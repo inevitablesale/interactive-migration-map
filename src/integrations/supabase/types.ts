@@ -9,39 +9,9 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      company_data: {
+      canary_firms_data: {
         Row: {
-          "Accountant Employment 2020": number | null
-          "Accountant Establishments 2020": number | null
-          "Accountant Payroll 2020": number | null
-          B01001_001E: number | null
-          B01002_001E: number | null
-          B08303_001E: number | null
-          B11001_001E: number | null
-          B11003_001E: number | null
-          B15003_001E: number | null
-          B15003_022E: number | null
-          B15003_023E: number | null
-          B15003_025E: number | null
-          B17001_001E: number | null
-          B17001_002E: number | null
-          B19013_001E: number | null
-          B23001_001E: number | null
-          B23025_004E: number | null
-          B23025_005E: number | null
-          B25001_001E: number | null
-          B25002_002E: number | null
-          B25002_003E: number | null
-          B25064_001E: number | null
-          B25077_001E: number | null
           "Block FIPS": string | null
-          C24010_001E: number | null
-          C24010_012E: number | null
-          C24010_033E: number | null
-          C24010_034E: number | null
-          C24060_001E: number | null
-          C24060_004E: number | null
-          C24060_007E: number | null
           "Company ID": number
           "Company Name": string | null
           COUNTYFP: number | null
@@ -68,37 +38,7 @@ export type Database = {
           websiteUrl: string | null
         }
         Insert: {
-          "Accountant Employment 2020"?: number | null
-          "Accountant Establishments 2020"?: number | null
-          "Accountant Payroll 2020"?: number | null
-          B01001_001E?: number | null
-          B01002_001E?: number | null
-          B08303_001E?: number | null
-          B11001_001E?: number | null
-          B11003_001E?: number | null
-          B15003_001E?: number | null
-          B15003_022E?: number | null
-          B15003_023E?: number | null
-          B15003_025E?: number | null
-          B17001_001E?: number | null
-          B17001_002E?: number | null
-          B19013_001E?: number | null
-          B23001_001E?: number | null
-          B23025_004E?: number | null
-          B23025_005E?: number | null
-          B25001_001E?: number | null
-          B25002_002E?: number | null
-          B25002_003E?: number | null
-          B25064_001E?: number | null
-          B25077_001E?: number | null
           "Block FIPS"?: string | null
-          C24010_001E?: number | null
-          C24010_012E?: number | null
-          C24010_033E?: number | null
-          C24010_034E?: number | null
-          C24060_001E?: number | null
-          C24060_004E?: number | null
-          C24060_007E?: number | null
           "Company ID": number
           "Company Name"?: string | null
           COUNTYFP?: number | null
@@ -125,37 +65,7 @@ export type Database = {
           websiteUrl?: string | null
         }
         Update: {
-          "Accountant Employment 2020"?: number | null
-          "Accountant Establishments 2020"?: number | null
-          "Accountant Payroll 2020"?: number | null
-          B01001_001E?: number | null
-          B01002_001E?: number | null
-          B08303_001E?: number | null
-          B11001_001E?: number | null
-          B11003_001E?: number | null
-          B15003_001E?: number | null
-          B15003_022E?: number | null
-          B15003_023E?: number | null
-          B15003_025E?: number | null
-          B17001_001E?: number | null
-          B17001_002E?: number | null
-          B19013_001E?: number | null
-          B23001_001E?: number | null
-          B23025_004E?: number | null
-          B23025_005E?: number | null
-          B25001_001E?: number | null
-          B25002_002E?: number | null
-          B25002_003E?: number | null
-          B25064_001E?: number | null
-          B25077_001E?: number | null
           "Block FIPS"?: string | null
-          C24010_001E?: number | null
-          C24010_012E?: number | null
-          C24010_033E?: number | null
-          C24010_034E?: number | null
-          C24060_001E?: number | null
-          C24060_004E?: number | null
-          C24060_007E?: number | null
           "Company ID"?: number
           "Company Name"?: string | null
           COUNTYFP?: number | null
@@ -180,6 +90,477 @@ export type Database = {
           STATEFP?: number | null
           Summary?: string | null
           websiteUrl?: string | null
+        }
+        Relationships: []
+      }
+      county_data: {
+        Row: {
+          B01001_001E: number | null
+          B01002_001E: number | null
+          B08303_001E: number | null
+          B11001_001E: number | null
+          B11003_001E: number | null
+          B15003_001E: number | null
+          B15003_022E: number | null
+          B15003_023E: number | null
+          B15003_025E: number | null
+          B17001_001E: number | null
+          B17001_002E: number | null
+          B19013_001E: number | null
+          B23001_001E: number | null
+          B23025_004E: number | null
+          B23025_005E: number | null
+          B25001_001E: number | null
+          B25002_002E: number | null
+          B25002_003E: number | null
+          B25064_001E: number | null
+          B25077_001E: number | null
+          C24010_001E: number | null
+          C24010_012E: number | null
+          C24010_033E: number | null
+          C24010_034E: number | null
+          C24060_001E: number | null
+          C24060_004E: number | null
+          C24060_007E: number | null
+          COUNTYFP: string | null
+          COUNTYNAME: string | null
+          EMP: number | null
+          ESTAB: number | null
+          PAYANN: number | null
+          PLACEFP: string | null
+          PLACENAME: string | null
+          PLACENS: string | null
+          STATEFP: string | null
+        }
+        Insert: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          COUNTYFP?: string | null
+          COUNTYNAME?: string | null
+          EMP?: number | null
+          ESTAB?: number | null
+          PAYANN?: number | null
+          PLACEFP?: string | null
+          PLACENAME?: string | null
+          PLACENS?: string | null
+          STATEFP?: string | null
+        }
+        Update: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          COUNTYFP?: string | null
+          COUNTYNAME?: string | null
+          EMP?: number | null
+          ESTAB?: number | null
+          PAYANN?: number | null
+          PLACEFP?: string | null
+          PLACENAME?: string | null
+          PLACENS?: string | null
+          STATEFP?: string | null
+        }
+        Relationships: []
+      }
+      msa_county_reference: {
+        Row: {
+          county_name: string
+          fipscty: string
+          fipstate: string
+          msa: string
+          msa_name: string
+        }
+        Insert: {
+          county_name: string
+          fipscty: string
+          fipstate: string
+          msa: string
+          msa_name: string
+        }
+        Update: {
+          county_name?: string
+          fipscty?: string
+          fipstate?: string
+          msa?: string
+          msa_name?: string
+        }
+        Relationships: []
+      }
+      msa_state_crosswalk: {
+        Row: {
+          county_name: string | null
+          msa: string | null
+          msa_name: string | null
+          state_fips: string | null
+        }
+        Insert: {
+          county_name?: string | null
+          msa?: string | null
+          msa_name?: string | null
+          state_fips?: string | null
+        }
+        Update: {
+          county_name?: string | null
+          msa?: string | null
+          msa_name?: string | null
+          state_fips?: string | null
+        }
+        Relationships: []
+      }
+      national_data: {
+        Row: {
+          B01001_001E: number | null
+          B01002_001E: number | null
+          B08303_001E: number | null
+          B11001_001E: number | null
+          B11003_001E: number | null
+          B15003_001E: number | null
+          B15003_022E: number | null
+          B15003_023E: number | null
+          B15003_025E: number | null
+          B17001_001E: number | null
+          B17001_002E: number | null
+          B19013_001E: number | null
+          B23001_001E: number | null
+          B23025_004E: number | null
+          B23025_005E: number | null
+          B25001_001E: number | null
+          B25002_002E: number | null
+          B25002_003E: number | null
+          B25064_001E: number | null
+          B25077_001E: number | null
+          C24010_001E: number | null
+          C24010_012E: number | null
+          C24010_033E: number | null
+          C24010_034E: number | null
+          C24060_001E: number | null
+          C24060_004E: number | null
+          C24060_007E: number | null
+          EMP: number | null
+          ESTAB: number | null
+          naics2017: string | null
+          PAYANN: number | null
+          us: string
+        }
+        Insert: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          EMP?: number | null
+          ESTAB?: number | null
+          naics2017?: string | null
+          PAYANN?: number | null
+          us: string
+        }
+        Update: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          EMP?: number | null
+          ESTAB?: number | null
+          naics2017?: string | null
+          PAYANN?: number | null
+          us?: string
+        }
+        Relationships: []
+      }
+      region_data: {
+        Row: {
+          B01001_001E: number | null
+          B01002_001E: number | null
+          B08303_001E: number | null
+          B11001_001E: number | null
+          B11003_001E: number | null
+          B15003_001E: number | null
+          B15003_022E: number | null
+          B15003_023E: number | null
+          B15003_025E: number | null
+          B17001_001E: number | null
+          B17001_002E: number | null
+          B19013_001E: number | null
+          B23001_001E: number | null
+          B23025_004E: number | null
+          B23025_005E: number | null
+          B25001_001E: number | null
+          B25002_002E: number | null
+          B25002_003E: number | null
+          B25064_001E: number | null
+          B25077_001E: number | null
+          C24010_001E: number | null
+          C24010_012E: number | null
+          C24010_033E: number | null
+          C24010_034E: number | null
+          C24060_001E: number | null
+          C24060_004E: number | null
+          C24060_007E: number | null
+          EMP: number | null
+          ESTAB: number | null
+          msa: string | null
+          PAYANN: number | null
+        }
+        Insert: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          EMP?: number | null
+          ESTAB?: number | null
+          msa?: string | null
+          PAYANN?: number | null
+        }
+        Update: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          EMP?: number | null
+          ESTAB?: number | null
+          msa?: string | null
+          PAYANN?: number | null
+        }
+        Relationships: []
+      }
+      state_data: {
+        Row: {
+          B01001_001E: number | null
+          B01002_001E: number | null
+          B08303_001E: number | null
+          B11001_001E: number | null
+          B11003_001E: number | null
+          B15003_001E: number | null
+          B15003_022E: number | null
+          B15003_023E: number | null
+          B15003_025E: number | null
+          B17001_001E: number | null
+          B17001_002E: number | null
+          B19013_001E: number | null
+          B23001_001E: number | null
+          B23025_004E: number | null
+          B23025_005E: number | null
+          B25001_001E: number | null
+          B25002_002E: number | null
+          B25002_003E: number | null
+          B25064_001E: number | null
+          B25077_001E: number | null
+          C24010_001E: number | null
+          C24010_012E: number | null
+          C24010_033E: number | null
+          C24010_034E: number | null
+          C24060_001E: number | null
+          C24060_004E: number | null
+          C24060_007E: number | null
+          EMP: number | null
+          ESTAB: number | null
+          PAYANN: number | null
+          STATEFP: string
+        }
+        Insert: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          EMP?: number | null
+          ESTAB?: number | null
+          PAYANN?: number | null
+          STATEFP: string
+        }
+        Update: {
+          B01001_001E?: number | null
+          B01002_001E?: number | null
+          B08303_001E?: number | null
+          B11001_001E?: number | null
+          B11003_001E?: number | null
+          B15003_001E?: number | null
+          B15003_022E?: number | null
+          B15003_023E?: number | null
+          B15003_025E?: number | null
+          B17001_001E?: number | null
+          B17001_002E?: number | null
+          B19013_001E?: number | null
+          B23001_001E?: number | null
+          B23025_004E?: number | null
+          B23025_005E?: number | null
+          B25001_001E?: number | null
+          B25002_002E?: number | null
+          B25002_003E?: number | null
+          B25064_001E?: number | null
+          B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
+          EMP?: number | null
+          ESTAB?: number | null
+          PAYANN?: number | null
+          STATEFP?: string
         }
         Relationships: []
       }
