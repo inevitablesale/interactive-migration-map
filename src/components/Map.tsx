@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useToast } from '@/components/ui/use-toast';
 import { supabase } from "@/integrations/supabase/client";
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
@@ -9,7 +8,6 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJ
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const { toast } = useToast();
   const [companyData, setCompanyData] = useState<any[]>([]);
   const animationRef = useRef<number>();
 
@@ -24,11 +22,6 @@ const Map = () => {
 
       if (error) {
         console.error('Error fetching company data:', error);
-        toast({
-          title: "Error loading company data",
-          description: "Please try again later",
-          variant: "destructive",
-        });
         return;
       }
 
@@ -36,7 +29,7 @@ const Map = () => {
     };
 
     fetchCompanyData();
-  }, [toast]);
+  }, []);
 
   const animateToNextLocation = (locations: any[], currentIndex: number) => {
     if (!map.current || !locations.length) return;
@@ -160,11 +153,6 @@ const Map = () => {
         if (densestLocations.length > 0) {
           animateToNextLocation(densestLocations, -1);
         }
-
-        toast({
-          title: "Map loaded successfully",
-          description: "Displaying company locations heatmap",
-        });
       });
 
       return () => {
@@ -175,17 +163,12 @@ const Map = () => {
       };
     } catch (error) {
       console.error('Error initializing map:', error);
-      toast({
-        title: "Error loading map",
-        description: "Please check your connection and try again",
-        variant: "destructive",
-      });
     }
-  }, [companyData, toast]);
+  }, [companyData]);
 
   return (
     <div className="relative w-full h-screen">
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0 }} />
     </div>
   );
 };

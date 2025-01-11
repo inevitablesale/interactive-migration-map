@@ -8,7 +8,7 @@ import { ComparisonTool } from "@/components/ComparisonTool";
 const Index = () => {
   return (
     <div className="min-h-screen w-full relative">
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-4">
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Bird className="w-8 h-8 text-yellow-400" />
           <span className="text-xl font-bold text-yellow-400">Canary</span>
@@ -16,9 +16,11 @@ const Index = () => {
       </div>
       <Hero />
       <Map />
-      <ChatBar />
-      <ComparisonTool />
-      <BottomPanel />
+      <div className="relative z-20">
+        <ChatBar />
+        <ComparisonTool />
+        <BottomPanel />
+      </div>
     </div>
   );
 };
