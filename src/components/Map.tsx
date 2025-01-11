@@ -74,7 +74,6 @@ const Map = () => {
         'top-right'
       );
 
-      // Add atmosphere and fog effects
       map.current.on('style.load', () => {
         if (!map.current) return;
         
@@ -84,7 +83,7 @@ const Map = () => {
           'horizon-blend': 0.2,
         });
 
-        // Add clustered points source
+        // Add source with clustering enabled
         map.current.addSource('companies', {
           type: 'geojson',
           data: {
@@ -107,7 +106,57 @@ const Map = () => {
           clusterRadius: 50
         });
 
-        // Add clusters layer
+        // Add heatmap layer first (will be most visible at low zoom levels)
+        map.current.addLayer({
+          id: 'companies-heat',
+          type: 'heatmap',
+          source: 'companies',
+          maxzoom: 15,
+          paint: {
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'employeeCount'],
+              0, 0,
+              100, 0.5,
+              1000, 1
+            ],
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 2,  // Increased base intensity
+              9, 4   // Increased max intensity
+            ],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(0, 0, 255, 0)',
+              0.2, 'rgb(0, 179, 255)',
+              0.4, 'rgb(0, 255, 255)',
+              0.6, 'rgb(0, 255, 179)',
+              0.8, 'rgb(0, 255, 0)',
+              1, 'rgb(179, 255, 0)'
+            ],
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 4,    // Increased base radius
+              9, 30    // Increased max radius
+            ],
+            'heatmap-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              6, 1,    // Full opacity until zoom level 6
+              9, 0     // Fade out completely by zoom level 9
+            ]
+          }
+        });
+
+        // Add clusters layer (visible at higher zoom levels)
         map.current.addLayer({
           id: 'clusters',
           type: 'circle',
@@ -131,6 +180,13 @@ const Map = () => {
               30,
               750,
               40
+            ],
+            'circle-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              7, 0,    // Hidden at low zoom levels
+              9, 1     // Fully visible at higher zoom levels
             ]
           }
         });
@@ -145,6 +201,15 @@ const Map = () => {
             'text-field': '{point_count_abbreviated}',
             'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
             'text-size': 12
+          },
+          paint: {
+            'text-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              7, 0,    // Hidden at low zoom levels
+              9, 1     // Fully visible at higher zoom levels
+            ]
           }
         });
 
@@ -158,56 +223,13 @@ const Map = () => {
             'circle-color': '#11b4da',
             'circle-radius': 8,
             'circle-stroke-width': 1,
-            'circle-stroke-color': '#fff'
-          }
-        });
-
-        // Add heatmap layer
-        map.current.addLayer({
-          id: 'companies-heat',
-          type: 'heatmap',
-          source: 'companies',
-          maxzoom: 15,
-          paint: {
-            'heatmap-weight': [
-              'interpolate',
-              ['linear'],
-              ['get', 'employeeCount'],
-              0, 0,
-              100, 0.5,
-              1000, 1
-            ],
-            'heatmap-intensity': [
+            'circle-stroke-color': '#fff',
+            'circle-opacity': [
               'interpolate',
               ['linear'],
               ['zoom'],
-              0, 1,
-              9, 3
-            ],
-            'heatmap-color': [
-              'interpolate',
-              ['linear'],
-              ['heatmap-density'],
-              0, 'rgba(0, 0, 255, 0)',
-              0.2, 'rgb(0, 179, 255)',
-              0.4, 'rgb(0, 255, 255)',
-              0.6, 'rgb(0, 255, 179)',
-              0.8, 'rgb(0, 255, 0)',
-              1, 'rgb(179, 255, 0)'
-            ],
-            'heatmap-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              0, 2,
-              9, 20
-            ],
-            'heatmap-opacity': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              7, 1,
-              9, 0
+              7, 0,    // Hidden at low zoom levels
+              9, 1     // Fully visible at higher zoom levels
             ]
           }
         });
@@ -218,17 +240,20 @@ const Map = () => {
           const features = map.current.queryRenderedFeatures(e.point, {
             layers: ['clusters']
           });
-          const clusterId = features[0].properties.cluster_id;
-          map.current.getSource('companies').getClusterExpansionZoom(
-            clusterId,
-            (err, zoom) => {
+          if (!features.length) return;
+          
+          const clusterId = features[0].properties?.cluster_id;
+          const source = map.current.getSource('companies');
+          
+          if (clusterId && 'getClusterExpansionZoom' in source) {
+            (source as any).getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
               if (err) return;
               map.current?.easeTo({
                 center: (features[0].geometry as any).coordinates,
                 zoom: zoom
               });
-            }
-          );
+            });
+          }
         });
 
         // Change cursor on hover
