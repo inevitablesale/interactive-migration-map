@@ -47,17 +47,16 @@ const Map = () => {
     map.current.easeTo({
       center: [nextLocation.longitude, nextLocation.latitude],
       zoom: 8,
-      duration: 3000,
+      duration: 2000,
       pitch: 45,
-      bearing: Math.random() * 180 - 90, // Random bearing for visual interest
-      essential: true,
-      complete: () => {
-        // Schedule next animation
-        animationRef.current = window.setTimeout(() => {
-          animateToNextLocation(locations, nextIndex);
-        }, 2000); // Wait 2 seconds before moving to next location
-      }
+      bearing: Math.random() * 180 - 90,
+      essential: true
     });
+
+    // Schedule next animation
+    animationRef.current = window.setTimeout(() => {
+      animateToNextLocation(locations, nextIndex);
+    }, 2000);
   };
 
   useEffect(() => {
@@ -71,7 +70,7 @@ const Map = () => {
         style: 'mapbox://styles/mapbox/dark-v11',
         projection: 'globe',
         zoom: 3,
-        center: [-95.7129, 37.0902], // Center on US
+        center: [-95.7129, 37.0902],
         pitch: 45,
       });
 
