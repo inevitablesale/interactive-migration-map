@@ -17,7 +17,7 @@ const Map = () => {
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/dark-v11', // Changed to dark style
         projection: 'globe',
         zoom: 3,
         center: [-95.7129, 37.0902], // Center on US
@@ -36,8 +36,8 @@ const Map = () => {
         if (!map.current) return;
         
         map.current.setFog({
-          color: 'rgb(255, 255, 255)',
-          'high-color': 'rgb(200, 200, 225)',
+          color: 'rgb(0, 0, 0)', // Darker fog for dark theme
+          'high-color': 'rgb(30, 30, 50)',
           'horizon-blend': 0.2,
         });
 
@@ -62,11 +62,11 @@ const Map = () => {
               ['linear'],
               ['heatmap-density'],
               0, 'rgba(0, 0, 255, 0)',
-              0.2, 'rgb(103, 169, 207)',
-              0.4, 'rgb(209, 229, 240)',
-              0.6, 'rgb(253, 219, 199)',
-              0.8, 'rgb(239, 138, 98)',
-              1, 'rgb(178, 24, 43)'
+              0.2, 'rgb(0, 179, 255)',
+              0.4, 'rgb(0, 255, 255)',
+              0.6, 'rgb(0, 255, 179)',
+              0.8, 'rgb(0, 255, 0)',
+              1, 'rgb(179, 255, 0)'
             ],
             'heatmap-radius': 30
           }
