@@ -2,22 +2,49 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from "@/integrations/supabase/client";
+
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
   const { toast } = useToast();
+  const [companyData, setCompanyData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    const fetchCompanyData = async () => {
+      const { data, error } = await supabase
+        .from('company_data')
+        .select('latitude, longitude, "Company Name", employeeCount')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+
+      if (error) {
+        console.error('Error fetching company data:', error);
+        toast({
+          title: "Error loading company data",
+          description: "Please try again later",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setCompanyData(data || []);
+    };
+
+    fetchCompanyData();
+  }, [toast]);
+
+  useEffect(() => {
+    if (!mapContainer.current || !companyData.length) return;
 
     try {
-      mapboxgl.accessToken = mapboxToken;
+      mapboxgl.accessToken = MAPBOX_TOKEN;
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/dark-v11', // Changed to dark style
+        style: 'mapbox://styles/mapbox/dark-v11',
         projection: 'globe',
         zoom: 3,
         center: [-95.7129, 37.0902], // Center on US
@@ -36,27 +63,50 @@ const Map = () => {
         if (!map.current) return;
         
         map.current.setFog({
-          color: 'rgb(0, 0, 0)', // Darker fog for dark theme
+          color: 'rgb(0, 0, 0)',
           'high-color': 'rgb(30, 30, 50)',
           'horizon-blend': 0.2,
         });
 
-        // Add heatmap layer for migration flows
-        map.current.addSource('migration', {
+        // Add heatmap layer for company locations
+        map.current.addSource('companies', {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: [] // We'll add real data here later
+            features: companyData.map(company => ({
+              type: 'Feature',
+              properties: {
+                name: company['Company Name'],
+                employeeCount: company.employeeCount,
+              },
+              geometry: {
+                type: 'Point',
+                coordinates: [company.longitude, company.latitude]
+              }
+            }))
           }
         });
 
         map.current.addLayer({
-          id: 'migration-heat',
+          id: 'companies-heat',
           type: 'heatmap',
-          source: 'migration',
+          source: 'companies',
           paint: {
-            'heatmap-weight': 1,
-            'heatmap-intensity': 1,
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'employeeCount'],
+              0, 0,
+              100, 0.5,
+              1000, 1
+            ],
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 1,
+              9, 3
+            ],
             'heatmap-color': [
               'interpolate',
               ['linear'],
@@ -68,13 +118,20 @@ const Map = () => {
               0.8, 'rgb(0, 255, 0)',
               1, 'rgb(179, 255, 0)'
             ],
-            'heatmap-radius': 30
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 2,
+              9, 20
+            ],
+            'heatmap-opacity': 0.8
           }
         });
 
         toast({
           title: "Map loaded successfully",
-          description: "Try zooming and panning to explore the data",
+          description: "Displaying company locations heatmap",
         });
       });
 
@@ -85,38 +142,14 @@ const Map = () => {
       console.error('Error initializing map:', error);
       toast({
         title: "Error loading map",
-        description: "Please check your Mapbox token and try again",
+        description: "Please check your connection and try again",
         variant: "destructive",
       });
     }
-  }, [mapboxToken, toast]);
+  }, [companyData, toast]);
 
   return (
     <div className="relative w-full h-screen">
-      {!mapboxToken && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Enter your Mapbox token</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              To use this map, you need a Mapbox public token. Get one at{' '}
-              <a 
-                href="https://mapbox.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-accent hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-            <input
-              type="text"
-              placeholder="pk.eyJ1..."
-              className="w-full p-2 border rounded mb-4"
-              onChange={(e) => setMapboxToken(e.target.value)}
-            />
-          </div>
-        </div>
-      )}
       <div ref={mapContainer} className="absolute inset-0" />
     </div>
   );
