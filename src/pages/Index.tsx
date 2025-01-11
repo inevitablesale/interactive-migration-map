@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { Bird } from "lucide-react";
 import { BottomPanel } from "@/components/BottomPanel";
 import { ChatBar } from "@/components/ChatBar";
+import { ComparisonTool } from "@/components/ComparisonTool";
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
       <Hero />
       <Map />
       <ChatBar />
+      <ComparisonTool />
       <BottomPanel />
     </div>
   );
