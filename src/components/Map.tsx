@@ -11,6 +11,7 @@ const Map = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const { toast } = useToast();
   const [companyData, setCompanyData] = useState<any[]>([]);
+  const animationRef = useRef<number>();
 
   useEffect(() => {
     const fetchCompanyData = async () => {
@@ -18,7 +19,8 @@ const Map = () => {
         .from('company_data')
         .select('latitude, longitude, "Company Name", employeeCount')
         .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+        .not('longitude', 'is', null)
+        .order('employeeCount', { ascending: false });
 
       if (error) {
         console.error('Error fetching company data:', error);
@@ -35,6 +37,28 @@ const Map = () => {
 
     fetchCompanyData();
   }, [toast]);
+
+  const animateToNextLocation = (locations: any[], currentIndex: number) => {
+    if (!map.current || !locations.length) return;
+
+    const nextIndex = (currentIndex + 1) % locations.length;
+    const nextLocation = locations[nextIndex];
+
+    map.current.easeTo({
+      center: [nextLocation.longitude, nextLocation.latitude],
+      zoom: 8,
+      duration: 3000,
+      pitch: 45,
+      bearing: Math.random() * 180 - 90, // Random bearing for visual interest
+      essential: true,
+      complete: () => {
+        // Schedule next animation
+        animationRef.current = window.setTimeout(() => {
+          animateToNextLocation(locations, nextIndex);
+        }, 2000); // Wait 2 seconds before moving to next location
+      }
+    });
+  };
 
   useEffect(() => {
     if (!mapContainer.current || !companyData.length) return;
@@ -129,6 +153,15 @@ const Map = () => {
           }
         });
 
+        // Start the location animation
+        const densestLocations = companyData
+          .filter(company => company.employeeCount > 1000)
+          .slice(0, 20); // Take top 20 densest locations
+        
+        if (densestLocations.length > 0) {
+          animateToNextLocation(densestLocations, -1);
+        }
+
         toast({
           title: "Map loaded successfully",
           description: "Displaying company locations heatmap",
@@ -136,6 +169,9 @@ const Map = () => {
       });
 
       return () => {
+        if (animationRef.current) {
+          clearTimeout(animationRef.current);
+        }
         map.current?.remove();
       };
     } catch (error) {
