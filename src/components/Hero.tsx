@@ -6,7 +6,7 @@ export function Hero() {
       <div className="text-center max-w-4xl px-4">
         <p className="text-cyan-400 text-sm md:text-base tracking-wider mb-4">AI-POWERED MARKET INTELLIGENCE</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
-          <span className="text-cyan-400">Find Tomorrow's</span>
+          <span className="bg-gradient-to-r from-cyan-400 to-blue-600 text-transparent bg-clip-text">Find Tomorrow's</span>
           <br />
           <span className="text-white">Opportunities Today</span>
         </h1>

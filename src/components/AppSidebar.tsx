@@ -27,7 +27,7 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar className="bg-[#222222] text-white">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Data Layers</SidebarGroupLabel>
