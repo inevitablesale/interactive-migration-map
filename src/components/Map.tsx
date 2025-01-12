@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +49,7 @@ const Map = () => {
     return STATE_COLORS[colorIndex];
   };
 
-  const updateActiveState = (state: StateData | null) => {
+  const updateActiveState = useCallback((state: StateData | null) => {
     setActiveState(state);
     if (state) {
       // Only pass serializable data
@@ -65,7 +65,7 @@ const Map = () => {
       const event = new CustomEvent('stateChanged', { detail: eventData });
       window.dispatchEvent(event);
     }
-  };
+  }, []);
 
   const flyToState = (stateId: string) => {
     if (!map.current) return;
@@ -92,11 +92,11 @@ const Map = () => {
     }
   };
 
-  const startCyclingStates = () => {
+  const startCyclingStates = useCallback(() => {
     const interval = setInterval(() => {
       if (stateData.length === 0 || !mapLoaded) return;
       
-      setCurrentStateIndex((prev) => {
+      setCurrentStateIndex(prev => {
         const nextIndex = (prev + 1) % stateData.length;
         const nextState = stateData[nextIndex];
         updateActiveState(nextState);
@@ -118,7 +118,7 @@ const Map = () => {
     }, 3000);
 
     return interval;
-  };
+  }, [stateData, mapLoaded, updateActiveState]);
 
   const fetchStateData = async () => {
     try {
@@ -249,7 +249,7 @@ const Map = () => {
         clearInterval(interval);
       }
     };
-  }, [stateData, mapLoaded]);
+  }, [stateData, mapLoaded, startCyclingStates]);
 
   useEffect(() => {
     fetchStateData();

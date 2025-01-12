@@ -20,17 +20,17 @@ export function Hero() {
     const handleStateChange = (event: Event) => {
       const customEvent = event as CustomEvent<StateData>;
       const stateData = customEvent.detail;
+      
+      // Use functional updates to avoid stale closures
       setActiveState(stateData);
-      if (!activeState) {
-        setShowHeroText(false);
-      }
+      setShowHeroText(prev => !stateData ? prev : false);
     };
 
     window.addEventListener('stateChanged', handleStateChange);
     return () => {
       window.removeEventListener('stateChanged', handleStateChange);
     };
-  }, [activeState]);
+  }, []); // Remove activeState dependency to avoid re-subscribing
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white px-4 hero-section">
