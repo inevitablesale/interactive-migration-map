@@ -88,7 +88,7 @@ const Map = () => {
           'id': 'state-fills',
           'type': 'fill',
           'source': 'states',
-          'source-layer': 'state-fills', // This should match your tileset's source layer name
+          'source-layer': 'STATEFP', // Updated to match the correct source layer
           'paint': {
             'fill-color': [
               'interpolate',
@@ -110,7 +110,7 @@ const Map = () => {
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
-          'source-layer': 'state-fills',
+          'source-layer': 'STATEFP', // Updated to match the correct source layer
           'paint': {
             'line-color': '#627BC1',
             'line-width': 1
@@ -134,7 +134,7 @@ const Map = () => {
           map.setFeatureState(
             {
               source: 'states',
-              sourceLayer: 'state-fills',
+              sourceLayer: 'STATEFP',
               id: state.STATEFP
             },
             {
