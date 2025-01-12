@@ -14,18 +14,26 @@ interface StateData {
 
 export function Hero() {
   const [activeState, setActiveState] = useState<StateData | null>(null);
-  const [hasInitialZoom, setHasInitialZoom] = useState(false);
 
   // Listen for custom event from Map component
   useEffect(() => {
-    const handleStateChange = (event: CustomEvent<StateData>) => {
-      setActiveState(event.detail);
-      setHasInitialZoom(true);
+    const handleStateChange = (event: CustomEvent<{ detail: StateData }>) => {
+      // Ensure we're only passing serializable data
+      const stateData = {
+        STATEFP: event.detail.STATEFP,
+        EMP: event.detail.EMP,
+        PAYANN: event.detail.PAYANN,
+        ESTAB: event.detail.ESTAB,
+        B19013_001E: event.detail.B19013_001E,
+        B23025_004E: event.detail.B23025_004E,
+        B25077_001E: event.detail.B25077_001E
+      };
+      setActiveState(stateData);
     };
 
-    window.addEventListener('stateChanged' as any, handleStateChange);
+    window.addEventListener('stateChanged', handleStateChange as EventListener);
     return () => {
-      window.removeEventListener('stateChanged' as any, handleStateChange);
+      window.removeEventListener('stateChanged', handleStateChange as EventListener);
     };
   }, []);
 
