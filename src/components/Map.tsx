@@ -15,10 +15,10 @@ interface StateData {
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<mapboxgl.Map | null>(null);
-  const navControlRef = useRef<mapboxgl.NavigationControl | null>(null);
 
   useEffect(() => {
     let stateData: StateData[] = [];
+    let map: mapboxgl.Map | null = null;
 
     const fetchStateData = async () => {
       try {
@@ -44,7 +44,7 @@ const Map = () => {
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
-      const map = new mapboxgl.Map({
+      map = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
         zoom: 3,
@@ -54,11 +54,9 @@ const Map = () => {
 
       mapInstance.current = map;
 
-      const navControl = new mapboxgl.NavigationControl({
+      map.addControl(new mapboxgl.NavigationControl({
         visualizePitch: true,
-      });
-      map.addControl(navControl, 'top-right');
-      navControlRef.current = navControl;
+      }), 'top-right');
 
       map.on('style.load', () => {
         if (!map || !stateData.length) return;
@@ -88,7 +86,7 @@ const Map = () => {
             'fill-color': [
               'interpolate',
               ['linear'],
-              ['get', 'score'],
+              ['coalesce', ['feature-state', 'score'], 0],
               0, '#f7fbff',
               0.2, '#deebf7',
               0.4, '#c6dbef',
@@ -124,16 +122,18 @@ const Map = () => {
             (normalizedEstab * 0.2)
           );
 
-          map.setFeatureState(
-            {
-              source: 'states',
-              sourceLayer: 'tl_2020_us_state-52k5uw',
-              id: state.STATEFP
-            },
-            {
-              score: compositeScore
-            }
-          );
+          if (map) {
+            map.setFeatureState(
+              {
+                source: 'states',
+                sourceLayer: 'tl_2020_us_state-52k5uw',
+                id: state.STATEFP
+              },
+              {
+                score: compositeScore
+              }
+            );
+          }
         });
       });
     };
