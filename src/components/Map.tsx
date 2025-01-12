@@ -12,7 +12,7 @@ const MAP_COLORS = {
   accent: '#FFF903',     // Yellow
   highlight: '#94EC0E',  // Lime Green
   active: '#FA0098',     // Hot Pink
-  inactive: '#000000',   // Black
+  inactive: '#1a365d',   // Dark Blue (changed from black for better visibility)
   msa: '#FA0098'        // MSA Color (Hot Pink)
 };
 
@@ -235,7 +235,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-color': mode === 'hero' ? MAP_COLORS.inactive : MAP_COLORS.primary,
           'fill-extrusion-height': mode === 'hero' ? 100000 : 5000,
           'fill-extrusion-opacity': 0.6
         }
@@ -248,7 +248,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.accent,
+          'fill-extrusion-color': mode === 'hero' ? MAP_COLORS.accent : MAP_COLORS.highlight,
           'fill-extrusion-height': mode === 'hero' ? 200000 : 50000,
           'fill-extrusion-opacity': 0.8,
           'fill-extrusion-base': mode === 'hero' ? 100000 : 5000
