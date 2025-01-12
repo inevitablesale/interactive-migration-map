@@ -53,6 +53,7 @@ const Map = () => {
     if (!state) return;
     
     setActiveState(state);
+    // Create a plain object with only serializable data
     const eventData = {
       STATEFP: state.STATEFP,
       EMP: state.EMP,
@@ -62,11 +63,15 @@ const Map = () => {
       B23025_004E: state.B23025_004E,
       B25077_001E: state.B25077_001E
     };
-    const event = new CustomEvent('stateChanged', { detail: eventData });
+    
+    // Use a custom event with serializable data
+    const event = new CustomEvent('stateChanged', { 
+      detail: JSON.parse(JSON.stringify(eventData))
+    });
     window.dispatchEvent(event);
   }, []);
 
-  const flyToState = (stateId: string) => {
+  const flyToState = useCallback((stateId: string) => {
     if (!map.current) return;
     
     const stateFeatures = map.current.querySourceFeatures('states', {
@@ -89,7 +94,7 @@ const Map = () => {
         duration: 2000
       });
     }
-  };
+  }, []);
 
   const startCyclingStates = useCallback(() => {
     const interval = setInterval(() => {
@@ -132,13 +137,15 @@ const Map = () => {
         return;
       }
 
-      setStateData(data || []);
+      // Ensure the data is serializable
+      const serializedData = JSON.parse(JSON.stringify(data || []));
+      setStateData(serializedData);
 
-      if (data && data.length > 0) {
+      if (serializedData.length > 0) {
         setTimeout(() => {
-          updateActiveState(data[0]);
+          updateActiveState(serializedData[0]);
           if (mapLoaded) {
-            flyToState(data[0].STATEFP);
+            flyToState(serializedData[0].STATEFP);
           }
         }, 2000);
       }
