@@ -10,7 +10,6 @@ const Map = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [companyData, setCompanyData] = useState<any[]>([]);
   const animationRef = useRef<number>();
-  const [mapInitialized, setMapInitialized] = useState(false);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
@@ -43,7 +42,7 @@ const Map = () => {
   }, []);
 
   const animateToNextLocation = (locations: any[], currentIndex: number) => {
-    if (!map.current || !locations.length) return;
+    if (!map.current) return;
 
     const nextIndex = (currentIndex + 1) % locations.length;
     const nextLocation = locations[nextIndex];
@@ -65,7 +64,7 @@ const Map = () => {
   };
 
   useEffect(() => {
-    if (!mapContainer.current || !companyData.length || mapInitialized) return;
+    if (!mapContainer.current || !companyData.length || map.current) return;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -80,7 +79,6 @@ const Map = () => {
       });
 
       map.current = mapInstance;
-      setMapInitialized(true);
 
       mapInstance.addControl(
         new mapboxgl.NavigationControl({
@@ -121,7 +119,6 @@ const Map = () => {
           clusterRadius: 50
         });
 
-        // Add heatmap layer first (will be most visible at low zoom levels)
         map.current.addLayer({
           id: 'companies-heat',
           type: 'heatmap',
@@ -300,7 +297,7 @@ const Map = () => {
     } catch (error) {
       console.error('Error initializing map:', error);
     }
-  }, [companyData, mapInitialized]);
+  }, [companyData]);
 
   return (
     <div className="relative w-full h-screen">
