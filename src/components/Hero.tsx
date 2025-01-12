@@ -22,24 +22,11 @@ export function Hero() {
       const stateData = customEvent.detail;
       setActiveState(stateData);
 
-      // Calculate insights for toast notification
-      const employmentRate = stateData.EMP && stateData.B23025_004E ? 
-        (stateData.EMP / stateData.B23025_004E * 100).toFixed(1) : null;
-      
-      const businessDensity = stateData.ESTAB && stateData.B23025_004E ? 
-        (stateData.ESTAB / (stateData.B23025_004E / 1000)).toFixed(1) : null;
-
-      // Show toast with key metrics
+      // Show simplified toast with key metrics
       toast({
-        title: "State Market Update",
-        description: (
-          <div className="space-y-2">
-            <p>• {stateData.ESTAB?.toLocaleString()} active businesses</p>
-            <p>• {employmentRate}% employment rate</p>
-            <p>• ${(stateData.B25077_001E || 0).toLocaleString()} median home value</p>
-          </div>
-        ),
-        duration: 3000,
+        title: "Market Update",
+        description: `${stateData.ESTAB?.toLocaleString()} businesses • $${(stateData.B25077_001E || 0).toLocaleString()} median home value`,
+        duration: 2000,
       });
     };
 

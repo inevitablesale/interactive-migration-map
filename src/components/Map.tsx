@@ -119,7 +119,7 @@ const Map = () => {
         }
         return nextIndex;
       });
-    }, 3000);
+    }, 5000); // Increased from 3000 to 5000ms
 
     return interval;
   }, [stateData, mapLoaded, updateActiveState, getStateColor]);
