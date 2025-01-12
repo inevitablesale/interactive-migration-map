@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Map, ChartBar, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,25 +8,45 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function HeatmapTool() {
   const [selectedMetric, setSelectedMetric] = useState("employment");
+  const [selectedStateId, setSelectedStateId] = useState<string | null>(null);
   
   const { data: stateData } = useQuery({
-    queryKey: ['stateMetrics', selectedMetric],
+    queryKey: ['stateMetrics', selectedMetric, selectedStateId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const query = supabase
         .from('state_data')
         .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E');
       
+      if (selectedStateId) {
+        query.eq('STATEFP', selectedStateId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: true
   });
+
+  useEffect(() => {
+    const handleStateSelection = (event: CustomEvent<{ stateId: string }>) => {
+      setSelectedStateId(event.detail.stateId);
+    };
+
+    window.addEventListener('stateSelected', handleStateSelection as EventListener);
+    return () => {
+      window.removeEventListener('stateSelected', handleStateSelection as EventListener);
+    };
+  }, []);
 
   return (
     <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Map className="w-5 h-5 text-yellow-400" />
-          <h3 className="text-lg font-semibold text-white">Market Heatmap</h3>
+          <h3 className="text-lg font-semibold text-white">
+            {selectedStateId ? `State Analysis - ID: ${selectedStateId}` : 'Market Heatmap'}
+          </h3>
         </div>
       </div>
       

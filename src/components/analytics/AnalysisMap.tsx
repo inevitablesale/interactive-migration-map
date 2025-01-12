@@ -25,7 +25,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -48,14 +47,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       'top-right'
     );
 
-    // Wait for map style to load before adding layers
     map.current.on('style.load', () => {
       if (!map.current) return;
       
-      // Set map as loaded
       setMapLoaded(true);
 
-      // Add state layer
       map.current.addSource('states', {
         type: 'vector',
         url: 'mapbox://inevitablesale.9fnr921z'
@@ -73,7 +69,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add MSA layer
       map.current.addSource('msas', {
         type: 'vector',
         url: 'mapbox://inevitablesale.29jcxgnm'
@@ -95,7 +90,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -123,19 +117,38 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Set initial view mode
+      // Add click event for state selection
+      map.current.on('click', 'state-base', (e) => {
+        if (e.features && e.features[0]) {
+          const stateId = e.features[0].properties?.STATEFP;
+          if (stateId) {
+            // Dispatch custom event with state data
+            const event = new CustomEvent('stateSelected', { 
+              detail: { stateId }
+            });
+            window.dispatchEvent(event);
+
+            // Highlight selected state
+            map.current?.setPaintProperty('state-base', 'fill-extrusion-color', [
+              'match',
+              ['get', 'STATEFP'],
+              stateId,
+              MAP_COLORS.accent,
+              MAP_COLORS.inactive
+            ]);
+          }
+        }
+      });
+
       updateViewMode(viewMode);
     });
 
     return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
+      map.current?.remove();
+      map.current = null;
     };
   }, []);
 
-  // Handle view mode changes
   const updateViewMode = (mode: 'state' | 'msa') => {
     if (!map.current || !mapLoaded) return;
 
@@ -164,7 +177,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   };
 
-  // Update view mode when changed
   useEffect(() => {
     updateViewMode(viewMode);
   }, [viewMode, mapLoaded]);
