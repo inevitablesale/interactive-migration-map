@@ -5,27 +5,29 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function HeatmapTool() {
   const [selectedMetric, setSelectedMetric] = useState("density");
   const { toast } = useToast();
+  const [toastShown, setToastShown] = useState(false);
   
   // Listen for state selection from map
   useEffect(() => {
     const handleStateChange = (event: CustomEvent) => {
       const stateData = event.detail;
-      if (stateData) {
+      if (stateData && !toastShown) {
         toast({
-          title: "State Selected",
-          description: `Analyzing market data for selected region`,
+          title: "Region Selection",
+          description: `Click multiple states to create a custom region for analysis`,
         });
+        setToastShown(true);
       }
     };
 
     window.addEventListener('stateChanged', handleStateChange as EventListener);
     return () => window.removeEventListener('stateChanged', handleStateChange as EventListener);
-  }, [toast]);
+  }, [toast, toastShown]);
 
   const { data: stateData } = useQuery({
     queryKey: ['stateMetrics', selectedMetric],

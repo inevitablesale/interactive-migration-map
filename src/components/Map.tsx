@@ -15,14 +15,6 @@ const MAP_COLORS = {
   inactive: '#000000'    // Black
 };
 
-const STATE_COLORS = [
-  '#037CFE',  // Electric Blue
-  '#00FFE0',  // Cyan
-  '#FFF903',  // Yellow
-  '#94EC0E',  // Lime Green
-  '#FA0098',  // Hot Pink
-];
-
 interface MapProps {
   mode?: 'hero' | 'analysis';
 }
@@ -33,20 +25,37 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
   const stateDataRef = useRef<any[]>([]);
   const mapLoadedRef = useRef(false);
   const mapInitializedRef = useRef(false);
+  const [activeStates, setActiveStates] = useState<any[]>([]);
   const [activeState, setActiveState] = useState<any>(null);
   const statesWithDataRef = useRef<Set<string>>(new Set());
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const getStateColor = (stateId: string) => {
-    const colorIndex = parseInt(stateId) % STATE_COLORS.length;
-    return STATE_COLORS[colorIndex];
-  };
+  const lastToastTimeRef = useRef<number>(0);
 
   const updateActiveState = (state: any) => {
-    setActiveState(state);
-    if (state) {
-      const event = new CustomEvent('stateChanged', { detail: state });
-      window.dispatchEvent(event);
+    if (mode === 'hero') {
+      setActiveState(state);
+      if (state) {
+        const event = new CustomEvent('stateChanged', { detail: state });
+        window.dispatchEvent(event);
+      }
+    } else {
+      // In analysis mode, handle multiple state selection
+      const currentTime = Date.now();
+      if (currentTime - lastToastTimeRef.current > 5000) { // Only show toast every 5 seconds
+        const event = new CustomEvent('stateChanged', { detail: state });
+        window.dispatchEvent(event);
+        lastToastTimeRef.current = currentTime;
+      }
+      
+      if (state) {
+        setActiveStates(prev => {
+          const exists = prev.some(s => s.STATEFP === state.STATEFP);
+          if (exists) {
+            return prev.filter(s => s.STATEFP !== state.STATEFP);
+          }
+          return [...prev, state];
+        });
+      }
     }
   };
 
@@ -189,13 +198,13 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'paint': {
           'fill-extrusion-color': [
             'case',
-            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            getStateColor(activeState?.STATEFP || '0'),
+            ['in', ['get', 'STATEFP'], ['literal', activeStates.map(s => s.STATEFP)]],
+            MAP_COLORS.accent,
             'transparent'
           ],
           'fill-extrusion-height': [
             'case',
-            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
+            ['in', ['get', 'STATEFP'], ['literal', activeStates.map(s => s.STATEFP)]],
             mode === 'hero' ? 100000 : 50000,
             0
           ],
@@ -229,7 +238,6 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         
         if (stateData) {
           updateActiveState(stateData);
-          flyToState(stateId);
         }
       });
 
@@ -252,11 +260,28 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
     return cleanup;
   }, [mode]);
 
+  // Update map when active states change
+  useEffect(() => {
+    if (map.current && mapLoadedRef.current && mode === 'analysis') {
+      map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+        'case',
+        ['in', ['get', 'STATEFP'], ['literal', activeStates.map(s => s.STATEFP)]],
+        MAP_COLORS.accent,
+        'transparent'
+      ]);
+    }
+  }, [activeStates, mode]);
+
   return (
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
       {mode === 'hero' && <StateReportCard data={activeState} isVisible={!!activeState} />}
+      {mode === 'analysis' && activeStates.length > 0 && (
+        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md p-2 rounded text-white text-sm">
+          {activeStates.length} states selected
+        </div>
+      )}
     </div>
   );
 };
