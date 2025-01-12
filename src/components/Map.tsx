@@ -6,6 +6,13 @@ import StateReportCard from './StateReportCard';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
+// Lovable.dev color scheme
+const COLORS = {
+  primary: '#F97316', // Yellow
+  secondary: '#222222', // Black
+  inactive: '#666666', // Gray for states without data
+};
+
 interface StateData {
   STATEFP: string;
   EMP: number | null;
@@ -27,6 +34,7 @@ const Map = () => {
   const mapLoadedRef = useRef(false);
   const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
+  const statesWithDataRef = useRef<Set<string>>(new Set());
 
   // Cleanup function
   const cleanup = () => {
@@ -93,6 +101,7 @@ const Map = () => {
         const { data, error } = await supabase
           .from('state_data')
           .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
+          .not('STATEFP', 'is', null)
           .not('EMP', 'is', null);
 
         if (error) {
@@ -100,6 +109,8 @@ const Map = () => {
           return;
         }
 
+        // Store states with data in a Set for quick lookup
+        statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
         stateDataRef.current = data || [];
 
         if (!mapInitializedRef.current) {
@@ -134,32 +145,20 @@ const Map = () => {
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Calculate scores for various metrics
-        const calculateMetricScores = () => {
-          const metrics = {
-            emp: stateDataRef.current.map(d => d.EMP).filter((v): v is number => v != null),
-            payann: stateDataRef.current.map(d => d.PAYANN).filter((v): v is number => v != null),
-            estab: stateDataRef.current.map(d => d.ESTAB).filter((v): v is number => v != null),
-            income: stateDataRef.current.map(d => d.B19013_001E).filter((v): v is number => v != null),
-            employment: stateDataRef.current.map(d => d.B23025_004E).filter((v): v is number => v != null),
-            homeValue: stateDataRef.current.map(d => d.B25077_001E).filter((v): v is number => v != null),
-          };
+        // Add base layer for all states
+        map.current.addLayer({
+          'id': 'state-base',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': COLORS.inactive,
+            'fill-extrusion-height': 0,
+            'fill-extrusion-opacity': 0.6
+          }
+        });
 
-          const ranges = {
-            emp: { min: Math.min(...metrics.emp), max: Math.max(...metrics.emp) },
-            payann: { min: Math.min(...metrics.payann), max: Math.max(...metrics.payann) },
-            estab: { min: Math.min(...metrics.estab), max: Math.max(...metrics.estab) },
-            income: { min: Math.min(...metrics.income), max: Math.max(...metrics.income) },
-            employment: { min: Math.min(...metrics.employment), max: Math.max(...metrics.employment) },
-            homeValue: { min: Math.min(...metrics.homeValue), max: Math.max(...metrics.homeValue) },
-          };
-
-          return { metrics, ranges };
-        };
-
-        const { ranges } = calculateMetricScores();
-
-        // Add 3D extrusion layer
+        // Add layer for states with data
         map.current.addLayer({
           'id': 'state-extrusions',
           'type': 'fill-extrusion',
@@ -167,15 +166,17 @@ const Map = () => {
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'fill-extrusion-color': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['feature-state', 'score'], 0],
-              0, '#FF6B6B',
-              0.2, '#FFB347',
-              0.4, '#48D1CC',
-              0.6, '#4682B4',
-              0.8, '#9370DB',
-              1, '#FF69B4'
+              'case',
+              ['in', ['get', 'STATEFP'], ['literal', Array.from(statesWithDataRef.current)]],
+              [
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['feature-state', 'score'], 0],
+                0, COLORS.secondary,
+                0.5, COLORS.primary,
+                1, '#ffffff'
+              ],
+              'transparent'
             ],
             'fill-extrusion-height': [
               'interpolate',
@@ -185,7 +186,8 @@ const Map = () => {
               1, 500000
             ],
             'fill-extrusion-opacity': 0.8
-          }
+          },
+          'filter': ['in', 'STATEFP', ...Array.from(statesWithDataRef.current)]
         });
 
         map.current.addLayer({
