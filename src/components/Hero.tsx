@@ -1,6 +1,40 @@
 import { ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import StateReportCard from "./StateReportCard";
+
+interface StateData {
+  STATEFP: string;
+  EMP: number | null;
+  PAYANN: number | null;
+  ESTAB: number | null;
+  B19013_001E: number | null;
+  B23025_004E: number | null;
+  B25077_001E: number | null;
+}
 
 export function Hero() {
+  const [activeState, setActiveState] = useState<StateData | null>(null);
+
+  // Listen for custom event from Map component
+  useEffect(() => {
+    const handleStateChange = (event: CustomEvent<StateData>) => {
+      setActiveState(event.detail);
+    };
+
+    window.addEventListener('stateChanged' as any, handleStateChange);
+    return () => {
+      window.removeEventListener('stateChanged' as any, handleStateChange);
+    };
+  }, []);
+
+  if (activeState) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-white px-4">
+        <StateReportCard data={activeState} isVisible={true} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white px-4">
       <div className="text-center max-w-4xl">

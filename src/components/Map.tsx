@@ -33,6 +33,15 @@ const Map = () => {
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentStateIndexRef = useRef(0);
 
+  // Function to update active state and dispatch event
+  const updateActiveState = (state: StateData | null) => {
+    setActiveState(state);
+    if (state) {
+      const event = new CustomEvent('stateChanged', { detail: state });
+      window.dispatchEvent(event);
+    }
+  };
+
   // Function to start cycling through states
   const startCyclingStates = () => {
     if (cycleIntervalRef.current) return;
@@ -42,7 +51,7 @@ const Map = () => {
       
       currentStateIndexRef.current = (currentStateIndexRef.current + 1) % stateDataRef.current.length;
       const nextState = stateDataRef.current[currentStateIndexRef.current];
-      setActiveState(nextState);
+      updateActiveState(nextState);
 
       // Fly to the next state if map is available
       if (map.current && nextState) {
@@ -67,7 +76,7 @@ const Map = () => {
           });
         }
       }
-    }, 5000); // Cycle every 5 seconds
+    }, 4000); // Changed to 4 seconds as requested
   };
 
   // Add scroll handler to stop cycling when user scrolls to analysis section
@@ -229,7 +238,7 @@ const Map = () => {
 
       const newActiveState = stateDataRef.current.find(state => state.STATEFP === clickedStateId);
       if (newActiveState) {
-        setActiveState(newActiveState);
+        updateActiveState(newActiveState);
         
         // Fly to clicked state
         const bounds = new mapboxgl.LngLatBounds();
