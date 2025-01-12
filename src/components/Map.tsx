@@ -6,11 +6,11 @@ import StateReportCard from './StateReportCard';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
-// Lovable.dev color scheme
+// Updated color scheme to use more black and yellow
 const COLORS = {
-  primary: '#F97316', // Yellow
+  primary: '#F97316', // Yellow/Orange
   secondary: '#222222', // Black
-  inactive: '#666666', // Gray for states without data
+  inactive: '#000000', // Black for states without data
 };
 
 interface StateData {
@@ -60,6 +60,11 @@ const Map = () => {
         statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
         stateDataRef.current = data || [];
 
+        // Set first state as active by default
+        if (data && data.length > 0) {
+          setActiveState(data[0]);
+        }
+
         if (!mapInitializedRef.current) {
           initializeMap();
           mapInitializedRef.current = true;
@@ -92,7 +97,7 @@ const Map = () => {
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Add base layer for all states
+        // Add base layer for all states (black)
         map.current.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
@@ -101,51 +106,70 @@ const Map = () => {
           'paint': {
             'fill-extrusion-color': COLORS.inactive,
             'fill-extrusion-height': 0,
-            'fill-extrusion-opacity': 0.6
+            'fill-extrusion-opacity': 0.9
           }
         });
 
-        // Add layer for states with data
+        // Add layer for active state only
         map.current.addLayer({
-          'id': 'state-extrusions',
+          'id': 'state-active',
           'type': 'fill-extrusion',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'fill-extrusion-color': [
-              'case',
-              ['in', ['get', 'STATEFP'], ['literal', Array.from(statesWithDataRef.current)]],
-              COLORS.primary,
-              'transparent'
-            ],
+            'fill-extrusion-color': COLORS.primary,
             'fill-extrusion-height': [
               'case',
-              ['in', ['get', 'STATEFP'], ['literal', Array.from(statesWithDataRef.current)]],
+              ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
               500000,
               0
             ],
             'fill-extrusion-opacity': 0.8
-          },
-          'filter': ['in', 'STATEFP', ...Array.from(statesWithDataRef.current)]
+          }
         });
 
-        // Add borders
+        // Add borders (changed from purple to yellow)
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'line-color': '#D6BCFA',
+            'line-color': '#F97316',
             'line-width': 1
           }
         });
+      });
+
+      // Update active state when map is clicked
+      map.current.on('click', 'state-base', (e) => {
+        if (!e.features?.[0]) return;
+        
+        const clickedStateId = e.features[0].properties?.STATEFP;
+        if (!clickedStateId || !statesWithDataRef.current.has(clickedStateId)) return;
+
+        const newActiveState = stateDataRef.current.find(state => state.STATEFP === clickedStateId);
+        if (newActiveState) {
+          setActiveState(newActiveState);
+        }
       });
     };
 
     fetchStateData();
     return cleanup;
   }, []);
+
+  // Update map when active state changes
+  useEffect(() => {
+    if (!map.current || !mapLoadedRef.current) return;
+
+    map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
+      'case',
+      ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
+      500000,
+      0
+    ]);
+  }, [activeState]);
 
   return (
     <div className="w-full h-full">
