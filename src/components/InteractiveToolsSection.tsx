@@ -5,7 +5,7 @@ import { HeatmapTool } from "./analytics/HeatmapTool";
 import { PredictiveTools } from "./analytics/PredictiveTools";
 import { OpportunityTools } from "./analytics/OpportunityTools";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import Map from "./Map";
+import AnalysisMap from "./analytics/AnalysisMap";
 
 export const InteractiveToolsSection = () => {
   const [showComparison, setShowComparison] = useState(false);
@@ -23,9 +23,9 @@ export const InteractiveToolsSection = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Map Section */}
+          {/* Analysis Map Section */}
           <div className="h-[600px] relative rounded-lg overflow-hidden border border-white/10">
-            <Map />
+            <AnalysisMap className="h-full" />
           </div>
 
           {/* Analysis Tools Section */}
