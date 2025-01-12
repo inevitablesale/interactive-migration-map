@@ -1,3 +1,4 @@
+<lov-code>
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -7,11 +8,11 @@ import StateReportCard from './StateReportCard';
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const COLORS = {
-  primary: '#00F5FF', // Electric Blue
-  secondary: '#00BFFF', // Deep Sky Blue
-  accent: '#1E90FF', // Dodger Blue
-  highlight: '#00FFFF', // Bright Cyan
-  active: '#00F5FF', // Electric Blue
+  primary: '#037CFE',    // Electric Blue
+  secondary: '#00FFE0',  // Cyan
+  accent: '#FFF903',     // Yellow
+  highlight: '#94EC0E',  // Lime Green
+  active: '#FA0098',     // Hot Pink
   inactive: '#000000',
 };
 
@@ -65,11 +66,10 @@ const Map = () => {
         bounds.extend(coord);
       });
 
-      // Maintain zoom level and limit rotation
       map.current.easeTo({
         center: bounds.getCenter(),
-        pitch: 60,
-        bearing: Math.random() * 90 - 45, // Random rotation between -45 and 45 degrees
+        pitch: 45, // Adjusted from 60 to 45 for less extreme angle
+        bearing: Math.random() * 90 - 45,
         duration: 2000
       });
     }
@@ -184,8 +184,8 @@ const Map = () => {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       zoom: 3,
-      center: [-98.5795, 39.8283], // Center of the US
-      pitch: 45,
+      center: [-98.5795, 39.8283],
+      pitch: 45, // Adjusted from 60 to 45 for less extreme angle
       bearing: 0,
       interactive: true,
     });
@@ -210,112 +210,4 @@ const Map = () => {
         'id': 'state-base',
         'type': 'fill-extrusion',
         'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'fill-extrusion-color': COLORS.inactive,
-          'fill-extrusion-height': 10000,
-          'fill-extrusion-opacity': 0.6
-        }
-      });
-
-      map.current.addLayer({
-        'id': 'state-active',
-        'type': 'fill-extrusion',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'fill-extrusion-color': [
-            'case',
-            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            COLORS.primary,
-            'transparent'
-          ],
-          'fill-extrusion-height': [
-            'case',
-            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            100000,
-            0
-          ],
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 10000
-        }
-      });
-
-      map.current.addLayer({
-        'id': 'state-borders',
-        'type': 'line',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'line-color': COLORS.primary,
-          'line-width': 1
-        }
-      });
-    });
-
-    map.current.on('click', 'state-base', (e) => {
-      if (!e.features?.[0]) return;
-      
-      const clickedStateId = e.features[0].properties?.STATEFP;
-      if (!clickedStateId || !statesWithDataRef.current.has(clickedStateId)) return;
-
-      if (cycleIntervalRef.current) {
-        clearInterval(cycleIntervalRef.current);
-        cycleIntervalRef.current = null;
-      }
-
-      const newActiveState = stateDataRef.current.find(state => state.STATEFP === clickedStateId);
-      if (newActiveState) {
-        updateActiveState(newActiveState);
-        flyToState(clickedStateId);
-      }
-    });
-
-    map.current.on('mousemove', 'state-base', () => {
-      if (map.current) map.current.getCanvas().style.cursor = 'pointer';
-    });
-
-    map.current.on('mouseleave', 'state-base', () => {
-      if (map.current) map.current.getCanvas().style.cursor = '';
-    });
-  };
-
-  useEffect(() => {
-    if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
-      startCyclingStates();
-    }
-  }, [stateDataRef.current, mapLoadedRef.current]);
-
-  useEffect(() => {
-    fetchStateData();
-    return cleanup;
-  }, []);
-
-  useEffect(() => {
-    if (!map.current || !mapLoadedRef.current) return;
-
-    map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
-      'case',
-      ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-      100000,
-      0
-    ]);
-
-    map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-      'case',
-      ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-      COLORS.active,
-      'transparent'
-    ]);
-  }, [activeState]);
-
-  return (
-    <div className="w-full h-full">
-      <div ref={mapContainer} className="w-full h-full" />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <StateReportCard data={activeState} isVisible={!!activeState} />
-    </div>
-  );
-};
-
-export default Map;
+        'source-layer': 'tl_2020_us_state-52
