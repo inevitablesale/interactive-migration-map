@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface StateData {
@@ -22,7 +22,20 @@ const formatNumber = (num: number | null) => {
 };
 
 const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
-  if (!data || !isVisible) return null;
+  const [showCard, setShowCard] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      setShowCard(scrollPosition < windowHeight);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  if (!data || !isVisible || !showCard) return null;
 
   return (
     <Card className="absolute bottom-4 right-4 w-72 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
