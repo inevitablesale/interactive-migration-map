@@ -65,13 +65,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': 10000,
+          'fill-extrusion-height': 20000,
           'fill-extrusion-opacity': 0.6
-        },
-        'minzoom': 0
+        }
       });
 
-      // Add MSA layer
+      // Add MSA layer with enhanced visibility
       map.current.addSource('msas', {
         type: 'vector',
         url: 'mapbox://inevitablesale.29jcxgnm'
@@ -83,17 +82,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source': 'msas',
         'source-layer': 'tl_2020_us_cbsa-aoky0u',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': 10000,
-          'fill-extrusion-opacity': 0.6
+          'fill-extrusion-color': MAP_COLORS.secondary,
+          'fill-extrusion-height': 50000,
+          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-base': 0
         },
         'layout': {
           'visibility': 'none'
-        },
-        'minzoom': 0
+        }
       });
 
-      // Add borders
+      // Add borders with enhanced visibility
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -101,7 +100,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'line-color': MAP_COLORS.primary,
-          'line-width': 1
+          'line-width': 1.5,
+          'line-opacity': 0.8
         }
       });
 
@@ -112,12 +112,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_cbsa-aoky0u',
         'paint': {
           'line-color': MAP_COLORS.secondary,
-          'line-width': 1
+          'line-width': 1.5,
+          'line-opacity': 0.8
         },
         'layout': {
           'visibility': 'none'
-        },
-        'minzoom': 0
+        }
       });
     });
 
@@ -129,23 +129,39 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     };
   }, []);
 
-  // Handle view mode changes
+  // Handle view mode changes with improved layer toggling
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
-    // Force a repaint by triggering a resize event
-    map.current.resize();
+    // Force a repaint by triggering a resize
+    requestAnimationFrame(() => {
+      map.current?.resize();
+    });
 
     if (viewMode === 'state') {
       map.current.setLayoutProperty('state-base', 'visibility', 'visible');
       map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-base', 'visibility', 'none');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+      
+      // Adjust camera for state view
+      map.current.easeTo({
+        pitch: 45,
+        zoom: 3,
+        duration: 1000
+      });
     } else {
       map.current.setLayoutProperty('state-base', 'visibility', 'none');
       map.current.setLayoutProperty('state-borders', 'visibility', 'none');
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      
+      // Adjust camera for MSA view
+      map.current.easeTo({
+        pitch: 60,
+        zoom: 3,
+        duration: 1000
+      });
     }
   }, [viewMode, mapLoaded]);
 
