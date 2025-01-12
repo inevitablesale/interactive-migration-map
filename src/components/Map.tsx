@@ -242,20 +242,23 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         url: 'mapbox://inevitablesale.29jcxgnm'
       });
 
-      // Base state layer
+      // Base state layer (2D)
       map.current.addLayer({
         'id': 'state-base',
-        'type': 'fill-extrusion',
+        'type': mode === 'hero' ? 'fill' : 'fill-extrusion',
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'fill-extrusion-color': mode === 'hero' ? MAP_COLORS.inactive : MAP_COLORS.primary,
-          'fill-extrusion-height': mode === 'hero' ? 100000 : 5000,
+        'paint': mode === 'hero' ? {
+          'fill-color': MAP_COLORS.inactive,
+          'fill-opacity': 0.6
+        } : {
+          'fill-extrusion-color': MAP_COLORS.primary,
+          'fill-extrusion-height': 5000,
           'fill-extrusion-opacity': 0.6
         }
       });
 
-      // Active state layer
+      // Active state layer (3D only for active state)
       map.current.addLayer({
         'id': 'state-highlight',
         'type': 'fill-extrusion',
@@ -264,8 +267,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'paint': {
           'fill-extrusion-color': mode === 'hero' ? ELECTRIC_COLORS[0] : MAP_COLORS.highlight,
           'fill-extrusion-height': mode === 'hero' ? 200000 : 50000,
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': mode === 'hero' ? 100000 : 5000
+          'fill-extrusion-opacity': 0.8
         },
         'filter': ['in', 'STATEFP', '']
       });
