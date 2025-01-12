@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, BuildingIcon, UsersIcon, HomeIcon } from 'lucide-react';
+import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, BuildingIcon, UsersIcon, HomeIcon, DatabaseIcon } from 'lucide-react';
 
 interface StateData {
   STATEFP: string;
@@ -55,7 +55,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
     (data.ESTAB / (data.B23025_004E / 1000)).toFixed(1) : null;
 
   return (
-    <Card className="absolute bottom-4 right-4 w-[350px] bg-black/40 backdrop-blur-md border-white/10 text-white">
+    <Card className="absolute bottom-[35%] right-4 w-[350px] bg-black/40 backdrop-blur-md border-white/10 text-white">
       <CardHeader className="py-2 px-4 border-b border-white/10">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <TrendingUpIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
@@ -119,6 +119,23 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
             <p className="text-xs text-gray-300">
               • Housing market indicates {data.B25077_001E && data.B25077_001E > 400000 ? 'premium' : 'accessible'} pricing
             </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-xs font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
+            Data Sources
+          </h3>
+          <div className="bg-white/5 p-3 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <DatabaseIcon className="w-3 h-3" style={{ color: REPORT_ACCENT_COLOR }} />
+              <p className="text-xs text-white">Primary Sources</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-gray-300">• US Census Bureau ACS Data</p>
+              <p className="text-xs text-gray-300">• Bureau of Labor Statistics</p>
+              <p className="text-xs text-gray-300">• County Business Patterns</p>
+            </div>
           </div>
         </div>
       </CardContent>
