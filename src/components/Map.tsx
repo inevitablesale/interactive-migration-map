@@ -18,6 +18,7 @@ const MAP_COLORS = {
 
 // Electric colors for cycling in hero mode
 const ELECTRIC_COLORS = [
+  '#94EC0E',  // Bright Green (matching the image)
   '#8B5CF6',  // Vivid Purple
   '#D946EF',  // Magenta Pink
   '#F97316',  // Bright Orange
