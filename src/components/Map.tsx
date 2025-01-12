@@ -52,7 +52,17 @@ const Map = () => {
   const updateActiveState = (state: StateData | null) => {
     setActiveState(state);
     if (state) {
-      const event = new CustomEvent('stateChanged', { detail: JSON.parse(JSON.stringify(state)) });
+      // Only pass serializable data
+      const eventData = {
+        STATEFP: state.STATEFP,
+        EMP: state.EMP,
+        PAYANN: state.PAYANN,
+        ESTAB: state.ESTAB,
+        B19013_001E: state.B19013_001E,
+        B23025_004E: state.B23025_004E,
+        B25077_001E: state.B25077_001E
+      };
+      const event = new CustomEvent('stateChanged', { detail: eventData });
       window.dispatchEvent(event);
     }
   };

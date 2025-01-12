@@ -17,17 +17,18 @@ export function Hero() {
   const [showHeroText, setShowHeroText] = useState(true);
 
   useEffect(() => {
-    const handleStateChange = (event: CustomEvent) => {
-      const stateData = (event as CustomEvent<StateData>).detail;
+    const handleStateChange = (event: Event) => {
+      const customEvent = event as CustomEvent<StateData>;
+      const stateData = customEvent.detail;
       setActiveState(stateData);
       if (!activeState) {
         setShowHeroText(false);
       }
     };
 
-    window.addEventListener('stateChanged', handleStateChange as EventListener);
+    window.addEventListener('stateChanged', handleStateChange);
     return () => {
-      window.removeEventListener('stateChanged', handleStateChange as EventListener);
+      window.removeEventListener('stateChanged', handleStateChange);
     };
   }, [activeState]);
 
