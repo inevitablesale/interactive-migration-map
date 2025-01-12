@@ -26,8 +26,10 @@ const fetchStateData = async (stateFp: string) => {
   return data;
 };
 
-const formatNumber = (num: number | null) => {
-  if (num === null) return 'N/A';
+const formatNumber = (value: string | number | null) => {
+  if (value === null) return 'N/A';
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return 'N/A';
   return new Intl.NumberFormat('en-US').format(num);
 };
 
