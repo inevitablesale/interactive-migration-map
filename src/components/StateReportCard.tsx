@@ -55,7 +55,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
     (data.ESTAB / (data.B23025_004E / 1000)).toFixed(1) : null;
 
   return (
-    <Card className="absolute bottom-[35%] right-4 w-[350px] bg-black/40 backdrop-blur-md border-white/10 text-white">
+    <Card className="absolute top-1/2 right-4 -translate-y-1/2 w-[350px] bg-black/40 backdrop-blur-md border-white/10 text-white">
       <CardHeader className="py-2 px-4 border-b border-white/10">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <TrendingUpIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
