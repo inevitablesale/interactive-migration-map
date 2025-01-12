@@ -32,60 +32,55 @@ const Index = () => {
         <DataSourcesSection />
 
         {/* Interactive Analysis Section */}
-        <div className="relative">
+        <div className="relative bg-black/95">
           <div className="min-h-screen flex">
             {/* Left Panel - Analysis Tools */}
             <div className="w-80 bg-black/40 backdrop-blur-md p-6 border-r border-white/10">
-              <h3 className="text-xl font-semibold text-white mb-6">Analysis Tools</h3>
+              <h3 className="text-xl font-semibold text-white mb-6">Data Value Principles</h3>
               <div className="space-y-4">
-                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
-                  <h4 className="text-white font-medium mb-2">Data Layers</h4>
-                  <div className="space-y-2">
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-white/5 rounded">
-                      <span>Migration Flows</span>
-                      <span className="text-cyan-400">On</span>
-                    </button>
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-white/5 rounded">
-                      <span>Firm Density</span>
-                      <span>Off</span>
-                    </button>
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-white/5 rounded">
-                      <span>Analytics</span>
-                      <span>Off</span>
-                    </button>
-                  </div>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h4 className="text-white font-medium mb-2">Value Creation</h4>
+                  <p className="text-sm text-gray-300">Data doesn't inherently contain value. It becomes valuable through actionable insights and decision-making.</p>
                 </div>
-                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-                  <h4 className="text-white font-medium mb-2">Demographic Analysis</h4>
-                  <p className="text-sm text-gray-300">Analyze population and demographic trends</p>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h4 className="text-white font-medium mb-2">Behavior Change</h4>
+                  <p className="text-sm text-gray-300">Focus on what people should do differently with the data, not just what data to collect.</p>
                 </div>
-                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-                  <h4 className="text-white font-medium mb-2">Economic Indicators</h4>
-                  <p className="text-sm text-gray-300">Track business and economic metrics</p>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h4 className="text-white font-medium mb-2">Future-Focused Solutions</h4>
+                  <p className="text-sm text-gray-300">Build for the next 3 years, not just solving past problems.</p>
                 </div>
-                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-                  <h4 className="text-white font-medium mb-2">Migration Patterns</h4>
-                  <p className="text-sm text-gray-300">Visualize population movement</p>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h4 className="text-white font-medium mb-2">Customer Commitment</h4>
+                  <p className="text-sm text-gray-300">Success requires commitment from actual users, not just technical teams.</p>
                 </div>
-                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-                  <h4 className="text-white font-medium mb-2">Compare Markets</h4>
-                  <p className="text-sm text-gray-300">Compare firms side by side with detailed metrics</p>
-                  <p className="text-sm text-gray-300 mt-2">Detect acquisition signals in accounting practices before they list. Our AI analyzes millions of data points to identify growth patterns.</p>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <h4 className="text-white font-medium mb-2">Incentive Alignment</h4>
+                  <p className="text-sm text-gray-300">Create strong incentives for workflow changes or integrate naturally into existing processes.</p>
                 </div>
               </div>
             </div>
 
-            {/* Center - Map Interaction Area */}
-            <div className="flex-1 bg-transparent">
-              {/* Map Controls Overlay */}
-              <div className="p-4 absolute top-4 right-4 bg-black/40 backdrop-blur-md rounded-lg border border-white/10">
-                <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm">
-                    Generate Report
-                  </button>
-                  <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm">
-                    Run Analysis
-                  </button>
+            {/* Center - Content Area */}
+            <div className="flex-1 p-8">
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-3xl font-bold text-white mb-6">Data Transformation Journey</h2>
+                <p className="text-gray-300 mb-4">
+                  The path to data-driven decision making isn't just about collecting more data. It's about creating meaningful change in how people work and make decisions.
+                </p>
+                <div className="space-y-6">
+                  <div className="bg-white/5 p-6 rounded-lg">
+                    <h3 className="text-xl font-semibold text-white mb-3">Beyond Data Collection</h3>
+                    <p className="text-gray-300">
+                      Success in data transformation comes not from the quantity of data collected, but from how effectively it drives actionable insights and behavioral changes.
+                    </p>
+                  </div>
+                  <div className="bg-white/5 p-6 rounded-lg">
+                    <h3 className="text-xl font-semibold text-white mb-3">Creating True Value</h3>
+                    <p className="text-gray-300">
+                      Focus on creating data assets that solve persistent problems and drive meaningful organizational change, rather than responding to momentary challenges.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

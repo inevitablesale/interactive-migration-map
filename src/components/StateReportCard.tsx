@@ -31,11 +31,11 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const analysisSection = document.querySelector('.analysis-section');
-      if (!analysisSection) return;
+      const heroSection = document.querySelector('.hero-section');
+      if (!heroSection) return;
 
-      const rect = analysisSection.getBoundingClientRect();
-      setShowCard(rect.top > window.innerHeight);
+      const rect = heroSection.getBoundingClientRect();
+      setShowCard(rect.bottom > 0);
     };
 
     window.addEventListener('scroll', handleScroll);
