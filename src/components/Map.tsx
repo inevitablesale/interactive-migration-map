@@ -14,7 +14,7 @@ const Map = () => {
   useEffect(() => {
     const fetchCompanyData = async () => {
       const { data, error } = await supabase
-        .from('company_data')
+        .from('canary_firms_data')  // Changed from 'company_data' to 'canary_firms_data'
         .select('latitude, longitude, "Company Name", employeeCount, STATE')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
