@@ -27,10 +27,6 @@ const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const stateDataRef = useRef<StateData[]>([]);
-  const currentStateIndex = useRef(0);
-  const previousStateId = useRef<string | null>(null);
-  const isAnimating = useRef(false);
-  const animationTimeoutRef = useRef<number | null>(null);
   const mapLoadedRef = useRef(false);
   const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
@@ -38,61 +34,13 @@ const Map = () => {
 
   // Cleanup function
   const cleanup = () => {
-    if (animationTimeoutRef.current) {
-      window.clearTimeout(animationTimeoutRef.current);
-      animationTimeoutRef.current = null;
-    }
-    
     if (map.current) {
       map.current.remove();
       map.current = null;
     }
-
     mapLoadedRef.current = false;
     mapInitializedRef.current = false;
-    isAnimating.current = false;
-    previousStateId.current = null;
-    currentStateIndex.current = 0;
     setActiveState(null);
-  };
-
-  // Function to zoom to a state
-  const zoomToState = async (stateId: string) => {
-    if (!map.current || !mapLoadedRef.current) return;
-
-    try {
-      const features = map.current.querySourceFeatures('states', {
-        sourceLayer: 'tl_2020_us_state-52k5uw',
-        filter: ['==', ['get', 'STATEFP'], stateId]
-      });
-
-      if (features.length > 0 && features[0].geometry) {
-        const bounds = new mapboxgl.LngLatBounds();
-        
-        if (features[0].geometry.type === 'Polygon') {
-          features[0].geometry.coordinates[0].forEach((coord: [number, number]) => {
-            bounds.extend(coord);
-          });
-        } else if (features[0].geometry.type === 'MultiPolygon') {
-          features[0].geometry.coordinates.forEach((poly: [number, number][][]) => {
-            poly[0].forEach((coord: [number, number]) => {
-              bounds.extend(coord);
-            });
-          });
-        }
-
-        // Adjust padding and camera settings for a more distant, eye-level view
-        await map.current.fitBounds(bounds, {
-          padding: { top: 150, bottom: 150, left: 300, right: 300 }, // Increased padding
-          duration: 1500, // Slightly longer animation
-          pitch: 45, // Lower pitch for better perspective
-          bearing: 0,
-          maxZoom: 4.8 // Reduced max zoom to keep distance
-        });
-      }
-    } catch (err) {
-      console.error('Error zooming to state:', err);
-    }
   };
 
   useEffect(() => {
@@ -109,7 +57,6 @@ const Map = () => {
           return;
         }
 
-        // Store states with data in a Set for quick lookup
         statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
         stateDataRef.current = data || [];
 
@@ -168,28 +115,21 @@ const Map = () => {
             'fill-extrusion-color': [
               'case',
               ['in', ['get', 'STATEFP'], ['literal', Array.from(statesWithDataRef.current)]],
-              [
-                'interpolate',
-                ['linear'],
-                ['coalesce', ['feature-state', 'score'], 0],
-                0, COLORS.secondary,
-                0.5, COLORS.primary,
-                1, '#ffffff'
-              ],
+              COLORS.primary,
               'transparent'
             ],
             'fill-extrusion-height': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['feature-state', 'height'], 0],
-              0, 0,
-              1, 500000
+              'case',
+              ['in', ['get', 'STATEFP'], ['literal', Array.from(statesWithDataRef.current)]],
+              500000,
+              0
             ],
             'fill-extrusion-opacity': 0.8
           },
           'filter': ['in', 'STATEFP', ...Array.from(statesWithDataRef.current)]
         });
 
+        // Add borders
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -200,80 +140,10 @@ const Map = () => {
             'line-width': 1
           }
         });
-
-        const animateNextState = async () => {
-          if (!map.current || !mapLoadedRef.current || isAnimating.current) return;
-          isAnimating.current = true;
-
-          try {
-            // Reset previous state
-            if (previousStateId.current) {
-              await map.current.setFeatureState(
-                {
-                  source: 'states',
-                  sourceLayer: 'tl_2020_us_state-52k5uw',
-                  id: previousStateId.current
-                },
-                {
-                  score: 0,
-                  height: 0
-                }
-              );
-            }
-
-            // Clear active state and wait for animation
-            setActiveState(null);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Animate next state
-            const state = stateDataRef.current[currentStateIndex.current];
-            if (!state?.STATEFP) {
-              isAnimating.current = false;
-              return;
-            }
-
-            // Calculate growth score based on available metrics
-            const growthScore = Math.random(); // Simplified scoring for now
-
-            await map.current.setFeatureState(
-              {
-                source: 'states',
-                sourceLayer: 'tl_2020_us_state-52k5uw',
-                id: state.STATEFP
-              },
-              {
-                score: growthScore,
-                height: 1
-              }
-            );
-
-            // Set active state and zoom to it
-            setActiveState(state);
-            await zoomToState(state.STATEFP);
-
-            previousStateId.current = state.STATEFP;
-            currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
-
-            // Wait for animation to complete before allowing next state
-            await new Promise(resolve => setTimeout(resolve, 5000));
-          } finally {
-            isAnimating.current = false;
-            if (mapLoadedRef.current) {
-              animationTimeoutRef.current = window.setTimeout(animateNextState, 1000);
-            }
-          }
-        };
-
-        map.current.once('idle', () => {
-          if (mapLoadedRef.current) {
-            animateNextState();
-          }
-        });
       });
     };
 
     fetchStateData();
-
     return cleanup;
   }, []);
 

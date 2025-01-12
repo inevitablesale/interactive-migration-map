@@ -2,7 +2,6 @@ import Map from "@/components/Map";
 import { Hero } from "@/components/Hero";
 import { Bird } from "lucide-react";
 import { BottomPanel } from "@/components/BottomPanel";
-import { ChatBar } from "@/components/ChatBar";
 import { ComparisonTool } from "@/components/ComparisonTool";
 
 const Index = () => {
@@ -35,6 +34,23 @@ const Index = () => {
             <div className="w-80 bg-black/40 backdrop-blur-md p-6 border-r border-white/10">
               <h3 className="text-xl font-semibold text-white mb-6">Analysis Tools</h3>
               <div className="space-y-4">
+                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                  <h4 className="text-white font-medium mb-2">Data Layers</h4>
+                  <div className="space-y-2">
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-white/5 rounded">
+                      <span>Migration Flows</span>
+                      <span className="text-cyan-400">On</span>
+                    </button>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-white/5 rounded">
+                      <span>Firm Density</span>
+                      <span>Off</span>
+                    </button>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-white/5 rounded">
+                      <span>Analytics</span>
+                      <span>Off</span>
+                    </button>
+                  </div>
+                </div>
                 <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
                   <h4 className="text-white font-medium mb-2">Demographic Analysis</h4>
                   <p className="text-sm text-gray-300">Analyze population and demographic trends</p>
@@ -76,9 +92,6 @@ const Index = () => {
       {/* Fixed UI Elements */}
       <div className="fixed bottom-0 left-0 right-0 z-20">
         <BottomPanel />
-      </div>
-      <div className="fixed z-20">
-        <ChatBar />
       </div>
     </div>
   );
