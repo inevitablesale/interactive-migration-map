@@ -9,10 +9,10 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJ
 const MAP_COLORS = {
   primary: '#037CFE',    // Electric Blue
   secondary: '#00FFE0',  // Cyan
-  accent: '#FFF903',     // Yellow
+  accent: '#0EA5E9',     // Ocean Blue (changed for electric effect)
   highlight: '#94EC0E',  // Lime Green
   active: '#FA0098',     // Hot Pink
-  inactive: '#1a365d',   // Dark Blue (changed from black for better visibility)
+  inactive: '#1a365d',   // Dark Blue
   msa: '#FA0098'        // MSA Color (Hot Pink)
 };
 
@@ -99,7 +99,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         flyToState(nextState.STATEFP);
         
         if (map.current) {
-          map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+          map.current.setPaintProperty('state-highlight', 'fill-extrusion-color', [
             'case',
             ['==', ['get', 'STATEFP'], nextState.STATEFP],
             MAP_COLORS.accent,
@@ -228,7 +228,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         url: 'mapbox://inevitablesale.29jcxgnm'
       });
 
-      // Base state layer with higher extrusion for hero mode
+      // Base state layer
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -241,7 +241,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         }
       });
 
-      // Active state layer with even higher extrusion for hero mode
+      // Active state layer
       map.current.addLayer({
         'id': 'state-highlight',
         'type': 'fill-extrusion',
