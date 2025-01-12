@@ -15,6 +15,14 @@ const MAP_COLORS = {
   inactive: '#000000'    // Black
 };
 
+const STATE_COLORS = [
+  '#037CFE',  // Electric Blue
+  '#00FFE0',  // Cyan
+  '#FFF903',  // Yellow
+  '#94EC0E',  // Lime Green
+  '#FA0098',  // Hot Pink
+];
+
 interface MapProps {
   mode?: 'hero' | 'analysis';
 }
