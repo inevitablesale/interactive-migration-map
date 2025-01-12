@@ -14,7 +14,7 @@ const Map = () => {
   useEffect(() => {
     const fetchCompanyData = async () => {
       const { data, error } = await supabase
-        .from('canary_firms_data')  // Changed from 'company_data' to 'canary_firms_data'
+        .from('canary_firms_data')
         .select('latitude, longitude, "Company Name", employeeCount, STATE')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
@@ -60,7 +60,7 @@ const Map = () => {
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
+        style: 'mapbox://styles/inevitablesale/9fnr921z',  // Updated to use your custom tileset
         projection: 'globe',
         zoom: 3,
         center: [-95.7129, 37.0902],
