@@ -25,21 +25,9 @@ const formatNumber = (num: number | null) => {
   }).format(num);
 };
 
-const ELECTRIC_COLORS = [
-  '#037CFE', // Electric Blue
-  '#00FFE0', // Cyan
-  '#FFF903', // Yellow
-  '#94EC0E', // Lime Green
-  '#FA0098', // Hot Pink
-  '#9D00FF', // Electric Purple
-  '#FF3366', // Electric Pink
-  '#00FF66', // Electric Green
-];
-
 const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   const [showCard, setShowCard] = useState(true);
-  const colorIndex = parseInt(data?.STATEFP || '0') % ELECTRIC_COLORS.length;
-  const stateColor = ELECTRIC_COLORS[colorIndex];
+  const REPORT_ACCENT_COLOR = '#FFF903'; // Yellow accent color
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,79 +54,69 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   const businessDensity = data.ESTAB && data.B23025_004E ? 
     (data.ESTAB / (data.B23025_004E / 1000)).toFixed(1) : null;
 
-  const REPORT_ACCENT_COLOR = '#FFF903'; // Yellow accent color for the report card
-
   return (
-    <Card className="absolute bottom-8 right-8 w-[450px] bg-black/40 backdrop-blur-md border-white/10 text-white">
-      <CardHeader className="py-3 px-6 border-b border-white/10">
-        <CardTitle className="text-xl font-bold flex items-center gap-2">
-          <TrendingUpIcon className="w-5 h-5" style={{ color: REPORT_ACCENT_COLOR }} />
+    <Card className="absolute bottom-4 right-4 w-[350px] bg-black/40 backdrop-blur-md border-white/10 text-white">
+      <CardHeader className="py-2 px-4 border-b border-white/10">
+        <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <TrendingUpIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
           Market Intelligence Report
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6 space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
+      <CardContent className="p-4 space-y-4">
+        <div className="space-y-3">
+          <h3 className="text-xs font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
             Economic Vitality
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <BuildingIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
-                <p className="text-sm text-white">Business Activity</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/5 p-3 rounded-lg">
+              <div className="flex items-center gap-1 mb-1">
+                <BuildingIcon className="w-3 h-3" style={{ color: REPORT_ACCENT_COLOR }} />
+                <p className="text-xs text-white">Business Activity</p>
               </div>
-              <p className="text-2xl font-semibold">{formatNumber(data.ESTAB)} firms</p>
-              <p className="text-sm text-gray-400 mt-1">
-                {businessDensity} businesses per 1k workers
-              </p>
+              <p className="text-lg font-semibold">{formatNumber(data.ESTAB)} firms</p>
+              <p className="text-xs text-gray-400">{businessDensity} per 1k workers</p>
             </div>
-            <div className="bg-white/5 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <UsersIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
-                <p className="text-sm text-white">Workforce</p>
+            <div className="bg-white/5 p-3 rounded-lg">
+              <div className="flex items-center gap-1 mb-1">
+                <UsersIcon className="w-3 h-3" style={{ color: REPORT_ACCENT_COLOR }} />
+                <p className="text-xs text-white">Workforce</p>
               </div>
-              <p className="text-2xl font-semibold">{employmentRate}%</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Employment rate
-              </p>
+              <p className="text-lg font-semibold">{employmentRate}%</p>
+              <p className="text-xs text-gray-400">Employment rate</p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
+        <div className="space-y-3">
+          <h3 className="text-xs font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
             Market Indicators
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm text-white mb-1">Annual Payroll</p>
-              <p className="text-2xl font-semibold">${formatNumber(data.PAYANN)}</p>
-              <p className="text-sm text-gray-400 mt-1">
-                ${avgPayPerEmployee} per employee
-              </p>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/5 p-3 rounded-lg">
+              <p className="text-xs text-white mb-1">Annual Payroll</p>
+              <p className="text-lg font-semibold">${formatNumber(data.PAYANN)}</p>
+              <p className="text-xs text-gray-400">${avgPayPerEmployee} per employee</p>
             </div>
-            <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm text-white mb-1">Housing Market</p>
-              <p className="text-2xl font-semibold">${formatNumber(data.B25077_001E)}</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Median home value
-              </p>
+            <div className="bg-white/5 p-3 rounded-lg">
+              <p className="text-xs text-white mb-1">Housing Market</p>
+              <p className="text-lg font-semibold">${formatNumber(data.B25077_001E)}</p>
+              <p className="text-xs text-gray-400">Median home value</p>
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
+          <h3 className="text-xs font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
             Key Insights
           </h3>
-          <div className="bg-white/5 p-4 rounded-lg space-y-2">
-            <p className="text-sm text-gray-300">
+          <div className="bg-white/5 p-3 rounded-lg space-y-1">
+            <p className="text-xs text-gray-300">
               • Market shows {businessDensity && Number(businessDensity) > 50 ? 'high' : 'moderate'} business density
             </p>
-            <p className="text-sm text-gray-300">
+            <p className="text-xs text-gray-300">
               • Workforce participation is {employmentRate && Number(employmentRate) > 65 ? 'above' : 'below'} national average
             </p>
-            <p className="text-sm text-gray-300">
+            <p className="text-xs text-gray-300">
               • Housing market indicates {data.B25077_001E && data.B25077_001E > 400000 ? 'premium' : 'accessible'} pricing
             </p>
           </div>
