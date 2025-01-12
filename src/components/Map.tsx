@@ -76,7 +76,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
   };
 
   const startCyclingStates = () => {
-    if (cycleIntervalRef.current || mode === 'analysis') return;
+    if (cycleIntervalRef.current || mode !== 'hero') return;
     
     cycleIntervalRef.current = setInterval(() => {
       if (stateDataRef.current.length === 0 || !mapLoadedRef.current) return;
@@ -91,7 +91,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
           map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
             'case',
             ['==', ['get', 'STATEFP'], nextState.STATEFP],
-            getStateColor(nextState.STATEFP),
+            MAP_COLORS.accent,
             'transparent'
           ]);
         }
@@ -246,6 +246,9 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
 
   useEffect(() => {
     fetchStateData();
+    if (mode === 'hero') {
+      startCyclingStates();
+    }
     return cleanup;
   }, [mode]);
 
