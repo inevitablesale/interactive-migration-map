@@ -10,25 +10,36 @@ const Map = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [companyData, setCompanyData] = useState<any[]>([]);
   const animationRef = useRef<number>();
+  const [mapInitialized, setMapInitialized] = useState(false);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
-      const { data, error } = await supabase
-        .from('canary_firms_data')
-        .select('latitude, longitude, "Company Name", employeeCount, STATE')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .order('employeeCount', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('canary_firms_data')
+          .select('latitude, longitude, "Company Name", employeeCount, STATE')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .order('employeeCount', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching company data:', error);
-        return;
+        if (error) {
+          console.error('Error fetching company data:', error);
+          return;
+        }
+
+        setCompanyData(data || []);
+      } catch (err) {
+        console.error('Error in fetchCompanyData:', err);
       }
-
-      setCompanyData(data || []);
     };
 
     fetchCompanyData();
+
+    return () => {
+      if (animationRef.current) {
+        window.clearTimeout(animationRef.current);
+      }
+    };
   }, []);
 
   const animateToNextLocation = (locations: any[], currentIndex: number) => {
@@ -37,54 +48,58 @@ const Map = () => {
     const nextIndex = (currentIndex + 1) % locations.length;
     const nextLocation = locations[nextIndex];
 
-    map.current.easeTo({
-      center: [nextLocation.longitude, nextLocation.latitude],
-      zoom: 8,
-      duration: 2000,
-      pitch: 45,
-      bearing: Math.random() * 180 - 90,
-      essential: true
-    });
+    if (map.current && !map.current.removed) {
+      map.current.easeTo({
+        center: [nextLocation.longitude, nextLocation.latitude],
+        zoom: 8,
+        duration: 2000,
+        pitch: 45,
+        bearing: Math.random() * 180 - 90,
+        essential: true
+      });
 
-    // Schedule next animation
-    animationRef.current = window.setTimeout(() => {
-      animateToNextLocation(locations, nextIndex);
-    }, 2000);
+      animationRef.current = window.setTimeout(() => {
+        animateToNextLocation(locations, nextIndex);
+      }, 2000);
+    }
   };
 
   useEffect(() => {
-    if (!mapContainer.current || !companyData.length) return;
+    if (!mapContainer.current || !companyData.length || mapInitialized) return;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
-      map.current = new mapboxgl.Map({
+      const mapInstance = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/inevitablesale/9fnr921z',  // Updated to use your custom tileset
+        style: 'mapbox://styles/inevitablesale/9fnr921z',
         projection: 'globe',
         zoom: 3,
         center: [-95.7129, 37.0902],
         pitch: 45,
       });
 
-      map.current.addControl(
+      map.current = mapInstance;
+      setMapInitialized(true);
+
+      mapInstance.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
         'top-right'
       );
 
-      map.current.on('style.load', () => {
-        if (!map.current) return;
+      mapInstance.on('style.load', () => {
+        if (!mapInstance || mapInstance.removed) return;
         
-        map.current.setFog({
+        mapInstance.setFog({
           color: 'rgb(0, 0, 0)',
           'high-color': 'rgb(30, 30, 50)',
           'horizon-blend': 0.2,
         });
 
         // Add source with clustering enabled
-        map.current.addSource('companies', {
+        mapInstance.addSource('companies', {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
@@ -276,14 +291,16 @@ const Map = () => {
 
       return () => {
         if (animationRef.current) {
-          clearTimeout(animationRef.current);
+          window.clearTimeout(animationRef.current);
         }
-        map.current?.remove();
+        if (map.current && !map.current.removed) {
+          map.current.remove();
+        }
       };
     } catch (error) {
       console.error('Error initializing map:', error);
     }
-  }, [companyData]);
+  }, [companyData, mapInitialized]);
 
   return (
     <div className="relative w-full h-screen">
