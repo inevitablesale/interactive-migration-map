@@ -5,10 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
+interface StateData {
+  STATEFP: string;
+  EMP: number | null;
+  PAYANN: number | null;
+  ESTAB: number | null;
+}
+
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [stateData, setStateData] = useState<any[]>([]);
+  const mapInstance = useRef<mapboxgl.Map | null>(null);
+  const [stateData, setStateData] = useState<StateData[]>([]);
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -33,36 +40,35 @@ const Map = () => {
   }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || mapInstance.current) return;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
-      const mapInstance = new mapboxgl.Map({
+      const map = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/inevitablesale/9fnr921z',
+        style: 'mapbox://styles/mapbox/light-v11',
         zoom: 3,
         center: [-95.7129, 37.0902],
         pitch: 45,
       });
 
-      map.current = mapInstance;
+      mapInstance.current = map;
 
-      mapInstance.addControl(
+      map.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
         'top-right'
       );
 
-      // Wait for both style and state data to be loaded
-      mapInstance.on('style.load', () => {
-        if (!mapInstance || mapInstance._removed) return;
+      const handleStyleLoad = () => {
+        if (!map || map._removed) return;
 
         // Calculate min and max values for normalization
-        const empValues = stateData.map(d => d.EMP).filter(v => v != null);
-        const payannValues = stateData.map(d => d.PAYANN).filter(v => v != null);
-        const estabValues = stateData.map(d => d.ESTAB).filter(v => v != null);
+        const empValues = stateData.map(d => d.EMP).filter((v): v is number => v != null);
+        const payannValues = stateData.map(d => d.PAYANN).filter((v): v is number => v != null);
+        const estabValues = stateData.map(d => d.ESTAB).filter((v): v is number => v != null);
 
         const minEmp = Math.min(...empValues);
         const maxEmp = Math.max(...empValues);
@@ -71,24 +77,20 @@ const Map = () => {
         const minEstab = Math.min(...estabValues);
         const maxEstab = Math.max(...estabValues);
 
-        // Normalize and set state colors based on economic indicators
         stateData.forEach(state => {
-          if (!state.STATEFP) return;
+          if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB) return;
 
-          // Normalize values between 0 and 1
           const normalizedEmp = (state.EMP - minEmp) / (maxEmp - minEmp);
           const normalizedPayann = (state.PAYANN - minPayann) / (maxPayann - minPayann);
           const normalizedEstab = (state.ESTAB - minEstab) / (maxEstab - minEstab);
 
-          // Calculate composite score (weighted average)
           const compositeScore = (
             (normalizedEmp * 0.4) + 
             (normalizedPayann * 0.4) + 
             (normalizedEstab * 0.2)
           );
 
-          // Set the state's fill color based on the composite score
-          mapInstance.setFeatureState(
+          map.setFeatureState(
             {
               source: 'composite',
               sourceLayer: 'state-fills',
@@ -99,12 +101,15 @@ const Map = () => {
             }
           );
         });
-      });
+      };
+
+      map.on('style.load', handleStyleLoad);
 
       return () => {
-        if (mapInstance && !mapInstance._removed) {
-          mapInstance.remove();
-          map.current = null;
+        map.off('style.load', handleStyleLoad);
+        if (map && !map._removed) {
+          map.remove();
+          mapInstance.current = null;
         }
       };
     } catch (error) {
