@@ -7,11 +7,11 @@ import StateReportCard from './StateReportCard';
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const COLORS = {
-  primary: '#8B5CF6', // Vivid Purple
-  secondary: '#D946EF', // Magenta Pink
-  accent: '#F97316', // Bright Orange
-  highlight: '#0EA5E9', // Ocean Blue
-  active: '#1EAEDB', // Bright Blue
+  primary: '#00FFFF', // Electric Cyan
+  secondary: '#00BFFF', // Deep Sky Blue
+  accent: '#1E90FF', // Dodger Blue
+  highlight: '#00CED1', // Dark Turquoise
+  active: '#00F5FF', // Electric Blue
   inactive: '#000000',
 };
 
@@ -65,10 +65,11 @@ const Map = () => {
         bounds.extend(coord);
       });
 
-      map.current.fitBounds(bounds, {
-        padding: 100,
+      // Maintain zoom level and only adjust pitch and bearing
+      map.current.easeTo({
+        center: bounds.getCenter(),
         pitch: 60,
-        bearing: 0,
+        bearing: Math.random() * 360, // Random rotation for visual interest
         duration: 2000
       });
     }
@@ -300,10 +301,11 @@ const Map = () => {
       0
     ]);
 
+    // Use electric blue colors for active state
     map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
       'case',
       ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-      COLORS.primary,
+      COLORS.active,
       'transparent'
     ]);
   }, [activeState]);
