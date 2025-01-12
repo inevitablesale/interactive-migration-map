@@ -84,9 +84,9 @@ const Map = () => {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/dark-v11',
-        zoom: 3.5,
-        center: [-95.7129, 37.0902],
-        pitch: 60,
+        zoom: 3,
+        center: [-98.5795, 39.8283], // Center of the US
+        pitch: 45, // Reduced pitch for better visibility
         bearing: 0,
         interactive: true,
       });
@@ -108,7 +108,7 @@ const Map = () => {
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Base layer for all states
+        // Base layer for all states with minimal height
         map.current.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
@@ -116,8 +116,8 @@ const Map = () => {
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'fill-extrusion-color': COLORS.inactive,
-            'fill-extrusion-height': 0,
-            'fill-extrusion-opacity': 0.9
+            'fill-extrusion-height': 10000, // Small base height for all states
+            'fill-extrusion-opacity': 0.6
           }
         });
 
@@ -128,7 +128,12 @@ const Map = () => {
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'fill-extrusion-color': COLORS.primary,
+            'fill-extrusion-color': [
+              'case',
+              ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
+              COLORS.primary,
+              'transparent'
+            ],
             'fill-extrusion-height': [
               'case',
               ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
@@ -136,7 +141,7 @@ const Map = () => {
               0
             ],
             'fill-extrusion-opacity': 0.8,
-            'fill-extrusion-base': 0
+            'fill-extrusion-base': 10000 // Start from the base layer height
           }
         });
 
@@ -169,17 +174,19 @@ const Map = () => {
         if (newActiveState) {
           setActiveState(newActiveState);
           
-          // Fly to clicked state with dynamic camera positioning
-          if (map.current) {
-            map.current.flyTo({
-              center: [-95.7129, 37.0902],
-              zoom: 4,
-              pitch: 75,
-              bearing: 0,
-              duration: 2000,
-              essential: true
-            });
-          }
+          // Fly to clicked state
+          const bounds = new mapboxgl.LngLatBounds();
+          const coordinates = e.features[0].geometry.coordinates[0];
+          coordinates.forEach((coord: any) => {
+            bounds.extend(coord);
+          });
+
+          map.current?.fitBounds(bounds, {
+            padding: 100,
+            pitch: 60,
+            bearing: 0,
+            duration: 2000
+          });
         }
       });
 
@@ -206,6 +213,13 @@ const Map = () => {
       ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
       100000,
       0
+    ]);
+
+    map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+      'case',
+      ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
+      COLORS.primary,
+      'transparent'
     ]);
   }, [activeState]);
 
