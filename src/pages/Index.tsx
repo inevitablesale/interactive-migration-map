@@ -31,24 +31,39 @@ const Index = () => {
             <Hero />
           </div>
 
-          {/* Content Sections */}
+          {/* Interactive Analysis Section */}
           <div className="relative">
-            {/* Controls Section with frosted glass effect */}
-            <div className="min-h-screen bg-black/40 backdrop-blur-md p-8">
-              <div className="max-w-7xl mx-auto">
-                <h2 className="text-3xl font-bold text-white mb-8">Market Intelligence</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-white mb-4">Firm Analysis</h3>
-                    <p className="text-gray-200">
-                      Analyze firm density and distribution across regions to identify market opportunities.
-                    </p>
+            <div className="min-h-screen flex">
+              {/* Left Panel - Analysis Tools */}
+              <div className="w-80 bg-black/40 backdrop-blur-md p-6 border-r border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6">Analysis Tools</h3>
+                <div className="space-y-4">
+                  <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                    <h4 className="text-white font-medium mb-2">Demographic Analysis</h4>
+                    <p className="text-sm text-gray-300">Analyze population and demographic trends</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-white mb-4">Migration Patterns</h3>
-                    <p className="text-gray-200">
-                      Track business migration patterns and understand emerging market trends.
-                    </p>
+                  <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                    <h4 className="text-white font-medium mb-2">Economic Indicators</h4>
+                    <p className="text-sm text-gray-300">Track business and economic metrics</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                    <h4 className="text-white font-medium mb-2">Migration Patterns</h4>
+                    <p className="text-sm text-gray-300">Visualize population movement</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center - Map Interaction Area */}
+              <div className="flex-1 bg-transparent">
+                {/* Map Controls Overlay */}
+                <div className="p-4 absolute top-4 right-4 bg-black/40 backdrop-blur-md rounded-lg border border-white/10">
+                  <div className="flex gap-2">
+                    <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm">
+                      Generate Report
+                    </button>
+                    <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm">
+                      Run Analysis
+                    </button>
                   </div>
                 </div>
               </div>
