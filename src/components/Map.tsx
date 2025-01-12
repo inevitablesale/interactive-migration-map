@@ -7,23 +7,23 @@ import StateReportCard from './StateReportCard';
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const MAP_COLORS = {
-  primary: '#037CFE',    // Electric Blue
-  secondary: '#00FFE0',  // Cyan
-  accent: '#FFF903',     // Yellow
-  highlight: '#94EC0E',  // Lime Green
-  active: '#FA0098',     // Hot Pink
-  inactive: '#000000'    // Black
+  primary: '#037CFE',
+  secondary: '#00FFE0',
+  accent: '#FFF903',
+  highlight: '#94EC0E',
+  active: '#FA0098',
+  inactive: '#000000'
 };
 
 const STATE_COLORS = [
-  '#037CFE', // Electric Blue
-  '#00FFE0', // Cyan
-  '#FFF903', // Yellow
-  '#94EC0E', // Lime Green
-  '#FA0098', // Hot Pink
-  '#9D00FF', // Electric Purple
-  '#FF3366', // Electric Pink
-  '#00FF66', // Electric Green
+  '#037CFE',
+  '#00FFE0',
+  '#FFF903',
+  '#94EC0E',
+  '#FA0098',
+  '#9D00FF',
+  '#FF3366',
+  '#00FF66',
 ];
 
 interface StateData {
@@ -39,13 +39,10 @@ interface StateData {
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const stateDataRef = useRef<StateData[]>([]);
-  const mapLoadedRef = useRef(false);
-  const mapInitializedRef = useRef(false);
+  const [stateData, setStateData] = useState<StateData[]>([]);
   const [activeState, setActiveState] = useState<StateData | null>(null);
-  const statesWithDataRef = useRef<Set<string>>(new Set());
-  const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const currentStateIndexRef = useRef(0);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentStateIndex, setCurrentStateIndex] = useState(0);
 
   const getStateColor = (stateId: string) => {
     const colorIndex = parseInt(stateId) % STATE_COLORS.length;
@@ -55,7 +52,7 @@ const Map = () => {
   const updateActiveState = (state: StateData | null) => {
     setActiveState(state);
     if (state) {
-      const event = new CustomEvent('stateChanged', { detail: state });
+      const event = new CustomEvent('stateChanged', { detail: JSON.parse(JSON.stringify(state)) });
       window.dispatchEvent(event);
     }
   };
@@ -86,60 +83,31 @@ const Map = () => {
   };
 
   const startCyclingStates = () => {
-    if (cycleIntervalRef.current) return;
-    
-    cycleIntervalRef.current = setInterval(() => {
-      if (stateDataRef.current.length === 0 || !mapLoadedRef.current) return;
+    const interval = setInterval(() => {
+      if (stateData.length === 0 || !mapLoaded) return;
       
-      currentStateIndexRef.current = (currentStateIndexRef.current + 1) % stateDataRef.current.length;
-      const nextState = stateDataRef.current[currentStateIndexRef.current];
-      updateActiveState(nextState);
-      
-      if (nextState && nextState.STATEFP) {
-        flyToState(nextState.STATEFP);
+      setCurrentStateIndex((prev) => {
+        const nextIndex = (prev + 1) % stateData.length;
+        const nextState = stateData[nextIndex];
+        updateActiveState(nextState);
         
-        if (map.current) {
-          map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-            'case',
-            ['==', ['get', 'STATEFP'], nextState.STATEFP],
-            getStateColor(nextState.STATEFP),
-            'transparent'
-          ]);
+        if (nextState && nextState.STATEFP) {
+          flyToState(nextState.STATEFP);
+          
+          if (map.current) {
+            map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+              'case',
+              ['==', ['get', 'STATEFP'], nextState.STATEFP],
+              getStateColor(nextState.STATEFP),
+              'transparent'
+            ]);
+          }
         }
-      }
+        return nextIndex;
+      });
     }, 3000);
-  };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const analysisSection = document.querySelector('.analysis-section');
-      if (!analysisSection) return;
-
-      const rect = analysisSection.getBoundingClientRect();
-      if (rect.top <= window.innerHeight) {
-        if (cycleIntervalRef.current) {
-          clearInterval(cycleIntervalRef.current);
-          cycleIntervalRef.current = null;
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const cleanup = () => {
-    if (cycleIntervalRef.current) {
-      clearInterval(cycleIntervalRef.current);
-      cycleIntervalRef.current = null;
-    }
-    if (map.current) {
-      map.current.remove();
-      map.current = null;
-    }
-    mapLoadedRef.current = false;
-    mapInitializedRef.current = false;
-    setActiveState(null);
+    return interval;
   };
 
   const fetchStateData = async () => {
@@ -155,37 +123,22 @@ const Map = () => {
         return;
       }
 
-      statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
-      stateDataRef.current = data || [];
+      setStateData(data || []);
 
-      setTimeout(() => {
-        if (data && data.length > 0) {
+      if (data && data.length > 0) {
+        setTimeout(() => {
           updateActiveState(data[0]);
-          if (mapLoadedRef.current) {
+          if (mapLoaded) {
             flyToState(data[0].STATEFP);
-            
-            if (map.current) {
-              map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-                'case',
-                ['==', ['get', 'STATEFP'], data[0].STATEFP],
-                getStateColor(data[0].STATEFP),
-                'transparent'
-              ]);
-            }
           }
-        }
-      }, 2000);
-
-      if (!mapInitializedRef.current) {
-        initializeMap();
-        mapInitializedRef.current = true;
+        }, 2000);
       }
     } catch (err) {
       console.error('Error in fetchStateData:', err);
     }
   };
 
-  const initializeMap = () => {
+  useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -200,7 +153,6 @@ const Map = () => {
       interactive: true,
     });
 
-    // Only add navigation controls if not in hero section
     const isHeroSection = document.querySelector('.hero-section');
     if (!isHeroSection) {
       map.current.addControl(
@@ -213,7 +165,7 @@ const Map = () => {
 
     map.current.on('style.load', () => {
       if (!map.current) return;
-      mapLoadedRef.current = true;
+      setMapLoaded(true);
 
       map.current.addSource('states', {
         type: 'vector',
@@ -266,21 +218,35 @@ const Map = () => {
         }
       });
     });
-  };
 
-  useEffect(() => {
-    if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
-      startCyclingStates();
-    }
-  }, [stateDataRef.current, mapLoadedRef.current]);
-
-  useEffect(() => {
-    fetchStateData();
-    return cleanup;
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
-    if (!map.current || !mapLoadedRef.current || !activeState?.STATEFP) return;
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (stateData.length > 0 && mapLoaded) {
+      interval = startCyclingStates();
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [stateData, mapLoaded]);
+
+  useEffect(() => {
+    fetchStateData();
+  }, []);
+
+  useEffect(() => {
+    if (!map.current || !mapLoaded || !activeState?.STATEFP) return;
 
     map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
       'case',
