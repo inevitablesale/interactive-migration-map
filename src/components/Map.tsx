@@ -12,7 +12,8 @@ const MAP_COLORS = {
   accent: '#FFF903',     // Yellow
   highlight: '#94EC0E',  // Lime Green
   active: '#FA0098',     // Hot Pink
-  inactive: '#000000'    // Black
+  inactive: '#000000',   // Black
+  msa: '#FA0098'        // MSA Color (Hot Pink)
 };
 
 interface MapProps {
@@ -30,6 +31,8 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
   const statesWithDataRef = useRef<Set<string>>(new Set());
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastToastTimeRef = useRef<number>(0);
+  const [showMSA, setShowMSA] = useState(false);
+  const [activeStateFP, setActiveStateFP] = useState<string | null>(null);
 
   const updateActiveState = (state: any) => {
     if (mode === 'hero') {
@@ -39,9 +42,8 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         window.dispatchEvent(event);
       }
     } else {
-      // In analysis mode, handle multiple state selection
       const currentTime = Date.now();
-      if (currentTime - lastToastTimeRef.current > 5000) { // Only show toast every 5 seconds
+      if (currentTime - lastToastTimeRef.current > 5000) {
         const event = new CustomEvent('stateChanged', { detail: state });
         window.dispatchEvent(event);
         lastToastTimeRef.current = currentTime;
@@ -147,6 +149,29 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
     }
   };
 
+  const handleStateDoubleClick = async (stateId: string) => {
+    if (mode !== 'analysis') return;
+    
+    setActiveStateFP(stateId);
+    setShowMSA(true);
+
+    if (map.current) {
+      map.current.setLayoutProperty('msa-fills', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+
+      const msaFilter = ['==', ['get', 'STATEFP'], stateId];
+      map.current.setFilter('msa-fills', msaFilter);
+      map.current.setFilter('msa-borders', msaFilter);
+
+      const { data: msaData } = await supabase
+        .from('region_data')
+        .select('*')
+        .eq('STATEFP', stateId);
+
+      console.log('MSA Data:', msaData);
+    }
+  };
+
   const initializeMap = () => {
     if (!mapContainer.current || map.current) return;
 
@@ -178,6 +203,11 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -191,35 +221,29 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
       });
 
       map.current.addLayer({
-        'id': 'state-active',
-        'type': 'fill-extrusion',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
+        'id': 'msa-fills',
+        'type': 'fill',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'layout': {
+          'visibility': 'none'
+        },
         'paint': {
-          'fill-extrusion-color': [
-            'case',
-            ['in', ['get', 'STATEFP'], ['literal', activeStates.map(s => s.STATEFP)]],
-            MAP_COLORS.accent,
-            'transparent'
-          ],
-          'fill-extrusion-height': [
-            'case',
-            ['in', ['get', 'STATEFP'], ['literal', activeStates.map(s => s.STATEFP)]],
-            mode === 'hero' ? 100000 : 50000,
-            0
-          ],
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': mode === 'hero' ? 10000 : 5000
+          'fill-color': MAP_COLORS.msa,
+          'fill-opacity': 0.3
         }
       });
 
       map.current.addLayer({
-        'id': 'state-borders',
+        'id': 'msa-borders',
         'type': 'line',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'layout': {
+          'visibility': 'none'
+        },
         'paint': {
-          'line-color': MAP_COLORS.primary,
+          'line-color': MAP_COLORS.msa,
           'line-width': 1
         }
       });
@@ -230,6 +254,15 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
     });
 
     if (mode === 'analysis') {
+      map.current.on('dblclick', 'state-base', (e) => {
+        if (!e.features?.[0]) return;
+        
+        const stateId = e.features[0].properties?.STATEFP;
+        if (stateId) {
+          handleStateDoubleClick(stateId);
+        }
+      });
+
       map.current.on('click', 'state-base', (e) => {
         if (!e.features?.[0]) return;
         
@@ -241,7 +274,6 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         }
       });
 
-      // Change cursor on hover
       map.current.on('mouseenter', 'state-base', () => {
         if (map.current) map.current.getCanvas().style.cursor = 'pointer';
       });
@@ -260,7 +292,6 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
     return cleanup;
   }, [mode]);
 
-  // Update map when active states change
   useEffect(() => {
     if (map.current && mapLoadedRef.current && mode === 'analysis') {
       map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
