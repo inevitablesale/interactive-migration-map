@@ -4,6 +4,7 @@ import { Bird } from "lucide-react";
 import { BottomPanel } from "@/components/BottomPanel";
 import { DataSourcesSection } from "@/components/DataSourcesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
+import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
 
 const Index = () => {
   return (
@@ -30,6 +31,9 @@ const Index = () => {
 
         {/* Solutions Section */}
         <SolutionsSection />
+
+        {/* Interactive Tools Section */}
+        <InteractiveToolsSection />
 
         {/* Data Sources Section */}
         <DataSourcesSection />
