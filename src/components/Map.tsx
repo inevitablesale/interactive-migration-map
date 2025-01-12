@@ -163,21 +163,32 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
       map.current.setFilter('msa-fills', msaFilter);
       map.current.setFilter('msa-borders', msaFilter);
 
-      // Updated query to join with msa_state_crosswalk
-      const { data: msaData, error } = await supabase
-        .from('region_data')
-        .select(`
-          *,
-          msa_state_crosswalk!inner(*)
-        `)
-        .eq('msa_state_crosswalk.state_fips', stateId);
+      // First get MSAs for the state
+      const { data: msaData, error: msaError } = await supabase
+        .from('msa_state_crosswalk')
+        .select('msa')
+        .eq('state_fips', stateId);
 
-      if (error) {
-        console.error('Error fetching MSA data:', error);
+      if (msaError) {
+        console.error('Error fetching MSA data:', msaError);
         return;
       }
 
-      console.log('MSA Data:', msaData);
+      if (msaData && msaData.length > 0) {
+        // Then get region data for those MSAs
+        const msaList = msaData.map(m => m.msa);
+        const { data: regionData, error: regionError } = await supabase
+          .from('region_data')
+          .select('*')
+          .in('msa', msaList);
+
+        if (regionError) {
+          console.error('Error fetching region data:', regionError);
+          return;
+        }
+
+        console.log('Region Data:', regionData);
+      }
     }
   };
 
