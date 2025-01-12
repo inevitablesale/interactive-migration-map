@@ -7,8 +7,11 @@ import StateReportCard from './StateReportCard';
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const COLORS = {
-  primary: '#FCD34D',
-  secondary: '#222222',
+  primary: '#8B5CF6', // Vivid Purple
+  secondary: '#D946EF', // Magenta Pink
+  accent: '#F97316', // Bright Orange
+  highlight: '#0EA5E9', // Ocean Blue
+  active: '#1EAEDB', // Bright Blue
   inactive: '#000000',
 };
 
@@ -33,7 +36,11 @@ const Map = () => {
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentStateIndexRef = useRef(0);
 
-  // Function to update active state and dispatch event
+  const getStateColor = (index: number) => {
+    const colors = Object.values(COLORS).filter(color => color !== COLORS.inactive);
+    return colors[index % colors.length];
+  };
+
   const updateActiveState = (state: StateData | null) => {
     setActiveState(state);
     if (state) {
@@ -42,7 +49,6 @@ const Map = () => {
     }
   };
 
-  // Function to fly to a state
   const flyToState = (stateId: string) => {
     if (!map.current) return;
     
@@ -68,7 +74,6 @@ const Map = () => {
     }
   };
 
-  // Function to start cycling through states
   const startCyclingStates = () => {
     if (cycleIntervalRef.current) return;
     
@@ -79,11 +84,19 @@ const Map = () => {
       const nextState = stateDataRef.current[currentStateIndexRef.current];
       updateActiveState(nextState);
       
-      // Ensure map flies to the next state
       if (nextState) {
         flyToState(nextState.STATEFP);
+        
+        if (map.current) {
+          map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+            'case',
+            ['==', ['get', 'STATEFP'], nextState.STATEFP],
+            getStateColor(currentStateIndexRef.current),
+            'transparent'
+          ]);
+        }
       }
-    }, 4000);
+    }, 3000); // Changed to 3 seconds
   };
 
   useEffect(() => {
@@ -134,12 +147,20 @@ const Map = () => {
       statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
       stateDataRef.current = data || [];
 
-      // Set initial state after 2 seconds
       setTimeout(() => {
         if (data && data.length > 0) {
           updateActiveState(data[0]);
           if (mapLoadedRef.current) {
             flyToState(data[0].STATEFP);
+            
+            if (map.current) {
+              map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+                'case',
+                ['==', ['get', 'STATEFP'], data[0].STATEFP],
+                getStateColor(0),
+                'transparent'
+              ]);
+            }
           }
         }
       }, 2000);
@@ -184,7 +205,6 @@ const Map = () => {
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
-      // Base layer for all states with minimal height
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -197,7 +217,6 @@ const Map = () => {
         }
       });
 
-      // Layer for active state with enhanced 3D effect
       map.current.addLayer({
         'id': 'state-active',
         'type': 'fill-extrusion',
@@ -221,7 +240,6 @@ const Map = () => {
         }
       });
 
-      // Add borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -234,7 +252,6 @@ const Map = () => {
       });
     });
 
-    // Update active state when map is clicked
     map.current.on('click', 'state-base', (e) => {
       if (!e.features?.[0]) return;
       
@@ -253,7 +270,6 @@ const Map = () => {
       }
     });
 
-    // Add hover effects
     map.current.on('mousemove', 'state-base', () => {
       if (map.current) map.current.getCanvas().style.cursor = 'pointer';
     });
@@ -263,7 +279,6 @@ const Map = () => {
     });
   };
 
-  // Start cycling after data is fetched and map is loaded
   useEffect(() => {
     if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
       startCyclingStates();
