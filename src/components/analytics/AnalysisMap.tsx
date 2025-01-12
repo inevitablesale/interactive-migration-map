@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { supabase } from "@/integrations/supabase/client";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
 
@@ -26,6 +25,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [mapLoaded, setMapLoaded] = useState(false);
 
+  // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -48,8 +48,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       'top-right'
     );
 
+    // Wait for map style to load before adding layers
     map.current.on('style.load', () => {
       if (!map.current) return;
+      
+      // Set map as loaded
       setMapLoaded(true);
 
       // Add state layer
@@ -70,7 +73,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add MSA layer with enhanced visibility
+      // Add MSA layer
       map.current.addSource('msas', {
         type: 'vector',
         url: 'mapbox://inevitablesale.29jcxgnm'
@@ -92,7 +95,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add borders with enhanced visibility
+      // Add borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -119,6 +122,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           'visibility': 'none'
         }
       });
+
+      // Set initial view mode
+      updateViewMode(viewMode);
     });
 
     return () => {
@@ -129,22 +135,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     };
   }, []);
 
-  // Handle view mode changes with improved layer toggling
-  useEffect(() => {
+  // Handle view mode changes
+  const updateViewMode = (mode: 'state' | 'msa') => {
     if (!map.current || !mapLoaded) return;
 
-    // Force a repaint by triggering a resize
-    requestAnimationFrame(() => {
-      map.current?.resize();
-    });
-
-    if (viewMode === 'state') {
+    if (mode === 'state') {
       map.current.setLayoutProperty('state-base', 'visibility', 'visible');
       map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-base', 'visibility', 'none');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
       
-      // Adjust camera for state view
       map.current.easeTo({
         pitch: 45,
         zoom: 3,
@@ -156,13 +156,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
       
-      // Adjust camera for MSA view
       map.current.easeTo({
         pitch: 60,
         zoom: 3,
         duration: 1000
       });
     }
+  };
+
+  // Update view mode when changed
+  useEffect(() => {
+    updateViewMode(viewMode);
   }, [viewMode, mapLoaded]);
 
   return (
