@@ -67,7 +67,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
     (data.ESTAB / (data.B23025_004E / 1000)).toFixed(1) : null;
 
   return (
-    <Card className="absolute bottom-8 right-8 w-[450px] bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
+    <Card className="absolute bottom-8 right-8 w-[450px] bg-black/40 backdrop-blur-md border-white/10 text-white">
       <CardHeader className="py-3 px-6 border-b border-white/10">
         <CardTitle className="text-xl font-bold flex items-center gap-2">
           <TrendingUpIcon className="w-5 h-5" style={{ color: stateColor }} />
@@ -84,7 +84,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
             <div className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <BuildingIcon className="w-4 h-4" style={{ color: stateColor }} />
-                <p className="text-sm" style={{ color: stateColor }}>Business Activity</p>
+                <p className="text-sm text-white">Business Activity</p>
               </div>
               <p className="text-2xl font-semibold">{formatNumber(data.ESTAB)} firms</p>
               <p className="text-sm text-gray-400 mt-1">
@@ -94,7 +94,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
             <div className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <UsersIcon className="w-4 h-4" style={{ color: stateColor }} />
-                <p className="text-sm" style={{ color: stateColor }}>Workforce</p>
+                <p className="text-sm text-white">Workforce</p>
               </div>
               <p className="text-2xl font-semibold">{employmentRate}%</p>
               <p className="text-sm text-gray-400 mt-1">
@@ -111,14 +111,14 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm mb-1" style={{ color: stateColor }}>Annual Payroll</p>
+              <p className="text-sm text-white mb-1">Annual Payroll</p>
               <p className="text-2xl font-semibold">${formatNumber(data.PAYANN)}</p>
               <p className="text-sm text-gray-400 mt-1">
                 ${avgPayPerEmployee} per employee
               </p>
             </div>
             <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm mb-1" style={{ color: stateColor }}>Housing Market</p>
+              <p className="text-sm text-white mb-1">Housing Market</p>
               <p className="text-2xl font-semibold">${formatNumber(data.B25077_001E)}</p>
               <p className="text-sm text-gray-400 mt-1">
                 Median home value
