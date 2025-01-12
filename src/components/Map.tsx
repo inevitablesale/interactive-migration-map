@@ -7,10 +7,10 @@ import StateReportCard from './StateReportCard';
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const COLORS = {
-  primary: '#00FFFF', // Electric Cyan
+  primary: '#00F5FF', // Electric Blue
   secondary: '#00BFFF', // Deep Sky Blue
   accent: '#1E90FF', // Dodger Blue
-  highlight: '#00CED1', // Dark Turquoise
+  highlight: '#00FFFF', // Bright Cyan
   active: '#00F5FF', // Electric Blue
   inactive: '#000000',
 };
@@ -65,11 +65,11 @@ const Map = () => {
         bounds.extend(coord);
       });
 
-      // Maintain zoom level and only adjust pitch and bearing
+      // Maintain zoom level and limit rotation
       map.current.easeTo({
         center: bounds.getCenter(),
         pitch: 60,
-        bearing: Math.random() * 360, // Random rotation for visual interest
+        bearing: Math.random() * 90 - 45, // Random rotation between -45 and 45 degrees
         duration: 2000
       });
     }
@@ -301,7 +301,6 @@ const Map = () => {
       0
     ]);
 
-    // Use electric blue colors for active state
     map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
       'case',
       ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
