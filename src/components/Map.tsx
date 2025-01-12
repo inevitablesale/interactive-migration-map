@@ -44,10 +44,11 @@ const Map = () => {
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/dark-v11', // Changed to dark style for better contrast with overlay
         zoom: 3,
         center: [-95.7129, 37.0902],
         pitch: 45,
+        interactive: true, // Keep map interactive even when fixed
       });
 
       map.current.addControl(new mapboxgl.NavigationControl({
@@ -143,8 +144,9 @@ const Map = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-screen">
-      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0 }} />
+    <div className="w-full h-full">
+      <div ref={mapContainer} className="w-full h-full" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
     </div>
   );
 };
