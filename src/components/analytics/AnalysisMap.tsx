@@ -70,7 +70,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add MSA layer with the correct tileset
+      // Add MSA layer
       map.current.addSource('msas', {
         type: 'vector',
         url: 'mapbox://inevitablesale.29jcxgnm'
@@ -91,7 +91,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add borders for both layers
+      // Add borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',

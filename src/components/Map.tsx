@@ -44,27 +44,26 @@ const Map = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
 
-  const getStateColor = (stateId: string) => {
+  const getStateColor = useCallback((stateId: string) => {
     const colorIndex = parseInt(stateId) % STATE_COLORS.length;
     return STATE_COLORS[colorIndex];
-  };
+  }, []);
 
   const updateActiveState = useCallback((state: StateData | null) => {
+    if (!state) return;
+    
     setActiveState(state);
-    if (state) {
-      // Only pass serializable data
-      const eventData = {
-        STATEFP: state.STATEFP,
-        EMP: state.EMP,
-        PAYANN: state.PAYANN,
-        ESTAB: state.ESTAB,
-        B19013_001E: state.B19013_001E,
-        B23025_004E: state.B23025_004E,
-        B25077_001E: state.B25077_001E
-      };
-      const event = new CustomEvent('stateChanged', { detail: eventData });
-      window.dispatchEvent(event);
-    }
+    const eventData = {
+      STATEFP: state.STATEFP,
+      EMP: state.EMP,
+      PAYANN: state.PAYANN,
+      ESTAB: state.ESTAB,
+      B19013_001E: state.B19013_001E,
+      B23025_004E: state.B23025_004E,
+      B25077_001E: state.B25077_001E
+    };
+    const event = new CustomEvent('stateChanged', { detail: eventData });
+    window.dispatchEvent(event);
   }, []);
 
   const flyToState = (stateId: string) => {
@@ -99,9 +98,9 @@ const Map = () => {
       setCurrentStateIndex(prev => {
         const nextIndex = (prev + 1) % stateData.length;
         const nextState = stateData[nextIndex];
-        updateActiveState(nextState);
         
         if (nextState && nextState.STATEFP) {
+          updateActiveState(nextState);
           flyToState(nextState.STATEFP);
           
           if (map.current) {
@@ -118,7 +117,7 @@ const Map = () => {
     }, 3000);
 
     return interval;
-  }, [stateData, mapLoaded, updateActiveState]);
+  }, [stateData, mapLoaded, updateActiveState, getStateColor]);
 
   const fetchStateData = async () => {
     try {
@@ -271,7 +270,7 @@ const Map = () => {
       getStateColor(activeState.STATEFP),
       'transparent'
     ]);
-  }, [activeState]);
+  }, [activeState, getStateColor]);
 
   return (
     <div className="w-full h-full">
