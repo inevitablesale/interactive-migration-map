@@ -34,7 +34,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
-      zoom: 2.5, // Lower initial zoom level
+      zoom: 2.5,
       center: [-98.5795, 39.8283],
       pitch: 60,
       bearing: 0,
@@ -65,8 +65,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 15000,
-          'fill-extrusion-opacity': 0.4  // Reduced opacity for states
-        }
+          'fill-extrusion-opacity': 0.4
+        },
+        'minzoom': 0,
+        'maxzoom': 24
       });
 
       map.current.addSource('msas', {
@@ -81,13 +83,15 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_cbsa-aoky0u',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.secondary,
-          'fill-extrusion-height': 100000, // Increased height for better visibility
-          'fill-extrusion-opacity': 0.9,  // Increased opacity
-          'fill-extrusion-base': 15000    // Start from state height
+          'fill-extrusion-height': 150000,
+          'fill-extrusion-opacity': 0.9,
+          'fill-extrusion-base': 15000
         },
         'layout': {
           'visibility': 'none'
-        }
+        },
+        'minzoom': 0,
+        'maxzoom': 24
       });
 
       map.current.addLayer({
@@ -99,7 +103,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           'line-color': MAP_COLORS.primary,
           'line-width': 1.5,
           'line-opacity': 0.8
-        }
+        },
+        'minzoom': 0,
+        'maxzoom': 24
       });
 
       map.current.addLayer({
@@ -114,7 +120,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         },
         'layout': {
           'visibility': 'none'
-        }
+        },
+        'minzoom': 0,
+        'maxzoom': 24
       });
     });
 
@@ -145,7 +153,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         duration: 1000
       });
     } else {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible'); // Keep states visible
+      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
       map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
