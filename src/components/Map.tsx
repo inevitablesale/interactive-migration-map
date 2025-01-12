@@ -65,6 +65,12 @@ const Map = () => {
       const handleStyleLoad = () => {
         if (!map || map._removed) return;
 
+        // Add the custom tileset source
+        map.addSource('states', {
+          type: 'vector',
+          url: 'mapbox://inevitablesale.9fnr921z'
+        });
+
         // Calculate min and max values for normalization
         const empValues = stateData.map(d => d.EMP).filter((v): v is number => v != null);
         const payannValues = stateData.map(d => d.PAYANN).filter((v): v is number => v != null);
@@ -77,6 +83,41 @@ const Map = () => {
         const minEstab = Math.min(...estabValues);
         const maxEstab = Math.max(...estabValues);
 
+        // Add the fill layer for states
+        map.addLayer({
+          'id': 'state-fills',
+          'type': 'fill',
+          'source': 'states',
+          'source-layer': 'state-fills', // This should match your tileset's source layer name
+          'paint': {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'score'],
+              0, '#f7fbff',
+              0.2, '#deebf7',
+              0.4, '#c6dbef',
+              0.6, '#9ecae1',
+              0.8, '#6baed6',
+              1, '#2171b5'
+            ],
+            'fill-opacity': 0.8
+          }
+        });
+
+        // Add state border lines
+        map.addLayer({
+          'id': 'state-borders',
+          'type': 'line',
+          'source': 'states',
+          'source-layer': 'state-fills',
+          'paint': {
+            'line-color': '#627BC1',
+            'line-width': 1
+          }
+        });
+
+        // Set feature states for the score calculations
         stateData.forEach(state => {
           if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB) return;
 
@@ -92,7 +133,7 @@ const Map = () => {
 
           map.setFeatureState(
             {
-              source: 'composite',
+              source: 'states',
               sourceLayer: 'state-fills',
               id: state.STATEFP
             },
