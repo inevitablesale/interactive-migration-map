@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
-import StateReportCard from "./StateReportCard";
+import { useToast } from "@/hooks/use-toast";
 
 interface StateData {
   STATEFP: string;
@@ -14,19 +14,40 @@ interface StateData {
 
 export function Hero() {
   const [activeState, setActiveState] = useState<StateData | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleStateChange = (event: Event) => {
       const customEvent = event as CustomEvent<StateData>;
       const stateData = customEvent.detail;
       setActiveState(stateData);
+
+      // Calculate insights for toast notification
+      const employmentRate = stateData.EMP && stateData.B23025_004E ? 
+        (stateData.EMP / stateData.B23025_004E * 100).toFixed(1) : null;
+      
+      const businessDensity = stateData.ESTAB && stateData.B23025_004E ? 
+        (stateData.ESTAB / (stateData.B23025_004E / 1000)).toFixed(1) : null;
+
+      // Show toast with key metrics
+      toast({
+        title: "State Market Update",
+        description: (
+          <div className="space-y-2">
+            <p>• {stateData.ESTAB?.toLocaleString()} active businesses</p>
+            <p>• {employmentRate}% employment rate</p>
+            <p>• ${(stateData.B25077_001E || 0).toLocaleString()} median home value</p>
+          </div>
+        ),
+        duration: 3000,
+      });
     };
 
     window.addEventListener('stateChanged', handleStateChange);
     return () => {
       window.removeEventListener('stateChanged', handleStateChange);
     };
-  }, []);
+  }, [toast]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white px-4 hero-section">
@@ -47,7 +68,6 @@ export function Hero() {
           </button>
         </div>
       </div>
-      {activeState && <StateReportCard data={activeState} isVisible={true} />}
     </div>
   );
 }
