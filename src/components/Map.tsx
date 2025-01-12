@@ -25,7 +25,6 @@ const Map = () => {
   const isAnimating = useRef(false);
   const animationTimeoutRef = useRef<number | null>(null);
   const mapLoadedRef = useRef(false);
-  const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
 
   const cleanup = () => {
@@ -40,7 +39,6 @@ const Map = () => {
     }
 
     mapLoadedRef.current = false;
-    mapInitializedRef.current = false;
     isAnimating.current = false;
     previousStateId.current = null;
     currentStateIndex.current = 0;
@@ -152,42 +150,49 @@ const Map = () => {
 
         const { ranges } = calculateMetricScores();
 
+        // Add base layer for all states with minimal height
         newMap.addLayer({
-          'id': 'state-extrusions',
+          'id': 'state-base',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': '#1a1a1a',
+            'fill-extrusion-height': 100,
+            'fill-extrusion-opacity': 1
+          }
+        });
+
+        // Add layer for active state
+        newMap.addLayer({
+          'id': 'state-active',
           'type': 'fill-extrusion',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'fill-extrusion-color': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['feature-state', 'score'], 0],
-              0, '#FF6B6B',
-              0.2, '#FFB347',
-              0.4, '#48D1CC',
-              0.6, '#4682B4',
-              0.8, '#9370DB',
-              1, '#FF69B4'
+              'case',
+              ['boolean', ['feature-state', 'active'], false],
+              [
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['feature-state', 'score'], 0],
+                0, '#FF6B6B',
+                0.2, '#FFB347',
+                0.4, '#48D1CC',
+                0.6, '#4682B4',
+                0.8, '#9370DB',
+                1, '#FF69B4'
+              ],
+              'transparent'
             ],
             'fill-extrusion-height': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['feature-state', 'height'], 0],
-              0, 0,
-              1, 500000
+              'case',
+              ['boolean', ['feature-state', 'active'], false],
+              500000,
+              100
             ],
             'fill-extrusion-opacity': 1
-          }
-        });
-
-        newMap.addLayer({
-          'id': 'state-borders',
-          'type': 'line',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'line-color': '#D6BCFA',
-            'line-width': 1
           }
         });
 
@@ -197,17 +202,11 @@ const Map = () => {
           try {
             isAnimating.current = true;
             
+            // Reset previous state
             if (previousStateId.current && map.current) {
               map.current.setFeatureState(
-                {
-                  source: 'states',
-                  sourceLayer: 'tl_2020_us_state-52k5uw',
-                  id: previousStateId.current
-                },
-                {
-                  score: 0,
-                  height: 0
-                }
+                { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: previousStateId.current },
+                { active: false, score: 0 }
               );
             }
 
@@ -222,7 +221,7 @@ const Map = () => {
 
             const normalizeValue = (value: number | null, min: number, max: number) => {
               if (value === null) return 0;
-              return (value - min) / (max - min) + (Math.random() * 0.01);
+              return (value - min) / (max - min);
             };
 
             const growthScore = (
@@ -236,15 +235,8 @@ const Map = () => {
 
             if (map.current) {
               map.current.setFeatureState(
-                {
-                  source: 'states',
-                  sourceLayer: 'tl_2020_us_state-52k5uw',
-                  id: state.STATEFP
-                },
-                {
-                  score: growthScore,
-                  height: 1
-                }
+                { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: state.STATEFP },
+                { active: true, score: growthScore }
               );
             }
 
@@ -280,7 +272,11 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <StateReportCard data={activeState} isVisible={!!activeState} />
+      {activeState && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <StateReportCard data={activeState} isVisible={true} />
+        </div>
+      )}
     </div>
   );
 };
