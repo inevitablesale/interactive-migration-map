@@ -202,7 +202,7 @@ const Map = () => {
           try {
             // Reset previous state
             if (previousStateId.current) {
-              map.current.setFeatureState(
+              await map.current.setFeatureState(
                 {
                   source: 'states',
                   sourceLayer: 'tl_2020_us_state-52k5uw',
@@ -228,7 +228,7 @@ const Map = () => {
 
             const normalizeValue = (value: number | null, min: number, max: number) => {
               if (value === null) return 0;
-              return (value - min) / (max - min);
+              return (value - min) / (max - min) + (Math.random() * 0.01);
             };
 
             const growthScore = (
@@ -240,7 +240,7 @@ const Map = () => {
               normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
             );
 
-            map.current.setFeatureState(
+            await map.current.setFeatureState(
               {
                 source: 'states',
                 sourceLayer: 'tl_2020_us_state-52k5uw',
