@@ -10,6 +10,9 @@ interface StateData {
   EMP: number | null;
   PAYANN: number | null;
   ESTAB: number | null;
+  B19013_001E: number | null; // Median household income
+  B23025_004E: number | null; // Employment
+  B25077_001E: number | null; // Median home value
 }
 
 const Map = () => {
@@ -23,7 +26,7 @@ const Map = () => {
       try {
         const { data, error } = await supabase
           .from('state_data')
-          .select('STATEFP, EMP, PAYANN, ESTAB')
+          .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
           .not('EMP', 'is', null);
 
         if (error) {
@@ -60,16 +63,30 @@ const Map = () => {
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        const empValues = stateDataRef.current.map(d => d.EMP).filter((v): v is number => v != null);
-        const payannValues = stateDataRef.current.map(d => d.PAYANN).filter((v): v is number => v != null);
-        const estabValues = stateDataRef.current.map(d => d.ESTAB).filter((v): v is number => v != null);
+        // Calculate scores for various metrics
+        const calculateMetricScores = () => {
+          const metrics = {
+            emp: stateDataRef.current.map(d => d.EMP).filter((v): v is number => v != null),
+            payann: stateDataRef.current.map(d => d.PAYANN).filter((v): v is number => v != null),
+            estab: stateDataRef.current.map(d => d.ESTAB).filter((v): v is number => v != null),
+            income: stateDataRef.current.map(d => d.B19013_001E).filter((v): v is number => v != null),
+            employment: stateDataRef.current.map(d => d.B23025_004E).filter((v): v is number => v != null),
+            homeValue: stateDataRef.current.map(d => d.B25077_001E).filter((v): v is number => v != null),
+          };
 
-        const minEmp = Math.min(...empValues);
-        const maxEmp = Math.max(...empValues);
-        const minPayann = Math.min(...payannValues);
-        const maxPayann = Math.max(...payannValues);
-        const minEstab = Math.min(...estabValues);
-        const maxEstab = Math.max(...estabValues);
+          const ranges = {
+            emp: { min: Math.min(...metrics.emp), max: Math.max(...metrics.emp) },
+            payann: { min: Math.min(...metrics.payann), max: Math.max(...metrics.payann) },
+            estab: { min: Math.min(...metrics.estab), max: Math.max(...metrics.estab) },
+            income: { min: Math.min(...metrics.income), max: Math.max(...metrics.income) },
+            employment: { min: Math.min(...metrics.employment), max: Math.max(...metrics.employment) },
+            homeValue: { min: Math.min(...metrics.homeValue), max: Math.max(...metrics.homeValue) },
+          };
+
+          return { metrics, ranges };
+        };
+
+        const { ranges } = calculateMetricScores();
 
         // Add 3D extrusion layer with gradient colors
         map.current.addLayer({
@@ -82,12 +99,12 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['coalesce', ['feature-state', 'score'], 0],
-              0, '#FF6B6B',  // Coral red
-              0.2, '#FFB347', // Orange
-              0.4, '#48D1CC', // Turquoise
-              0.6, '#4682B4', // Steel blue
-              0.8, '#9370DB', // Medium purple
-              1, '#FF69B4'    // Hot pink
+              0, '#FF6B6B',    // Low growth
+              0.2, '#FFB347',  // Below average
+              0.4, '#48D1CC',  // Average
+              0.6, '#4682B4',  // Above average
+              0.8, '#9370DB',  // High growth
+              1, '#FF69B4'     // Exceptional growth
             ],
             'fill-extrusion-height': [
               'interpolate',
@@ -135,16 +152,21 @@ const Map = () => {
 
           // Animate current state
           const state = stateDataRef.current[currentStateIndex.current];
-          if (!state?.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB) return;
+          if (!state?.STATEFP) return;
 
-          const normalizedEmp = (state.EMP - minEmp) / (maxEmp - minEmp);
-          const normalizedPayann = (state.PAYANN - minPayann) / (maxPayann - minPayann);
-          const normalizedEstab = (state.ESTAB - minEstab) / (maxEstab - minEstab);
+          // Calculate comprehensive growth score
+          const normalizeValue = (value: number | null, min: number, max: number) => {
+            if (value === null) return 0;
+            return (value - min) / (max - min);
+          };
 
-          const compositeScore = (
-            (normalizedEmp * 0.4) + 
-            (normalizedPayann * 0.4) + 
-            (normalizedEstab * 0.2)
+          const growthScore = (
+            normalizeValue(state.EMP, ranges.emp.min, ranges.emp.max) * 0.2 +
+            normalizeValue(state.PAYANN, ranges.payann.min, ranges.payann.max) * 0.2 +
+            normalizeValue(state.ESTAB, ranges.estab.min, ranges.estab.max) * 0.15 +
+            normalizeValue(state.B19013_001E, ranges.income.min, ranges.income.max) * 0.15 +
+            normalizeValue(state.B23025_004E, ranges.employment.min, ranges.employment.max) * 0.15 +
+            normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
           );
 
           map.current.setFeatureState(
@@ -154,7 +176,7 @@ const Map = () => {
               id: state.STATEFP
             },
             {
-              score: compositeScore,
+              score: growthScore,
               height: 1
             }
           );
