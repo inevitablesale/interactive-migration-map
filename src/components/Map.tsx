@@ -41,28 +41,6 @@ const Map = () => {
     };
   }, []);
 
-  const animateToNextLocation = (locations: any[], currentIndex: number) => {
-    if (!map.current) return;
-
-    const nextIndex = (currentIndex + 1) % locations.length;
-    const nextLocation = locations[nextIndex];
-
-    if (map.current && !map.current._removed) {
-      map.current.easeTo({
-        center: [nextLocation.longitude, nextLocation.latitude],
-        zoom: 8,
-        duration: 2000,
-        pitch: 45,
-        bearing: Math.random() * 180 - 90,
-        essential: true
-      });
-
-      animationRef.current = window.setTimeout(() => {
-        animateToNextLocation(locations, nextIndex);
-      }, 2000);
-    }
-  };
-
   useEffect(() => {
     if (!mapContainer.current || !companyData.length || map.current) return;
 
@@ -71,7 +49,7 @@ const Map = () => {
       
       const mapInstance = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/inevitablesale/9fnr921z',
+        style: 'mapbox://styles/mapbox/dark-v11', // Using a default Mapbox style instead of custom style
         projection: 'globe',
         zoom: 3,
         center: [-95.7129, 37.0902],
@@ -119,7 +97,8 @@ const Map = () => {
           clusterRadius: 50
         });
 
-        map.current.addLayer({
+        // Add heatmap layer
+        mapInstance.addLayer({
           id: 'companies-heat',
           type: 'heatmap',
           source: 'companies',
@@ -137,8 +116,8 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['zoom'],
-              0, 2,  // Increased base intensity
-              9, 4   // Increased max intensity
+              0, 2,
+              9, 4
             ],
             'heatmap-color': [
               'interpolate',
@@ -155,21 +134,21 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['zoom'],
-              0, 4,    // Increased base radius
-              9, 30    // Increased max radius
+              0, 4,
+              9, 30
             ],
             'heatmap-opacity': [
               'interpolate',
               ['linear'],
               ['zoom'],
-              6, 1,    // Full opacity until zoom level 6
-              9, 0     // Fade out completely by zoom level 9
+              6, 1,
+              9, 0
             ]
           }
         });
 
-        // Add clusters layer (visible at higher zoom levels)
-        map.current.addLayer({
+        // Add clusters layer
+        mapInstance.addLayer({
           id: 'clusters',
           type: 'circle',
           source: 'companies',
@@ -197,14 +176,14 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['zoom'],
-              7, 0,    // Hidden at low zoom levels
-              9, 1     // Fully visible at higher zoom levels
+              7, 0,
+              9, 1
             ]
           }
         });
 
         // Add cluster count labels
-        map.current.addLayer({
+        mapInstance.addLayer({
           id: 'cluster-count',
           type: 'symbol',
           source: 'companies',
@@ -219,14 +198,14 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['zoom'],
-              7, 0,    // Hidden at low zoom levels
-              9, 1     // Fully visible at higher zoom levels
+              7, 0,
+              9, 1
             ]
           }
         });
 
         // Add unclustered point layer
-        map.current.addLayer({
+        mapInstance.addLayer({
           id: 'unclustered-point',
           type: 'circle',
           source: 'companies',
@@ -240,27 +219,27 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['zoom'],
-              7, 0,    // Hidden at low zoom levels
-              9, 1     // Fully visible at higher zoom levels
+              7, 0,
+              9, 1
             ]
           }
         });
 
         // Add click events for clusters
-        map.current.on('click', 'clusters', (e) => {
-          if (!map.current) return;
-          const features = map.current.queryRenderedFeatures(e.point, {
+        mapInstance.on('click', 'clusters', (e) => {
+          if (!mapInstance) return;
+          const features = mapInstance.queryRenderedFeatures(e.point, {
             layers: ['clusters']
           });
           if (!features.length) return;
           
           const clusterId = features[0].properties?.cluster_id;
-          const source = map.current.getSource('companies');
+          const source = mapInstance.getSource('companies');
           
           if (clusterId && 'getClusterExpansionZoom' in source) {
             (source as any).getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
               if (err) return;
-              map.current?.easeTo({
+              mapInstance?.easeTo({
                 center: (features[0].geometry as any).coordinates,
                 zoom: zoom
               });
@@ -269,27 +248,15 @@ const Map = () => {
         });
 
         // Change cursor on hover
-        map.current.on('mouseenter', 'clusters', () => {
-          if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+        mapInstance.on('mouseenter', 'clusters', () => {
+          if (mapInstance) mapInstance.getCanvas().style.cursor = 'pointer';
         });
-        map.current.on('mouseleave', 'clusters', () => {
-          if (map.current) map.current.getCanvas().style.cursor = '';
+        mapInstance.on('mouseleave', 'clusters', () => {
+          if (mapInstance) mapInstance.getCanvas().style.cursor = '';
         });
-
-        // Start the location animation
-        const densestLocations = companyData
-          .filter(company => company.employeeCount > 1000)
-          .slice(0, 20);
-        
-        if (densestLocations.length > 0) {
-          animateToNextLocation(densestLocations, -1);
-        }
       });
 
       return () => {
-        if (animationRef.current) {
-          window.clearTimeout(animationRef.current);
-        }
         if (mapInstance && !mapInstance._removed) {
           mapInstance.remove();
         }
