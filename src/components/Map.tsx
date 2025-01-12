@@ -6,9 +6,8 @@ import StateReportCard from './StateReportCard';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
-// Updated color scheme to use more black and yellow
 const COLORS = {
-  primary: '#F97316', // Yellow/Orange
+  primary: '#FCD34D', // Warmer yellow
   secondary: '#222222', // Black
   inactive: '#000000', // Black for states without data
 };
@@ -31,9 +30,13 @@ const Map = () => {
   const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
   const statesWithDataRef = useRef<Set<string>>(new Set());
+  const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup function
   const cleanup = () => {
+    if (cycleIntervalRef.current) {
+      clearInterval(cycleIntervalRef.current);
+    }
     if (map.current) {
       map.current.remove();
       map.current = null;
@@ -41,6 +44,18 @@ const Map = () => {
     mapLoadedRef.current = false;
     mapInitializedRef.current = false;
     setActiveState(null);
+  };
+
+  // Function to cycle through states
+  const cycleToNextState = () => {
+    if (stateDataRef.current.length === 0) return;
+    
+    const currentIndex = activeState 
+      ? stateDataRef.current.findIndex(state => state.STATEFP === activeState.STATEFP)
+      : -1;
+    
+    const nextIndex = (currentIndex + 1) % stateDataRef.current.length;
+    setActiveState(stateDataRef.current[nextIndex]);
   };
 
   useEffect(() => {
@@ -69,6 +84,9 @@ const Map = () => {
           initializeMap();
           mapInitializedRef.current = true;
         }
+
+        // Start cycling through states
+        cycleIntervalRef.current = setInterval(cycleToNextState, 5000);
       } catch (err) {
         console.error('Error in fetchStateData:', err);
       }
@@ -128,14 +146,14 @@ const Map = () => {
           }
         });
 
-        // Add borders (changed from purple to yellow)
+        // Add borders with warmer yellow color
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'line-color': '#F97316',
+            'line-color': '#FCD34D',
             'line-width': 1
           }
         });
@@ -147,6 +165,12 @@ const Map = () => {
         
         const clickedStateId = e.features[0].properties?.STATEFP;
         if (!clickedStateId || !statesWithDataRef.current.has(clickedStateId)) return;
+
+        // Clear the auto-cycle interval when user interacts
+        if (cycleIntervalRef.current) {
+          clearInterval(cycleIntervalRef.current);
+          cycleIntervalRef.current = null;
+        }
 
         const newActiveState = stateDataRef.current.find(state => state.STATEFP === clickedStateId);
         if (newActiveState) {
