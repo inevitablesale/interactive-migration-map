@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
@@ -14,11 +14,12 @@ interface StateData {
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const [stateData, setStateData] = useState<StateData[]>([]);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const mapInstance = useRef<mapboxgl.Map | null>(null);
   const navControlRef = useRef<mapboxgl.NavigationControl | null>(null);
 
   useEffect(() => {
+    let stateData: StateData[] = [];
+
     const fetchStateData = async () => {
       try {
         const { data, error } = await supabase
@@ -31,19 +32,16 @@ const Map = () => {
           return;
         }
 
-        setStateData(data || []);
+        stateData = data || [];
+        initializeMap();
       } catch (err) {
         console.error('Error in fetchStateData:', err);
       }
     };
 
-    fetchStateData();
-  }, []);
+    const initializeMap = () => {
+      if (!mapContainer.current) return;
 
-  useEffect(() => {
-    if (!mapContainer.current || mapLoaded) return;
-
-    try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
       const map = new mapboxgl.Map({
@@ -54,23 +52,22 @@ const Map = () => {
         pitch: 45,
       });
 
-      // Add navigation control
+      mapInstance.current = map;
+
       const navControl = new mapboxgl.NavigationControl({
         visualizePitch: true,
       });
       map.addControl(navControl, 'top-right');
       navControlRef.current = navControl;
 
-      const handleStyleLoad = () => {
-        if (!map) return;
+      map.on('style.load', () => {
+        if (!map || !stateData.length) return;
 
-        // Add the custom tileset source
         map.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Calculate min and max values for normalization
         const empValues = stateData.map(d => d.EMP).filter((v): v is number => v != null);
         const payannValues = stateData.map(d => d.PAYANN).filter((v): v is number => v != null);
         const estabValues = stateData.map(d => d.ESTAB).filter((v): v is number => v != null);
@@ -82,7 +79,6 @@ const Map = () => {
         const minEstab = Math.min(...estabValues);
         const maxEstab = Math.max(...estabValues);
 
-        // Add the fill layer for states
         map.addLayer({
           'id': 'state-fills',
           'type': 'fill',
@@ -104,7 +100,6 @@ const Map = () => {
           }
         });
 
-        // Add state border lines
         map.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -116,7 +111,6 @@ const Map = () => {
           }
         });
 
-        // Set feature states for the score calculations
         stateData.forEach(state => {
           if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB) return;
 
@@ -141,25 +135,18 @@ const Map = () => {
             }
           );
         });
+      });
+    };
 
-        setMapLoaded(true);
-      };
+    fetchStateData();
 
-      map.on('style.load', handleStyleLoad);
-
-      // Cleanup function
-      return () => {
-        map.off('style.load', handleStyleLoad);
-        if (navControlRef.current) {
-          map.removeControl(navControlRef.current);
-        }
-        map.remove();
-        setMapLoaded(false);
-      };
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
-  }, [stateData, mapLoaded]);
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="relative w-full h-screen">
