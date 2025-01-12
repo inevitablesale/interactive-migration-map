@@ -34,30 +34,22 @@ export function Hero() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white px-4 hero-section">
       {showHeroText ? (
-        <div className="text-center max-w-4xl animate-fade-in space-y-8">
-          <div className="space-y-6">
-            <p className="text-yellow-400 text-sm md:text-base tracking-widest uppercase font-medium">
-              AI-Powered Market Intelligence
-            </p>
-            <h1 className="space-y-4">
-              <span className="block text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text leading-tight">
-                Find Tomorrow's
-              </span>
-              <span className="block text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 leading-tight">
-                Opportunities Today
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto">
-              Discover high-potential accounting practices using advanced market analytics and AI-driven insights
-            </p>
+        <div className="text-center max-w-4xl animate-fade-in">
+          <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">AI-POWERED MARKET INTELLIGENCE</p>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
+            <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Find Tomorrow's</span>
+            <br />
+            <span className="text-white">Opportunities Today</span>
+          </h1>
+          <div className="flex justify-center">
+            <button 
+              onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+              className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"
+            >
+              <span className="text-sm uppercase tracking-wider mb-2">Explore the Map</span>
+              <ChevronDown className="w-6 h-6 animate-bounce" />
+            </button>
           </div>
-          <button 
-            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-            className="group flex flex-col items-center text-white/80 hover:text-white transition-colors mt-12"
-          >
-            <span className="text-sm uppercase tracking-wider mb-2 font-medium">Explore the Map</span>
-            <ChevronDown className="w-6 h-6 animate-bounce" />
-          </button>
         </div>
       ) : (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
