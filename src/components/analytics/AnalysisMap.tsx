@@ -52,14 +52,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       
       setMapLoaded(true);
 
+      // Add state source with correct tileset ID
       map.current.addSource('states', {
         type: 'vector',
-        url: 'mapbox://inevitablesale.9fnr921z'
+        url: 'mapbox://inevitablesale.tl_2020_us_state'
       });
 
+      // Add MSA source with correct tileset ID
       map.current.addSource('msas', {
         type: 'vector',
-        url: 'mapbox://inevitablesale.29jcxgnm'
+        url: 'mapbox://inevitablesale.tl_2020_us_cbsa'
       });
 
       // Add state layer
@@ -67,7 +69,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'id': 'state-base',
         'type': 'fill-extrusion',
         'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
+        'source-layer': 'tl_2020_us_state',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 20000,
@@ -80,7 +82,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'id': 'msa-base',
         'type': 'fill-extrusion',
         'source': 'msas',
-        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'source-layer': 'tl_2020_us_cbsa',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.secondary,
           'fill-extrusion-height': 50000,
@@ -97,7 +99,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'id': 'state-borders',
         'type': 'line',
         'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
+        'source-layer': 'tl_2020_us_state',
         'paint': {
           'line-color': MAP_COLORS.primary,
           'line-width': 1.5,
@@ -109,7 +111,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'id': 'msa-borders',
         'type': 'line',
         'source': 'msas',
-        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'source-layer': 'tl_2020_us_cbsa',
         'paint': {
           'line-color': MAP_COLORS.secondary,
           'line-width': 1.5,
