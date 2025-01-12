@@ -46,30 +46,6 @@ const Map = () => {
     setActiveState(null);
   };
 
-  // Function to cycle through states
-  const cycleToNextState = () => {
-    if (stateDataRef.current.length === 0) return;
-    
-    const currentIndex = activeState 
-      ? stateDataRef.current.findIndex(state => state.STATEFP === activeState.STATEFP)
-      : -1;
-    
-    const nextIndex = (currentIndex + 1) % stateDataRef.current.length;
-    const nextState = stateDataRef.current[nextIndex];
-    setActiveState(nextState);
-    
-    if (map.current && nextState) {
-      map.current.flyTo({
-        center: [-95.7129, 37.0902],
-        zoom: 3.5,
-        pitch: 60,
-        bearing: 0,
-        duration: 2000,
-        essential: true
-      });
-    }
-  };
-
   useEffect(() => {
     const fetchStateData = async () => {
       try {
@@ -95,8 +71,6 @@ const Map = () => {
           initializeMap();
           mapInitializedRef.current = true;
         }
-
-        cycleIntervalRef.current = setInterval(cycleToNextState, 5000);
       } catch (err) {
         console.error('Error in fetchStateData:', err);
       }
@@ -117,8 +91,13 @@ const Map = () => {
         interactive: true,
       });
 
-      // Add navigation controls
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      // Add navigation controls with pitch control
+      map.current.addControl(
+        new mapboxgl.NavigationControl({
+          visualizePitch: true,
+        }),
+        'top-right'
+      );
 
       map.current.on('style.load', () => {
         if (!map.current) return;
@@ -129,7 +108,7 @@ const Map = () => {
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Base layer for all states (black)
+        // Base layer for all states
         map.current.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
@@ -189,16 +168,28 @@ const Map = () => {
         const newActiveState = stateDataRef.current.find(state => state.STATEFP === clickedStateId);
         if (newActiveState) {
           setActiveState(newActiveState);
+          
+          // Fly to clicked state with dynamic camera positioning
+          if (map.current) {
+            map.current.flyTo({
+              center: [-95.7129, 37.0902],
+              zoom: 4,
+              pitch: 75,
+              bearing: 0,
+              duration: 2000,
+              essential: true
+            });
+          }
         }
       });
 
       // Add hover effects
       map.current.on('mousemove', 'state-base', () => {
-        map.current!.getCanvas().style.cursor = 'pointer';
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
       });
 
       map.current.on('mouseleave', 'state-base', () => {
-        map.current!.getCanvas().style.cursor = '';
+        if (map.current) map.current.getCanvas().style.cursor = '';
       });
     };
 
@@ -222,9 +213,7 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <div className="absolute right-4 top-20">
-        <StateReportCard data={activeState} isVisible={!!activeState} />
-      </div>
+      <StateReportCard data={activeState} isVisible={!!activeState} />
     </div>
   );
 };
