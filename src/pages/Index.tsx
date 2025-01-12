@@ -19,7 +19,7 @@ const Index = () => {
         {/* Fixed Header */}
         <div className="fixed top-4 left-4 z-50 flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Bird className="w-8 h-8 text-yellow-400" />
+            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
         </div>

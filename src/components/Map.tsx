@@ -44,18 +44,24 @@ const Map = () => {
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/dark-v11', // Changed to dark style for better contrast with overlay
+        style: 'mapbox://styles/mapbox/dark-v11',
         zoom: 3,
         center: [-95.7129, 37.0902],
         pitch: 45,
-        interactive: true, // Keep map interactive even when fixed
+        interactive: true,
       });
 
-      map.current.addControl(new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }), 'top-right');
-
+      // Remove labels by applying a custom style
       map.current.on('style.load', () => {
+        const style = map.current?.getStyle();
+        if (style && style.layers) {
+          style.layers.forEach((layer) => {
+            if (layer.type === 'symbol') {
+              map.current?.removeLayer(layer.id);
+            }
+          });
+        }
+
         if (!map.current || !stateDataRef.current.length) return;
 
         map.current.addSource('states', {
@@ -84,12 +90,12 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['coalesce', ['feature-state', 'score'], 0],
-              0, '#f7fbff',
-              0.2, '#deebf7',
-              0.4, '#c6dbef',
-              0.6, '#9ecae1',
-              0.8, '#6baed6',
-              1, '#2171b5'
+              0, '#9b87f5',
+              0.2, '#7E69AB',
+              0.4, '#6E59A5',
+              0.6, '#8B5CF6',
+              0.8, '#D946EF',
+              1, '#0EA5E9'
             ],
             'fill-opacity': 0.8
           }
@@ -101,7 +107,7 @@ const Map = () => {
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'line-color': '#627BC1',
+            'line-color': '#D6BCFA',
             'line-width': 1
           }
         });

@@ -99,3 +99,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .animate-color-change {
+    animation: color-change 5s infinite;
+  }
+}
+
+@keyframes color-change {
+  0% { color: #9b87f5; }
+  20% { color: #7E69AB; }
+  40% { color: #6E59A5; }
+  60% { color: #8B5CF6; }
+  80% { color: #D946EF; }
+  100% { color: #9b87f5; }
+}
