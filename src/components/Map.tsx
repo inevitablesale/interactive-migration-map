@@ -14,8 +14,9 @@ interface StateData {
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<mapboxgl.Map | null>(null);
   const [stateData, setStateData] = useState<StateData[]>([]);
+  // Remove mapInstance from ref to avoid cloning issues
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -40,7 +41,7 @@ const Map = () => {
   }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || mapInstance.current) return;
+    if (!mapContainer.current || mapLoaded) return;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -53,17 +54,14 @@ const Map = () => {
         pitch: 45,
       });
 
-      mapInstance.current = map;
-
-      map.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'top-right'
-      );
+      // Add navigation control
+      const navControl = new mapboxgl.NavigationControl({
+        visualizePitch: true,
+      });
+      map.addControl(navControl, 'top-right');
 
       const handleStyleLoad = () => {
-        if (!map || map._removed) return;
+        if (!map) return;
 
         // Add the custom tileset source
         map.addSource('states', {
@@ -88,7 +86,7 @@ const Map = () => {
           'id': 'state-fills',
           'type': 'fill',
           'source': 'states',
-          'source-layer': 'STATEFP', // Updated to match the correct source layer
+          'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'fill-color': [
               'interpolate',
@@ -110,7 +108,7 @@ const Map = () => {
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
-          'source-layer': 'STATEFP', // Updated to match the correct source layer
+          'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'line-color': '#627BC1',
             'line-width': 1
@@ -134,7 +132,7 @@ const Map = () => {
           map.setFeatureState(
             {
               source: 'states',
-              sourceLayer: 'STATEFP',
+              sourceLayer: 'tl_2020_us_state-52k5uw',
               id: state.STATEFP
             },
             {
@@ -142,21 +140,23 @@ const Map = () => {
             }
           );
         });
+
+        setMapLoaded(true);
       };
 
       map.on('style.load', handleStyleLoad);
 
+      // Cleanup function
       return () => {
         map.off('style.load', handleStyleLoad);
-        if (map && !map._removed) {
-          map.remove();
-          mapInstance.current = null;
-        }
+        navControl.remove();
+        map.remove();
+        setMapLoaded(false);
       };
     } catch (error) {
       console.error('Error initializing map:', error);
     }
-  }, [stateData]);
+  }, [stateData, mapLoaded]);
 
   return (
     <div className="relative w-full h-screen">
