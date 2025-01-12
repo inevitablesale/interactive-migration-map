@@ -15,44 +15,26 @@ const MAP_COLORS = {
   inactive: '#000000'    // Black
 };
 
-const STATE_COLORS = [
-  '#037CFE', // Electric Blue
-  '#00FFE0', // Cyan
-  '#FFF903', // Yellow
-  '#94EC0E', // Lime Green
-  '#FA0098', // Hot Pink
-  '#9D00FF', // Electric Purple
-  '#FF3366', // Electric Pink
-  '#00FF66', // Electric Green
-];
-
-interface StateData {
-  STATEFP: string;
-  EMP: number | null;
-  PAYANN: number | null;
-  ESTAB: number | null;
-  B19013_001E: number | null;
-  B23025_004E: number | null;
-  B25077_001E: number | null;
+interface MapProps {
+  mode?: 'hero' | 'analysis';
 }
 
-const Map = () => {
+const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const stateDataRef = useRef<StateData[]>([]);
+  const stateDataRef = useRef<any[]>([]);
   const mapLoadedRef = useRef(false);
   const mapInitializedRef = useRef(false);
-  const [activeState, setActiveState] = useState<StateData | null>(null);
+  const [activeState, setActiveState] = useState<any>(null);
   const statesWithDataRef = useRef<Set<string>>(new Set());
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const currentStateIndexRef = useRef(0);
 
   const getStateColor = (stateId: string) => {
     const colorIndex = parseInt(stateId) % STATE_COLORS.length;
     return STATE_COLORS[colorIndex];
   };
 
-  const updateActiveState = (state: StateData | null) => {
+  const updateActiveState = (state: any) => {
     setActiveState(state);
     if (state) {
       const event = new CustomEvent('stateChanged', { detail: state });
@@ -86,13 +68,12 @@ const Map = () => {
   };
 
   const startCyclingStates = () => {
-    if (cycleIntervalRef.current) return;
+    if (cycleIntervalRef.current || mode === 'analysis') return;
     
     cycleIntervalRef.current = setInterval(() => {
       if (stateDataRef.current.length === 0 || !mapLoadedRef.current) return;
       
-      currentStateIndexRef.current = (currentStateIndexRef.current + 1) % stateDataRef.current.length;
-      const nextState = stateDataRef.current[currentStateIndexRef.current];
+      const nextState = stateDataRef.current[Math.floor(Math.random() * stateDataRef.current.length)];
       updateActiveState(nextState);
       
       if (nextState && nextState.STATEFP) {
@@ -109,24 +90,6 @@ const Map = () => {
       }
     }, 3000);
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const analysisSection = document.querySelector('.analysis-section');
-      if (!analysisSection) return;
-
-      const rect = analysisSection.getBoundingClientRect();
-      if (rect.top <= window.innerHeight) {
-        if (cycleIntervalRef.current) {
-          clearInterval(cycleIntervalRef.current);
-          cycleIntervalRef.current = null;
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const cleanup = () => {
     if (cycleIntervalRef.current) {
@@ -158,24 +121,6 @@ const Map = () => {
       statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
       stateDataRef.current = data || [];
 
-      setTimeout(() => {
-        if (data && data.length > 0) {
-          updateActiveState(data[0]);
-          if (mapLoadedRef.current) {
-            flyToState(data[0].STATEFP);
-            
-            if (map.current) {
-              map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-                'case',
-                ['==', ['get', 'STATEFP'], data[0].STATEFP],
-                getStateColor(data[0].STATEFP),
-                'transparent'
-              ]);
-            }
-          }
-        }
-      }, 2000);
-
       if (!mapInitializedRef.current) {
         initializeMap();
         mapInitializedRef.current = true;
@@ -195,21 +140,17 @@ const Map = () => {
       style: 'mapbox://styles/mapbox/dark-v11',
       zoom: 3,
       center: [-98.5795, 39.8283],
-      pitch: 45,
+      pitch: mode === 'hero' ? 45 : 0,
       bearing: 0,
       interactive: true,
     });
 
-    // Only add navigation controls if not in hero section
-    const isHeroSection = document.querySelector('.hero-section');
-    if (!isHeroSection) {
-      map.current.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'top-right'
-      );
-    }
+    map.current.addControl(
+      new mapboxgl.NavigationControl({
+        visualizePitch: true,
+      }),
+      'top-right'
+    );
 
     map.current.on('style.load', () => {
       if (!map.current) return;
@@ -227,7 +168,7 @@ const Map = () => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': 10000,
+          'fill-extrusion-height': mode === 'hero' ? 10000 : 5000,
           'fill-extrusion-opacity': 0.6
         }
       });
@@ -247,11 +188,11 @@ const Map = () => {
           'fill-extrusion-height': [
             'case',
             ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            100000,
+            mode === 'hero' ? 100000 : 50000,
             0
           ],
           'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 10000
+          'fill-extrusion-base': mode === 'hero' ? 10000 : 5000
         }
       });
 
@@ -265,43 +206,46 @@ const Map = () => {
           'line-width': 1
         }
       });
-    });
-  };
 
-  useEffect(() => {
-    if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
-      startCyclingStates();
+      if (mode === 'hero') {
+        startCyclingStates();
+      }
+    });
+
+    if (mode === 'analysis') {
+      map.current.on('click', 'state-base', (e) => {
+        if (!e.features?.[0]) return;
+        
+        const stateId = e.features[0].properties?.STATEFP;
+        const stateData = stateDataRef.current.find(state => state.STATEFP === stateId);
+        
+        if (stateData) {
+          updateActiveState(stateData);
+          flyToState(stateId);
+        }
+      });
+
+      // Change cursor on hover
+      map.current.on('mouseenter', 'state-base', () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.current.on('mouseleave', 'state-base', () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
+      });
     }
-  }, [stateDataRef.current, mapLoadedRef.current]);
+  };
 
   useEffect(() => {
     fetchStateData();
     return cleanup;
-  }, []);
-
-  useEffect(() => {
-    if (!map.current || !mapLoadedRef.current || !activeState?.STATEFP) return;
-
-    map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
-      'case',
-      ['==', ['get', 'STATEFP'], activeState.STATEFP],
-      100000,
-      0
-    ]);
-
-    map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-      'case',
-      ['==', ['get', 'STATEFP'], activeState.STATEFP],
-      getStateColor(activeState.STATEFP),
-      'transparent'
-    ]);
-  }, [activeState]);
+  }, [mode]);
 
   return (
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <StateReportCard data={activeState} isVisible={!!activeState} />
+      {mode === 'hero' && <StateReportCard data={activeState} isVisible={!!activeState} />}
     </div>
   );
 };

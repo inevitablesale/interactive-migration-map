@@ -25,7 +25,7 @@ export const InteractiveToolsSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Map Section */}
           <div className="h-[600px] relative rounded-lg overflow-hidden border border-white/10">
-            <Map />
+            <Map mode="analysis" />
           </div>
 
           {/* Analysis Tools Section */}
