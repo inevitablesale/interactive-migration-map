@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
-import StateReportCard from './StateReportCard';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -119,7 +118,7 @@ const Map = () => {
         }
         return nextIndex;
       });
-    }, 5000); // Increased from 3000 to 5000ms
+    }, 5000);
 
     return interval;
   }, [stateData, mapLoaded, updateActiveState, getStateColor]);
@@ -283,7 +282,6 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <StateReportCard data={activeState} isVisible={!!activeState} />
     </div>
   );
 };
