@@ -104,6 +104,7 @@ const Map = () => {
       return () => {
         if (mapInstance && !mapInstance._removed) {
           mapInstance.remove();
+          map.current = null;
         }
       };
     } catch (error) {
