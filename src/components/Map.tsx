@@ -213,10 +213,11 @@ const Map = () => {
                   height: 0
                 }
               );
-
-              setActiveState(null);
-              await new Promise(resolve => setTimeout(resolve, 1000));
             }
+
+            // Clear active state and wait for animation
+            setActiveState(null);
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Animate next state
             const state = stateDataRef.current[currentStateIndex.current];
@@ -257,10 +258,13 @@ const Map = () => {
 
             previousStateId.current = state.STATEFP;
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
+
+            // Wait for animation to complete before allowing next state
+            await new Promise(resolve => setTimeout(resolve, 5000));
           } finally {
             isAnimating.current = false;
             if (mapLoadedRef.current) {
-              animationTimeoutRef.current = window.setTimeout(animateNextState, 5000);
+              animationTimeoutRef.current = window.setTimeout(animateNextState, 1000);
             }
           }
         };
@@ -282,7 +286,9 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <StateReportCard data={activeState} isVisible={!!activeState} />
+      <div className="absolute right-4 top-20">
+        <StateReportCard data={activeState} isVisible={!!activeState} />
+      </div>
     </div>
   );
 };

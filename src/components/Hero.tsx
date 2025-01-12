@@ -84,9 +84,6 @@ export function Hero() {
             </p>
           </div>
         )}
-        <p className="text-lg md:text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
-          Detect acquisition signals in accounting practices before they list. Our AI analyzes millions of data points to identify growth patterns.
-        </p>
         <div className="flex justify-center">
           <button 
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}

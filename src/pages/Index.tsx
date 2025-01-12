@@ -47,6 +47,11 @@ const Index = () => {
                   <h4 className="text-white font-medium mb-2">Migration Patterns</h4>
                   <p className="text-sm text-gray-300">Visualize population movement</p>
                 </div>
+                <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                  <h4 className="text-white font-medium mb-2">Compare Markets</h4>
+                  <p className="text-sm text-gray-300">Compare firms side by side with detailed metrics</p>
+                  <p className="text-sm text-gray-300 mt-2">Detect acquisition signals in accounting practices before they list. Our AI analyzes millions of data points to identify growth patterns.</p>
+                </div>
               </div>
             </div>
 
@@ -74,7 +79,6 @@ const Index = () => {
       </div>
       <div className="fixed z-20">
         <ChatBar />
-        <ComparisonTool />
       </div>
     </div>
   );
