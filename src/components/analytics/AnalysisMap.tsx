@@ -23,6 +23,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [showingMSAs, setShowingMSAs] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -56,6 +57,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
+      // Add state layer
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -68,11 +75,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      map.current.addSource('msas', {
-        type: 'vector',
-        url: 'mapbox://inevitablesale.29jcxgnm'
-      });
-
+      // Add MSA layer (initially hidden)
       map.current.addLayer({
         'id': 'msa-base',
         'type': 'fill-extrusion',
@@ -89,6 +92,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
+      // Add borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -118,7 +122,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       // Add click event for state selection
       map.current.on('click', 'state-base', (e) => {
-        if (e.features && e.features[0]) {
+        if (!showingMSAs && e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
             const event = new CustomEvent('stateSelected', { 
@@ -142,31 +146,40 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         if (e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
+            setShowingMSAs(true);
+            
+            // Hide state layers
             map.current?.setLayoutProperty('state-base', 'visibility', 'none');
             map.current?.setLayoutProperty('state-borders', 'visibility', 'none');
+            
+            // Show and filter MSA layers
             map.current?.setLayoutProperty('msa-base', 'visibility', 'visible');
             map.current?.setLayoutProperty('msa-borders', 'visibility', 'visible');
+            map.current?.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
+            map.current?.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
             
             map.current?.easeTo({
               pitch: 60,
               zoom: 5,
               duration: 1000
             });
-
-            // Filter MSAs to show only those in the selected state
-            map.current?.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
-            map.current?.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
           }
         }
       });
 
       // Add double click on MSA layer to return to state view
       map.current.on('dblclick', 'msa-base', () => {
+        setShowingMSAs(false);
+        
+        // Show state layers
         map.current?.setLayoutProperty('state-base', 'visibility', 'visible');
         map.current?.setLayoutProperty('state-borders', 'visibility', 'visible');
+        
+        // Hide MSA layers
         map.current?.setLayoutProperty('msa-base', 'visibility', 'none');
         map.current?.setLayoutProperty('msa-borders', 'visibility', 'none');
         
+        // Clear filters
         map.current?.setFilter('msa-base', null);
         map.current?.setFilter('msa-borders', null);
         
@@ -182,7 +195,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [showingMSAs]);
 
   return (
     <div className={`relative ${className}`}>
