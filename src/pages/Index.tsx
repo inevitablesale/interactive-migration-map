@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { Bird } from "lucide-react";
 import { BottomPanel } from "@/components/BottomPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
+import { DataSourcesSection } from "@/components/DataSourcesSection";
 
 const Index = () => {
   return (
@@ -26,6 +27,9 @@ const Index = () => {
         <div className="min-h-screen">
           <Hero />
         </div>
+
+        {/* Data Sources Section */}
+        <DataSourcesSection />
 
         {/* Interactive Analysis Section */}
         <div className="relative">
