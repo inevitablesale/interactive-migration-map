@@ -73,9 +73,13 @@ const Map = () => {
           });
         }
 
+        // Adjust the padding and camera settings for a more eye-level view
         await map.current.fitBounds(bounds, {
-          padding: 50,
-          duration: 1000
+          padding: { top: 100, bottom: 100, left: 200, right: 200 },
+          duration: 1000,
+          pitch: 60, // Adjusted for more eye-level view
+          bearing: 0,
+          maxZoom: 5.5 // Limit how close we can zoom
         });
       }
     } catch (err) {
