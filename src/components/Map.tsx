@@ -51,19 +51,10 @@ const Map = () => {
         interactive: true,
       });
 
-      // Remove labels by applying a custom style
       map.current.on('style.load', () => {
-        const style = map.current?.getStyle();
-        if (style && style.layers) {
-          style.layers.forEach((layer) => {
-            if (layer.type === 'symbol') {
-              map.current?.removeLayer(layer.id);
-            }
-          });
-        }
-
         if (!map.current || !stateDataRef.current.length) return;
 
+        // Add the states source
         map.current.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
@@ -80,13 +71,14 @@ const Map = () => {
         const minEstab = Math.min(...estabValues);
         const maxEstab = Math.max(...estabValues);
 
+        // Add 3D extrusion layer
         map.current.addLayer({
-          'id': 'state-fills',
-          'type': 'fill',
+          'id': 'state-extrusions',
+          'type': 'fill-extrusion',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'fill-color': [
+            'fill-extrusion-color': [
               'interpolate',
               ['linear'],
               ['coalesce', ['feature-state', 'score'], 0],
@@ -97,10 +89,19 @@ const Map = () => {
               0.8, '#D946EF',
               1, '#0EA5E9'
             ],
-            'fill-opacity': 0.8
+            'fill-extrusion-height': [
+              'interpolate',
+              ['linear'],
+              ['coalesce', ['feature-state', 'score'], 0],
+              0, 0,
+              1, 500000
+            ],
+            'fill-extrusion-opacity': 0.8,
+            'fill-extrusion-base': 0
           }
         });
 
+        // Add flat background layer
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -112,6 +113,7 @@ const Map = () => {
           }
         });
 
+        // Set feature states for extrusion heights
         stateDataRef.current.forEach(state => {
           if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB || !map.current) return;
 
@@ -136,6 +138,16 @@ const Map = () => {
             }
           );
         });
+
+        // Add rotation animation
+        let rotationDegrees = 0;
+        const rotate = () => {
+          if (!map.current) return;
+          rotationDegrees += 0.1;
+          map.current.setBearing(rotationDegrees % 360);
+          requestAnimationFrame(rotate);
+        };
+        rotate();
       });
     };
 
