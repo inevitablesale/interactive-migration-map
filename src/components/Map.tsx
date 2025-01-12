@@ -16,6 +16,7 @@ const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const stateDataRef = useRef<StateData[]>([]);
+  const currentStateIndex = useRef(0);
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -54,7 +55,6 @@ const Map = () => {
       map.current.on('style.load', () => {
         if (!map.current || !stateDataRef.current.length) return;
 
-        // Add the states source
         map.current.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
@@ -71,7 +71,7 @@ const Map = () => {
         const minEstab = Math.min(...estabValues);
         const maxEstab = Math.max(...estabValues);
 
-        // Add 3D extrusion layer
+        // Add 3D extrusion layer with gradient colors
         map.current.addLayer({
           'id': 'state-extrusions',
           'type': 'fill-extrusion',
@@ -82,17 +82,17 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['coalesce', ['feature-state', 'score'], 0],
-              0, '#9b87f5',
-              0.2, '#7E69AB',
-              0.4, '#6E59A5',
-              0.6, '#8B5CF6',
-              0.8, '#D946EF',
-              1, '#0EA5E9'
+              0, '#FF6B6B',  // Coral red
+              0.2, '#FFB347', // Orange
+              0.4, '#48D1CC', // Turquoise
+              0.6, '#4682B4', // Steel blue
+              0.8, '#9370DB', // Medium purple
+              1, '#FF69B4'    // Hot pink
             ],
             'fill-extrusion-height': [
               'interpolate',
               ['linear'],
-              ['coalesce', ['feature-state', 'score'], 0],
+              ['coalesce', ['feature-state', 'height'], 0],
               0, 0,
               1, 500000
             ],
@@ -113,9 +113,29 @@ const Map = () => {
           }
         });
 
-        // Set feature states for extrusion heights
-        stateDataRef.current.forEach(state => {
-          if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB || !map.current) return;
+        // Animate states one at a time
+        const animateNextState = () => {
+          if (!map.current) return;
+
+          // Reset previous state
+          if (currentStateIndex.current > 0) {
+            const prevState = stateDataRef.current[currentStateIndex.current - 1];
+            map.current.setFeatureState(
+              {
+                source: 'states',
+                sourceLayer: 'tl_2020_us_state-52k5uw',
+                id: prevState.STATEFP
+              },
+              {
+                score: 0,
+                height: 0
+              }
+            );
+          }
+
+          // Animate current state
+          const state = stateDataRef.current[currentStateIndex.current];
+          if (!state?.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB) return;
 
           const normalizedEmp = (state.EMP - minEmp) / (maxEmp - minEmp);
           const normalizedPayann = (state.PAYANN - minPayann) / (maxPayann - minPayann);
@@ -134,20 +154,20 @@ const Map = () => {
               id: state.STATEFP
             },
             {
-              score: compositeScore
+              score: compositeScore,
+              height: 1
             }
           );
-        });
 
-        // Add rotation animation
-        let rotationDegrees = 0;
-        const rotate = () => {
-          if (!map.current) return;
-          rotationDegrees += 0.1;
-          map.current.setBearing(rotationDegrees % 360);
-          requestAnimationFrame(rotate);
+          // Move to next state
+          currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
+          
+          // Schedule next animation
+          setTimeout(animateNextState, 3000); // Change state every 3 seconds
         };
-        rotate();
+
+        // Start the animation
+        animateNextState();
       });
     };
 
