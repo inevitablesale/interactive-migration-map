@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
-import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
 
@@ -71,11 +70,51 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add MSA layer (you'll need to add your MSA source and layer here)
-      // This is a placeholder - you'll need to add the actual MSA data source
+      // Add MSA layer with the correct tileset
       map.current.addSource('msas', {
         type: 'vector',
-        url: 'mapbox://your-msa-tileset-url'
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
+      map.current.addLayer({
+        'id': 'msa-base',
+        'type': 'fill-extrusion',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 10000,
+          'fill-extrusion-opacity': 0.6
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
+
+      // Add borders for both layers
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.primary,
+          'line-width': 1
+        }
+      });
+
+      map.current.addLayer({
+        'id': 'msa-borders',
+        'type': 'line',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'line-color': MAP_COLORS.secondary,
+          'line-width': 1
+        },
+        'layout': {
+          'visibility': 'none'
+        }
       });
     });
 
@@ -93,10 +132,14 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     if (viewMode === 'state') {
       map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      // Hide MSA layer when implemented
+      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
     } else {
       map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      // Show MSA layer when implemented
+      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
     }
   }, [viewMode, mapLoaded]);
 
