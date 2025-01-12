@@ -18,7 +18,10 @@ interface StateReportCardProps {
 
 const formatNumber = (num: number | null) => {
   if (num === null) return 'N/A';
-  return new Intl.NumberFormat('en-US').format(num);
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(num);
 };
 
 const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
@@ -27,8 +30,8 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      setShowCard(scrollPosition < windowHeight);
+      const threshold = window.innerHeight * 0.5; // Hide when scrolled halfway
+      setShowCard(scrollPosition < threshold);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -38,34 +41,34 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   if (!data || !isVisible || !showCard) return null;
 
   return (
-    <Card className="absolute bottom-4 right-4 w-72 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
-      <CardHeader className="py-2 px-4">
-        <CardTitle className="text-lg">State Report</CardTitle>
+    <Card className="absolute bottom-8 right-8 w-96 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
+      <CardHeader className="py-3 px-6">
+        <CardTitle className="text-xl font-bold">State Report</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-2 p-4 pt-2 text-sm">
+      <CardContent className="grid grid-cols-2 gap-4 p-6">
         <div>
-          <p className="text-xs text-gray-400">Employment</p>
-          <p className="font-medium">{formatNumber(data.EMP)}</p>
+          <p className="text-sm text-yellow-400 font-medium mb-1">Employment</p>
+          <p className="text-lg font-semibold">{formatNumber(data.EMP)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Annual Payroll</p>
-          <p className="font-medium">${formatNumber(data.PAYANN)}</p>
+          <p className="text-sm text-yellow-400 font-medium mb-1">Annual Payroll</p>
+          <p className="text-lg font-semibold">${formatNumber(data.PAYANN)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Establishments</p>
-          <p className="font-medium">{formatNumber(data.ESTAB)}</p>
+          <p className="text-sm text-yellow-400 font-medium mb-1">Establishments</p>
+          <p className="text-lg font-semibold">{formatNumber(data.ESTAB)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Median Income</p>
-          <p className="font-medium">${formatNumber(data.B19013_001E)}</p>
+          <p className="text-sm text-yellow-400 font-medium mb-1">Median Income</p>
+          <p className="text-lg font-semibold">${formatNumber(data.B19013_001E)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Labor Force</p>
-          <p className="font-medium">{formatNumber(data.B23025_004E)}</p>
+          <p className="text-sm text-yellow-400 font-medium mb-1">Labor Force</p>
+          <p className="text-lg font-semibold">{formatNumber(data.B23025_004E)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Median Home</p>
-          <p className="font-medium">${formatNumber(data.B25077_001E)}</p>
+          <p className="text-sm text-yellow-400 font-medium mb-1">Median Home</p>
+          <p className="text-lg font-semibold">${formatNumber(data.B25077_001E)}</p>
         </div>
       </CardContent>
     </Card>
