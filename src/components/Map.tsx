@@ -75,11 +75,11 @@ const Map = () => {
 
         // Adjust padding and camera settings for a more distant, eye-level view
         await map.current.fitBounds(bounds, {
-          padding: { top: 150, bottom: 150, left: 300, right: 300 }, // Increased padding
-          duration: 1500, // Slightly longer animation
-          pitch: 45, // Lower pitch for better perspective
+          padding: { top: 150, bottom: 150, left: 300, right: 300 },
+          duration: 1500,
+          pitch: 45,
           bearing: 0,
-          maxZoom: 4.8 // Reduced max zoom to keep distance
+          maxZoom: 4.8
         });
       }
     } catch (err) {
@@ -204,19 +204,21 @@ const Map = () => {
           isAnimating.current = true;
 
           try {
-            // Reset previous state
-            if (previousStateId.current) {
-              await map.current.setFeatureState(
-                {
-                  source: 'states',
-                  sourceLayer: 'tl_2020_us_state-52k5uw',
-                  id: previousStateId.current
-                },
-                {
-                  score: 0,
-                  height: 0
-                }
-              );
+            // Reset all states to ensure only one is active
+            if (stateDataRef.current.length > 0) {
+              for (const state of stateDataRef.current) {
+                await map.current.setFeatureState(
+                  {
+                    source: 'states',
+                    sourceLayer: 'tl_2020_us_state-52k5uw',
+                    id: state.STATEFP
+                  },
+                  {
+                    score: 0,
+                    height: 0
+                  }
+                );
+              }
             }
 
             // Clear active state and wait for animation
