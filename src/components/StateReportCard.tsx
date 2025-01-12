@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, BuildingIcon, UsersIcon, HomeIcon } from 'lucide-react';
 
 interface StateData {
   STATEFP: string;
@@ -42,35 +43,87 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
 
   if (!data || !isVisible || !showCard) return null;
 
+  // Calculate derived insights
+  const employmentRate = data.EMP && data.B23025_004E ? 
+    (data.EMP / data.B23025_004E * 100).toFixed(1) : null;
+  
+  const avgPayPerEmployee = data.PAYANN && data.EMP ? 
+    formatNumber(data.PAYANN / data.EMP) : null;
+  
+  const businessDensity = data.ESTAB && data.B23025_004E ? 
+    (data.ESTAB / (data.B23025_004E / 1000)).toFixed(1) : null;
+
   return (
-    <Card className="absolute bottom-8 right-8 w-96 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
-      <CardHeader className="py-3 px-6">
-        <CardTitle className="text-xl font-bold">State Report</CardTitle>
+    <Card className="absolute bottom-8 right-8 w-[450px] bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
+      <CardHeader className="py-3 px-6 border-b border-white/10">
+        <CardTitle className="text-xl font-bold flex items-center gap-2">
+          <TrendingUpIcon className="w-5 h-5 text-yellow-400" />
+          Market Intelligence Report
+        </CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-4 p-6">
-        <div>
-          <p className="text-sm text-yellow-400 font-medium mb-1">Employment</p>
-          <p className="text-lg font-semibold">{formatNumber(data.EMP)}</p>
+      <CardContent className="p-6 space-y-6">
+        {/* Economic Vitality Section */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wider">Economic Vitality</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/5 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <BuildingIcon className="w-4 h-4 text-cyan-400" />
+                <p className="text-sm text-cyan-400">Business Activity</p>
+              </div>
+              <p className="text-2xl font-semibold">{formatNumber(data.ESTAB)} firms</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {businessDensity} businesses per 1k workers
+              </p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <UsersIcon className="w-4 h-4 text-green-400" />
+                <p className="text-sm text-green-400">Workforce</p>
+              </div>
+              <p className="text-2xl font-semibold">{employmentRate}%</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Employment rate
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-yellow-400 font-medium mb-1">Annual Payroll</p>
-          <p className="text-lg font-semibold">${formatNumber(data.PAYANN)}</p>
+
+        {/* Market Indicators Section */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wider">Market Indicators</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/5 p-4 rounded-lg">
+              <p className="text-sm text-purple-400 mb-1">Annual Payroll</p>
+              <p className="text-2xl font-semibold">${formatNumber(data.PAYANN)}</p>
+              <p className="text-sm text-gray-400 mt-1">
+                ${avgPayPerEmployee} per employee
+              </p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-lg">
+              <p className="text-sm text-orange-400 mb-1">Housing Market</p>
+              <p className="text-2xl font-semibold">${formatNumber(data.B25077_001E)}</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Median home value
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-yellow-400 font-medium mb-1">Establishments</p>
-          <p className="text-lg font-semibold">{formatNumber(data.ESTAB)}</p>
-        </div>
-        <div>
-          <p className="text-sm text-yellow-400 font-medium mb-1">Median Income</p>
-          <p className="text-lg font-semibold">${formatNumber(data.B19013_001E)}</p>
-        </div>
-        <div>
-          <p className="text-sm text-yellow-400 font-medium mb-1">Labor Force</p>
-          <p className="text-lg font-semibold">{formatNumber(data.B23025_004E)}</p>
-        </div>
-        <div>
-          <p className="text-sm text-yellow-400 font-medium mb-1">Median Home</p>
-          <p className="text-lg font-semibold">${formatNumber(data.B25077_001E)}</p>
+
+        {/* Key Insights Section */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wider">Key Insights</h3>
+          <div className="bg-white/5 p-4 rounded-lg space-y-2">
+            <p className="text-sm text-gray-300">
+              • Market shows {businessDensity && Number(businessDensity) > 50 ? 'high' : 'moderate'} business density
+            </p>
+            <p className="text-sm text-gray-300">
+              • Workforce participation is {employmentRate && Number(employmentRate) > 65 ? 'above' : 'below'} national average
+            </p>
+            <p className="text-sm text-gray-300">
+              • Housing market indicates {data.B25077_001E && data.B25077_001E > 400000 ? 'premium' : 'accessible'} pricing
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>
