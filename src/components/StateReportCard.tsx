@@ -29,9 +29,11 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const threshold = window.innerHeight * 0.5; // Hide when scrolled halfway
-      setShowCard(scrollPosition < threshold);
+      const analysisSection = document.querySelector('.analysis-section');
+      if (!analysisSection) return;
+
+      const rect = analysisSection.getBoundingClientRect();
+      setShowCard(rect.top > window.innerHeight);
     };
 
     window.addEventListener('scroll', handleScroll);

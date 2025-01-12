@@ -17,17 +17,8 @@ export function Hero() {
 
   // Listen for custom event from Map component
   useEffect(() => {
-    const handleStateChange = (event: CustomEvent<{ detail: StateData }>) => {
-      // Ensure we're only passing serializable data
-      const stateData = {
-        STATEFP: event.detail.STATEFP,
-        EMP: event.detail.EMP,
-        PAYANN: event.detail.PAYANN,
-        ESTAB: event.detail.ESTAB,
-        B19013_001E: event.detail.B19013_001E,
-        B23025_004E: event.detail.B23025_004E,
-        B25077_001E: event.detail.B25077_001E
-      };
+    const handleStateChange = (event: CustomEvent) => {
+      const stateData = (event as CustomEvent<StateData>).detail;
       setActiveState(stateData);
     };
 

@@ -134,13 +134,15 @@ const Map = () => {
       statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
       stateDataRef.current = data || [];
 
-      if (data && data.length > 0) {
-        updateActiveState(data[0]);
-        // Fly to initial state
-        if (mapLoadedRef.current) {
-          flyToState(data[0].STATEFP);
+      // Set initial state after 2 seconds
+      setTimeout(() => {
+        if (data && data.length > 0) {
+          updateActiveState(data[0]);
+          if (mapLoadedRef.current) {
+            flyToState(data[0].STATEFP);
+          }
         }
-      }
+      }, 2000);
 
       if (!mapInitializedRef.current) {
         initializeMap();
