@@ -133,20 +133,12 @@ const Map = () => {
       }
 
       setStateData(data || []);
-
-      if (data && data.length > 0) {
-        setTimeout(() => {
-          updateActiveState(data[0]);
-          if (mapLoaded) {
-            flyToState(data[0].STATEFP);
-          }
-        }, 2000);
-      }
     } catch (err) {
       console.error('Error in fetchStateData:', err);
     }
   };
 
+  // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -155,8 +147,8 @@ const Map = () => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
-      zoom: 3,
-      center: [-98.5795, 39.8283],
+      zoom: 3.5, // Increased initial zoom
+      center: [-98.5795, 39.8283], // Centered on continental US
       pitch: 45,
       bearing: 0,
       interactive: true,
@@ -236,6 +228,23 @@ const Map = () => {
     };
   }, []);
 
+  // Handle initial state data loading
+  useEffect(() => {
+    fetchStateData();
+  }, []);
+
+  // Handle cycling states
+  useEffect(() => {
+    if (stateData.length > 0 && mapLoaded) {
+      const firstState = stateData[0];
+      updateActiveState(firstState);
+      if (firstState?.STATEFP) {
+        flyToState(firstState.STATEFP);
+      }
+    }
+  }, [stateData, mapLoaded]);
+
+  // Handle state cycling interval
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     
@@ -250,10 +259,7 @@ const Map = () => {
     };
   }, [stateData, mapLoaded, startCyclingStates]);
 
-  useEffect(() => {
-    fetchStateData();
-  }, []);
-
+  // Update active state styling
   useEffect(() => {
     if (!map.current || !mapLoaded || !activeState?.STATEFP) return;
 
@@ -270,7 +276,7 @@ const Map = () => {
       getStateColor(activeState.STATEFP),
       'transparent'
     ]);
-  }, [activeState, getStateColor]);
+  }, [activeState, getStateColor, mapLoaded]);
 
   return (
     <div className="w-full h-full">
