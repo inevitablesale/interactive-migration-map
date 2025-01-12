@@ -28,7 +28,6 @@ const Map = () => {
   const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
 
-  // Cleanup function
   const cleanup = () => {
     if (animationTimeoutRef.current) {
       window.clearTimeout(animationTimeoutRef.current);
@@ -48,7 +47,6 @@ const Map = () => {
     setActiveState(null);
   };
 
-  // Function to zoom to a state
   const zoomToState = async (stateId: string) => {
     if (!map.current || !mapLoadedRef.current) return;
 
@@ -73,7 +71,6 @@ const Map = () => {
           });
         }
 
-        // Adjust padding and camera settings for a more distant, eye-level view
         await map.current.fitBounds(bounds, {
           padding: { top: 150, bottom: 150, left: 300, right: 300 },
           duration: 1500,
@@ -159,7 +156,7 @@ const Map = () => {
 
         const { ranges } = calculateMetricScores();
 
-        // Add 3D extrusion layer
+        // Add 3D extrusion layer with solid colors
         map.current.addLayer({
           'id': 'state-extrusions',
           'type': 'fill-extrusion',
@@ -184,7 +181,7 @@ const Map = () => {
               0, 0,
               1, 500000
             ],
-            'fill-extrusion-opacity': 0.8
+            'fill-extrusion-opacity': 1  // Set to 1 for solid color
           }
         });
 
@@ -201,31 +198,29 @@ const Map = () => {
 
         const animateNextState = async () => {
           if (!map.current || !mapLoadedRef.current || isAnimating.current) return;
-          isAnimating.current = true;
-
+          
           try {
-            // Reset all states to ensure only one is active
-            if (stateDataRef.current.length > 0) {
-              for (const state of stateDataRef.current) {
-                await map.current.setFeatureState(
-                  {
-                    source: 'states',
-                    sourceLayer: 'tl_2020_us_state-52k5uw',
-                    id: state.STATEFP
-                  },
-                  {
-                    score: 0,
-                    height: 0
-                  }
-                );
-              }
+            isAnimating.current = true;
+            
+            // Reset all states immediately
+            if (previousStateId.current) {
+              await map.current.setFeatureState(
+                {
+                  source: 'states',
+                  sourceLayer: 'tl_2020_us_state-52k5uw',
+                  id: previousStateId.current
+                },
+                {
+                  score: 0,
+                  height: 0
+                }
+              );
             }
 
             // Clear active state and wait for animation
             setActiveState(null);
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Animate next state
             const state = stateDataRef.current[currentStateIndex.current];
             if (!state?.STATEFP) {
               isAnimating.current = false;
@@ -258,14 +253,12 @@ const Map = () => {
               }
             );
 
-            // Set active state and zoom to it
             setActiveState(state);
             await zoomToState(state.STATEFP);
 
             previousStateId.current = state.STATEFP;
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
 
-            // Wait for animation to complete before allowing next state
             await new Promise(resolve => setTimeout(resolve, 5000));
           } finally {
             isAnimating.current = false;
@@ -285,16 +278,27 @@ const Map = () => {
 
     fetchStateData();
 
-    return cleanup;
+    return () => {
+      if (animationTimeoutRef.current) {
+        window.clearTimeout(animationTimeoutRef.current);
+      }
+      if (map.current) {
+        map.current.remove();
+      }
+      mapLoadedRef.current = false;
+      mapInitializedRef.current = false;
+      isAnimating.current = false;
+      previousStateId.current = null;
+      currentStateIndex.current = 0;
+      setActiveState(null);
+    };
   }, []);
 
   return (
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      <div className="absolute right-4 top-20">
-        <StateReportCard data={activeState} isVisible={!!activeState} />
-      </div>
+      <StateReportCard data={activeState} isVisible={!!activeState} />
     </div>
   );
 };

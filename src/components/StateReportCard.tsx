@@ -25,7 +25,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   if (!data || !isVisible) return null;
 
   return (
-    <Card className="absolute right-8 top-1/3 w-72 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
+    <Card className="absolute right-8 top-1/2 -translate-y-1/2 w-72 bg-black/80 backdrop-blur-md border-white/10 text-white animate-fade-in shadow-xl">
       <CardHeader className="py-2 px-4">
         <CardTitle className="text-lg">State Report</CardTitle>
       </CardHeader>
