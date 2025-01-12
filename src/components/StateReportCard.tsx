@@ -25,34 +25,34 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   if (!data || !isVisible) return null;
 
   return (
-    <Card className="absolute bottom-4 right-4 w-80 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
-      <CardHeader>
-        <CardTitle>State Report</CardTitle>
+    <Card className="absolute bottom-4 right-4 w-72 bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
+      <CardHeader className="py-2 px-4">
+        <CardTitle className="text-lg">State Report</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="grid grid-cols-2 gap-2 p-4 pt-2 text-sm">
         <div>
-          <p className="text-sm text-gray-400">Employment</p>
-          <p className="text-lg font-semibold">{formatNumber(data.EMP)}</p>
+          <p className="text-xs text-gray-400">Employment</p>
+          <p className="font-medium">{formatNumber(data.EMP)}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-400">Annual Payroll</p>
-          <p className="text-lg font-semibold">${formatNumber(data.PAYANN)}</p>
+          <p className="text-xs text-gray-400">Annual Payroll</p>
+          <p className="font-medium">${formatNumber(data.PAYANN)}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-400">Establishments</p>
-          <p className="text-lg font-semibold">{formatNumber(data.ESTAB)}</p>
+          <p className="text-xs text-gray-400">Establishments</p>
+          <p className="font-medium">{formatNumber(data.ESTAB)}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-400">Median Household Income</p>
-          <p className="text-lg font-semibold">${formatNumber(data.B19013_001E)}</p>
+          <p className="text-xs text-gray-400">Median Income</p>
+          <p className="font-medium">${formatNumber(data.B19013_001E)}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-400">Labor Force</p>
-          <p className="text-lg font-semibold">{formatNumber(data.B23025_004E)}</p>
+          <p className="text-xs text-gray-400">Labor Force</p>
+          <p className="font-medium">{formatNumber(data.B23025_004E)}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-400">Median Home Value</p>
-          <p className="text-lg font-semibold">${formatNumber(data.B25077_001E)}</p>
+          <p className="text-xs text-gray-400">Median Home</p>
+          <p className="font-medium">${formatNumber(data.B25077_001E)}</p>
         </div>
       </CardContent>
     </Card>

@@ -28,7 +28,7 @@ const Map = () => {
   const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
 
-  // Cleanup function to handle map and animation resources
+  // Cleanup function
   const cleanup = () => {
     if (animationTimeoutRef.current) {
       window.clearTimeout(animationTimeoutRef.current);
@@ -55,13 +55,12 @@ const Map = () => {
     try {
       const features = map.current.querySourceFeatures('states', {
         sourceLayer: 'tl_2020_us_state-52k5uw',
-        filter: ['==', ['id'], stateId]
+        filter: ['==', ['get', 'STATEFP'], stateId]
       });
 
       if (features.length > 0 && features[0].geometry) {
         const bounds = new mapboxgl.LngLatBounds();
         
-        // Handle different geometry types
         if (features[0].geometry.type === 'Polygon') {
           features[0].geometry.coordinates[0].forEach((coord: [number, number]) => {
             bounds.extend(coord);
@@ -74,8 +73,7 @@ const Map = () => {
           });
         }
 
-        // Zoom to the state with padding and animation
-        map.current.fitBounds(bounds, {
+        await map.current.fitBounds(bounds, {
           padding: 50,
           duration: 1000
         });
@@ -98,15 +96,7 @@ const Map = () => {
           return;
         }
 
-        stateDataRef.current = (data || []).map(item => ({
-          STATEFP: item.STATEFP,
-          EMP: item.EMP,
-          PAYANN: item.PAYANN,
-          ESTAB: item.ESTAB,
-          B19013_001E: item.B19013_001E,
-          B23025_004E: item.B23025_004E,
-          B25077_001E: item.B25077_001E
-        }));
+        stateDataRef.current = data || [];
 
         if (!mapInitializedRef.current) {
           initializeMap();
@@ -165,7 +155,7 @@ const Map = () => {
 
         const { ranges } = calculateMetricScores();
 
-        // Add 3D extrusion layer with gradient colors
+        // Add 3D extrusion layer
         map.current.addLayer({
           'id': 'state-extrusions',
           'type': 'fill-extrusion',
@@ -190,8 +180,7 @@ const Map = () => {
               0, 0,
               1, 500000
             ],
-            'fill-extrusion-opacity': 0.8,
-            'fill-extrusion-base': 0
+            'fill-extrusion-opacity': 0.8
           }
         });
 
@@ -213,11 +202,6 @@ const Map = () => {
           try {
             // Reset previous state
             if (previousStateId.current) {
-              if (!map.current || !mapLoadedRef.current) {
-                isAnimating.current = false;
-                return;
-              }
-
               map.current.setFeatureState(
                 {
                   source: 'states',
@@ -236,7 +220,7 @@ const Map = () => {
 
             // Animate next state
             const state = stateDataRef.current[currentStateIndex.current];
-            if (!state?.STATEFP || !map.current || !mapLoadedRef.current) {
+            if (!state?.STATEFP) {
               isAnimating.current = false;
               return;
             }
@@ -267,21 +251,20 @@ const Map = () => {
               }
             );
 
-            // Zoom to the state and show report card
-            await zoomToState(state.STATEFP);
+            // Set active state and zoom to it
             setActiveState(state);
+            await zoomToState(state.STATEFP);
 
             previousStateId.current = state.STATEFP;
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
           } finally {
             isAnimating.current = false;
             if (mapLoadedRef.current) {
-              animationTimeoutRef.current = window.setTimeout(animateNextState, 5000); // Increased timeout to 5s
+              animationTimeoutRef.current = window.setTimeout(animateNextState, 5000);
             }
           }
         };
 
-        // Start animation only after map is fully loaded
         map.current.once('idle', () => {
           if (mapLoadedRef.current) {
             animateNextState();
