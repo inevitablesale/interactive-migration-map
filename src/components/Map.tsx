@@ -22,6 +22,20 @@ const Map = () => {
   const currentStateIndex = useRef(0);
   const previousStateId = useRef<string | null>(null);
   const isAnimating = useRef(false);
+  const animationTimeoutRef = useRef<number | null>(null);
+
+  // Cleanup function to handle map and animation resources
+  const cleanup = () => {
+    if (animationTimeoutRef.current) {
+      window.clearTimeout(animationTimeoutRef.current);
+      animationTimeoutRef.current = null;
+    }
+    
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
+  };
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -36,7 +50,17 @@ const Map = () => {
           return;
         }
 
-        stateDataRef.current = data || [];
+        // Store only the necessary data
+        stateDataRef.current = (data || []).map(item => ({
+          STATEFP: item.STATEFP,
+          EMP: item.EMP,
+          PAYANN: item.PAYANN,
+          ESTAB: item.ESTAB,
+          B19013_001E: item.B19013_001E,
+          B23025_004E: item.B23025_004E,
+          B25077_001E: item.B25077_001E
+        }));
+
         initializeMap();
       } catch (err) {
         console.error('Error in fetchStateData:', err);
@@ -101,12 +125,12 @@ const Map = () => {
               'interpolate',
               ['linear'],
               ['coalesce', ['feature-state', 'score'], 0],
-              0, '#FF6B6B',    // Low growth
-              0.2, '#FFB347',  // Below average
-              0.4, '#48D1CC',  // Average
-              0.6, '#4682B4',  // Above average
-              0.8, '#9370DB',  // High growth
-              1, '#FF69B4'     // Exceptional growth
+              0, '#FF6B6B',
+              0.2, '#FFB347',
+              0.4, '#48D1CC',
+              0.6, '#4682B4',
+              0.8, '#9370DB',
+              1, '#FF69B4'
             ],
             'fill-extrusion-height': [
               'interpolate',
@@ -120,7 +144,6 @@ const Map = () => {
           }
         });
 
-        // Add flat background layer
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -132,13 +155,11 @@ const Map = () => {
           }
         });
 
-        // Animate states one at a time with lowering previous state
         const animateNextState = async () => {
           if (!map.current || isAnimating.current) return;
           isAnimating.current = true;
 
           try {
-            // Lower previous state first if it exists
             if (previousStateId.current) {
               await new Promise<void>((resolve) => {
                 if (!map.current) return;
@@ -157,7 +178,6 @@ const Map = () => {
               });
             }
 
-            // Get and animate current state
             const state = stateDataRef.current[currentStateIndex.current];
             if (!state?.STATEFP) return;
 
@@ -175,44 +195,37 @@ const Map = () => {
               normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
             );
 
-            // Set current state
-            map.current.setFeatureState(
-              {
-                source: 'states',
-                sourceLayer: 'tl_2020_us_state-52k5uw',
-                id: state.STATEFP
-              },
-              {
-                score: growthScore,
-                height: 1
-              }
-            );
+            if (map.current) {
+              map.current.setFeatureState(
+                {
+                  source: 'states',
+                  sourceLayer: 'tl_2020_us_state-52k5uw',
+                  id: state.STATEFP
+                },
+                {
+                  score: growthScore,
+                  height: 1
+                }
+              );
+            }
 
-            // Store current state as previous for next iteration
             previousStateId.current = state.STATEFP;
-
-            // Move to next state
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
           } finally {
             isAnimating.current = false;
-            // Schedule next animation after current state has been shown
-            setTimeout(animateNextState, 3000);
+            // Use ref for timeout to allow cleanup
+            animationTimeoutRef.current = window.setTimeout(animateNextState, 3000);
           }
         };
 
-        // Start the animation
         animateNextState();
       });
     };
 
     fetchStateData();
 
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
+    // Cleanup on unmount
+    return cleanup;
   }, []);
 
   return (
