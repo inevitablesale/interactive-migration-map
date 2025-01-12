@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -13,7 +12,7 @@ const COLORS = {
   accent: '#FFF903',     // Yellow
   highlight: '#94EC0E',  // Lime Green
   active: '#FA0098',     // Hot Pink
-  inactive: '#000000',
+  inactive: '#000000'
 };
 
 interface StateData {
@@ -210,4 +209,85 @@ const Map = () => {
         'id': 'state-base',
         'type': 'fill-extrusion',
         'source': 'states',
-        'source-layer': 'tl_2020_us_state-52
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': COLORS.inactive,
+          'fill-extrusion-height': 10000,
+          'fill-extrusion-opacity': 0.6
+        }
+      });
+
+      map.current.addLayer({
+        'id': 'state-active',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': [
+            'case',
+            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
+            COLORS.primary,
+            'transparent'
+          ],
+          'fill-extrusion-height': [
+            'case',
+            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
+            100000,
+            0
+          ],
+          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-base': 10000
+        }
+      });
+
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': COLORS.primary,
+          'line-width': 1
+        }
+      });
+    });
+
+    useEffect(() => {
+      if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
+        startCyclingStates();
+      }
+    }, [stateDataRef.current, mapLoadedRef.current]);
+
+    useEffect(() => {
+      fetchStateData();
+      return cleanup;
+    }, []);
+
+    useEffect(() => {
+      if (!map.current || !mapLoadedRef.current) return;
+
+      map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
+        'case',
+        ['==', ['get', 'STATEFP'], activeState?.STATEFP],
+        100000,
+        0
+      ]);
+
+      map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+        'case',
+        ['==', ['get', 'STATEFP'], activeState?.STATEFP],
+        COLORS.active,
+        'transparent'
+      ]);
+    }, [activeState]);
+
+    return (
+      <div className="w-full h-full">
+        <div ref={mapContainer} className="w-full h-full" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+        <StateReportCard data={activeState} isVisible={!!activeState} />
+      </div>
+    );
+};
+
+export default Map;
