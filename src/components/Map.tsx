@@ -21,6 +21,7 @@ const Map = () => {
   const stateDataRef = useRef<StateData[]>([]);
   const currentStateIndex = useRef(0);
   const previousStateId = useRef<string | null>(null);
+  const isAnimating = useRef(false);
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -133,67 +134,70 @@ const Map = () => {
 
         // Animate states one at a time with lowering previous state
         const animateNextState = async () => {
-          if (!map.current) return;
+          if (!map.current || isAnimating.current) return;
+          isAnimating.current = true;
 
-          // Lower previous state first
-          if (previousStateId.current) {
-            await new Promise<void>((resolve) => {
-              map.current?.setFeatureState(
-                {
-                  source: 'states',
-                  sourceLayer: 'tl_2020_us_state-52k5uw',
-                  id: previousStateId.current
-                },
-                {
-                  score: 0,
-                  height: 0
-                }
-              );
-              // Wait for lowering animation
-              setTimeout(resolve, 1000);
-            });
-          }
-
-          // Animate current state
-          const state = stateDataRef.current[currentStateIndex.current];
-          if (!state?.STATEFP) return;
-
-          // Calculate comprehensive growth score
-          const normalizeValue = (value: number | null, min: number, max: number) => {
-            if (value === null) return 0;
-            return (value - min) / (max - min);
-          };
-
-          const growthScore = (
-            normalizeValue(state.EMP, ranges.emp.min, ranges.emp.max) * 0.2 +
-            normalizeValue(state.PAYANN, ranges.payann.min, ranges.payann.max) * 0.2 +
-            normalizeValue(state.ESTAB, ranges.estab.min, ranges.estab.max) * 0.15 +
-            normalizeValue(state.B19013_001E, ranges.income.min, ranges.income.max) * 0.15 +
-            normalizeValue(state.B23025_004E, ranges.employment.min, ranges.employment.max) * 0.15 +
-            normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
-          );
-
-          // Set current state
-          map.current.setFeatureState(
-            {
-              source: 'states',
-              sourceLayer: 'tl_2020_us_state-52k5uw',
-              id: state.STATEFP
-            },
-            {
-              score: growthScore,
-              height: 1
+          try {
+            // Lower previous state first if it exists
+            if (previousStateId.current) {
+              await new Promise<void>((resolve) => {
+                if (!map.current) return;
+                map.current.setFeatureState(
+                  {
+                    source: 'states',
+                    sourceLayer: 'tl_2020_us_state-52k5uw',
+                    id: previousStateId.current
+                  },
+                  {
+                    score: 0,
+                    height: 0
+                  }
+                );
+                setTimeout(resolve, 1000);
+              });
             }
-          );
 
-          // Store current state as previous for next iteration
-          previousStateId.current = state.STATEFP;
+            // Get and animate current state
+            const state = stateDataRef.current[currentStateIndex.current];
+            if (!state?.STATEFP) return;
 
-          // Move to next state
-          currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
-          
-          // Schedule next animation after current state has been shown
-          setTimeout(animateNextState, 3000);
+            const normalizeValue = (value: number | null, min: number, max: number) => {
+              if (value === null) return 0;
+              return (value - min) / (max - min);
+            };
+
+            const growthScore = (
+              normalizeValue(state.EMP, ranges.emp.min, ranges.emp.max) * 0.2 +
+              normalizeValue(state.PAYANN, ranges.payann.min, ranges.payann.max) * 0.2 +
+              normalizeValue(state.ESTAB, ranges.estab.min, ranges.estab.max) * 0.15 +
+              normalizeValue(state.B19013_001E, ranges.income.min, ranges.income.max) * 0.15 +
+              normalizeValue(state.B23025_004E, ranges.employment.min, ranges.employment.max) * 0.15 +
+              normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
+            );
+
+            // Set current state
+            map.current.setFeatureState(
+              {
+                source: 'states',
+                sourceLayer: 'tl_2020_us_state-52k5uw',
+                id: state.STATEFP
+              },
+              {
+                score: growthScore,
+                height: 1
+              }
+            );
+
+            // Store current state as previous for next iteration
+            previousStateId.current = state.STATEFP;
+
+            // Move to next state
+            currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
+          } finally {
+            isAnimating.current = false;
+            // Schedule next animation after current state has been shown
+            setTimeout(animateNextState, 3000);
+          }
         };
 
         // Start the animation
