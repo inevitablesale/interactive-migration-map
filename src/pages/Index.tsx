@@ -28,57 +28,54 @@ const Index = () => {
           <Hero />
         </div>
 
-        {/* Data Sources Section */}
-        <DataSourcesSection />
-
         {/* Interactive Analysis Section */}
         <div className="relative bg-black/95">
           <div className="min-h-screen flex">
-            {/* Left Panel - Analysis Tools */}
+            {/* Left Panel - Buyer-Focused Value Principles */}
             <div className="w-80 bg-black/40 backdrop-blur-md p-6 border-r border-white/10">
-              <h3 className="text-xl font-semibold text-white mb-6">Data Value Principles</h3>
+              <h3 className="text-xl font-semibold text-white mb-6">Your Path to Successful Acquisitions</h3>
               <div className="space-y-4">
                 <div className="p-4 bg-white/5 rounded-lg">
-                  <h4 className="text-white font-medium mb-2">Value Creation</h4>
-                  <p className="text-sm text-gray-300">Data doesn't inherently contain value. It becomes valuable through actionable insights and decision-making.</p>
+                  <h4 className="text-white font-medium mb-2">Beyond Market Data</h4>
+                  <p className="text-sm text-gray-300">We transform raw data into actionable insights that guide your acquisition decisions. Every metric is chosen to help you identify the right opportunities.</p>
                 </div>
                 <div className="p-4 bg-white/5 rounded-lg">
-                  <h4 className="text-white font-medium mb-2">Behavior Change</h4>
-                  <p className="text-sm text-gray-300">Focus on what people should do differently with the data, not just what data to collect.</p>
+                  <h4 className="text-white font-medium mb-2">Future Growth Potential</h4>
+                  <p className="text-sm text-gray-300">Look beyond current performance. Our analysis helps you spot markets with untapped potential and growing demand for accounting services.</p>
                 </div>
                 <div className="p-4 bg-white/5 rounded-lg">
-                  <h4 className="text-white font-medium mb-2">Future-Focused Solutions</h4>
-                  <p className="text-sm text-gray-300">Build for the next 3 years, not just solving past problems.</p>
+                  <h4 className="text-white font-medium mb-2">Risk Mitigation</h4>
+                  <p className="text-sm text-gray-300">Make informed decisions with comprehensive market analysis that helps you understand and mitigate acquisition risks before they become problems.</p>
                 </div>
                 <div className="p-4 bg-white/5 rounded-lg">
-                  <h4 className="text-white font-medium mb-2">Customer Commitment</h4>
-                  <p className="text-sm text-gray-300">Success requires commitment from actual users, not just technical teams.</p>
+                  <h4 className="text-white font-medium mb-2">Competitive Edge</h4>
+                  <p className="text-sm text-gray-300">Stay ahead of the market with insights that help you identify undervalued opportunities before they become obvious to others.</p>
                 </div>
                 <div className="p-4 bg-white/5 rounded-lg">
-                  <h4 className="text-white font-medium mb-2">Incentive Alignment</h4>
-                  <p className="text-sm text-gray-300">Create strong incentives for workflow changes or integrate naturally into existing processes.</p>
+                  <h4 className="text-white font-medium mb-2">Clear Action Steps</h4>
+                  <p className="text-sm text-gray-300">Transform insights into action with clear, practical steps for evaluating and pursuing acquisition opportunities in your target markets.</p>
                 </div>
               </div>
             </div>
 
-            {/* Center - Content Area */}
+            {/* Center - Solution-Focused Content */}
             <div className="flex-1 p-8">
               <div className="max-w-3xl mx-auto">
-                <h2 className="text-3xl font-bold text-white mb-6">Data Transformation Journey</h2>
-                <p className="text-gray-300 mb-4">
-                  The path to data-driven decision making isn't just about collecting more data. It's about creating meaningful change in how people work and make decisions.
+                <h2 className="text-3xl font-bold text-white mb-6">Your Acquisition Success Blueprint</h2>
+                <p className="text-gray-300 mb-8">
+                  Stop wondering if you're making the right acquisition decisions. Our solution combines comprehensive market data with practical insights to help you:
                 </p>
                 <div className="space-y-6">
                   <div className="bg-white/5 p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold text-white mb-3">Beyond Data Collection</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">Identify the Right Opportunities</h3>
                     <p className="text-gray-300">
-                      Success in data transformation comes not from the quantity of data collected, but from how effectively it drives actionable insights and behavioral changes.
+                      Don't just look at what's available - find the opportunities that align with your growth strategy. Our analysis helps you understand market dynamics, growth potential, and competitive landscapes to spot the best fits for your portfolio.
                     </p>
                   </div>
                   <div className="bg-white/5 p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold text-white mb-3">Creating True Value</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">Make Confident Decisions</h3>
                     <p className="text-gray-300">
-                      Focus on creating data assets that solve persistent problems and drive meaningful organizational change, rather than responding to momentary challenges.
+                      Replace uncertainty with confidence. Our solution provides you with clear, actionable insights that help you evaluate opportunities, understand their true potential, and make decisions backed by comprehensive market intelligence.
                     </p>
                   </div>
                 </div>
