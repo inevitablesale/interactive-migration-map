@@ -24,7 +24,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -50,7 +50,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     map.current.on('style.load', () => {
       if (!map.current) return;
-      setMapLoaded(true);
 
       map.current.addSource('states', {
         type: 'vector',
@@ -65,10 +64,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 15000,
-          'fill-extrusion-opacity': 0.4
-        },
-        'minzoom': 0,
-        'maxzoom': 24
+          'fill-extrusion-opacity': 0.6
+        }
       });
 
       map.current.addSource('msas', {
@@ -90,8 +87,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'layout': {
           'visibility': 'none'
         },
-        'minzoom': 0,
-        'maxzoom': 24
+        'filter': ['==', 'state_fips', '']
       });
 
       map.current.addLayer({
@@ -103,9 +99,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           'line-color': MAP_COLORS.primary,
           'line-width': 1.5,
           'line-opacity': 0.8
-        },
-        'minzoom': 0,
-        'maxzoom': 24
+        }
       });
 
       map.current.addLayer({
@@ -121,8 +115,40 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'layout': {
           'visibility': 'none'
         },
-        'minzoom': 0,
-        'maxzoom': 24
+        'filter': ['==', 'state_fips', '']
+      });
+
+      // Add click event for states
+      map.current.on('click', 'state-base', (e) => {
+        if (!e.features?.[0] || !map.current) return;
+        
+        const feature = e.features[0];
+        const stateFips = feature.properties?.STATEFP;
+        
+        if (!stateFips) return;
+
+        setSelectedState(stateFips);
+        setViewMode('msa');
+
+        // Update MSA filters
+        map.current.setFilter('msa-base', ['==', 'state_fips', stateFips]);
+        map.current.setFilter('msa-borders', ['==', 'state_fips', stateFips]);
+
+        // Show MSA layers
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+
+        // Zoom to state bounds
+        const bounds = new mapboxgl.LngLatBounds();
+        const coordinates = feature.geometry.coordinates[0];
+        coordinates.forEach((coord: number[]) => {
+          bounds.extend(coord as [number, number]);
+        });
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
       });
     });
 
@@ -135,15 +161,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   }, []);
 
   useEffect(() => {
-    if (!map.current || !mapLoaded) return;
-
-    requestAnimationFrame(() => {
-      map.current?.resize();
-    });
+    if (!map.current) return;
 
     if (viewMode === 'state') {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
+      setSelectedState(null);
       map.current.setLayoutProperty('msa-base', 'visibility', 'none');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
       
@@ -152,19 +173,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         zoom: 2.5,
         duration: 1000
       });
-    } else {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-      
-      map.current.easeTo({
-        pitch: 60,
-        zoom: 2.5,
-        duration: 1000
-      });
     }
-  }, [viewMode, mapLoaded]);
+  }, [viewMode]);
 
   return (
     <div className={`relative ${className}`}>
@@ -174,7 +184,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             <MapIcon className="h-4 w-4" />
             <span className="ml-2">States</span>
           </ToggleGroupItem>
-          <ToggleGroupItem value="msa" aria-label="Toggle MSA view">
+          <ToggleGroupItem value="msa" aria-label="Toggle MSA view" disabled={!selectedState}>
             <Building2 className="h-4 w-4" />
             <span className="ml-2">MSAs</span>
           </ToggleGroupItem>
