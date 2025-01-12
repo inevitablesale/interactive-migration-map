@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { supabase } from "@/integrations/supabase/client";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
 
@@ -25,6 +24,22 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
+
+  const resetToStateView = useCallback(() => {
+    if (!map.current) return;
+    
+    setSelectedState(null);
+    map.current.setFilter('msa-base', ['==', 'state_fips', '']);
+    map.current.setFilter('msa-borders', ['==', 'state_fips', '']);
+    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    
+    map.current.easeTo({
+      pitch: 45,
+      zoom: 2.5,
+      duration: 1000
+    });
+  }, []);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -56,6 +71,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
+      // Add base layers
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -66,11 +87,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           'fill-extrusion-height': 15000,
           'fill-extrusion-opacity': 0.6
         }
-      });
-
-      map.current.addSource('msas', {
-        type: 'vector',
-        url: 'mapbox://inevitablesale.29jcxgnm'
       });
 
       map.current.addLayer({
@@ -130,25 +146,27 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         setSelectedState(stateFips);
         setViewMode('msa');
 
-        // Update MSA filters
-        map.current.setFilter('msa-base', ['==', 'state_fips', stateFips]);
-        map.current.setFilter('msa-borders', ['==', 'state_fips', stateFips]);
+        const geometry = feature.geometry;
+        if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+          const bounds = new mapboxgl.LngLatBounds();
+          const coords = geometry.type === 'Polygon' ? [geometry.coordinates[0]] : geometry.coordinates[0];
+          
+          coords.forEach((coord: number[]) => {
+            bounds.extend(coord as [number, number]);
+          });
 
-        // Show MSA layers
-        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+          // Update MSA filters and visibility
+          map.current.setFilter('msa-base', ['==', 'state_fips', stateFips]);
+          map.current.setFilter('msa-borders', ['==', 'state_fips', stateFips]);
+          map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+          map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
 
-        // Zoom to state bounds
-        const bounds = new mapboxgl.LngLatBounds();
-        const coordinates = feature.geometry.coordinates[0];
-        coordinates.forEach((coord: number[]) => {
-          bounds.extend(coord as [number, number]);
-        });
-
-        map.current.fitBounds(bounds, {
-          padding: 50,
-          duration: 1000
-        });
+          // Zoom to bounds
+          map.current.fitBounds(bounds, {
+            padding: 50,
+            duration: 1000
+          });
+        }
       });
     });
 
@@ -164,17 +182,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     if (!map.current) return;
 
     if (viewMode === 'state') {
-      setSelectedState(null);
-      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-      
-      map.current.easeTo({
-        pitch: 45,
-        zoom: 2.5,
-        duration: 1000
-      });
+      resetToStateView();
     }
-  }, [viewMode]);
+  }, [viewMode, resetToStateView]);
 
   return (
     <div className={`relative ${className}`}>
