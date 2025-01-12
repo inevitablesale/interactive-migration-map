@@ -126,6 +126,9 @@ export type Database = {
           COUNTYNAME: string | null
           EMP: number | null
           ESTAB: number | null
+          MOVEDIN2020: number | null
+          MOVEDIN2021: number | null
+          MOVEDIN2022: number | null
           PAYANN: number | null
           PLACEFP: string | null
           PLACENAME: string | null
@@ -164,6 +167,9 @@ export type Database = {
           COUNTYNAME?: string | null
           EMP?: number | null
           ESTAB?: number | null
+          MOVEDIN2020?: number | null
+          MOVEDIN2021?: number | null
+          MOVEDIN2022?: number | null
           PAYANN?: number | null
           PLACEFP?: string | null
           PLACENAME?: string | null
@@ -202,6 +208,9 @@ export type Database = {
           COUNTYNAME?: string | null
           EMP?: number | null
           ESTAB?: number | null
+          MOVEDIN2020?: number | null
+          MOVEDIN2021?: number | null
+          MOVEDIN2022?: number | null
           PAYANN?: number | null
           PLACEFP?: string | null
           PLACENAME?: string | null
