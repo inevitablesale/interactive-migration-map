@@ -13,13 +13,15 @@ export function Hero() {
         <p className="text-lg md:text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
           Detect acquisition signals in accounting practices before they list. Our AI analyzes millions of data points to identify growth patterns.
         </p>
-        <button 
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-          className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"
-        >
-          <span className="text-sm uppercase tracking-wider mb-2">Explore the Map</span>
-          <ChevronDown className="w-6 h-6 animate-bounce" />
-        </button>
+        <div className="flex justify-center">
+          <button 
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+            className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"
+          >
+            <span className="text-sm uppercase tracking-wider mb-2">Explore the Map</span>
+            <ChevronDown className="w-6 h-6 animate-bounce" />
+          </button>
+        </div>
       </div>
     </div>
   );
