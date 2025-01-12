@@ -208,6 +208,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         url: 'mapbox://inevitablesale.29jcxgnm'
       });
 
+      // Base state layer
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -220,6 +221,22 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         }
       });
 
+      // Active state layer
+      map.current.addLayer({
+        'id': 'state-highlight',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.accent,
+          'fill-extrusion-height': mode === 'hero' ? 100000 : 50000,
+          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-base': mode === 'hero' ? 10000 : 5000
+        },
+        'filter': ['in', 'STATEFP', '']
+      });
+
+      // MSA layers (initially hidden)
       map.current.addLayer({
         'id': 'msa-fills',
         'type': 'fill',
@@ -294,11 +311,10 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
 
   useEffect(() => {
     if (map.current && mapLoadedRef.current && mode === 'analysis') {
-      map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-        'case',
-        ['in', ['get', 'STATEFP'], ['literal', activeStates.map(s => s.STATEFP)]],
-        MAP_COLORS.accent,
-        'transparent'
+      map.current.setFilter('state-highlight', [
+        'in',
+        'STATEFP',
+        ...activeStates.map(s => s.STATEFP)
       ]);
     }
   }, [activeStates, mode]);
