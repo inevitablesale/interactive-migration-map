@@ -6,14 +6,25 @@ import StateReportCard from './StateReportCard';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
-const COLORS = {
+const MAP_COLORS = {
   primary: '#037CFE',    // Electric Blue
   secondary: '#00FFE0',  // Cyan
   accent: '#FFF903',     // Yellow
   highlight: '#94EC0E',  // Lime Green
   active: '#FA0098',     // Hot Pink
-  inactive: '#000000'
+  inactive: '#000000'    // Black
 };
+
+const STATE_COLORS = [
+  '#037CFE', // Electric Blue
+  '#00FFE0', // Cyan
+  '#FFF903', // Yellow
+  '#94EC0E', // Lime Green
+  '#FA0098', // Hot Pink
+  '#9D00FF', // Electric Purple
+  '#FF3366', // Electric Pink
+  '#00FF66', // Electric Green
+];
 
 interface StateData {
   STATEFP: string;
@@ -37,8 +48,7 @@ const Map = () => {
   const currentStateIndexRef = useRef(0);
 
   const getStateColor = (index: number) => {
-    const colors = Object.values(COLORS).filter(color => color !== COLORS.inactive);
-    return colors[index % colors.length];
+    return STATE_COLORS[index % STATE_COLORS.length];
   };
 
   const updateActiveState = (state: StateData | null) => {
@@ -67,7 +77,7 @@ const Map = () => {
 
       map.current.easeTo({
         center: bounds.getCenter(),
-        pitch: 45, // Adjusted from 60 to 45 for less extreme angle
+        pitch: 45,
         bearing: Math.random() * 90 - 45,
         duration: 2000
       });
@@ -211,7 +221,7 @@ const Map = () => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': COLORS.inactive,
+          'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 10000,
           'fill-extrusion-opacity': 0.6
         }
@@ -226,7 +236,7 @@ const Map = () => {
           'fill-extrusion-color': [
             'case',
             ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            COLORS.primary,
+            getStateColor(currentStateIndexRef.current),
             'transparent'
           ],
           'fill-extrusion-height': [
@@ -246,7 +256,7 @@ const Map = () => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'line-color': COLORS.primary,
+          'line-color': MAP_COLORS.primary,
           'line-width': 1
         }
       });
@@ -277,7 +287,7 @@ const Map = () => {
     map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
       'case',
       ['==', ['get', 'STATEFP'], activeState?.STATEFP],
-      COLORS.active,
+      MAP_COLORS.active,
       'transparent'
     ]);
   }, [activeState]);

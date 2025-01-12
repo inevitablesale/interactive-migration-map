@@ -66,24 +66,25 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   const businessDensity = data.ESTAB && data.B23025_004E ? 
     (data.ESTAB / (data.B23025_004E / 1000)).toFixed(1) : null;
 
+  const REPORT_ACCENT_COLOR = '#FFF903'; // Yellow accent color for the report card
+
   return (
     <Card className="absolute bottom-8 right-8 w-[450px] bg-black/40 backdrop-blur-md border-white/10 text-white">
       <CardHeader className="py-3 px-6 border-b border-white/10">
         <CardTitle className="text-xl font-bold flex items-center gap-2">
-          <TrendingUpIcon className="w-5 h-5" style={{ color: stateColor }} />
+          <TrendingUpIcon className="w-5 h-5" style={{ color: REPORT_ACCENT_COLOR }} />
           Market Intelligence Report
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
-        {/* Economic Vitality Section */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: stateColor }}>
+          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
             Economic Vitality
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <BuildingIcon className="w-4 h-4" style={{ color: stateColor }} />
+                <BuildingIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
                 <p className="text-sm text-white">Business Activity</p>
               </div>
               <p className="text-2xl font-semibold">{formatNumber(data.ESTAB)} firms</p>
@@ -93,7 +94,7 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
             </div>
             <div className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <UsersIcon className="w-4 h-4" style={{ color: stateColor }} />
+                <UsersIcon className="w-4 h-4" style={{ color: REPORT_ACCENT_COLOR }} />
                 <p className="text-sm text-white">Workforce</p>
               </div>
               <p className="text-2xl font-semibold">{employmentRate}%</p>
@@ -104,9 +105,8 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
           </div>
         </div>
 
-        {/* Market Indicators Section */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: stateColor }}>
+          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
             Market Indicators
           </h3>
           <div className="grid grid-cols-2 gap-4">
@@ -127,9 +127,8 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
           </div>
         </div>
 
-        {/* Key Insights Section */}
         <div className="space-y-2">
-          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: stateColor }}>
+          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
             Key Insights
           </h3>
           <div className="bg-white/5 p-4 rounded-lg space-y-2">
