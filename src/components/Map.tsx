@@ -73,13 +73,13 @@ const Map = () => {
           });
         }
 
-        // Adjust the padding and camera settings for a more eye-level view
+        // Adjust padding and camera settings for a more distant, eye-level view
         await map.current.fitBounds(bounds, {
-          padding: { top: 100, bottom: 100, left: 200, right: 200 },
-          duration: 1000,
-          pitch: 60, // Adjusted for more eye-level view
+          padding: { top: 150, bottom: 150, left: 300, right: 300 }, // Increased padding
+          duration: 1500, // Slightly longer animation
+          pitch: 45, // Lower pitch for better perspective
           bearing: 0,
-          maxZoom: 5.5 // Limit how close we can zoom
+          maxZoom: 4.8 // Reduced max zoom to keep distance
         });
       }
     } catch (err) {
