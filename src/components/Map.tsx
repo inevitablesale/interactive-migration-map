@@ -24,6 +24,7 @@ const Map = () => {
   const isAnimating = useRef(false);
   const animationTimeoutRef = useRef<number | null>(null);
   const mapLoadedRef = useRef(false);
+  const mapInitializedRef = useRef(false);
 
   // Cleanup function to handle map and animation resources
   const cleanup = () => {
@@ -36,6 +37,12 @@ const Map = () => {
       map.current.remove();
       map.current = null;
     }
+
+    mapLoadedRef.current = false;
+    mapInitializedRef.current = false;
+    isAnimating.current = false;
+    previousStateId.current = null;
+    currentStateIndex.current = 0;
   };
 
   useEffect(() => {
@@ -62,7 +69,10 @@ const Map = () => {
           B25077_001E: item.B25077_001E
         }));
 
-        initializeMap();
+        if (!mapInitializedRef.current) {
+          initializeMap();
+          mapInitializedRef.current = true;
+        }
       } catch (err) {
         console.error('Error in fetchStateData:', err);
       }
@@ -163,25 +173,31 @@ const Map = () => {
 
           try {
             if (previousStateId.current) {
-              await new Promise<void>((resolve) => {
-                if (!map.current) return resolve();
-                map.current.setFeatureState(
-                  {
-                    source: 'states',
-                    sourceLayer: 'tl_2020_us_state-52k5uw',
-                    id: previousStateId.current
-                  },
-                  {
-                    score: 0,
-                    height: 0
-                  }
-                );
-                setTimeout(resolve, 1000);
-              });
+              if (!map.current || !mapLoadedRef.current) {
+                isAnimating.current = false;
+                return;
+              }
+
+              map.current.setFeatureState(
+                {
+                  source: 'states',
+                  sourceLayer: 'tl_2020_us_state-52k5uw',
+                  id: previousStateId.current
+                },
+                {
+                  score: 0,
+                  height: 0
+                }
+              );
+
+              await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
             const state = stateDataRef.current[currentStateIndex.current];
-            if (!state?.STATEFP || !map.current || !mapLoadedRef.current) return;
+            if (!state?.STATEFP || !map.current || !mapLoadedRef.current) {
+              isAnimating.current = false;
+              return;
+            }
 
             const normalizeValue = (value: number | null, min: number, max: number) => {
               if (value === null) return 0;
@@ -213,14 +229,17 @@ const Map = () => {
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
           } finally {
             isAnimating.current = false;
-            // Use ref for timeout to allow cleanup
-            animationTimeoutRef.current = window.setTimeout(animateNextState, 3000);
+            if (mapLoadedRef.current) {
+              animationTimeoutRef.current = window.setTimeout(animateNextState, 3000);
+            }
           }
         };
 
         // Start animation only after map is fully loaded
         map.current.once('idle', () => {
-          animateNextState();
+          if (mapLoadedRef.current) {
+            animateNextState();
+          }
         });
       });
     };
