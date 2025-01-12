@@ -176,8 +176,10 @@ const Map = () => {
           
           // Fly to clicked state
           const bounds = new mapboxgl.LngLatBounds();
-          const coordinates = e.features[0].geometry.coordinates[0];
-          coordinates.forEach((coord: any) => {
+          // Type assertion to handle the Polygon geometry type
+          const geometry = e.features[0].geometry as GeoJSON.Polygon;
+          const coordinates = geometry.coordinates[0];
+          coordinates.forEach((coord: [number, number]) => {
             bounds.extend(coord);
           });
 
