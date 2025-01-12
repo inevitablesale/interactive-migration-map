@@ -9,12 +9,20 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJ
 const MAP_COLORS = {
   primary: '#037CFE',    // Electric Blue
   secondary: '#00FFE0',  // Cyan
-  accent: '#0EA5E9',     // Ocean Blue (changed for electric effect)
+  accent: '#0EA5E9',     // Ocean Blue
   highlight: '#94EC0E',  // Lime Green
   active: '#FA0098',     // Hot Pink
   inactive: '#1a365d',   // Dark Blue
   msa: '#FA0098'        // MSA Color (Hot Pink)
 };
+
+// Electric colors for cycling in hero mode
+const ELECTRIC_COLORS = [
+  '#8B5CF6',  // Vivid Purple
+  '#D946EF',  // Magenta Pink
+  '#F97316',  // Bright Orange
+  '#0EA5E9'   // Ocean Blue
+];
 
 interface MapProps {
   mode?: 'hero' | 'analysis';
@@ -33,6 +41,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
   const lastToastTimeRef = useRef<number>(0);
   const [showMSA, setShowMSA] = useState(false);
   const [activeStateFP, setActiveStateFP] = useState<string | null>(null);
+  const [currentColorIndex, setCurrentColorIndex] = useState(0);
 
   const updateActiveState = (state: any) => {
     if (mode === 'hero') {
@@ -99,10 +108,14 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         flyToState(nextState.STATEFP);
         
         if (map.current) {
+          // Update the color and increment the index
+          const currentColor = ELECTRIC_COLORS[currentColorIndex];
+          setCurrentColorIndex((prevIndex) => (prevIndex + 1) % ELECTRIC_COLORS.length);
+          
           map.current.setPaintProperty('state-highlight', 'fill-extrusion-color', [
             'case',
             ['==', ['get', 'STATEFP'], nextState.STATEFP],
-            MAP_COLORS.accent,
+            currentColor,
             'transparent'
           ]);
         }
@@ -248,7 +261,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': mode === 'hero' ? MAP_COLORS.accent : MAP_COLORS.highlight,
+          'fill-extrusion-color': mode === 'hero' ? ELECTRIC_COLORS[0] : MAP_COLORS.highlight,
           'fill-extrusion-height': mode === 'hero' ? 200000 : 50000,
           'fill-extrusion-opacity': 0.8,
           'fill-extrusion-base': mode === 'hero' ? 100000 : 5000
