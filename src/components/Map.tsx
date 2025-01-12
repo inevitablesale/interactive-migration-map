@@ -48,7 +48,7 @@ const Map = () => {
     const nextIndex = (currentIndex + 1) % locations.length;
     const nextLocation = locations[nextIndex];
 
-    if (map.current && !map.current.removed) {
+    if (map.current && !map.current._removed) {
       map.current.easeTo({
         center: [nextLocation.longitude, nextLocation.latitude],
         zoom: 8,
@@ -90,7 +90,7 @@ const Map = () => {
       );
 
       mapInstance.on('style.load', () => {
-        if (!mapInstance || mapInstance.removed) return;
+        if (!mapInstance || mapInstance._removed) return;
         
         mapInstance.setFog({
           color: 'rgb(0, 0, 0)',
@@ -293,7 +293,7 @@ const Map = () => {
         if (animationRef.current) {
           window.clearTimeout(animationRef.current);
         }
-        if (map.current && !map.current.removed) {
+        if (map.current && !map.current._removed) {
           map.current.remove();
         }
       };
