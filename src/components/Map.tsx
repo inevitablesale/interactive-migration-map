@@ -42,44 +42,50 @@ const Map = () => {
     }
   };
 
+  // Function to fly to a state
+  const flyToState = (stateId: string) => {
+    if (!map.current) return;
+    
+    const stateFeatures = map.current.querySourceFeatures('states', {
+      sourceLayer: 'tl_2020_us_state-52k5uw',
+      filter: ['==', ['get', 'STATEFP'], stateId]
+    });
+
+    if (stateFeatures.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds();
+      const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
+      const coordinates = geometry.coordinates[0];
+      coordinates.forEach((coord: [number, number]) => {
+        bounds.extend(coord);
+      });
+
+      map.current.fitBounds(bounds, {
+        padding: 100,
+        pitch: 60,
+        bearing: 0,
+        duration: 2000
+      });
+    }
+  };
+
   // Function to start cycling through states
   const startCyclingStates = () => {
     if (cycleIntervalRef.current) return;
     
     cycleIntervalRef.current = setInterval(() => {
-      if (stateDataRef.current.length === 0) return;
+      if (stateDataRef.current.length === 0 || !mapLoadedRef.current) return;
       
       currentStateIndexRef.current = (currentStateIndexRef.current + 1) % stateDataRef.current.length;
       const nextState = stateDataRef.current[currentStateIndexRef.current];
       updateActiveState(nextState);
 
-      // Fly to the next state if map is available
-      if (map.current && nextState) {
-        const stateFeatures = map.current.querySourceFeatures('states', {
-          sourceLayer: 'tl_2020_us_state-52k5uw',
-          filter: ['==', ['get', 'STATEFP'], nextState.STATEFP]
-        });
-
-        if (stateFeatures.length > 0) {
-          const bounds = new mapboxgl.LngLatBounds();
-          const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
-          const coordinates = geometry.coordinates[0];
-          coordinates.forEach((coord: [number, number]) => {
-            bounds.extend(coord);
-          });
-
-          map.current.fitBounds(bounds, {
-            padding: 100,
-            pitch: 60,
-            bearing: 0,
-            duration: 2000
-          });
-        }
+      // Ensure map flies to the next state
+      if (nextState) {
+        flyToState(nextState.STATEFP);
       }
-    }, 4000); // Changed to 4 seconds as requested
+    }, 4000);
   };
 
-  // Add scroll handler to stop cycling when user scrolls to analysis section
   useEffect(() => {
     const handleScroll = () => {
       const analysisSection = document.querySelector('.analysis-section');
@@ -130,7 +136,11 @@ const Map = () => {
       stateDataRef.current = data || [];
 
       if (data && data.length > 0) {
-        setActiveState(data[0]);
+        updateActiveState(data[0]);
+        // Fly to initial state
+        if (mapLoadedRef.current) {
+          flyToState(data[0].STATEFP);
+        }
       }
 
       if (!mapInitializedRef.current) {
@@ -268,19 +278,18 @@ const Map = () => {
     });
   };
 
-  // Start cycling after data is fetched
+  // Start cycling after data is fetched and map is loaded
   useEffect(() => {
-    if (stateDataRef.current.length > 0 && !cycleIntervalRef.current) {
+    if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
       startCyclingStates();
     }
-  }, [stateDataRef.current]);
+  }, [stateDataRef.current, mapLoadedRef.current]);
 
   useEffect(() => {
     fetchStateData();
     return cleanup;
   }, []);
 
-  // Update map when active state changes
   useEffect(() => {
     if (!map.current || !mapLoadedRef.current) return;
 
