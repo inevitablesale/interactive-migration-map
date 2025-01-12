@@ -14,12 +14,10 @@ interface StateData {
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<mapboxgl.Map | null>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const stateDataRef = useRef<StateData[]>([]);
 
   useEffect(() => {
-    let stateData: StateData[] = [];
-    let map: mapboxgl.Map | null = null;
-
     const fetchStateData = async () => {
       try {
         const { data, error } = await supabase
@@ -32,7 +30,7 @@ const Map = () => {
           return;
         }
 
-        stateData = data || [];
+        stateDataRef.current = data || [];
         initializeMap();
       } catch (err) {
         console.error('Error in fetchStateData:', err);
@@ -40,11 +38,11 @@ const Map = () => {
     };
 
     const initializeMap = () => {
-      if (!mapContainer.current) return;
+      if (!mapContainer.current || map.current) return;
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
-      map = new mapboxgl.Map({
+      map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
         zoom: 3,
@@ -52,23 +50,21 @@ const Map = () => {
         pitch: 45,
       });
 
-      mapInstance.current = map;
-
-      map.addControl(new mapboxgl.NavigationControl({
+      map.current.addControl(new mapboxgl.NavigationControl({
         visualizePitch: true,
       }), 'top-right');
 
-      map.on('style.load', () => {
-        if (!map || !stateData.length) return;
+      map.current.on('style.load', () => {
+        if (!map.current || !stateDataRef.current.length) return;
 
-        map.addSource('states', {
+        map.current.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        const empValues = stateData.map(d => d.EMP).filter((v): v is number => v != null);
-        const payannValues = stateData.map(d => d.PAYANN).filter((v): v is number => v != null);
-        const estabValues = stateData.map(d => d.ESTAB).filter((v): v is number => v != null);
+        const empValues = stateDataRef.current.map(d => d.EMP).filter((v): v is number => v != null);
+        const payannValues = stateDataRef.current.map(d => d.PAYANN).filter((v): v is number => v != null);
+        const estabValues = stateDataRef.current.map(d => d.ESTAB).filter((v): v is number => v != null);
 
         const minEmp = Math.min(...empValues);
         const maxEmp = Math.max(...empValues);
@@ -77,7 +73,7 @@ const Map = () => {
         const minEstab = Math.min(...estabValues);
         const maxEstab = Math.max(...estabValues);
 
-        map.addLayer({
+        map.current.addLayer({
           'id': 'state-fills',
           'type': 'fill',
           'source': 'states',
@@ -98,7 +94,7 @@ const Map = () => {
           }
         });
 
-        map.addLayer({
+        map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
@@ -109,8 +105,8 @@ const Map = () => {
           }
         });
 
-        stateData.forEach(state => {
-          if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB) return;
+        stateDataRef.current.forEach(state => {
+          if (!state.STATEFP || !state.EMP || !state.PAYANN || !state.ESTAB || !map.current) return;
 
           const normalizedEmp = (state.EMP - minEmp) / (maxEmp - minEmp);
           const normalizedPayann = (state.PAYANN - minPayann) / (maxPayann - minPayann);
@@ -122,18 +118,16 @@ const Map = () => {
             (normalizedEstab * 0.2)
           );
 
-          if (map) {
-            map.setFeatureState(
-              {
-                source: 'states',
-                sourceLayer: 'tl_2020_us_state-52k5uw',
-                id: state.STATEFP
-              },
-              {
-                score: compositeScore
-              }
-            );
-          }
+          map.current.setFeatureState(
+            {
+              source: 'states',
+              sourceLayer: 'tl_2020_us_state-52k5uw',
+              id: state.STATEFP
+            },
+            {
+              score: compositeScore
+            }
+          );
         });
       });
     };
@@ -141,9 +135,9 @@ const Map = () => {
     fetchStateData();
 
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
       }
     };
   }, []);
