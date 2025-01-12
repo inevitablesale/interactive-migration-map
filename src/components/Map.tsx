@@ -163,10 +163,19 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
       map.current.setFilter('msa-fills', msaFilter);
       map.current.setFilter('msa-borders', msaFilter);
 
-      const { data: msaData } = await supabase
+      // Updated query to join with msa_state_crosswalk
+      const { data: msaData, error } = await supabase
         .from('region_data')
-        .select('*')
-        .eq('STATEFP', stateId);
+        .select(`
+          *,
+          msa_state_crosswalk!inner(*)
+        `)
+        .eq('msa_state_crosswalk.state_fips', stateId);
+
+      if (error) {
+        console.error('Error fetching MSA data:', error);
+        return;
+      }
 
       console.log('MSA Data:', msaData);
     }
