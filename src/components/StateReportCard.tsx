@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, BuildingIcon, UsersIcon, HomeIcon, DatabaseIcon } from 'lucide-react';
+import { TrendingUpIcon, BuildingIcon, UsersIcon } from 'lucide-react';
 
 interface StateData {
   STATEFP: string;
@@ -119,23 +119,6 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
             <p className="text-xs text-gray-300">
               • Housing market indicates {data.B25077_001E && data.B25077_001E > 400000 ? 'premium' : 'accessible'} pricing
             </p>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="text-xs font-medium uppercase tracking-wider" style={{ color: REPORT_ACCENT_COLOR }}>
-            Data Sources
-          </h3>
-          <div className="bg-white/5 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <DatabaseIcon className="w-3 h-3" style={{ color: REPORT_ACCENT_COLOR }} />
-              <p className="text-xs text-white">Primary Sources</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs text-gray-300">• US Census Bureau ACS Data</p>
-              <p className="text-xs text-gray-300">• Bureau of Labor Statistics</p>
-              <p className="text-xs text-gray-300">• County Business Patterns</p>
-            </div>
           </div>
         </div>
       </CardContent>

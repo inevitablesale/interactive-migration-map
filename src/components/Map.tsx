@@ -200,12 +200,16 @@ const Map = () => {
       interactive: true,
     });
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'top-right'
-    );
+    // Only add navigation controls if not in hero section
+    const isHeroSection = document.querySelector('.hero-section');
+    if (!isHeroSection) {
+      map.current.addControl(
+        new mapboxgl.NavigationControl({
+          visualizePitch: true,
+        }),
+        'top-right'
+      );
+    }
 
     map.current.on('style.load', () => {
       if (!map.current) return;

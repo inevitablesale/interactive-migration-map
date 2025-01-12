@@ -16,12 +16,10 @@ export function Hero() {
   const [activeState, setActiveState] = useState<StateData | null>(null);
   const [showHeroText, setShowHeroText] = useState(true);
 
-  // Listen for custom event from Map component
   useEffect(() => {
     const handleStateChange = (event: CustomEvent) => {
       const stateData = (event as CustomEvent<StateData>).detail;
       setActiveState(stateData);
-      // Only hide hero text on first state load
       if (!activeState) {
         setShowHeroText(false);
       }
@@ -34,7 +32,7 @@ export function Hero() {
   }, [activeState]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-white px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen text-white px-4 hero-section">
       {showHeroText ? (
         <div className="text-center max-w-4xl animate-fade-in">
           <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">AI-POWERED MARKET INTELLIGENCE</p>
