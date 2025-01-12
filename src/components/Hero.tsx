@@ -22,10 +22,15 @@ export function Hero() {
       const stateData = customEvent.detail;
       setActiveState(stateData);
 
-      // Show simplified toast with key metrics
+      // Calculate average payroll
+      const avgPayroll = stateData.PAYANN && stateData.EMP 
+        ? Math.round(stateData.PAYANN / stateData.EMP)
+        : 0;
+
+      // Show toast with key metrics
       toast({
-        title: "Market Update",
-        description: `${stateData.ESTAB?.toLocaleString()} businesses • $${(stateData.B25077_001E || 0).toLocaleString()} median home value`,
+        title: `State ${stateData.STATEFP}`,
+        description: `${stateData.ESTAB?.toLocaleString()} firms • $${avgPayroll.toLocaleString()} avg payroll`,
         duration: 2000,
       });
     };
