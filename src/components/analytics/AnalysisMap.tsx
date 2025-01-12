@@ -68,7 +68,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           'fill-extrusion-height': 10000,
           'fill-extrusion-opacity': 0.6
         },
-        'minzoom': 0  // Explicitly set minzoom for states
+        'minzoom': 0
       });
 
       // Add MSA layer
@@ -90,7 +90,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'layout': {
           'visibility': 'none'
         },
-        'minzoom': 0  // Set minzoom to 0 to match state layer visibility
+        'minzoom': 0
       });
 
       // Add borders
@@ -117,7 +117,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'layout': {
           'visibility': 'none'
         },
-        'minzoom': 0  // Set minzoom to 0 to match state borders visibility
+        'minzoom': 0
       });
     });
 
@@ -132,6 +132,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   // Handle view mode changes
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
+
+    // Force a repaint by triggering a resize event
+    map.current.resize();
 
     if (viewMode === 'state') {
       map.current.setLayoutProperty('state-base', 'visibility', 'visible');
