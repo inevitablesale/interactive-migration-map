@@ -7,7 +7,7 @@ import StateReportCard from './StateReportCard';
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const COLORS = {
-  primary: '#FCD34D', // Warmer yellow
+  primary: '#FCD34D', // Warm yellow
   secondary: '#222222', // Black
   inactive: '#000000', // Black for states without data
 };
@@ -58,10 +58,9 @@ const Map = () => {
     const nextState = stateDataRef.current[nextIndex];
     setActiveState(nextState);
     
-    // Fly to the new state with birdseye view
     if (map.current && nextState) {
       map.current.flyTo({
-        center: [-95.7129, 37.0902], // Center of US
+        center: [-95.7129, 37.0902],
         zoom: 3.5,
         pitch: 60,
         bearing: 0,
@@ -88,7 +87,6 @@ const Map = () => {
         statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
         stateDataRef.current = data || [];
 
-        // Set first state as active by default
         if (data && data.length > 0) {
           setActiveState(data[0]);
         }
@@ -98,7 +96,6 @@ const Map = () => {
           mapInitializedRef.current = true;
         }
 
-        // Start cycling through states
         cycleIntervalRef.current = setInterval(cycleToNextState, 5000);
       } catch (err) {
         console.error('Error in fetchStateData:', err);
@@ -120,7 +117,7 @@ const Map = () => {
         interactive: true,
       });
 
-      // Add navigation controls for better interactivity
+      // Add navigation controls
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       map.current.on('style.load', () => {
@@ -132,7 +129,7 @@ const Map = () => {
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Add base layer for all states (black)
+        // Base layer for all states (black)
         map.current.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
@@ -145,7 +142,7 @@ const Map = () => {
           }
         });
 
-        // Add layer for active state only with enhanced 3D effect
+        // Layer for active state with enhanced 3D effect
         map.current.addLayer({
           'id': 'state-active',
           'type': 'fill-extrusion',
@@ -156,7 +153,7 @@ const Map = () => {
             'fill-extrusion-height': [
               'case',
               ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-              100000, // Increased height for better 3D effect
+              100000,
               0
             ],
             'fill-extrusion-opacity': 0.8,
@@ -164,14 +161,14 @@ const Map = () => {
           }
         });
 
-        // Add borders with warmer yellow color
+        // Add borders with warm yellow color
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'line-color': '#FCD34D',
+            'line-color': COLORS.primary,
             'line-width': 1
           }
         });
@@ -184,7 +181,6 @@ const Map = () => {
         const clickedStateId = e.features[0].properties?.STATEFP;
         if (!clickedStateId || !statesWithDataRef.current.has(clickedStateId)) return;
 
-        // Clear the auto-cycle interval when user interacts
         if (cycleIntervalRef.current) {
           clearInterval(cycleIntervalRef.current);
           cycleIntervalRef.current = null;
@@ -196,7 +192,7 @@ const Map = () => {
         }
       });
 
-      // Add hover effect for better interactivity
+      // Add hover effects
       map.current.on('mousemove', 'state-base', () => {
         map.current!.getCanvas().style.cursor = 'pointer';
       });
