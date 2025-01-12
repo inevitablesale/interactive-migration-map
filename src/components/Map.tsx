@@ -10,9 +10,9 @@ interface StateData {
   EMP: number | null;
   PAYANN: number | null;
   ESTAB: number | null;
-  B19013_001E: number | null; // Median household income
-  B23025_004E: number | null; // Employment
-  B25077_001E: number | null; // Median home value
+  B19013_001E: number | null;
+  B23025_004E: number | null;
+  B25077_001E: number | null;
 }
 
 const Map = () => {
@@ -20,6 +20,7 @@ const Map = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const stateDataRef = useRef<StateData[]>([]);
   const currentStateIndex = useRef(0);
+  const previousStateId = useRef<string | null>(null);
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -130,24 +131,27 @@ const Map = () => {
           }
         });
 
-        // Animate states one at a time
-        const animateNextState = () => {
+        // Animate states one at a time with lowering previous state
+        const animateNextState = async () => {
           if (!map.current) return;
 
-          // Reset previous state
-          if (currentStateIndex.current > 0) {
-            const prevState = stateDataRef.current[currentStateIndex.current - 1];
-            map.current.setFeatureState(
-              {
-                source: 'states',
-                sourceLayer: 'tl_2020_us_state-52k5uw',
-                id: prevState.STATEFP
-              },
-              {
-                score: 0,
-                height: 0
-              }
-            );
+          // Lower previous state first
+          if (previousStateId.current) {
+            await new Promise<void>((resolve) => {
+              map.current?.setFeatureState(
+                {
+                  source: 'states',
+                  sourceLayer: 'tl_2020_us_state-52k5uw',
+                  id: previousStateId.current
+                },
+                {
+                  score: 0,
+                  height: 0
+                }
+              );
+              // Wait for lowering animation
+              setTimeout(resolve, 1000);
+            });
           }
 
           // Animate current state
@@ -169,6 +173,7 @@ const Map = () => {
             normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
           );
 
+          // Set current state
           map.current.setFeatureState(
             {
               source: 'states',
@@ -181,11 +186,14 @@ const Map = () => {
             }
           );
 
+          // Store current state as previous for next iteration
+          previousStateId.current = state.STATEFP;
+
           // Move to next state
           currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
           
-          // Schedule next animation
-          setTimeout(animateNextState, 3000); // Change state every 3 seconds
+          // Schedule next animation after current state has been shown
+          setTimeout(animateNextState, 3000);
         };
 
         // Start the animation
