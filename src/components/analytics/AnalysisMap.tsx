@@ -26,9 +26,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const resetToStateView = useCallback(() => {
-    if (!map.current) return;
+    if (!map.current || !mapLoaded) return;
     
     setSelectedState(null);
     map.current.setFilter('msa-base', ['==', 'state_fips', '']);
@@ -41,7 +42,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       zoom: 2.5,
       duration: 1000
     });
-  }, []);
+  }, [mapLoaded]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -68,6 +69,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     map.current.on('style.load', () => {
       if (!map.current) return;
 
+      // Add sources
       map.current.addSource('states', {
         type: 'vector',
         url: 'mapbox://inevitablesale.9fnr921z'
@@ -172,6 +174,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
       });
+
+      setMapLoaded(true);
     });
 
     return () => {
@@ -183,12 +187,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   }, []);
 
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current || !mapLoaded) return;
 
     if (viewMode === 'state') {
       resetToStateView();
     }
-  }, [viewMode, resetToStateView]);
+  }, [viewMode, resetToStateView, mapLoaded]);
 
   return (
     <div className={`relative ${className}`}>
