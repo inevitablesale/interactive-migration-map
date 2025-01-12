@@ -293,8 +293,8 @@ const Map = () => {
         if (animationRef.current) {
           window.clearTimeout(animationRef.current);
         }
-        if (map.current && !map.current._removed) {
-          map.current.remove();
+        if (mapInstance && !mapInstance._removed) {
+          mapInstance.remove();
         }
       };
     } catch (error) {
