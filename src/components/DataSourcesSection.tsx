@@ -1,49 +1,83 @@
-import { Database, Globe, Info, Server } from "lucide-react";
+import { Database, Globe, Info, Server, Brain, LineChart, ShieldCheck, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useState } from "react";
 
 export const DataSourcesSection = () => {
+  const [activeTab, setActiveTab] = useState("transform");
+
+  const transformations = {
+    collect: {
+      title: "Data Collection",
+      description: "Comprehensive data gathering from authoritative sources",
+      steps: [
+        "Census Bureau demographic data",
+        "Bureau of Labor Statistics employment metrics",
+        "County Business Patterns statistics"
+      ]
+    },
+    analyze: {
+      title: "Smart Analysis",
+      description: "Advanced analytics to extract meaningful insights",
+      steps: [
+        "Market penetration metrics",
+        "Growth potential indicators",
+        "Competitive landscape analysis"
+      ]
+    },
+    decide: {
+      title: "Decision Support",
+      description: "Turn insights into actionable strategies",
+      steps: [
+        "Opportunity scoring",
+        "Risk assessment metrics",
+        "Investment case builder"
+      ]
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-black/90 relative z-20 px-4 py-16">
+    <div className="min-h-screen bg-black/95 relative z-20 px-4 py-16">
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
             How Canary Works
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Leveraging comprehensive data sources and advanced analytics to provide actionable insights for accounting practice acquisitions
+            Transforming complex market data into clear, actionable acquisition strategies
           </p>
         </div>
 
-        <Tabs defaultValue="data" className="w-full">
+        <Tabs defaultValue="transform" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto mb-8">
-            <TabsTrigger value="data">Data Sources</TabsTrigger>
+            <TabsTrigger value="transform">Data Journey</TabsTrigger>
             <TabsTrigger value="pricing">Pricing</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="data" className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Database className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Primary Data Sources</h3>
-                </div>
-                <ul className="space-y-3 text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    US Census Bureau ACS Data - Demographic and economic indicators
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Bureau of Labor Statistics - Employment and wage data
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    County Business Patterns - Detailed business statistics
-                  </li>
-                </ul>
-              </Card>
+          <TabsContent value="transform" className="space-y-8">
+            <div className="grid md:grid-cols-3 gap-6">
+              {Object.entries(transformations).map(([key, transform]) => (
+                <Card key={key} className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                  <div className="flex items-center gap-3 mb-4">
+                    {key === "collect" && <Database className="w-5 h-5 text-yellow-400" />}
+                    {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
+                    {key === "decide" && <LineChart className="w-5 h-5 text-yellow-400" />}
+                    <h3 className="text-lg font-semibold text-white">{transform.title}</h3>
+                  </div>
+                  <p className="text-gray-300 mb-4">{transform.description}</p>
+                  <ul className="space-y-3">
+                    {transform.steps.map((step, index) => (
+                      <li key={index} className="flex items-start gap-2 text-gray-300">
+                        <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
 
+            <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="flex items-center gap-3 mb-4">
                   <Globe className="w-5 h-5 text-yellow-400" />
@@ -51,60 +85,37 @@ export const DataSourcesSection = () => {
                 </div>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    State-level economic indicators and firm density
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    State-level economic indicators
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
                     MSA (Metropolitan Statistical Area) analysis
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    County-level demographic and business data
-                  </li>
-                </ul>
-              </Card>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Server className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Data Processing</h3>
-                </div>
-                <ul className="space-y-3 text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Real-time data aggregation and analysis
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Advanced filtering and customization options
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Predictive analytics for growth potential
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    County-level demographic insights
                   </li>
                 </ul>
               </Card>
 
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="flex items-center gap-3 mb-4">
-                  <Info className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Key Metrics</h3>
+                  <ShieldCheck className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">Data Quality</h3>
                 </div>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Firm density and distribution analysis
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    Real-time data aggregation
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Employee counts and revenue metrics
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    Advanced filtering options
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Market penetration and growth indicators
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    Predictive analytics
                   </li>
                 </ul>
               </Card>
@@ -121,19 +132,19 @@ export const DataSourcesSection = () => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">
-                  Perfect for curious buyers or first-time users exploring basic insights
+                  Perfect for exploring basic insights
                 </p>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Unlimited access to anonymized data
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    Access to anonymized data
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    MSA-level heatmaps and trends
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    Basic MSA-level heatmaps
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
                     Weekly insights newsletter
                   </li>
                 </ul>
@@ -147,23 +158,23 @@ export const DataSourcesSection = () => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">
-                  For active buyers needing detailed, actionable data
+                  For active buyers needing detailed insights
                 </p>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
                     Detailed city-level insights
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    Access to actual firm listings
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    Access to firm listings
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
                     Custom filters and alerts
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
                     Downloadable reports
                   </li>
                 </ul>
