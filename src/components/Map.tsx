@@ -55,7 +55,20 @@ const Map = () => {
       : -1;
     
     const nextIndex = (currentIndex + 1) % stateDataRef.current.length;
-    setActiveState(stateDataRef.current[nextIndex]);
+    const nextState = stateDataRef.current[nextIndex];
+    setActiveState(nextState);
+    
+    // Fly to the new state with birdseye view
+    if (map.current && nextState) {
+      map.current.flyTo({
+        center: [-95.7129, 37.0902], // Center of US
+        zoom: 3.5,
+        pitch: 60,
+        bearing: 0,
+        duration: 2000,
+        essential: true
+      });
+    }
   };
 
   useEffect(() => {
@@ -100,11 +113,15 @@ const Map = () => {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/dark-v11',
-        zoom: 3,
+        zoom: 3.5,
         center: [-95.7129, 37.0902],
-        pitch: 45,
+        pitch: 60,
+        bearing: 0,
         interactive: true,
       });
+
+      // Add navigation controls for better interactivity
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       map.current.on('style.load', () => {
         if (!map.current) return;
@@ -128,7 +145,7 @@ const Map = () => {
           }
         });
 
-        // Add layer for active state only
+        // Add layer for active state only with enhanced 3D effect
         map.current.addLayer({
           'id': 'state-active',
           'type': 'fill-extrusion',
@@ -139,10 +156,11 @@ const Map = () => {
             'fill-extrusion-height': [
               'case',
               ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-              500000,
+              100000, // Increased height for better 3D effect
               0
             ],
-            'fill-extrusion-opacity': 0.8
+            'fill-extrusion-opacity': 0.8,
+            'fill-extrusion-base': 0
           }
         });
 
@@ -177,6 +195,15 @@ const Map = () => {
           setActiveState(newActiveState);
         }
       });
+
+      // Add hover effect for better interactivity
+      map.current.on('mousemove', 'state-base', () => {
+        map.current!.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.current.on('mouseleave', 'state-base', () => {
+        map.current!.getCanvas().style.cursor = '';
+      });
     };
 
     fetchStateData();
@@ -190,7 +217,7 @@ const Map = () => {
     map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
       'case',
       ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-      500000,
+      100000,
       0
     ]);
   }, [activeState]);
