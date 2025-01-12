@@ -19,6 +19,8 @@ interface AnalysisMapProps {
   className?: string;
 }
 
+type Position = [number, number];
+
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -151,8 +153,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           const bounds = new mapboxgl.LngLatBounds();
           const coords = geometry.type === 'Polygon' ? [geometry.coordinates[0]] : geometry.coordinates[0];
           
-          coords.forEach((coord: number[]) => {
-            bounds.extend(coord as [number, number]);
+          coords.forEach((coord: Position[]) => {
+            coord.forEach((position: Position) => {
+              bounds.extend(position);
+            });
           });
 
           // Update MSA filters and visibility
