@@ -34,9 +34,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
-      zoom: 3,
+      zoom: 2.5, // Lower initial zoom level
       center: [-98.5795, 39.8283],
-      pitch: 45,
+      pitch: 60,
       bearing: 0,
       interactive: true,
     });
@@ -52,7 +52,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       if (!map.current) return;
       setMapLoaded(true);
 
-      // Add state layer
       map.current.addSource('states', {
         type: 'vector',
         url: 'mapbox://inevitablesale.9fnr921z'
@@ -65,12 +64,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': 20000,
-          'fill-extrusion-opacity': 0.6
+          'fill-extrusion-height': 15000,
+          'fill-extrusion-opacity': 0.4  // Reduced opacity for states
         }
       });
 
-      // Add MSA layer with enhanced visibility
       map.current.addSource('msas', {
         type: 'vector',
         url: 'mapbox://inevitablesale.29jcxgnm'
@@ -83,16 +81,15 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_cbsa-aoky0u',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.secondary,
-          'fill-extrusion-height': 50000,
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 0
+          'fill-extrusion-height': 100000, // Increased height for better visibility
+          'fill-extrusion-opacity': 0.9,  // Increased opacity
+          'fill-extrusion-base': 15000    // Start from state height
         },
         'layout': {
           'visibility': 'none'
         }
       });
 
-      // Add borders with enhanced visibility
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -112,8 +109,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_cbsa-aoky0u',
         'paint': {
           'line-color': MAP_COLORS.secondary,
-          'line-width': 1.5,
-          'line-opacity': 0.8
+          'line-width': 2,
+          'line-opacity': 1
         },
         'layout': {
           'visibility': 'none'
@@ -129,11 +126,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     };
   }, []);
 
-  // Handle view mode changes with improved layer toggling
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
-    // Force a repaint by triggering a resize
     requestAnimationFrame(() => {
       map.current?.resize();
     });
@@ -144,22 +139,20 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setLayoutProperty('msa-base', 'visibility', 'none');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
       
-      // Adjust camera for state view
       map.current.easeTo({
         pitch: 45,
-        zoom: 3,
+        zoom: 2.5,
         duration: 1000
       });
     } else {
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+      map.current.setLayoutProperty('state-base', 'visibility', 'visible'); // Keep states visible
+      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
       
-      // Adjust camera for MSA view
       map.current.easeTo({
         pitch: 60,
-        zoom: 3,
+        zoom: 2.5,
         duration: 1000
       });
     }
