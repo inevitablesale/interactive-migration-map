@@ -47,8 +47,9 @@ const Map = () => {
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentStateIndexRef = useRef(0);
 
-  const getStateColor = (index: number) => {
-    return STATE_COLORS[index % STATE_COLORS.length];
+  const getStateColor = (stateId: string) => {
+    const colorIndex = parseInt(stateId) % STATE_COLORS.length;
+    return STATE_COLORS[colorIndex];
   };
 
   const updateActiveState = (state: StateData | null) => {
@@ -94,14 +95,14 @@ const Map = () => {
       const nextState = stateDataRef.current[currentStateIndexRef.current];
       updateActiveState(nextState);
       
-      if (nextState) {
+      if (nextState && nextState.STATEFP) {
         flyToState(nextState.STATEFP);
         
         if (map.current) {
           map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
             'case',
             ['==', ['get', 'STATEFP'], nextState.STATEFP],
-            getStateColor(currentStateIndexRef.current),
+            getStateColor(nextState.STATEFP),
             'transparent'
           ]);
         }
@@ -167,7 +168,7 @@ const Map = () => {
               map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
                 'case',
                 ['==', ['get', 'STATEFP'], data[0].STATEFP],
-                getStateColor(0),
+                getStateColor(data[0].STATEFP),
                 'transparent'
               ]);
             }
@@ -236,7 +237,7 @@ const Map = () => {
           'fill-extrusion-color': [
             'case',
             ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            getStateColor(currentStateIndexRef.current),
+            getStateColor(activeState?.STATEFP || '0'),
             'transparent'
           ],
           'fill-extrusion-height': [
@@ -275,19 +276,19 @@ const Map = () => {
   }, []);
 
   useEffect(() => {
-    if (!map.current || !mapLoadedRef.current) return;
+    if (!map.current || !mapLoadedRef.current || !activeState?.STATEFP) return;
 
     map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
       'case',
-      ['==', ['get', 'STATEFP'], activeState?.STATEFP],
+      ['==', ['get', 'STATEFP'], activeState.STATEFP],
       100000,
       0
     ]);
 
     map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
       'case',
-      ['==', ['get', 'STATEFP'], activeState?.STATEFP],
-      MAP_COLORS.active,
+      ['==', ['get', 'STATEFP'], activeState.STATEFP],
+      getStateColor(activeState.STATEFP),
       'transparent'
     ]);
   }, [activeState]);
