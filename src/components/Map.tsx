@@ -228,7 +228,7 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         url: 'mapbox://inevitablesale.29jcxgnm'
       });
 
-      // Base state layer
+      // Base state layer with higher extrusion for hero mode
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -236,12 +236,12 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': mode === 'hero' ? 10000 : 5000,
+          'fill-extrusion-height': mode === 'hero' ? 100000 : 5000,
           'fill-extrusion-opacity': 0.6
         }
       });
 
-      // Active state layer
+      // Active state layer with even higher extrusion for hero mode
       map.current.addLayer({
         'id': 'state-highlight',
         'type': 'fill-extrusion',
@@ -249,9 +249,9 @@ const Map: React.FC<MapProps> = ({ mode = 'hero' }) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.accent,
-          'fill-extrusion-height': mode === 'hero' ? 100000 : 50000,
+          'fill-extrusion-height': mode === 'hero' ? 200000 : 50000,
           'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': mode === 'hero' ? 10000 : 5000
+          'fill-extrusion-base': mode === 'hero' ? 100000 : 5000
         },
         'filter': ['in', 'STATEFP', '']
       });
