@@ -96,7 +96,7 @@ const Map = () => {
           ]);
         }
       }
-    }, 3000); // Changed to 3 seconds
+    }, 3000);
   };
 
   useEffect(() => {
@@ -184,7 +184,7 @@ const Map = () => {
       style: 'mapbox://styles/mapbox/dark-v11',
       zoom: 3,
       center: [-98.5795, 39.8283],
-      pitch: 45, // Adjusted from 60 to 45 for less extreme angle
+      pitch: 45,
       bearing: 0,
       interactive: true,
     });
@@ -251,43 +251,44 @@ const Map = () => {
         }
       });
     });
+  };
 
-    useEffect(() => {
-      if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
-        startCyclingStates();
-      }
-    }, [stateDataRef.current, mapLoadedRef.current]);
+  useEffect(() => {
+    if (stateDataRef.current.length > 0 && mapLoadedRef.current && !cycleIntervalRef.current) {
+      startCyclingStates();
+    }
+  }, [stateDataRef.current, mapLoadedRef.current]);
 
-    useEffect(() => {
-      fetchStateData();
-      return cleanup;
-    }, []);
+  useEffect(() => {
+    fetchStateData();
+    return cleanup;
+  }, []);
 
-    useEffect(() => {
-      if (!map.current || !mapLoadedRef.current) return;
+  useEffect(() => {
+    if (!map.current || !mapLoadedRef.current) return;
 
-      map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
-        'case',
-        ['==', ['get', 'STATEFP'], activeState?.STATEFP],
-        100000,
-        0
-      ]);
+    map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
+      'case',
+      ['==', ['get', 'STATEFP'], activeState?.STATEFP],
+      100000,
+      0
+    ]);
 
-      map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-        'case',
-        ['==', ['get', 'STATEFP'], activeState?.STATEFP],
-        COLORS.active,
-        'transparent'
-      ]);
-    }, [activeState]);
+    map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
+      'case',
+      ['==', ['get', 'STATEFP'], activeState?.STATEFP],
+      COLORS.active,
+      'transparent'
+    ]);
+  }, [activeState]);
 
-    return (
-      <div className="w-full h-full">
-        <div ref={mapContainer} className="w-full h-full" />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-        <StateReportCard data={activeState} isVisible={!!activeState} />
-      </div>
-    );
+  return (
+    <div className="w-full h-full">
+      <div ref={mapContainer} className="w-full h-full" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+      <StateReportCard data={activeState} isVisible={!!activeState} />
+    </div>
+  );
 };
 
 export default Map;
