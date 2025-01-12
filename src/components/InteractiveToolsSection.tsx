@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Brain, LineChart, Target, Filter, Search, ChartBar } from "lucide-react";
+import { Brain, LineChart, Target, Filter, Search, ChartBar, TrendingUp, Building2, Users, ArrowUpDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "./ui/button";
+import { ComparisonTool } from "./ComparisonTool";
 
 export const InteractiveToolsSection = () => {
   const [selectedState, setSelectedState] = useState<string>("");
   const [selectedMetric, setSelectedMetric] = useState<string>("employeeCount");
+  const [showComparison, setShowComparison] = useState(false);
 
   const { data: firmData, isLoading } = useQuery({
     queryKey: ['firms', selectedState],
@@ -24,6 +27,22 @@ export const InteractiveToolsSection = () => {
       if (error) throw error;
       return data;
     }
+  });
+
+  const { data: stateData } = useQuery({
+    queryKey: ['stateData', selectedState],
+    queryFn: async () => {
+      if (!selectedState) return null;
+      const { data, error } = await supabase
+        .from('state_data')
+        .select('*')
+        .eq('STATEFP', selectedState)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedState
   });
 
   const metrics = {
@@ -51,6 +70,19 @@ export const InteractiveToolsSection = () => {
     return Math.round(sum / firmData.length);
   };
 
+  const calculateGrowthPotential = () => {
+    if (!stateData) return null;
+    const employmentRate = stateData.EMP && stateData.B23025_004E ? 
+      (stateData.EMP / stateData.B23025_004E * 100).toFixed(1) : null;
+    
+    return {
+      employmentRate,
+      medianIncome: stateData.B19013_001E,
+      businessDensity: stateData.ESTAB && stateData.B23025_004E ? 
+        (stateData.ESTAB / (stateData.B23025_004E / 1000)).toFixed(1) : null
+    };
+  };
+
   return (
     <div className="min-h-screen bg-black/95 relative z-20 px-4 py-16">
       <div className="max-w-6xl mx-auto">
@@ -59,14 +91,14 @@ export const InteractiveToolsSection = () => {
             Interactive Market Analysis
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Explore real market data and make informed decisions with our interactive tools
+            Transform data into actionable insights with our comprehensive analysis tools
           </p>
         </div>
 
         <Tabs defaultValue="discover" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8">
             <TabsTrigger value="discover">Market Explorer</TabsTrigger>
-            <TabsTrigger value="analyze">Metric Analysis</TabsTrigger>
+            <TabsTrigger value="analyze">Growth Analysis</TabsTrigger>
             <TabsTrigger value="compare">Comparisons</TabsTrigger>
           </TabsList>
 
@@ -84,10 +116,10 @@ export const InteractiveToolsSection = () => {
                     onChange={(e) => setSelectedState(e.target.value)}
                   >
                     <option value="">All States</option>
-                    <option value="CA">California</option>
-                    <option value="TX">Texas</option>
-                    <option value="NY">New York</option>
-                    <option value="FL">Florida</option>
+                    <option value="06">California</option>
+                    <option value="48">Texas</option>
+                    <option value="36">New York</option>
+                    <option value="12">Florida</option>
                   </select>
                   
                   <div className="text-gray-300">
@@ -102,7 +134,7 @@ export const InteractiveToolsSection = () => {
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="flex items-center gap-3 mb-4">
                   <Filter className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Metric Analysis</h3>
+                  <h3 className="text-lg font-semibold text-white">Market Metrics</h3>
                 </div>
                 <div className="space-y-4">
                   <select
@@ -127,30 +159,77 @@ export const InteractiveToolsSection = () => {
           </TabsContent>
 
           <TabsContent value="analyze" className="space-y-8">
-            <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-              <div className="flex items-center gap-3 mb-4">
-                <ChartBar className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-lg font-semibold text-white">Distribution Analysis</h3>
-              </div>
-              <div className="h-64 flex items-center justify-center text-gray-400">
-                Interactive charts coming soon...
-              </div>
-            </Card>
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingUp className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">Market Growth</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="bg-white/5 p-3 rounded">
+                    <p className="text-sm text-gray-400">Employment Rate</p>
+                    <p className="text-xl font-bold text-white">
+                      {calculateGrowthPotential()?.employmentRate || 'N/A'}%
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Building2 className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">Business Density</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="bg-white/5 p-3 rounded">
+                    <p className="text-sm text-gray-400">Businesses per 1k Workers</p>
+                    <p className="text-xl font-bold text-white">
+                      {calculateGrowthPotential()?.businessDensity || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Users className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">Demographics</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="bg-white/5 p-3 rounded">
+                    <p className="text-sm text-gray-400">Median Income</p>
+                    <p className="text-xl font-bold text-white">
+                      ${calculateGrowthPotential()?.medianIncome?.toLocaleString() || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="compare" className="space-y-8">
             <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-              <div className="flex items-center gap-3 mb-4">
-                <Target className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-lg font-semibold text-white">Market Comparison</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <ArrowUpDown className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">State Comparison</h3>
+                </div>
+                <Button
+                  onClick={() => setShowComparison(true)}
+                  className="bg-yellow-400 text-black hover:bg-yellow-500"
+                >
+                  Compare States
+                </Button>
               </div>
-              <div className="h-64 flex items-center justify-center text-gray-400">
-                Comparison tools coming soon...
-              </div>
+              <p className="text-gray-400 text-sm">
+                Compare key metrics across different states to identify the most promising opportunities
+              </p>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      <ComparisonTool />
     </div>
   );
 };
