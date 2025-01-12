@@ -15,8 +15,8 @@ interface StateData {
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [stateData, setStateData] = useState<StateData[]>([]);
-  // Remove mapInstance from ref to avoid cloning issues
   const [mapLoaded, setMapLoaded] = useState(false);
+  const navControlRef = useRef<mapboxgl.NavigationControl | null>(null);
 
   useEffect(() => {
     const fetchStateData = async () => {
@@ -59,6 +59,7 @@ const Map = () => {
         visualizePitch: true,
       });
       map.addControl(navControl, 'top-right');
+      navControlRef.current = navControl;
 
       const handleStyleLoad = () => {
         if (!map) return;
@@ -149,7 +150,9 @@ const Map = () => {
       // Cleanup function
       return () => {
         map.off('style.load', handleStyleLoad);
-        navControl.remove();
+        if (navControlRef.current) {
+          map.removeControl(navControlRef.current);
+        }
         map.remove();
         setMapLoaded(false);
       };
