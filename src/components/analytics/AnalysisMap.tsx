@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Map as MapIcon, Building2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Map as MapIcon } from 'lucide-react';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -22,7 +22,6 @@ interface AnalysisMapProps {
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -122,13 +121,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         if (e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
-            // Dispatch custom event with state data
             const event = new CustomEvent('stateSelected', { 
               detail: { stateId }
             });
             window.dispatchEvent(event);
 
-            // Highlight selected state
             map.current?.setPaintProperty('state-base', 'fill-extrusion-color', [
               'match',
               ['get', 'STATEFP'],
@@ -140,7 +137,45 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      updateViewMode(viewMode);
+      // Add double click event for MSA view
+      map.current.on('dblclick', 'state-base', (e) => {
+        if (e.features && e.features[0]) {
+          const stateId = e.features[0].properties?.STATEFP;
+          if (stateId) {
+            map.current?.setLayoutProperty('state-base', 'visibility', 'none');
+            map.current?.setLayoutProperty('state-borders', 'visibility', 'none');
+            map.current?.setLayoutProperty('msa-base', 'visibility', 'visible');
+            map.current?.setLayoutProperty('msa-borders', 'visibility', 'visible');
+            
+            map.current?.easeTo({
+              pitch: 60,
+              zoom: 5,
+              duration: 1000
+            });
+
+            // Filter MSAs to show only those in the selected state
+            map.current?.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
+            map.current?.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
+          }
+        }
+      });
+
+      // Add double click on MSA layer to return to state view
+      map.current.on('dblclick', 'msa-base', () => {
+        map.current?.setLayoutProperty('state-base', 'visibility', 'visible');
+        map.current?.setLayoutProperty('state-borders', 'visibility', 'visible');
+        map.current?.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current?.setLayoutProperty('msa-borders', 'visibility', 'none');
+        
+        map.current?.setFilter('msa-base', null);
+        map.current?.setFilter('msa-borders', null);
+        
+        map.current?.easeTo({
+          pitch: 45,
+          zoom: 3,
+          duration: 1000
+        });
+      });
     });
 
     return () => {
@@ -149,51 +184,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     };
   }, []);
 
-  const updateViewMode = (mode: 'state' | 'msa') => {
-    if (!map.current || !mapLoaded) return;
-
-    if (mode === 'state') {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-      
-      map.current.easeTo({
-        pitch: 45,
-        zoom: 3,
-        duration: 1000
-      });
-    } else {
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-      
-      map.current.easeTo({
-        pitch: 60,
-        zoom: 3,
-        duration: 1000
-      });
-    }
-  };
-
-  useEffect(() => {
-    updateViewMode(viewMode);
-  }, [viewMode, mapLoaded]);
-
   return (
     <div className={`relative ${className}`}>
       <div className="absolute top-4 left-4 z-10">
-        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'state' | 'msa')}>
-          <ToggleGroupItem value="state" aria-label="Toggle state view">
-            <MapIcon className="h-4 w-4" />
-            <span className="ml-2">States</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem value="msa" aria-label="Toggle MSA view">
-            <Building2 className="h-4 w-4" />
-            <span className="ml-2">MSAs</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <Button variant="outline" size="sm">
+          <MapIcon className="h-4 w-4 mr-2" />
+          States
+        </Button>
       </div>
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
