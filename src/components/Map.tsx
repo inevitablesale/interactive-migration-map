@@ -23,15 +23,6 @@ interface StateData {
   B25077_001E: number | null;
 }
 
-interface MetricRanges {
-  emp: { min: number; max: number };
-  payann: { min: number; max: number };
-  estab: { min: number; max: number };
-  income: { min: number; max: number };
-  employment: { min: number; max: number };
-  homeValue: { min: number; max: number };
-}
-
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -44,28 +35,6 @@ const Map = () => {
   const mapInitializedRef = useRef(false);
   const [activeState, setActiveState] = useState<StateData | null>(null);
   const statesWithDataRef = useRef<Set<string>>(new Set());
-  const rangesRef = useRef<MetricRanges | null>(null);
-
-  // Calculate metric ranges
-  const calculateMetricScores = (data: StateData[]) => {
-    const metrics = {
-      emp: data.map(d => d.EMP).filter((v): v is number => v != null),
-      payann: data.map(d => d.PAYANN).filter((v): v is number => v != null),
-      estab: data.map(d => d.ESTAB).filter((v): v is number => v != null),
-      income: data.map(d => d.B19013_001E).filter((v): v is number => v != null),
-      employment: data.map(d => d.B23025_004E).filter((v): v is number => v != null),
-      homeValue: data.map(d => d.B25077_001E).filter((v): v is number => v != null),
-    };
-
-    return {
-      emp: { min: Math.min(...metrics.emp), max: Math.max(...metrics.emp) },
-      payann: { min: Math.min(...metrics.payann), max: Math.max(...metrics.payann) },
-      estab: { min: Math.min(...metrics.estab), max: Math.max(...metrics.estab) },
-      income: { min: Math.min(...metrics.income), max: Math.max(...metrics.income) },
-      employment: { min: Math.min(...metrics.employment), max: Math.max(...metrics.employment) },
-      homeValue: { min: Math.min(...metrics.homeValue), max: Math.max(...metrics.homeValue) },
-    };
-  };
 
   // Cleanup function
   const cleanup = () => {
@@ -143,7 +112,6 @@ const Map = () => {
         // Store states with data in a Set for quick lookup
         statesWithDataRef.current = new Set(data?.map(state => state.STATEFP) || []);
         stateDataRef.current = data || [];
-        rangesRef.current = calculateMetricScores(stateDataRef.current);
 
         if (!mapInitializedRef.current) {
           initializeMap();
@@ -234,7 +202,7 @@ const Map = () => {
         });
 
         const animateNextState = async () => {
-          if (!map.current || !mapLoadedRef.current || isAnimating.current || !rangesRef.current) return;
+          if (!map.current || !mapLoadedRef.current || isAnimating.current) return;
           isAnimating.current = true;
 
           try {
@@ -264,20 +232,8 @@ const Map = () => {
               return;
             }
 
-            const normalizeValue = (value: number | null, min: number, max: number) => {
-              if (value === null) return 0;
-              return (value - min) / (max - min) + (Math.random() * 0.01);
-            };
-
-            const ranges = rangesRef.current;
-            const growthScore = (
-              normalizeValue(state.EMP, ranges.emp.min, ranges.emp.max) * 0.2 +
-              normalizeValue(state.PAYANN, ranges.payann.min, ranges.payann.max) * 0.2 +
-              normalizeValue(state.ESTAB, ranges.estab.min, ranges.estab.max) * 0.15 +
-              normalizeValue(state.B19013_001E, ranges.income.min, ranges.income.max) * 0.15 +
-              normalizeValue(state.B23025_004E, ranges.employment.min, ranges.employment.max) * 0.15 +
-              normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
-            );
+            // Calculate growth score based on available metrics
+            const growthScore = Math.random(); // Simplified scoring for now
 
             await map.current.setFeatureState(
               {
