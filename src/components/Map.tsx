@@ -78,7 +78,7 @@ const Map = () => {
       currentStateIndexRef.current = (currentStateIndexRef.current + 1) % stateDataRef.current.length;
       const nextState = stateDataRef.current[currentStateIndexRef.current];
       updateActiveState(nextState);
-
+      
       // Ensure map flies to the next state
       if (nextState) {
         flyToState(nextState.STATEFP);
@@ -104,7 +104,6 @@ const Map = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Cleanup function
   const cleanup = () => {
     if (cycleIntervalRef.current) {
       clearInterval(cycleIntervalRef.current);
@@ -162,12 +161,11 @@ const Map = () => {
       style: 'mapbox://styles/mapbox/dark-v11',
       zoom: 3,
       center: [-98.5795, 39.8283], // Center of the US
-      pitch: 45, // Reduced pitch for better visibility
+      pitch: 45,
       bearing: 0,
       interactive: true,
     });
 
-    // Add navigation controls with pitch control
     map.current.addControl(
       new mapboxgl.NavigationControl({
         visualizePitch: true,
@@ -192,7 +190,7 @@ const Map = () => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': COLORS.inactive,
-          'fill-extrusion-height': 10000, // Small base height for all states
+          'fill-extrusion-height': 10000,
           'fill-extrusion-opacity': 0.6
         }
       });
@@ -217,11 +215,11 @@ const Map = () => {
             0
           ],
           'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 10000 // Start from the base layer height
+          'fill-extrusion-base': 10000
         }
       });
 
-      // Add borders with warm yellow color
+      // Add borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -249,22 +247,7 @@ const Map = () => {
       const newActiveState = stateDataRef.current.find(state => state.STATEFP === clickedStateId);
       if (newActiveState) {
         updateActiveState(newActiveState);
-        
-        // Fly to clicked state
-        const bounds = new mapboxgl.LngLatBounds();
-        // Type assertion to handle the Polygon geometry type
-        const geometry = e.features[0].geometry as GeoJSON.Polygon;
-        const coordinates = geometry.coordinates[0];
-        coordinates.forEach((coord: [number, number]) => {
-          bounds.extend(coord);
-        });
-
-        map.current?.fitBounds(bounds, {
-          padding: 100,
-          pitch: 60,
-          bearing: 0,
-          duration: 2000
-        });
+        flyToState(clickedStateId);
       }
     });
 
