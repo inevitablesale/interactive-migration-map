@@ -23,6 +23,7 @@ const Map = () => {
   const previousStateId = useRef<string | null>(null);
   const isAnimating = useRef(false);
   const animationTimeoutRef = useRef<number | null>(null);
+  const mapLoadedRef = useRef(false);
 
   // Cleanup function to handle map and animation resources
   const cleanup = () => {
@@ -82,7 +83,8 @@ const Map = () => {
       });
 
       map.current.on('style.load', () => {
-        if (!map.current || !stateDataRef.current.length) return;
+        if (!map.current) return;
+        mapLoadedRef.current = true;
 
         map.current.addSource('states', {
           type: 'vector',
@@ -156,13 +158,13 @@ const Map = () => {
         });
 
         const animateNextState = async () => {
-          if (!map.current || isAnimating.current) return;
+          if (!map.current || !mapLoadedRef.current || isAnimating.current) return;
           isAnimating.current = true;
 
           try {
             if (previousStateId.current) {
               await new Promise<void>((resolve) => {
-                if (!map.current) return;
+                if (!map.current) return resolve();
                 map.current.setFeatureState(
                   {
                     source: 'states',
@@ -179,7 +181,7 @@ const Map = () => {
             }
 
             const state = stateDataRef.current[currentStateIndex.current];
-            if (!state?.STATEFP) return;
+            if (!state?.STATEFP || !map.current || !mapLoadedRef.current) return;
 
             const normalizeValue = (value: number | null, min: number, max: number) => {
               if (value === null) return 0;
@@ -195,19 +197,17 @@ const Map = () => {
               normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
             );
 
-            if (map.current) {
-              map.current.setFeatureState(
-                {
-                  source: 'states',
-                  sourceLayer: 'tl_2020_us_state-52k5uw',
-                  id: state.STATEFP
-                },
-                {
-                  score: growthScore,
-                  height: 1
-                }
-              );
-            }
+            map.current.setFeatureState(
+              {
+                source: 'states',
+                sourceLayer: 'tl_2020_us_state-52k5uw',
+                id: state.STATEFP
+              },
+              {
+                score: growthScore,
+                height: 1
+              }
+            );
 
             previousStateId.current = state.STATEFP;
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
@@ -218,7 +218,10 @@ const Map = () => {
           }
         };
 
-        animateNextState();
+        // Start animation only after map is fully loaded
+        map.current.once('idle', () => {
+          animateNextState();
+        });
       });
     };
 
