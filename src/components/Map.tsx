@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
+import StateReportCard from './StateReportCard';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -25,6 +26,7 @@ const Map = () => {
   const animationTimeoutRef = useRef<number | null>(null);
   const mapLoadedRef = useRef(false);
   const mapInitializedRef = useRef(false);
+  const [activeState, setActiveState] = useState<StateData | null>(null);
 
   // Cleanup function to handle map and animation resources
   const cleanup = () => {
@@ -43,6 +45,44 @@ const Map = () => {
     isAnimating.current = false;
     previousStateId.current = null;
     currentStateIndex.current = 0;
+    setActiveState(null);
+  };
+
+  // Function to zoom to a state
+  const zoomToState = async (stateId: string) => {
+    if (!map.current || !mapLoadedRef.current) return;
+
+    try {
+      const features = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['id'], stateId]
+      });
+
+      if (features.length > 0 && features[0].geometry) {
+        const bounds = new mapboxgl.LngLatBounds();
+        
+        // Handle different geometry types
+        if (features[0].geometry.type === 'Polygon') {
+          features[0].geometry.coordinates[0].forEach((coord: [number, number]) => {
+            bounds.extend(coord);
+          });
+        } else if (features[0].geometry.type === 'MultiPolygon') {
+          features[0].geometry.coordinates.forEach((poly: [number, number][][]) => {
+            poly[0].forEach((coord: [number, number]) => {
+              bounds.extend(coord);
+            });
+          });
+        }
+
+        // Zoom to the state with padding and animation
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+      }
+    } catch (err) {
+      console.error('Error zooming to state:', err);
+    }
   };
 
   useEffect(() => {
@@ -58,7 +98,6 @@ const Map = () => {
           return;
         }
 
-        // Store only the necessary data
         stateDataRef.current = (data || []).map(item => ({
           STATEFP: item.STATEFP,
           EMP: item.EMP,
@@ -172,6 +211,7 @@ const Map = () => {
           isAnimating.current = true;
 
           try {
+            // Reset previous state
             if (previousStateId.current) {
               if (!map.current || !mapLoadedRef.current) {
                 isAnimating.current = false;
@@ -190,9 +230,11 @@ const Map = () => {
                 }
               );
 
+              setActiveState(null);
               await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
+            // Animate next state
             const state = stateDataRef.current[currentStateIndex.current];
             if (!state?.STATEFP || !map.current || !mapLoadedRef.current) {
               isAnimating.current = false;
@@ -225,12 +267,16 @@ const Map = () => {
               }
             );
 
+            // Zoom to the state and show report card
+            await zoomToState(state.STATEFP);
+            setActiveState(state);
+
             previousStateId.current = state.STATEFP;
             currentStateIndex.current = (currentStateIndex.current + 1) % stateDataRef.current.length;
           } finally {
             isAnimating.current = false;
             if (mapLoadedRef.current) {
-              animationTimeoutRef.current = window.setTimeout(animateNextState, 3000);
+              animationTimeoutRef.current = window.setTimeout(animateNextState, 5000); // Increased timeout to 5s
             }
           }
         };
@@ -246,7 +292,6 @@ const Map = () => {
 
     fetchStateData();
 
-    // Cleanup on unmount
     return cleanup;
   }, []);
 
@@ -254,6 +299,7 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+      <StateReportCard data={activeState} isVisible={!!activeState} />
     </div>
   );
 };
