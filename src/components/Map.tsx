@@ -98,11 +98,6 @@ const Map = () => {
         }
 
         stateDataRef.current = data || [];
-
-        if (!mapInitializedRef.current) {
-          initializeMap();
-          mapInitializedRef.current = true;
-        }
       } catch (err) {
         console.error('Error in fetchStateData:', err);
       }
@@ -113,7 +108,7 @@ const Map = () => {
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
-      map.current = new mapboxgl.Map({
+      const newMap = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/dark-v11',
         zoom: 3,
@@ -122,11 +117,12 @@ const Map = () => {
         interactive: true,
       });
 
-      map.current.on('style.load', () => {
-        if (!map.current) return;
+      map.current = newMap;
+
+      newMap.on('style.load', () => {
         mapLoadedRef.current = true;
 
-        map.current.addSource('states', {
+        newMap.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
         });
@@ -156,8 +152,7 @@ const Map = () => {
 
         const { ranges } = calculateMetricScores();
 
-        // Add 3D extrusion layer with solid colors
-        map.current.addLayer({
+        newMap.addLayer({
           'id': 'state-extrusions',
           'type': 'fill-extrusion',
           'source': 'states',
@@ -181,11 +176,11 @@ const Map = () => {
               0, 0,
               1, 500000
             ],
-            'fill-extrusion-opacity': 1  // Set to 1 for solid color
+            'fill-extrusion-opacity': 1
           }
         });
 
-        map.current.addLayer({
+        newMap.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
@@ -197,14 +192,13 @@ const Map = () => {
         });
 
         const animateNextState = async () => {
-          if (!map.current || !mapLoadedRef.current || isAnimating.current) return;
+          if (!mapLoadedRef.current || isAnimating.current) return;
           
           try {
             isAnimating.current = true;
             
-            // Reset all states immediately
-            if (previousStateId.current) {
-              await map.current.setFeatureState(
+            if (previousStateId.current && map.current) {
+              map.current.setFeatureState(
                 {
                   source: 'states',
                   sourceLayer: 'tl_2020_us_state-52k5uw',
@@ -217,7 +211,6 @@ const Map = () => {
               );
             }
 
-            // Clear active state and wait for animation
             setActiveState(null);
             await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -241,17 +234,19 @@ const Map = () => {
               normalizeValue(state.B25077_001E, ranges.homeValue.min, ranges.homeValue.max) * 0.15
             );
 
-            await map.current.setFeatureState(
-              {
-                source: 'states',
-                sourceLayer: 'tl_2020_us_state-52k5uw',
-                id: state.STATEFP
-              },
-              {
-                score: growthScore,
-                height: 1
-              }
-            );
+            if (map.current) {
+              map.current.setFeatureState(
+                {
+                  source: 'states',
+                  sourceLayer: 'tl_2020_us_state-52k5uw',
+                  id: state.STATEFP
+                },
+                {
+                  score: growthScore,
+                  height: 1
+                }
+              );
+            }
 
             setActiveState(state);
             await zoomToState(state.STATEFP);
@@ -268,7 +263,7 @@ const Map = () => {
           }
         };
 
-        map.current.once('idle', () => {
+        fetchStateData().then(() => {
           if (mapLoadedRef.current) {
             animateNextState();
           }
@@ -276,22 +271,9 @@ const Map = () => {
       });
     };
 
-    fetchStateData();
+    initializeMap();
 
-    return () => {
-      if (animationTimeoutRef.current) {
-        window.clearTimeout(animationTimeoutRef.current);
-      }
-      if (map.current) {
-        map.current.remove();
-      }
-      mapLoadedRef.current = false;
-      mapInitializedRef.current = false;
-      isAnimating.current = false;
-      previousStateId.current = null;
-      currentStateIndex.current = 0;
-      setActiveState(null);
-    };
+    return cleanup;
   }, []);
 
   return (
