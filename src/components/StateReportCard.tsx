@@ -25,8 +25,21 @@ const formatNumber = (num: number | null) => {
   }).format(num);
 };
 
+const ELECTRIC_COLORS = [
+  '#037CFE', // Electric Blue
+  '#00FFE0', // Cyan
+  '#FFF903', // Yellow
+  '#94EC0E', // Lime Green
+  '#FA0098', // Hot Pink
+  '#9D00FF', // Electric Purple
+  '#FF3366', // Electric Pink
+  '#00FF66', // Electric Green
+];
+
 const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
   const [showCard, setShowCard] = useState(true);
+  const colorIndex = parseInt(data?.STATEFP || '0') % ELECTRIC_COLORS.length;
+  const stateColor = ELECTRIC_COLORS[colorIndex];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,19 +70,21 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
     <Card className="absolute bottom-8 right-8 w-[450px] bg-black/40 backdrop-blur-md border-white/10 text-white animate-fade-in">
       <CardHeader className="py-3 px-6 border-b border-white/10">
         <CardTitle className="text-xl font-bold flex items-center gap-2">
-          <TrendingUpIcon className="w-5 h-5 text-yellow-400" />
+          <TrendingUpIcon className="w-5 h-5" style={{ color: stateColor }} />
           Market Intelligence Report
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {/* Economic Vitality Section */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wider">Economic Vitality</h3>
+          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: stateColor }}>
+            Economic Vitality
+          </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <BuildingIcon className="w-4 h-4 text-cyan-400" />
-                <p className="text-sm text-cyan-400">Business Activity</p>
+                <BuildingIcon className="w-4 h-4" style={{ color: stateColor }} />
+                <p className="text-sm" style={{ color: stateColor }}>Business Activity</p>
               </div>
               <p className="text-2xl font-semibold">{formatNumber(data.ESTAB)} firms</p>
               <p className="text-sm text-gray-400 mt-1">
@@ -78,8 +93,8 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
             </div>
             <div className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <UsersIcon className="w-4 h-4 text-green-400" />
-                <p className="text-sm text-green-400">Workforce</p>
+                <UsersIcon className="w-4 h-4" style={{ color: stateColor }} />
+                <p className="text-sm" style={{ color: stateColor }}>Workforce</p>
               </div>
               <p className="text-2xl font-semibold">{employmentRate}%</p>
               <p className="text-sm text-gray-400 mt-1">
@@ -91,17 +106,19 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
 
         {/* Market Indicators Section */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wider">Market Indicators</h3>
+          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: stateColor }}>
+            Market Indicators
+          </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm text-purple-400 mb-1">Annual Payroll</p>
+              <p className="text-sm mb-1" style={{ color: stateColor }}>Annual Payroll</p>
               <p className="text-2xl font-semibold">${formatNumber(data.PAYANN)}</p>
               <p className="text-sm text-gray-400 mt-1">
                 ${avgPayPerEmployee} per employee
               </p>
             </div>
             <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm text-orange-400 mb-1">Housing Market</p>
+              <p className="text-sm mb-1" style={{ color: stateColor }}>Housing Market</p>
               <p className="text-2xl font-semibold">${formatNumber(data.B25077_001E)}</p>
               <p className="text-sm text-gray-400 mt-1">
                 Median home value
@@ -112,7 +129,9 @@ const StateReportCard = ({ data, isVisible }: StateReportCardProps) => {
 
         {/* Key Insights Section */}
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wider">Key Insights</h3>
+          <h3 className="text-sm font-medium uppercase tracking-wider" style={{ color: stateColor }}>
+            Key Insights
+          </h3>
           <div className="bg-white/5 p-4 rounded-lg space-y-2">
             <p className="text-sm text-gray-300">
               • Market shows {businessDensity && Number(businessDensity) > 50 ? 'high' : 'moderate'} business density

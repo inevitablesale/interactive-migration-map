@@ -21,18 +21,21 @@ export function Hero() {
     const handleStateChange = (event: CustomEvent) => {
       const stateData = (event as CustomEvent<StateData>).detail;
       setActiveState(stateData);
-      setShowHeroText(false); // Hide hero text when first state loads
+      // Only hide hero text on first state load
+      if (!activeState) {
+        setShowHeroText(false);
+      }
     };
 
     window.addEventListener('stateChanged', handleStateChange as EventListener);
     return () => {
       window.removeEventListener('stateChanged', handleStateChange as EventListener);
     };
-  }, []);
+  }, [activeState]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white px-4">
-      {showHeroText && (
+      {showHeroText ? (
         <div className="text-center max-w-4xl animate-fade-in">
           <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">AI-POWERED MARKET INTELLIGENCE</p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
@@ -50,8 +53,17 @@ export function Hero() {
             </button>
           </div>
         </div>
+      ) : (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+          <button 
+            onClick={() => setShowHeroText(true)}
+            className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-sm text-white/80 hover:text-white transition-colors"
+          >
+            Show Welcome Screen
+          </button>
+        </div>
       )}
-      {activeState && <StateReportCard data={activeState} isVisible={true} />}
+      {activeState && <StateReportCard data={activeState} isVisible={!showHeroText} />}
     </div>
   );
 }
