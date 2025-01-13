@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -13,7 +14,7 @@ const MAP_COLORS = {
   accent: '#FFF903',
   highlight: '#94EC0E',
   active: '#FA0098',
-  inactive: '#000000',
+  inactive: '#1e293b',
   stateWithMSA: '#3b82f6',
   stateWithoutMSA: '#1e293b'
 };
@@ -41,9 +42,14 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const fetchStatesWithMSA = async () => {
-    if (!map.current || !mapLoaded) return;
+    console.log('Fetching states with MSA data...');
+    if (!map.current || !mapLoaded) {
+      console.warn('Map not ready for fetching states with MSA');
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -53,60 +59,67 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       if (error) {
         console.error('Error fetching states with MSA:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch states with MSA data",
+          variant: "destructive",
+        });
         return;
       }
 
       const uniqueStates = [...new Set(data.map(d => d.state_fips))];
+      console.log('States with MSA data:', uniqueStates);
       setStatesWithMSA(uniqueStates);
-      
-      // Check if the layer exists before updating its properties
+
       if (map.current.getLayer('state-base')) {
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
-          'case',
-          ['in', ['get', 'STATEFP'], ['literal', uniqueStates]],
+          'match',
+          ['get', 'STATEFP'],
+          uniqueStates,
           MAP_COLORS.stateWithMSA,
           MAP_COLORS.stateWithoutMSA
         ]);
       }
     } catch (error) {
       console.error('Error in fetchStatesWithMSA:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update state colors",
+        variant: "destructive",
+      });
     }
   };
 
   const fetchMSAData = async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
-      // Step 1: Get unique counties from canary_firms_data
-      const { data: countyData, error: countyError } = await supabase
-        .from('canary_firms_data')
-        .select('COUNTYNAME')
-        .eq('STATEFP', parseInt(stateId))
-        .not('COUNTYNAME', 'is', null);
-
-      if (countyError) {
-        console.error('Error fetching county data:', countyError);
-        return;
-      }
-
-      const uniqueCounties = [...new Set(countyData.map(c => c.COUNTYNAME))];
-      console.log('Found unique counties:', uniqueCounties);
-
-      // Step 2: Get MSAs from crosswalk table
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
         .from('msa_state_crosswalk')
         .select('msa, msa_name')
-        .eq('state_fips', stateId)
-        .in('county_name', uniqueCounties);
+        .eq('state_fips', stateId);
 
       if (crosswalkError) {
         console.error('Error fetching MSA crosswalk:', crosswalkError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch MSA data",
+          variant: "destructive",
+        });
         return;
       }
 
       const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
       console.log('Found MSAs:', uniqueMsaCodes);
 
-      // Step 3: Get economic data for these MSAs
+      if (uniqueMsaCodes.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "This state has no Metropolitan Statistical Areas",
+          variant: "default",
+        });
+        return;
+      }
+
       const { data: regionData, error: regionError } = await supabase
         .from('region_data')
         .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
@@ -114,10 +127,14 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       if (regionError) {
         console.error('Error fetching region data:', regionError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch region economic data",
+          variant: "destructive",
+        });
         return;
       }
 
-      // Combine the data
       const combinedData = msaCrosswalk.map(msa => ({
         ...msa,
         ...regionData?.find(rd => rd.msa === msa.msa)
@@ -126,36 +143,44 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       setMsaData(combinedData);
       console.log('Combined MSA data:', combinedData);
 
-      // Update map visualization with MSA data
       updateMSAVisualization(combinedData);
     } catch (error) {
       console.error('Error in fetchMSAData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process MSA data",
+        variant: "destructive",
+      });
     }
   };
 
   const updateMSAVisualization = (msaData: MSAData[]) => {
-    if (!map.current) return;
+    if (!map.current) {
+      console.warn('Map not ready for MSA visualization update');
+      return;
+    }
 
-    // Calculate min/max values for normalization
-    const maxEmp = Math.max(...msaData.map(d => d.EMP || 0));
-    const maxPayann = Math.max(...msaData.map(d => d.PAYANN || 0));
-
-    // Get array of MSA codes for filtering
     const msaCodes = msaData.map(d => d.msa);
-    console.log('Filtering MSAs with codes:', msaCodes);
+    console.log('Updating MSA visualization for codes:', msaCodes);
 
     try {
+      // Show MSA layers
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+
       // Update MSA layer with economic data
       map.current.setPaintProperty('msa-base', 'fill-extrusion-height', [
-        'case',
-        ['in', ['get', 'CBSAFP'], ...msaCodes],
-        20000,
+        'match',
+        ['get', 'CBSAFP'],
+        msaCodes,
+        50000,
         0
       ]);
 
       map.current.setPaintProperty('msa-base', 'fill-extrusion-color', [
-        'case',
-        ['in', ['get', 'CBSAFP'], ...msaCodes],
+        'match',
+        ['get', 'CBSAFP'],
+        msaCodes,
         MAP_COLORS.secondary,
         MAP_COLORS.inactive
       ]);
@@ -164,59 +189,46 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setFilter('msa-base', ['in', 'CBSAFP', ...msaCodes]);
       map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...msaCodes]);
 
-      // Add popup for MSA data
-      const popup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false
-      });
-
-      map.current.on('mousemove', 'msa-base', (e) => {
-        if (!e.features?.[0]) return;
-        
-        const msaCode = e.features[0].properties?.CBSAFP;
-        const msaInfo = msaData.find(m => m.msa === msaCode);
-        
-        if (msaInfo) {
-          const html = `
-            <div class="p-2">
-              <h3 class="font-bold">${msaInfo.msa_name}</h3>
-              <p>Population: ${msaInfo.B01001_001E?.toLocaleString() || 'N/A'}</p>
-              <p>Employment: ${msaInfo.EMP?.toLocaleString() || 'N/A'}</p>
-              <p>Annual Payroll: $${msaInfo.PAYANN?.toLocaleString() || 'N/A'}</p>
-            </div>
-          `;
-          
-          popup.setLngLat(e.lngLat).setHTML(html).addTo(map.current);
-        }
-      });
-
-      map.current.on('mouseleave', 'msa-base', () => {
-        popup.remove();
-      });
-
     } catch (error) {
       console.error('Error updating MSA visualization:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update MSA visualization",
+        variant: "destructive",
+      });
     }
   };
 
   const fitStateAndShowMSAs = async (stateId: string) => {
-    if (!map.current || !statesWithMSA.includes(stateId)) {
+    if (!map.current) {
+      console.warn('Map not ready for state fitting');
+      return;
+    }
+
+    if (!statesWithMSA.includes(stateId)) {
       console.log('State has no MSA data:', stateId);
+      toast({
+        title: "No Data Available",
+        description: "This state has no Metropolitan Statistical Areas data available",
+        variant: "default",
+      });
       return;
     }
     
     console.log('Fitting state and showing MSAs for state:', stateId);
 
-    // Fetch MSA data first
-    await fetchMSAData(stateId);
+    try {
+      // Query for the selected state's features
+      const stateFeatures = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
 
-    // Query for the selected state's features
-    const stateFeatures = map.current.querySourceFeatures('states', {
-      sourceLayer: 'tl_2020_us_state-52k5uw',
-      filter: ['==', ['get', 'STATEFP'], stateId]
-    });
+      if (stateFeatures.length === 0) {
+        console.warn('No features found for state:', stateId);
+        return;
+      }
 
-    if (stateFeatures.length > 0) {
       // Calculate bounds for the state
       const bounds = new mapboxgl.LngLatBounds();
       stateFeatures.forEach(feature => {
@@ -236,12 +248,19 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         bearing: 0
       });
 
-      // Show MSA layers with proper visibility
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-
       setSelectedState(stateId);
       setViewMode('msa');
+
+      // Fetch and show MSA data
+      await fetchMSAData(stateId);
+
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to focus on selected state",
+        variant: "destructive",
+      });
     }
   };
 
