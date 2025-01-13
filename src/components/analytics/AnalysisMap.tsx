@@ -140,18 +140,22 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         
         // Update layer visibility based on geographic level
         if (map.current) {
-          if (geographicLevel === 'state') {
-            map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-            map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-            map.current.setLayoutProperty('county-base', 'visibility', 'none');
-          } else if (geographicLevel === 'msa') {
-            map.current.setLayoutProperty('state-base', 'visibility', 'none');
-            map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-            map.current.setLayoutProperty('county-base', 'visibility', 'none');
-          } else {
-            map.current.setLayoutProperty('state-base', 'visibility', 'none');
-            map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-            map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+          try {
+            if (geographicLevel === 'state') {
+              map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+              map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+              map.current.setLayoutProperty('county-base', 'visibility', 'none');
+            } else if (geographicLevel === 'msa') {
+              map.current.setLayoutProperty('state-base', 'visibility', 'none');
+              map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+              map.current.setLayoutProperty('county-base', 'visibility', 'none');
+            } else {
+              map.current.setLayoutProperty('state-base', 'visibility', 'none');
+              map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+              map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+            }
+          } catch (error) {
+            console.error('Error updating layer visibility:', error);
           }
         }
       });
@@ -168,7 +172,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         variant: "destructive",
       });
     }
-  }, [initializeLayers, mapContainer, toast, fetchStateData]);
+  }, [initializeLayers, mapContainer, toast, fetchStateData, geographicLevel]);
 
   useEffect(() => {
     if (mapLoaded && layersAdded) {
@@ -236,18 +240,24 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
   useEffect(() => {
     // Update visibility based on geographic level
-    if (geographicLevel === 'state') {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-      map.current.setLayoutProperty('county-base', 'visibility', 'none');
-    } else if (geographicLevel === 'msa') {
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('county-base', 'visibility', 'none');
-    } else {
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-      map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+    if (!map.current || !mapLoaded) return;
+
+    try {
+      if (geographicLevel === 'state') {
+        map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current.setLayoutProperty('county-base', 'visibility', 'none');
+      } else if (geographicLevel === 'msa') {
+        map.current.setLayoutProperty('state-base', 'visibility', 'none');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('county-base', 'visibility', 'none');
+      } else {
+        map.current.setLayoutProperty('state-base', 'visibility', 'none');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+      }
+    } catch (error) {
+      console.error('Error updating layer visibility:', error);
     }
   }, [geographicLevel, mapLoaded]);
 
