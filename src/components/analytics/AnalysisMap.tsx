@@ -35,6 +35,9 @@ interface StateData {
 const calculateBuyerScore = (state: StateData, allStates: StateData[]): number => {
   if (!state || !allStates.length) return 0;
 
+  // Pad the state FIPS code with leading zero if needed
+  const paddedStateFp = state.STATEFP.padStart(2, '0');
+
   // Calculate metrics as per SQL query
   const accountantEmployment = state.C24060_001E || 0;
   const medianIncome = state.B19013_001E || 0;
