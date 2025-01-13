@@ -15,17 +15,6 @@ const MAP_COLORS = {
   inactive: '#000000'
 };
 
-const STATE_COLORS = [
-  '#037CFE',
-  '#00FFE0',
-  '#FFF903',
-  '#94EC0E',
-  '#FA0098',
-  '#9D00FF',
-  '#FF3366',
-  '#00FF66',
-];
-
 interface StateData {
   STATEFP: string;
   EMP: number | null;
@@ -40,15 +29,8 @@ interface StateData {
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [stateData, setStateData] = useState<StateData[]>([]);
   const [activeState, setActiveState] = useState<StateData | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [currentStateIndex, setCurrentStateIndex] = useState(0);
-
-  const getStateColor = useCallback((stateId: string) => {
-    const colorIndex = parseInt(stateId) % STATE_COLORS.length;
-    return STATE_COLORS[colorIndex];
-  }, []);
 
   const updateActiveState = useCallback(async (state: StateData | null) => {
     if (!state) return;
@@ -81,86 +63,6 @@ const Map = () => {
       console.error('Error dispatching state change event:', error);
     }
   }, []);
-
-  const flyToState = useCallback((stateId: string) => {
-    if (!map.current) return;
-    
-    const stateFeatures = map.current.querySourceFeatures('states', {
-      sourceLayer: 'tl_2020_us_state-52k5uw',
-      filter: ['==', ['get', 'STATEFP'], stateId]
-    });
-
-    if (stateFeatures.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
-      const coordinates = geometry.coordinates[0];
-      coordinates.forEach((coord: [number, number]) => {
-        bounds.extend(coord);
-      });
-
-      map.current.easeTo({
-        center: bounds.getCenter(),
-        pitch: 45,
-        bearing: Math.random() * 90 - 45,
-        duration: 2000
-      });
-    }
-  }, []);
-
-  const startCyclingStates = useCallback(() => {
-    const interval = setInterval(() => {
-      if (stateData.length === 0 || !mapLoaded) return;
-      
-      setCurrentStateIndex(prev => {
-        const nextIndex = (prev + 1) % stateData.length;
-        const nextState = stateData[nextIndex];
-        
-        if (nextState && nextState.STATEFP) {
-          updateActiveState(nextState);
-          flyToState(nextState.STATEFP);
-          
-          if (map.current) {
-            map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-              'case',
-              ['==', ['get', 'STATEFP'], nextState.STATEFP],
-              getStateColor(nextState.STATEFP),
-              'transparent'
-            ]);
-          }
-        }
-        return nextIndex;
-      });
-    }, 5000);
-
-    return interval;
-  }, [stateData, mapLoaded, updateActiveState, getStateColor]);
-
-  const fetchStateData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
-        .not('STATEFP', 'is', null)
-        .not('EMP', 'is', null);
-
-      if (error) {
-        console.error('Error fetching state data:', error);
-        return;
-      }
-
-      const serializedData = JSON.parse(JSON.stringify(data || []));
-      setStateData(serializedData);
-
-      if (serializedData.length > 0) {
-        updateActiveState(serializedData[0]);
-        if (mapLoaded) {
-          flyToState(serializedData[0].STATEFP);
-        }
-      }
-    } catch (err) {
-      console.error('Error in fetchStateData:', err);
-    }
-  };
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -209,29 +111,6 @@ const Map = () => {
       });
 
       map.current.addLayer({
-        'id': 'state-active',
-        'type': 'fill-extrusion',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'fill-extrusion-color': [
-            'case',
-            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            getStateColor(activeState?.STATEFP || '0'),
-            'transparent'
-          ],
-          'fill-extrusion-height': [
-            'case',
-            ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            100000,
-            0
-          ],
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 10000
-        }
-      });
-
-      map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
         'source': 'states',
@@ -241,9 +120,6 @@ const Map = () => {
           'line-width': 1
         }
       });
-
-      // Start cycling immediately after map is loaded
-      fetchStateData();
     });
 
     return () => {
@@ -253,38 +129,6 @@ const Map = () => {
       }
     };
   }, []);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    
-    if (stateData.length > 0 && mapLoaded) {
-      interval = startCyclingStates();
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [stateData, mapLoaded, startCyclingStates]);
-
-  useEffect(() => {
-    if (!map.current || !mapLoaded || !activeState?.STATEFP) return;
-
-    map.current.setPaintProperty('state-active', 'fill-extrusion-height', [
-      'case',
-      ['==', ['get', 'STATEFP'], activeState.STATEFP],
-      100000,
-      0
-    ]);
-
-    map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-      'case',
-      ['==', ['get', 'STATEFP'], activeState.STATEFP],
-      getStateColor(activeState.STATEFP),
-      'transparent'
-    ]);
-  }, [activeState, getStateColor]);
 
   return (
     <div className="w-full h-full">
