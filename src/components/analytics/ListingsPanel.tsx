@@ -63,7 +63,7 @@ export const ListingsPanel = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-blue-400" />
-                  <h3 className="font-medium text-white">
+                  <h3 className={`font-medium text-white ${isFreeTier ? 'blur-sm select-none' : ''}`}>
                     {listing["Company Name"]}
                     {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
                   </h3>
