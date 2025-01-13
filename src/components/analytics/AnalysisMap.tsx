@@ -16,7 +16,7 @@ const MAP_COLORS = {
   highlight: '#94EC0E',
   active: '#FA0098',
   inactive: '#1e293b',
-  disabled: '#000000' // New color for states without MSA
+  disabled: '#000000'
 };
 
 const STATE_COLORS = [
@@ -55,11 +55,18 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
+  const [msaCountByState, setMsaCountByState] = useState<{ [key: string]: number }>({});
+
+  const getStateColor = useCallback((stateId: string) => {
+    const msaCount = msaCountByState[stateId] || 0;
+    const maxMSAs = Math.max(...Object.values(msaCountByState));
+    const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
+    return STATE_COLORS[colorIndex] || MAP_COLORS.disabled;
+  }, [msaCountByState]);
 
   const updateAnalysisTable = useCallback((stateId: string) => {
     if (!map.current) return;
     
-    // Create a plain serializable object
     const eventData = {
       stateId: stateId.toString(),
       timestamp: Date.now()
@@ -198,12 +205,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': [
-            'case',
-            ['in', ['get', 'STATEFP'], ['literal', statesWithMSA]],
-            MAP_COLORS.inactive,
-            MAP_COLORS.disabled
-          ],
+          'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 20000,
           'fill-extrusion-opacity': 0.6,
           'fill-extrusion-base': 0
@@ -276,7 +278,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [statesWithMSA, toast]);
+  }, [toast]);
 
   const fetchStatesWithMSA = useCallback(async () => {
     console.log('Fetching states with MSA data...');
@@ -300,51 +302,41 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      // Count MSAs per state and get unique states
       const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
         if (curr.state_fips) {
-          // Ensure state_fips is treated as string
           const stateFips = curr.state_fips.toString().padStart(2, '0');
           acc[stateFips] = (acc[stateFips] || 0) + 1;
         }
         return acc;
       }, {});
 
-      const uniqueStates = Object.keys(msaCountByState).map(state => 
-        state.toString().padStart(2, '0')
-      );
+      setMsaCountByState(msaCountByState);
+
+      const uniqueStates = Object.keys(msaCountByState);
       console.log('States with MSA data:', uniqueStates);
       console.log('MSA counts by state:', msaCountByState);
-      
-      setStatesWithMSA(uniqueStates);
 
       if (map.current.getLayer('state-base')) {
-        // Create color assignments based on MSA count
-        const maxMSAs = Math.max(...Object.values(msaCountByState));
-        const getStateColor = (stateId: string) => {
-          const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
-          const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
-          return STATE_COLORS[colorIndex] || MAP_COLORS.disabled;
-        };
-
-        // Create a serializable color expression for mapbox
-        const colorMatchExpression = [
-          'case',
-          ['in', ['get', 'STATEFP'], ['literal', uniqueStates]],
-          [
-            'match',
-            ['get', 'STATEFP'],
-            ...uniqueStates.flatMap(state => [state, getStateColor(state)]),
-            MAP_COLORS.disabled
-          ],
+        const colorMatchExpression: mapboxgl.Expression = [
+          'match',
+          ['get', 'STATEFP'],
+          ...uniqueStates.flatMap(state => [
+            state,
+            getStateColor(state)
+          ]),
           MAP_COLORS.disabled
         ];
 
-        // Update the state colors
-        map.current.setPaintProperty('state-base', 'fill-extrusion-color', colorMatchExpression);
+        console.log('Updating state colors with expression:', JSON.stringify(colorMatchExpression));
         
-        console.log('Updated state colors with expression:', JSON.stringify(colorMatchExpression));
+        map.current.setPaintProperty(
+          'state-base',
+          'fill-extrusion-color',
+          colorMatchExpression
+        );
       }
+
+      setStatesWithMSA(uniqueStates);
     } catch (error) {
       console.error('Error in fetchStatesWithMSA:', error);
       toast({
@@ -353,71 +345,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [layersAdded, toast]);
-
-  const fetchMSAData = useCallback(async (stateId: string) => {
-    console.log('Fetching MSA data for state:', stateId);
-    try {
-      const { data: msaCrosswalk, error: crosswalkError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('msa, msa_name')
-        .eq('state_fips', stateId);
-
-      if (crosswalkError) {
-        console.error('Error fetching MSA crosswalk:', crosswalkError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch MSA data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
-      console.log('Found MSAs:', uniqueMsaCodes);
-
-      if (uniqueMsaCodes.length === 0) {
-        toast({
-          title: "No MSA Data",
-          description: "This state has no Metropolitan Statistical Areas",
-          variant: "default",
-        });
-        return;
-      }
-
-      const { data: regionData, error: regionError } = await supabase
-        .from('region_data')
-        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
-        .in('msa', uniqueMsaCodes);
-
-      if (regionError) {
-        console.error('Error fetching region data:', regionError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch region economic data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const combinedData = msaCrosswalk.map(msa => ({
-        ...msa,
-        ...regionData?.find(rd => rd.msa === msa.msa)
-      }));
-
-      setMsaData(combinedData);
-      console.log('Combined MSA data:', combinedData);
-
-      updateMSAVisualization(combinedData);
-    } catch (error) {
-      console.error('Error in fetchMSAData:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process MSA data",
-        variant: "destructive",
-      });
-    }
-  }, [toast, updateMSAVisualization]);
+  }, [layersAdded, toast, getStateColor]);
 
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
@@ -483,7 +411,71 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [fetchMSAData, setSelectedState, toast, updateAnalysisTable]);
+  }, [fetchMSAData, updateAnalysisTable, toast]);
+
+  const fetchMSAData = useCallback(async (stateId: string) => {
+    console.log('Fetching MSA data for state:', stateId);
+    try {
+      const { data: msaCrosswalk, error: crosswalkError } = await supabase
+        .from('msa_state_crosswalk')
+        .select('msa, msa_name')
+        .eq('state_fips', stateId);
+
+      if (crosswalkError) {
+        console.error('Error fetching MSA crosswalk:', crosswalkError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch MSA data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
+      console.log('Found MSAs:', uniqueMsaCodes);
+
+      if (uniqueMsaCodes.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "This state has no Metropolitan Statistical Areas",
+          variant: "default",
+        });
+        return;
+      }
+
+      const { data: regionData, error: regionError } = await supabase
+        .from('region_data')
+        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
+        .in('msa', uniqueMsaCodes);
+
+      if (regionError) {
+        console.error('Error fetching region data:', regionError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch region economic data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const combinedData = msaCrosswalk.map(msa => ({
+        ...msa,
+        ...regionData?.find(rd => rd.msa === msa.msa)
+      }));
+
+      setMsaData(combinedData);
+      console.log('Combined MSA data:', combinedData);
+
+      updateMSAVisualization(combinedData);
+    } catch (error) {
+      console.error('Error in fetchMSAData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process MSA data",
+        variant: "destructive",
+      });
+    }
+  }, [toast, updateMSAVisualization]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -526,7 +518,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [initializeLayers]);
+  }, [initializeLayers, toast]);
 
   useEffect(() => {
     if (mapLoaded && layersAdded) {
@@ -535,17 +527,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
 
-  // Add hover and click effects for states
   useEffect(() => {
     if (!map.current) return;
 
     let hoveredStateId: string | null = null;
 
-    map.current.on('mousemove', 'state-base', (e) => {
-      if (e.features.length > 0) {
+    const handleMouseMove = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+      if (e.features && e.features.length > 0) {
         if (hoveredStateId) {
           map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         }
+        
         hoveredStateId = e.features[0].properties?.STATEFP;
         
         if (hoveredStateId) {
@@ -554,16 +546,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           updateAnalysisTable(hoveredStateId);
         }
       }
-    });
+    };
 
-    map.current.on('mouseleave', 'state-base', () => {
+    const handleMouseLeave = () => {
       if (hoveredStateId) {
         map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         hoveredStateId = null;
       }
-    });
+    };
 
-    map.current.on('click', 'state-base', (e) => {
+    const handleClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
@@ -571,7 +563,19 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           fitStateAndShowMSAs(stateId);
         }
       }
-    });
+    };
+
+    map.current.on('mousemove', 'state-base', handleMouseMove);
+    map.current.on('mouseleave', 'state-base', handleMouseLeave);
+    map.current.on('click', 'state-base', handleClick);
+
+    return () => {
+      if (map.current) {
+        map.current.off('mousemove', 'state-base', handleMouseMove);
+        map.current.off('mouseleave', 'state-base', handleMouseLeave);
+        map.current.off('click', 'state-base', handleClick);
+      }
+    };
   }, [fitStateAndShowMSAs, updateAnalysisTable]);
 
   useEffect(() => {
@@ -589,7 +593,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         hoveredMsaId = e.features[0].properties?.CBSAFP;
         
         if (hoveredMsaId) {
-          // Highlight hovered MSA
           map.current?.setPaintProperty('msa-base', 'fill-extrusion-opacity', [
             'case',
             ['==', ['get', 'CBSAFP'], hoveredMsaId],
@@ -597,15 +600,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             0.4
           ]);
 
-          // Find MSA data
           const msaData = msaData.find(m => m.msa === hoveredMsaId);
           if (msaData) {
-            // Remove existing popup
             if (popup) {
               popup.remove();
             }
 
-            // Create new popup
             popup = new mapboxgl.Popup({
               closeButton: false,
               closeOnClick: false,
@@ -630,7 +630,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       }
     };
 
-    // Add event listeners
     map.current.on('mousemove', 'msa-base', handleMsaHover);
     map.current.on('mouseleave', 'msa-base', handleMsaLeave);
 
