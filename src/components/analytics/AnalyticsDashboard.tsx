@@ -1,53 +1,90 @@
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, Building2, DollarSign } from "lucide-react";
+import { TrendingUp, Users, Building2, DollarSign, Briefcase } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 
 export function AnalyticsDashboard() {
-  const { data: marketMetrics } = useQuery({
-    queryKey: ['marketMetrics'],
+  const { data: practiceMetrics } = useQuery({
+    queryKey: ['practiceMetrics'],
     queryFn: async () => {
-      const { data: stateData, error } = await supabase
-        .from('state_data')
-        .select('EMP, PAYANN, ESTAB, B19013_001E')
-        .order('EMP', { ascending: false })
-        .limit(10);
+      const { data, error } = await supabase
+        .from('canary_firms_data')
+        .select('specialities, employeeCount, "State Name"')
+        .not('specialities', 'is', null);
       
       if (error) throw error;
-      return stateData;
+
+      // Process specialties data
+      const specialtiesMap = new Map();
+      data.forEach(firm => {
+        const specialties = firm.specialities.split(',').map(s => s.trim());
+        specialties.forEach(specialty => {
+          if (!specialtiesMap.has(specialty)) {
+            specialtiesMap.set(specialty, {
+              name: specialty,
+              firmCount: 0,
+              totalEmployees: 0,
+              states: new Set()
+            });
+          }
+          const stats = specialtiesMap.get(specialty);
+          stats.firmCount += 1;
+          stats.totalEmployees += firm.employeeCount || 0;
+          stats.states.add(firm["State Name"]);
+        });
+      });
+
+      return Array.from(specialtiesMap.values())
+        .map(stats => ({
+          ...stats,
+          avgEmployees: Math.round(stats.totalEmployees / stats.firmCount),
+          marketCoverage: stats.states.size,
+          states: Array.from(stats.states)
+        }))
+        .sort((a, b) => b.firmCount - a.firmCount)
+        .slice(0, 10);
     }
   });
 
   const metrics = [
     {
-      title: "Market Opportunity",
-      value: marketMetrics?.reduce((sum, state) => sum + (state.ESTAB || 0), 0)?.toLocaleString() || "...",
-      change: "+12%",
-      icon: TrendingUp,
-      description: "Active firms in target markets",
-      action: "Identify high-growth regions"
+      title: "Top Practice Areas",
+      value: practiceMetrics?.[0]?.name || "Loading...",
+      change: `${practiceMetrics?.[0]?.firmCount || 0} firms`,
+      icon: Briefcase,
+      description: "Most common specialty",
+      action: "View all practices"
     },
     {
-      title: "Total Addressable Market",
-      value: `$${(marketMetrics?.reduce((sum, state) => sum + (state.PAYANN || 0), 0) / 1e9)?.toFixed(1)}B` || "...",
-      change: "+8.3%",
-      icon: DollarSign,
-      description: "Annual revenue potential",
-      action: "Analyze revenue streams"
+      title: "Market Coverage",
+      value: practiceMetrics?.[0]?.marketCoverage || 0,
+      change: "states",
+      icon: Building2,
+      description: "Geographic reach of top practice",
+      action: "Explore coverage"
     },
     {
-      title: "Competition Level",
-      value: "Medium",
-      change: "Stable",
+      title: "Practice Size",
+      value: practiceMetrics?.[0]?.avgEmployees?.toLocaleString() || "0",
+      change: "avg employees",
       icon: Users,
-      description: "Based on market density",
-      action: "Review competitive landscape"
+      description: "Average firm size in top practice",
+      action: "Size breakdown"
     }
   ];
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="grid gap-4">
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-3">
         {metrics.map((metric) => (
           <Card key={metric.title} className="p-4 bg-black/40 border-white/10">
             <div className="flex items-center justify-between mb-2">
@@ -66,6 +103,84 @@ export function AnalyticsDashboard() {
             </div>
           </Card>
         ))}
+      </div>
+
+      <Card className="p-6 bg-black/40 border-white/10">
+        <h3 className="text-lg font-semibold text-white mb-4">Practice Area Distribution</h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={practiceMetrics}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+              <XAxis 
+                dataKey="name" 
+                angle={-45}
+                textAnchor="end"
+                height={100}
+                interval={0}
+                stroke="#ffffff60"
+                fontSize={12}
+              />
+              <YAxis stroke="#ffffff60" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#000000dd',
+                  border: '1px solid #ffffff20',
+                  borderRadius: '4px'
+                }}
+                labelStyle={{ color: '#fff' }}
+              />
+              <Bar dataKey="firmCount" fill="#3b82f6" name="Number of Firms" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="p-6 bg-black/40 border-white/10">
+          <h3 className="text-lg font-semibold text-white mb-4">Top Practice Areas</h3>
+          <div className="space-y-4">
+            {practiceMetrics?.slice(0, 5).map((practice, index) => (
+              <div key={practice.name} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-400">{index + 1}</span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-white">{practice.name}</div>
+                    <div className="text-xs text-white/60">{practice.firmCount} firms</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-white">
+                    {practice.avgEmployees} avg employees
+                  </div>
+                  <div className="text-xs text-white/60">
+                    {practice.marketCoverage} states
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-6 bg-black/40 border-white/10">
+          <h3 className="text-lg font-semibold text-white mb-4">Geographic Distribution</h3>
+          <div className="space-y-4">
+            {practiceMetrics?.[0]?.states.slice(0, 5).map((state, index) => (
+              <div key={state} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-green-400" />
+                  </div>
+                  <div className="text-sm font-medium text-white">{state}</div>
+                </div>
+                <div className="text-sm text-white/60">
+                  {practiceMetrics?.[0]?.name}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
     </div>
   );
