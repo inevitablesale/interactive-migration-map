@@ -10,23 +10,24 @@ import { calculateGrowthScore, getColorFromScore, getHeightFromScore } from '@/u
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const MAP_COLORS = {
-  primary: '#037CFE',
-  secondary: '#00FFE0',
-  accent: '#FFF903',
-  highlight: '#94EC0E',
-  active: '#FA0098',
-  inactive: '#1e293b'
+  primary: '#037CFE',    // Electric Blue
+  secondary: '#00FFE0',  // Electric Cyan
+  accent: '#FFF903',     // Electric Yellow
+  highlight: '#94EC0E',  // Electric Lime
+  active: '#FA0098',     // Electric Pink
+  inactive: '#1e293b'    // Dark slate for inactive states
 };
 
+// Updated electric color palette for state visualization
 const STATE_COLORS = [
-  '#e6f3ff',
-  '#bde0ff',
-  '#94cdff',
-  '#6bb9ff',
-  '#42a6ff',
-  '#1992ff',
-  '#007fff',
-  '#0066cc'
+  '#FA0098', // Electric Pink (lowest density)
+  '#94EC0E', // Electric Lime
+  '#FFF903', // Electric Yellow
+  '#00FFE0', // Electric Cyan
+  '#037CFE', // Electric Blue
+  '#9D00FF', // Electric Purple
+  '#FF3366', // Electric Rose
+  '#00FF66'  // Electric Green (highest density)
 ];
 
 interface MSAData {
@@ -140,7 +141,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       // Count MSAs per state and get unique states
       const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
         if (curr.state_fips) {
-          // Ensure state_fips is treated as string
           const stateFips = curr.state_fips.toString().padStart(2, '0');
           acc[stateFips] = (acc[stateFips] || 0) + 1;
         }
@@ -154,7 +154,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       setStatesWithMSA(uniqueStates);
 
       if (map.current.getLayer('state-base')) {
-        // Create color assignments based on MSA count
+        // Create color assignments based on MSA count with new electric colors
         const maxMSAs = Math.max(...Object.values(msaCountByState));
         const getStateColor = (stateId: string) => {
           const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
@@ -162,13 +162,18 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
         };
 
-        // Update the state colors based on MSA count
+        // Update the state colors with electric color scheme
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'match',
           ['get', 'STATEFP'],
           ...uniqueStates.flatMap(state => [state, getStateColor(state)]),
           MAP_COLORS.inactive
         ]);
+
+        // Enhance the visualization with opacity and lighting
+        map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.8);
+        map.current.setPaintProperty('state-base', 'fill-extrusion-ambient-occlusion-intensity', 0.5);
+        map.current.setPaintProperty('state-base', 'fill-extrusion-ambient-occlusion-radius', 5);
       }
     } catch (error) {
       console.error('Error in fetchStatesWithMSA:', error);
