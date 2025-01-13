@@ -797,6 +797,21 @@ export type Database = {
           trend_direction: string
         }[]
       }
+      get_msa_rankings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          msa: string
+          msa_name: string
+          total_firms: number
+          population: number
+          firm_density: number
+          growth_rate: number
+          density_rank: number
+          growth_rank: number
+          national_density_avg: number
+          national_growth_avg: number
+        }[]
+      }
       get_service_distribution: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -804,6 +819,20 @@ export type Database = {
           specialities: string
           specialty_count: number
           specialty_percentage: number
+        }[]
+      }
+      get_state_rankings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          statefp: string
+          total_firms: number
+          population: number
+          firm_density: number
+          growth_rate: number
+          density_rank: number
+          growth_rank: number
+          national_density_avg: number
+          national_growth_avg: number
         }[]
       }
     }

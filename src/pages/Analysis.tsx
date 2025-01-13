@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+import { Rankings } from "@/components/analytics/rankings/Rankings";
+
 const Analysis = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter') || 'market-entry';
@@ -55,7 +57,6 @@ const Analysis = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
       <div className="w-full">
-        {/* Navigation Bar */}
         <div className="bg-black/40 backdrop-blur-md border-b border-white/10">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-8 px-6">
@@ -105,6 +106,7 @@ const Analysis = () => {
             {/* Left Column */}
             <div className="space-y-8">
               <HeatmapSection activeFilter={activeFilter} />
+              <Rankings />
               {!isFreeTier && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -116,7 +118,6 @@ const Analysis = () => {
               )}
             </div>
             
-            {/* Right Column */}
             <div className="space-y-8">
               <BuyerProfileManager />
               <ListingsPanel />
