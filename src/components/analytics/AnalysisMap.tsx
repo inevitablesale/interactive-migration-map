@@ -26,15 +26,32 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
+  const verifyLayers = () => {
+    if (!map.current) return;
+    
+    const layers = map.current.getStyle().layers;
+    console.log('Available layers:', layers?.map(l => l.id));
+    
+    const stateLayer = map.current.getLayer('state-base');
+    const msaLayer = map.current.getLayer('msa-base');
+    
+    console.log('State layer exists:', !!stateLayer);
+    console.log('MSA layer exists:', !!msaLayer);
+  };
+
   const fitStateAndShowMSAs = (stateId: string) => {
     if (!map.current) return;
     console.log('Fitting state and showing MSAs for state:', stateId);
+
+    verifyLayers();
 
     // Query for the selected state's features
     const stateFeatures = map.current.querySourceFeatures('states', {
       sourceLayer: 'tl_2020_us_state-52k5uw',
       filter: ['==', ['get', 'STATEFP'], stateId]
     });
+
+    console.log('Found state features:', stateFeatures.length);
 
     if (stateFeatures.length > 0) {
       // Calculate bounds for the state
@@ -56,46 +73,26 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         bearing: 0
       });
 
-      // Gradually fade out state layer and fade in MSA layer
-      const fadeAnimation = (progress: number) => {
-        if (!map.current) return;
-        
-        map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 
-          0.6 * (1 - progress));
-        map.current.setPaintProperty('msa-base', 'fill-extrusion-opacity', 
-          0.8 * progress);
-      };
-
-      // Animate the transition
-      let start: number | null = null;
-      const duration = 1000;
-
-      const animate = (timestamp: number) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duration, 1);
-        
-        fadeAnimation(progress);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-
       // Show MSA layers before starting animation
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      try {
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+        console.log('MSA layers visibility set to visible');
+      } catch (error) {
+        console.error('Error setting MSA layer visibility:', error);
+      }
 
       // Filter MSAs to show only those in the selected state
-      map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
-      map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
-
-      // Start the animation
-      requestAnimationFrame(animate);
+      try {
+        map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
+        map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
+        console.log('MSA layers filtered for state:', stateId);
+      } catch (error) {
+        console.error('Error setting MSA layer filter:', error);
+      }
 
       setSelectedState(stateId);
       setViewMode('msa');
-      
-      console.log('MSA layers should now be visible');
     }
   };
 
@@ -172,75 +169,102 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       
       setMapLoaded(true);
 
-      // Add state source and layers
-      map.current.addSource('states', {
-        type: 'vector',
-        url: 'mapbox://inevitablesale.9fnr921z'
-      });
+      // Add state source
+      try {
+        map.current.addSource('states', {
+          type: 'vector',
+          url: 'mapbox://inevitablesale.9fnr921z'
+        });
+        console.log('Added states source');
+      } catch (error) {
+        console.error('Error adding states source:', error);
+      }
 
       // Add MSA source
-      map.current.addSource('msas', {
-        type: 'vector',
-        url: 'mapbox://inevitablesale.29jcxgnm'
-      });
+      try {
+        map.current.addSource('msas', {
+          type: 'vector',
+          url: 'mapbox://inevitablesale.29jcxgnm'
+        });
+        console.log('Added MSAs source');
+      } catch (error) {
+        console.error('Error adding MSAs source:', error);
+      }
 
       // Add state base layer
-      map.current.addLayer({
-        'id': 'state-base',
-        'type': 'fill-extrusion',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': 20000,
-          'fill-extrusion-opacity': 0.6
-        }
-      });
+      try {
+        map.current.addLayer({
+          'id': 'state-base',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': MAP_COLORS.inactive,
+            'fill-extrusion-height': 20000,
+            'fill-extrusion-opacity': 0.6
+          }
+        });
+        console.log('Added state base layer');
+      } catch (error) {
+        console.error('Error adding state base layer:', error);
+      }
 
       // Add MSA base layer
-      map.current.addLayer({
-        'id': 'msa-base',
-        'type': 'fill-extrusion',
-        'source': 'msas',
-        'source-layer': 'tl_2020_us_cbsa-aoky0u',
-        'paint': {
-          'fill-extrusion-color': MAP_COLORS.secondary,
-          'fill-extrusion-height': 50000,
-          'fill-extrusion-opacity': 0,
-          'fill-extrusion-base': 0
-        },
-        'layout': {
-          'visibility': 'none'
-        }
-      });
+      try {
+        map.current.addLayer({
+          'id': 'msa-base',
+          'type': 'fill-extrusion',
+          'source': 'msas',
+          'source-layer': 'tl_2020_us_cbsa-aoky0u',
+          'paint': {
+            'fill-extrusion-color': MAP_COLORS.secondary,
+            'fill-extrusion-height': 50000,
+            'fill-extrusion-opacity': 0.8,
+            'fill-extrusion-base': 0
+          },
+          'layout': {
+            'visibility': 'none'
+          }
+        });
+        console.log('Added MSA base layer');
+      } catch (error) {
+        console.error('Error adding MSA base layer:', error);
+      }
 
       // Add border layers
-      map.current.addLayer({
-        'id': 'state-borders',
-        'type': 'line',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'line-color': MAP_COLORS.primary,
-          'line-width': 1.5,
-          'line-opacity': 0.8
-        }
-      });
+      try {
+        map.current.addLayer({
+          'id': 'state-borders',
+          'type': 'line',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'line-color': MAP_COLORS.primary,
+            'line-width': 1.5,
+            'line-opacity': 0.8
+          }
+        });
 
-      map.current.addLayer({
-        'id': 'msa-borders',
-        'type': 'line',
-        'source': 'msas',
-        'source-layer': 'tl_2020_us_cbsa-aoky0u',
-        'paint': {
-          'line-color': MAP_COLORS.secondary,
-          'line-width': 1.5,
-          'line-opacity': 0.8
-        },
-        'layout': {
-          'visibility': 'none'
-        }
-      });
+        map.current.addLayer({
+          'id': 'msa-borders',
+          'type': 'line',
+          'source': 'msas',
+          'source-layer': 'tl_2020_us_cbsa-aoky0u',
+          'paint': {
+            'line-color': MAP_COLORS.secondary,
+            'line-width': 1.5,
+            'line-opacity': 0.8
+          },
+          'layout': {
+            'visibility': 'none'
+          }
+        });
+        console.log('Added border layers');
+      } catch (error) {
+        console.error('Error adding border layers:', error);
+      }
+
+      verifyLayers();
 
       // Add click event for state selection
       map.current.on('click', 'state-base', (e) => {
@@ -249,12 +273,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           if (stateId) {
             console.log('State clicked:', stateId);
             fitStateAndShowMSAs(stateId);
-            
-            // Dispatch custom event with state data
-            const event = new CustomEvent('stateSelected', { 
-              detail: { stateId }
-            });
-            window.dispatchEvent(event);
           }
         }
       });
