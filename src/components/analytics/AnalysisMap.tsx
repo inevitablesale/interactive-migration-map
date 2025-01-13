@@ -331,12 +331,15 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      // Fit the map to the state bounds
+      // Fit the map to the state bounds with adjusted zoom level
+      const currentZoom = map.current.getZoom();
       map.current.fitBounds(bounds, {
         padding: { top: 50, bottom: 50, left: 50, right: 50 },
         duration: 1500,
         pitch: 60,
-        bearing: 0
+        bearing: 0,
+        offset: [0, 0],
+        maxZoom: currentZoom + 1 // Increase zoom level by 1
       });
 
       setSelectedState(stateId);
