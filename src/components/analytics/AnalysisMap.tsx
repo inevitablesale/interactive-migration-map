@@ -118,6 +118,31 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [hoveredState, setHoveredState] = useState<StateData | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
+  const flyToState = useCallback((stateId: string) => {
+    if (!map.current) return;
+    
+    const stateFeatures = map.current.querySourceFeatures('states', {
+      sourceLayer: 'tl_2020_us_state-52k5uw',
+      filter: ['==', ['get', 'STATEFP'], stateId]
+    });
+
+    if (stateFeatures.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds();
+      const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
+      const coordinates = geometry.coordinates[0];
+      coordinates.forEach((coord: [number, number]) => {
+        bounds.extend(coord);
+      });
+
+      map.current.easeTo({
+        center: bounds.getCenter(),
+        pitch: 45,
+        bearing: Math.random() * 90 - 45,
+        duration: 2000
+      });
+    }
+  }, []);
+
   // Update map view based on filter
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
