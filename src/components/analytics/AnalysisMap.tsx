@@ -247,18 +247,29 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     try {
       const stateBounds = map.current.querySourceFeatures('states', {
-        'source-layer': 'boundaries_admin_1',
+        sourceLayer: 'boundaries_admin_1',
         filter: ['==', ['get', 'STATEFP'], stateId]
       });
 
       if (stateBounds.length > 0) {
         const bounds = new mapboxgl.LngLatBounds();
+        const feature = stateBounds[0];
         
-        stateBounds[0].geometry.coordinates.forEach((ring: any) => {
-          ring.forEach((coord: [number, number]) => {
-            bounds.extend(coord);
+        if (feature.geometry.type === 'Polygon') {
+          (feature.geometry.coordinates as number[][][]).forEach((ring) => {
+            ring.forEach((coord: [number, number]) => {
+              bounds.extend(coord);
+            });
           });
-        });
+        } else if (feature.geometry.type === 'MultiPolygon') {
+          (feature.geometry.coordinates as number[][][][]).forEach((polygon) => {
+            polygon.forEach((ring) => {
+              ring.forEach((coord: [number, number]) => {
+                bounds.extend(coord);
+              });
+            });
+          });
+        }
 
         map.current.fitBounds(bounds, {
           padding: 50,
