@@ -10,6 +10,7 @@ import { UpgradePrompt } from "@/components/analytics/UpgradePrompt";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
 import { MarketMetricsChart } from "@/components/analytics/visualizations/MarketMetricsChart";
 import { GrowthTrendChart } from "@/components/analytics/visualizations/GrowthTrendChart";
+import { ListingsPanel } from "@/components/analytics/ListingsPanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
@@ -20,7 +21,6 @@ const Analysis = () => {
   const activeFilter = searchParams.get('filter') || 'market-entry';
   const { toast } = useToast();
 
-  // Fetch user's subscription tier
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
     queryFn: async () => {
@@ -119,9 +119,8 @@ const Analysis = () => {
             {/* Right Column */}
             <div className="space-y-8">
               <BuyerProfileManager />
-              {!isFreeTier ? (
-                <AlertsPanel />
-              ) : (
+              <ListingsPanel />
+              {isFreeTier && (
                 <UpgradePrompt 
                   title="Unlock Advanced Features"
                   description="Get access to detailed market insights, alerts, and advanced analytics."
