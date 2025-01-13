@@ -17,45 +17,37 @@ interface AnalysisMapProps {
 
 interface StateData {
   STATEFP: string;
-  B19013_001E: number; // Median household income
-  C24010_033E: number; // Financial sector employment (male)
-  C24010_034E: number; // Financial sector employment (female)
-  EMP: number;         // Total employment
-  ESTAB: number;       // Number of establishments
-  PAYANN: number;      // Annual payroll
-  buyerScore?: number;
+  B01001_001E: number | null; // Total Population
+  B19013_001E: number | null; // Median Income
+  C24060_001E: number | null; // Total Accountant Employment
+  C24010_001E: number | null; // Total Workforce
+  PAYANN: number | null;      // Total Annual Payroll
+  ESTAB: number | null;       // Total Establishments
+  B08303_001E: number | null; // Average Commute Time
+  B15003_022E: number | null; // Bachelor's Degree Holders
+  B01002_001E: number | null; // Median Age
 }
 
-const calculateBuyerScore = (state: StateData): number => {
-  if (!state) return 0;
+const calculateBuyerScore = (state: StateData, allStates: StateData[]): number => {
+  if (!state || !allStates.length) return 0;
 
-  // Initialize weights for each factor (total should be 1)
-  const weights = {
-    financialEmployment: 0.2,    // 20% weight for financial sector employment
-    medianIncome: 0.2,          // 20% weight for median household income
-    totalEmployment: 0.2,        // 20% weight for total employment
-    establishments: 0.2,         // 20% weight for number of establishments
-    annualPayroll: 0.2          // 20% weight for annual payroll
-  };
+  // Find maximum values across all states
+  const maxPopulation = Math.max(...allStates.map(s => s.B01001_001E || 0));
+  const maxWorkforce = Math.max(...allStates.map(s => s.C24010_001E || 0));
+  const maxBachelors = Math.max(...allStates.map(s => s.B15003_022E || 0));
+  const maxCommuteTime = Math.max(...allStates.map(s => s.B08303_001E || 0));
 
-  // Calculate normalized scores (0-1) for each factor
-  const financialEmploymentScore = (state.C24010_033E + state.C24010_034E) / 10000; // Normalize by assumed max
-  const medianIncomeScore = state.B19013_001E / 100000; // Normalize by 100k
-  const totalEmploymentScore = state.EMP / 1000000; // Normalize by 1M
-  const establishmentsScore = state.ESTAB / 10000; // Normalize by 10k
-  const annualPayrollScore = state.PAYANN / 1000000000; // Normalize by 1B
+  // Calculate normalized component scores
+  const populationScore = ((state.B01001_001E || 0) / maxPopulation) * 0.3;
+  const workforceScore = ((state.C24010_001E || 0) / maxWorkforce) * 0.4;
+  const educationScore = ((state.B15003_022E || 0) / maxBachelors) * 0.2;
+  const commuteScore = (1 - ((state.B08303_001E || 0) / maxCommuteTime)) * 0.1;
 
-  // Calculate weighted score
-  const score = (
-    (financialEmploymentScore * weights.financialEmployment) +
-    (medianIncomeScore * weights.medianIncome) +
-    (totalEmploymentScore * weights.totalEmployment) +
-    (establishmentsScore * weights.establishments) +
-    (annualPayrollScore * weights.annualPayroll)
-  );
+  // Calculate total score
+  const totalScore = populationScore + workforceScore + educationScore + commuteScore;
 
   // Ensure score is between 0 and 1
-  return Math.min(Math.max(score, 0), 1);
+  return Math.min(Math.max(totalScore, 0), 1);
 };
 
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
@@ -183,13 +175,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     try {
       const { data, error } = await supabase
         .from('state_data')
-        .select('STATEFP, B19013_001E, C24010_033E, C24010_034E, EMP, ESTAB, PAYANN');
+        .select('STATEFP, B01001_001E, B19013_001E, C24060_001E, C24010_001E, PAYANN, ESTAB, B08303_001E, B15003_022E, B01002_001E');
 
       if (error) throw error;
 
       const processedData = data.map(state => ({
         ...state,
-        buyerScore: calculateBuyerScore(state)
+        buyerScore: calculateBuyerScore(state, data)
       }));
 
       setStateData(processedData);
