@@ -1,23 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Map as MapIcon, Building2, LineChart } from 'lucide-react';
+import { Map as MapIcon } from 'lucide-react';
 import { useSearchParams } from "react-router-dom";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
-import { useMapInitialization } from '@/hooks/useMapInitialization';
-import { useMapLayers } from '@/hooks/useMapLayers';
-import { useMSAData } from '@/hooks/useMSAData';
 import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
-import { getDensityColor, formatNumber } from '@/utils/heatmapUtils';
+import { formatNumber } from '@/utils/heatmapUtils';
 import { GeographicLevel } from "@/types/geography";
 
 interface AnalysisMapProps {
@@ -33,12 +23,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [stateData, setStateData] = useState<any[]>([]);
+  const [mapContainer, setMapContainer] = useState<HTMLDivElement | null>(null);
+  const [map, setMap] = useState<mapboxgl.Map | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const activeFilter = searchParams.get('filter');
-  const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
-  const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
-  const { msaData, setMsaData, statesWithMSA, setStatesWithMSA, fetchMSAData, fetchStatesWithMSA } = useMSAData();
 
   const fetchStateData = useCallback(async () => {
     try {
@@ -57,21 +46,22 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
       setStateData(densityMetrics);
 
-      // Update source data with firm density metrics
-      if (map.current && mapLoaded) {
-        const source = map.current.getSource('states') as mapboxgl.GeoJSONSource;
+      if (map && mapLoaded) {
+        const source = map.getSource('states') as mapboxgl.GeoJSONSource;
         if (source) {
-          const features = map.current.querySourceFeatures('states', {
-            sourceLayer: 'tl_2020_us_state-52k5uw'
-          });
-
-          features.forEach(feature => {
-            const matchingMetric = densityMetrics.find(
-              (metric: any) => metric.region === feature.properties.name
-            );
-            if (matchingMetric) {
-              feature.properties.firm_density = matchingMetric.firm_density || 0;
-            }
+          source.setData({
+            type: 'FeatureCollection',
+            features: densityMetrics.map((metric: any) => ({
+              type: 'Feature',
+              properties: {
+                name: metric.region,
+                firm_density: metric.firm_density || 0
+              },
+              geometry: {
+                type: 'Polygon',
+                coordinates: [] // This will be filled by Mapbox
+              }
+            }))
           });
         }
       }
@@ -81,13 +71,13 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   }, [toast, map, mapLoaded]);
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer || map) return;
 
     try {
       mapboxgl.accessToken = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
       
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
+      const newMap = new mapboxgl.Map({
+        container: mapContainer,
         style: 'mapbox://styles/mapbox/dark-v11',
         zoom: 3,
         center: [-98.5795, 39.8283],
@@ -96,28 +86,28 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         interactive: true,
       });
 
-      map.current.addControl(
+      newMap.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
         'top-right'
       );
 
-      map.current.on('style.load', () => {
+      newMap.on('style.load', () => {
         setMapLoaded(true);
-        if (!map.current) return;
+        if (!newMap) return;
 
-        map.current.addSource('states', {
+        // Use Mapbox's built-in state boundaries tileset
+        newMap.addSource('states', {
           type: 'vector',
-          url: 'mapbox://inevitablesale.9fnr921z'
+          url: 'mapbox://mapbox.boundaries-adm1-v3'
         });
 
-        // Add base layer with dynamic colors based on data
-        map.current.addLayer({
+        newMap.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
           'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
+          'source-layer': 'boundaries_admin_1',
           'paint': {
             'fill-extrusion-color': [
               'interpolate',
@@ -136,49 +126,51 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             ],
             'fill-extrusion-opacity': 0.8,
             'fill-extrusion-base': 0
-          }
+          },
+          'filter': ['==', ['get', 'iso_3166_1'], 'US']
         });
 
         // Add borders layer
-        map.current.addLayer({
+        newMap.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
+          'source-layer': 'boundaries_admin_1',
           'paint': {
             'line-color': MAP_COLORS.primary,
             'line-width': 1.5,
             'line-opacity': 0.8
-          }
+          },
+          'filter': ['==', ['get', 'iso_3166_1'], 'US']
         });
 
         // Add click event
-        map.current.on('click', 'state-base', (e) => {
+        newMap.on('click', 'state-base', (e) => {
           if (e.features && e.features[0]) {
-            const feature = e.features[0];
-            setSelectedState(feature.properties);
+            setSelectedState(e.features[0].properties);
             setShowReportPanel(true);
           }
         });
 
         // Add hover events
-        map.current.on('mousemove', 'state-base', (e) => {
+        newMap.on('mousemove', 'state-base', (e) => {
           if (e.features && e.features.length > 0) {
             setHoveredState(e.features[0].properties);
             setTooltipPosition({ x: e.point.x, y: e.point.y });
           }
         });
 
-        map.current.on('mouseleave', 'state-base', () => {
+        newMap.on('mouseleave', 'state-base', () => {
           setHoveredState(null);
         });
 
         fetchStateData();
       });
 
+      setMap(newMap);
+
       return () => {
-        map.current?.remove();
-        map.current = null;
+        newMap.remove();
       };
     } catch (error) {
       console.error('Error initializing map:', error);
@@ -188,20 +180,14 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         variant: "destructive",
       });
     }
-  }, [initializeLayers, mapContainer, toast, fetchStateData]);
+  }, [fetchStateData]);
 
   useEffect(() => {
-    if (mapLoaded && layersAdded) {
-      fetchStatesWithMSA();
-    }
-  }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
-
-  useEffect(() => {
-    if (!map.current || !mapLoaded || !stateData.length) return;
+    if (!map || !mapLoaded || !stateData.length) return;
 
     try {
       // Update the state colors based on firm density
-      map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
+      map.setPaintProperty('state-base', 'fill-extrusion-color', [
         'interpolate',
         ['linear'],
         ['coalesce', ['get', 'firm_density'], 0],
@@ -216,7 +202,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
   return (
     <div className="w-full h-full">
-      <div ref={mapContainer} className="w-full h-full" />
+      <div ref={setMapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
       {showReportPanel && selectedState && (
         <MapReportPanel
