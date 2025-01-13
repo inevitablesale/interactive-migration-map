@@ -31,7 +31,7 @@ export const InteractiveToolsSection = () => {
     <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
       {/* Analysis Map Section */}
       <div className="h-[calc(100vh-200px)] relative">
-        <AnalysisMap className="h-full" />
+        <AnalysisMap className="h-full" type="density" />
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-transparent to-black/20" />
       </div>
 
