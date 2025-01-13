@@ -3,14 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, Building2 } from "lucide-react";
+import { ServiceDistribution } from "@/types/supabase";
 
 export function ActionableInsights() {
-  const { data: serviceDistribution } = useQuery({
+  const { data: serviceDistribution } = useQuery<ServiceDistribution[]>({
     queryKey: ['serviceDistribution'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('service_distribution')
-        .select('*')
+        .rpc('get_service_distribution')
         .order('specialty_percentage', { ascending: false });
       
       if (error) throw error;

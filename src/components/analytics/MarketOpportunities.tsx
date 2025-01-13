@@ -3,14 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, Building2 } from "lucide-react";
+import { MarketOpportunityScore } from "@/types/supabase";
 
 export function MarketOpportunities() {
-  const { data: opportunities } = useQuery({
+  const { data: opportunities } = useQuery<MarketOpportunityScore[]>({
     queryKey: ['marketOpportunities'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('market_opportunity_scores')
-        .select('*')
+        .rpc('get_market_opportunities')
         .order('migration_score', { ascending: false })
         .limit(5);
       
