@@ -214,6 +214,76 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [toast]);
 
+  const fetchMSAData = useCallback(async (stateId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('msa_state_crosswalk')
+        .select('*')
+        .eq('state_fips', stateId);
+
+      if (error) {
+        console.error('Error fetching MSA data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch MSA data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setMsaData(data || []);
+    } catch (error) {
+      console.error('Error in fetchMSAData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process MSA data",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      const stateBounds = map.current.querySourceFeatures('states', {
+        'source-layer': 'boundaries_admin_1',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
+
+      if (stateBounds.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        
+        stateBounds[0].geometry.coordinates.forEach((ring: any) => {
+          ring.forEach((coord: [number, number]) => {
+            bounds.extend(coord);
+          });
+        });
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+
+        setViewMode('msa');
+        setSelectedState(stateId);
+        await fetchMSAData(stateId);
+
+        map.current.setLayoutProperty('state-base', 'visibility', 'none');
+        map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to zoom to state and show MSAs",
+        variant: "destructive",
+      });
+    }
+  }, [map, fetchMSAData, toast]);
+
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -269,38 +339,23 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     let hoveredStateId: string | null = null;
 
-    map.current.on('mousemove', 'state-base', (e) => {
-      if (e.features.length > 0) {
-        if (hoveredStateId) {
-          map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
-        }
-        hoveredStateId = e.features[0].properties?.STATEFP;
-        
-        if (hoveredStateId) {
-          map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0.3);
-          map.current?.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
-          updateAnalysisTable(hoveredStateId);
-        }
-      }
-    });
-
-    map.current.on('mouseleave', 'state-base', () => {
-      if (hoveredStateId) {
-        map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
-        hoveredStateId = null;
-      }
-    });
-
-    map.current.on('click', 'state-base', (e) => {
+    const handleStateClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
-          console.log('State clicked:', stateId);
           fitStateAndShowMSAs(stateId);
         }
       }
-    });
-  }, [fitStateAndShowMSAs, updateAnalysisTable]);
+    };
+
+    map.current.on('click', 'state-base', handleStateClick);
+
+    return () => {
+      if (map.current) {
+        map.current.off('click', 'state-base', handleStateClick);
+      }
+    };
+  }, [fitStateAndShowMSAs]);
 
   useEffect(() => {
     if (!map.current) return;
