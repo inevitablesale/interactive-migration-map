@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import AnalysisMap from "./analytics/AnalysisMap";
 import { useSearchParams } from "react-router-dom";
 import { GeographicLevel } from "@/types/geography";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Map, Building2 } from "lucide-react";
 
 export const InteractiveToolsSection = () => {
   const [showComparison, setShowComparison] = useState(false);
@@ -33,6 +35,32 @@ export const InteractiveToolsSection = () => {
     <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
       {/* Analysis Map Section */}
       <div className="h-[calc(100vh-200px)] relative">
+        <div className="absolute top-4 left-4 z-10">
+          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-2">
+            <ToggleGroup
+              type="single"
+              value={geographicLevel}
+              onValueChange={(value: GeographicLevel) => setGeographicLevel(value)}
+              className="flex gap-1"
+            >
+              <ToggleGroupItem
+                value="state"
+                className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
+              >
+                <Map className="w-4 h-4" />
+                States
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="msa"
+                className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
+              >
+                <Building2 className="w-4 h-4" />
+                MSAs
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
+        
         <AnalysisMap 
           className="h-full" 
           type="density" 
