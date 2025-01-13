@@ -27,20 +27,46 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
   const verifyLayers = () => {
-    if (!map.current) return;
+    if (!map.current) {
+      console.log('Map not initialized');
+      return;
+    }
     
     const layers = map.current.getStyle().layers;
-    console.log('Available layers:', layers?.map(l => l.id));
+    console.log('All available layers:', layers?.map(l => l.id));
     
+    // Check sources
+    const sources = map.current.getStyle().sources;
+    console.log('All available sources:', Object.keys(sources));
+    
+    // Verify specific layers
     const stateLayer = map.current.getLayer('state-base');
     const msaLayer = map.current.getLayer('msa-base');
     
     console.log('State layer exists:', !!stateLayer);
     console.log('MSA layer exists:', !!msaLayer);
+
+    // Check MSA source data
+    const msaSource = map.current.getSource('msas');
+    console.log('MSA source exists:', !!msaSource);
+    
+    if (msaSource) {
+      try {
+        const msaFeatures = map.current.querySourceFeatures('msas', {
+          sourceLayer: 'tl_2020_us_cbsa-aoky0u'
+        });
+        console.log('Number of MSA features found:', msaFeatures.length);
+      } catch (error) {
+        console.error('Error querying MSA features:', error);
+      }
+    }
   };
 
   const fitStateAndShowMSAs = (stateId: string) => {
-    if (!map.current) return;
+    if (!map.current) {
+      console.log('Map not initialized in fitStateAndShowMSAs');
+      return;
+    }
     console.log('Fitting state and showing MSAs for state:', stateId);
 
     verifyLayers();
@@ -75,18 +101,27 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       // Show MSA layers before starting animation
       try {
+        console.log('Attempting to show MSA layers...');
         map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
         map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
         console.log('MSA layers visibility set to visible');
+        
+        // Query MSA features for the selected state
+        const msaFeatures = map.current.querySourceFeatures('msas', {
+          sourceLayer: 'tl_2020_us_cbsa-aoky0u',
+          filter: ['==', ['get', 'STATEFP'], stateId]
+        });
+        console.log('MSA features found for state:', msaFeatures.length);
+        
       } catch (error) {
         console.error('Error setting MSA layer visibility:', error);
       }
 
       // Filter MSAs to show only those in the selected state
       try {
+        console.log('Setting MSA layer filter for state:', stateId);
         map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
         map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
-        console.log('MSA layers filtered for state:', stateId);
       } catch (error) {
         console.error('Error setting MSA layer filter:', error);
       }
@@ -144,6 +179,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
+    console.log('Initializing map...');
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
     map.current = new mapboxgl.Map({
