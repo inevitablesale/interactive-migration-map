@@ -111,9 +111,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
-        // Fit the map to the state bounds with padding
+        // Fit the map to the state bounds with increased padding and maxZoom
         map.current.fitBounds(bounds, {
-          padding: { top: 50, bottom: 50, left: 50, right: 50 },
+          padding: { top: 100, bottom: 100, left: 100, right: 100 },
+          maxZoom: 6,
           duration: 1000
         });
 
