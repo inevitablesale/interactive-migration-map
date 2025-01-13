@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Trophy, TrendingUp, Users, Building2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getStateName } from "@/utils/stateUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RankingCardProps {
   title: string;
@@ -34,9 +34,30 @@ export const RankingCard = ({
 
   useEffect(() => {
     const fetchStateName = async () => {
-      const name = await getStateName(region);
-      setDisplayName(name);
+      try {
+        const { data, error } = await supabase
+          .from('msa_county_reference')
+          .select('county_name')
+          .eq('fipstate', region)
+          .limit(1);
+
+        if (error) {
+          console.error('Error fetching state name:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Extract state name from county_name (format: "County Name, State Name")
+          const stateName = data[0].county_name.split(',')[1]?.trim();
+          if (stateName) {
+            setDisplayName(stateName);
+          }
+        }
+      } catch (error) {
+        console.error('Error in fetchStateName:', error);
+      }
     };
+
     fetchStateName();
   }, [region]);
 
@@ -44,7 +65,6 @@ export const RankingCard = ({
     <Card className="p-4 bg-black/40 backdrop-blur-md border-white/10 hover:bg-black/50 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
           <p className="text-sm text-gray-400">{displayName}</p>
         </div>
         <Trophy className="w-6 h-6 text-yellow-400" />
