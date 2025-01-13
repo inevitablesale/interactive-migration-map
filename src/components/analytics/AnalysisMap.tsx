@@ -411,12 +411,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   }, [toast]);
 
   const fetchStatesWithMSA = useCallback(async () => {
+    if (!map.current || !layersAdded) return;
+    
     console.log('Fetching states with MSA data...');
-    if (!map.current || !layersAdded) {
-      console.warn('Map or layers not ready for fetching states with MSA');
-      return;
-    }
-
     try {
       const { data: msaData, error: msaError } = await supabase
         .from('msa_state_crosswalk')
@@ -503,7 +500,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.on('style.load', () => {
         console.log('Map style loaded');
         setMapLoaded(true);
-        initializeLayers();
       });
 
       return () => {
@@ -518,7 +514,22 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [initializeLayers, toast]);
+  }, []);
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+    
+    try {
+      initializeLayers();
+    } catch (error) {
+      console.error('Error initializing layers:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map layers",
+        variant: "destructive",
+      });
+    }
+  }, [mapLoaded]);
 
   useEffect(() => {
     if (mapLoaded && layersAdded) {
