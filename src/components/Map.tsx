@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
+import { getStateName } from '@/utils/stateUtils';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -33,6 +34,7 @@ interface StateData {
   B19013_001E: number | null;
   B23025_004E: number | null;
   B25077_001E: number | null;
+  displayName?: string;
 }
 
 const Map = () => {
@@ -48,12 +50,18 @@ const Map = () => {
     return STATE_COLORS[colorIndex];
   }, []);
 
-  const updateActiveState = useCallback((state: StateData | null) => {
+  const updateActiveState = useCallback(async (state: StateData | null) => {
     if (!state) return;
     
-    setActiveState(state);
-    
     try {
+      const stateName = await getStateName(state.STATEFP);
+      const stateWithName = {
+        ...state,
+        displayName: stateName
+      };
+      
+      setActiveState(stateWithName);
+      
       const eventData = {
         STATEFP: state.STATEFP,
         EMP: state.EMP,
@@ -61,7 +69,8 @@ const Map = () => {
         ESTAB: state.ESTAB,
         B19013_001E: state.B19013_001E,
         B23025_004E: state.B23025_004E,
-        B25077_001E: state.B25077_001E
+        B25077_001E: state.B25077_001E,
+        displayName: stateName
       };
       
       const event = new CustomEvent('stateChanged', { 
