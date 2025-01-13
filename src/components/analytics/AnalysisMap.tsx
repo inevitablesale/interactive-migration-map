@@ -2,21 +2,33 @@ import React, { useState, useCallback, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Map as MapIcon, Building2 } from 'lucide-react';
+import { Map as MapIcon, Building2, LineChart } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { useMapInitialization } from '@/hooks/useMapInitialization';
 import { useMapLayers } from '@/hooks/useMapLayers';
 import { useMSAData } from '@/hooks/useMSAData';
 import { MAP_COLORS } from '@/constants/colors';
+import { supabase } from "@/integrations/supabase/client";
 import type { MSAData } from '@/types/map';
 
 interface AnalysisMapProps {
   className?: string;
 }
 
+interface StateData {
+  STATEFP: string;
+  B19013_001E: number; // Median household income
+  B25001_001E: number; // Housing units
+  B25077_001E: number; // Median home value
+  B25064_001E: number; // Median gross rent
+  buyerScore?: number;
+}
+
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  const [stateData, setStateData] = useState<StateData[]>([]);
   const { toast } = useToast();
   
   const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
@@ -32,12 +44,81 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     fetchStatesWithMSA
   } = useMSAData();
 
+  const calculateBuyerScore = (state: StateData): number => {
+    if (!state.B19013_001E || !state.B25077_001E || !state.B25064_001E) return 0;
+    
+    // Normalize values between 0 and 1
+    const incomeScore = state.B19013_001E / 100000; // Assuming max income of 100k
+    const homeValueScore = 1 - (state.B25077_001E / 1000000); // Inverse, assuming max value of 1M
+    const rentScore = 1 - (state.B25064_001E / 3000); // Inverse, assuming max rent of 3k
+    
+    // Weight the scores (adjust weights as needed)
+    const weightedScore = (
+      incomeScore * 0.4 + 
+      homeValueScore * 0.4 + 
+      rentScore * 0.2
+    );
+    
+    return Math.max(0, Math.min(1, weightedScore));
+  };
+
   const getStateColor = useCallback((stateId: string) => {
+    if (heatmapEnabled) {
+      const stateInfo = stateData.find(s => s.STATEFP === stateId);
+      if (stateInfo?.buyerScore !== undefined) {
+        // Use a gradient from red (less favorable) to green (more favorable)
+        const score = stateInfo.buyerScore;
+        const r = Math.round(255 * (1 - score));
+        const g = Math.round(255 * score);
+        return `rgb(${r}, ${g}, 100)`;
+      }
+      return MAP_COLORS.inactive;
+    }
+    
     const msaCount = msaCountByState[stateId] || 0;
     const maxMSAs = Math.max(...Object.values(msaCountByState));
     const colorIndex = Math.floor((msaCount / maxMSAs) * (MAP_COLORS.secondary.length - 1));
     return MAP_COLORS.secondary[colorIndex] || MAP_COLORS.inactive;
-  }, [msaCountByState]);
+  }, [msaCountByState, heatmapEnabled, stateData]);
+
+  const fetchStateData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('state_data')
+        .select('STATEFP, B19013_001E, B25001_001E, B25077_001E, B25064_001E');
+
+      if (error) throw error;
+
+      const processedData = data.map(state => ({
+        ...state,
+        buyerScore: calculateBuyerScore(state)
+      }));
+
+      setStateData(processedData);
+      
+      if (map.current) {
+        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
+          'case',
+          ['has', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
+            ...acc,
+            [state.STATEFP]: getStateColor(state.STATEFP)
+          }), {})]],
+          ['get', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
+            ...acc,
+            [state.STATEFP]: getStateColor(state.STATEFP)
+          }), {})]],
+          MAP_COLORS.inactive
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching state data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load state data",
+        variant: "destructive",
+      });
+    }
+  };
 
   const updateAnalysisTable = useCallback((stateId: string) => {
     if (!map.current) return;
@@ -227,6 +308,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.on('style.load', () => {
         setMapLoaded(true);
         initializeLayers();
+        fetchStateData();
       });
 
       return () => {
@@ -289,7 +371,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
         <ToggleGroup 
           type="single" 
           value={viewMode} 
@@ -307,10 +389,24 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           <ToggleGroupItem 
             value="msa" 
             aria-label="Toggle MSA view"
-            disabled={!selectedState} // Disable MSA toggle until a state is selected
+            disabled={!selectedState}
           >
             <Building2 className="h-4 w-4" />
             <span className="ml-2">MSAs</span>
+          </ToggleGroupItem>
+        </ToggleGroup>
+        
+        <ToggleGroup type="single" value={heatmapEnabled ? "enabled" : "disabled"}>
+          <ToggleGroupItem
+            value="enabled"
+            aria-label="Toggle heatmap"
+            onClick={() => {
+              setHeatmapEnabled(!heatmapEnabled);
+              fetchStateData();
+            }}
+          >
+            <LineChart className="h-4 w-4" />
+            <span className="ml-2">Buyer Score</span>
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
