@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Trophy, TrendingUp, Users, Building2, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { Building2, TrendingUp, Users, DollarSign, GraduationCap } from "lucide-react";
 
 interface RankingCardProps {
   title: string;
@@ -14,8 +11,9 @@ interface RankingCardProps {
     density: number;
     growth: number;
   };
-  specialization?: string;
   marketSaturation?: number;
+  avgPayrollPerFirm?: number;
+  educationRate?: number;
 }
 
 export const RankingCard = ({
@@ -25,124 +23,85 @@ export const RankingCard = ({
   densityRank,
   growthRank,
   comparedToNational,
-  specialization,
-  marketSaturation
+  marketSaturation,
+  avgPayrollPerFirm,
+  educationRate
 }: RankingCardProps) => {
-  const [displayName, setDisplayName] = useState(region);
-  const isDensityHigher = comparedToNational.density > 1;
-  const isGrowthHigher = comparedToNational.growth > 1;
-
-  useEffect(() => {
-    const fetchStateName = async () => {
-      try {
-        console.log('Fetching state name for region:', region);
-        
-        // Extract state ID from the region string (format: "State XX")
-        const stateId = region.replace('State ', '');
-        console.log('Extracted state ID:', stateId);
-        
-        // Pad the state ID with leading zero if needed
-        const paddedStateId = stateId.padStart(2, '0');
-        console.log('Padded state ID:', paddedStateId);
-
-        const { data, error } = await supabase
-          .from('msa_county_reference')
-          .select('county_name')
-          .eq('fipstate', paddedStateId)
-          .limit(1);
-
-        console.log('Query result:', { data, error });
-
-        if (error) {
-          console.error('Error fetching state name:', error);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          // Extract state name from county_name (format: "County Name, State Name")
-          const countyName = data[0].county_name;
-          console.log('Found county name:', countyName);
-          
-          const commaIndex = countyName.lastIndexOf(',');
-          if (commaIndex !== -1) {
-            const stateName = countyName.substring(commaIndex + 1).trim();
-            console.log('Extracted state name:', stateName);
-            setDisplayName(stateName);
-          } else {
-            console.log('No comma found in county name, cannot extract state name');
-          }
-        } else {
-          console.log('No data found for state ID:', paddedStateId);
-        }
-      } catch (error) {
-        console.error('Error in fetchStateName:', error);
-      }
-    };
-
-    fetchStateName();
-  }, [region]);
-
   return (
-    <Card className="p-4 bg-black/40 backdrop-blur-md border-white/10 hover:bg-black/50 transition-colors">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-sm text-gray-400">{displayName}</p>
-        </div>
-        <Trophy className="w-6 h-6 text-yellow-400" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1 text-sm text-gray-400">
-            <Building2 className="w-4 h-4" />
-            <span>Firms</span>
+    <Card className="bg-black/40 backdrop-blur-md border-white/10 p-4">
+      <div className="space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-sm text-white/60">{title}</h3>
+            <p className="text-lg font-semibold text-white">{region}</p>
           </div>
-          <p className="text-lg font-semibold text-white">{firmCount.toLocaleString()}</p>
-        </div>
-        
-        <div className="space-y-1">
-          <div className="flex items-center gap-1 text-sm text-gray-400">
-            <Users className="w-4 h-4" />
-            <span>Density Rank</span>
-          </div>
-          <p className="text-lg font-semibold text-white">#{densityRank}</p>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">Density vs National</span>
-          <div className={cn(
-            "flex items-center gap-1 text-sm",
-            isDensityHigher ? "text-green-400" : "text-red-400"
-          )}>
-            {isDensityHigher ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-            {Math.abs((comparedToNational.density - 1) * 100).toFixed(1)}%
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-blue-400" />
+            <span className="text-sm text-white">{firmCount.toLocaleString()} firms</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">Growth vs National</span>
-          <div className={cn(
-            "flex items-center gap-1 text-sm",
-            isGrowthHigher ? "text-green-400" : "text-red-400"
-          )}>
-            {isGrowthHigher ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-            {Math.abs((comparedToNational.growth - 1) * 100).toFixed(1)}%
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white/5 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="w-4 h-4 text-blue-400" />
+              <span className="text-sm text-white/60">Density Rank</span>
+            </div>
+            <p className="text-lg font-semibold text-white">#{densityRank}</p>
+            <p className="text-sm text-white/60">
+              {(comparedToNational.density * 100).toFixed(1)}% of national avg
+            </p>
+          </div>
+
+          <div className="bg-white/5 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-white/60">Growth Rank</span>
+            </div>
+            <p className="text-lg font-semibold text-white">#{growthRank}</p>
+            <p className="text-sm text-white/60">
+              {(comparedToNational.growth * 100).toFixed(1)}% of national avg
+            </p>
           </div>
         </div>
 
-        {specialization && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Specialization</span>
-            <span className="text-sm text-blue-400">{specialization}</span>
-          </div>
-        )}
+        {(marketSaturation !== undefined || avgPayrollPerFirm !== undefined || educationRate !== undefined) && (
+          <div className="grid grid-cols-3 gap-4">
+            {marketSaturation !== undefined && (
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm text-white/60">Market Saturation</span>
+                </div>
+                <p className="text-lg font-semibold text-white">
+                  {marketSaturation.toFixed(1)}%
+                </p>
+              </div>
+            )}
 
-        {marketSaturation && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Market Saturation</span>
-            <span className="text-sm text-purple-400">{(marketSaturation * 100).toFixed(1)}%</span>
+            {avgPayrollPerFirm !== undefined && (
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm text-white/60">Avg Payroll</span>
+                </div>
+                <p className="text-lg font-semibold text-white">
+                  ${(avgPayrollPerFirm / 1000).toFixed(0)}k
+                </p>
+              </div>
+            )}
+
+            {educationRate !== undefined && (
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <GraduationCap className="w-4 h-4 text-pink-400" />
+                  <span className="text-sm text-white/60">Education</span>
+                </div>
+                <p className="text-lg font-semibold text-white">
+                  {educationRate.toFixed(1)}%
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
