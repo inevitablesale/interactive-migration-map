@@ -18,42 +18,27 @@ import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
 import { getHeatmapColor, calculateBuyerScore } from '@/utils/mapUtils';
+import { getDensityColor, getGrowthColor, formatNumber } from '@/utils/heatmapUtils';
 
 interface AnalysisMapProps {
   className?: string;
+  data?: any[];
+  type: 'density' | 'growth';
 }
 
-interface StateData {
-  STATEFP: string;
-  B01001_001E: number | null; // Total Population
-  B19013_001E: number | null; // Median Income
-  C24060_001E: number | null; // Total Accountant Employment
-  C24010_001E: number | null; // Total Workforce
-  C24010_033E: number | null; // Additional workforce metric
-  C24010_034E: number | null; // Additional workforce metric
-  PAYANN: number | null;      // Total Annual Payroll
-  ESTAB: number | null;       // Total Establishments
-  B08303_001E: number | null; // Average Commute Time
-  B15003_022E: number | null; // Bachelor's Degree Holders
-  B01002_001E: number | null; // Median Age
-  B23025_004E: number | null; // Labor Force
-  EMP: number | null;         // Employment
-  buyerScore?: number;        // Added buyerScore to the interface
-}
-
-const AnalysisMap = ({ className }: AnalysisMapProps) => {
+const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
-  const [stateData, setStateData] = useState<StateData[]>([]);
-  const [activeState, setActiveState] = useState<StateData | null>(null);
+  const [stateData, setStateData] = useState<any[]>([]);
+  const [activeState, setActiveState] = useState<any | null>(null);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
   const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
   const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
   const { msaData, setMsaData, statesWithMSA, setStatesWithMSA, fetchMSAData, fetchStatesWithMSA } = useMSAData();
-  const [hoveredState, setHoveredState] = useState<StateData | null>(null);
+  const [hoveredState, setHoveredState] = useState<any | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showReportPanel, setShowReportPanel] = useState(false);
 
@@ -403,80 +388,42 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     });
   }, [fitStateAndShowMSAs, updateAnalysisTable, stateData]);
 
-  const formatNumber = (num: number | null) => {
-    if (num === null) return 'N/A';
-    return new Intl.NumberFormat().format(num);
-  };
+  const getTooltipContent = useCallback((feature: any) => {
+    if (!data) return null;
 
-  const getTooltipContent = (state: StateData) => {
+    const regionData = data.find(d => d.region === feature.properties.COUNTYNAME);
+    if (!regionData) return null;
+
+    if (type === 'density') {
+      return (
+        <div className="p-3 max-w-xs">
+          <h4 className="font-semibold mb-2">{regionData.region}</h4>
+          <div className="space-y-1 text-sm">
+            <p>Total Firms: {formatNumber(regionData.total_firms)}</p>
+            <p>Population: {formatNumber(regionData.population)}</p>
+            <p>Firm Density: {(regionData.firm_density * 100).toFixed(2)}%</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="p-3 max-w-xs">
-        <h4 className="font-semibold mb-2">State Statistics</h4>
+        <h4 className="font-semibold mb-2">{regionData.region}</h4>
         <div className="space-y-1 text-sm">
-          <p>Population: {formatNumber(state.B01001_001E)}</p>
-          <p>Median Income: ${formatNumber(state.B19013_001E)}</p>
-          <p>Labor Force: {formatNumber(state.B23025_004E)}</p>
-          <p>Establishments: {formatNumber(state.ESTAB)}</p>
-          {typeof state.buyerScore === 'number' && (
-            <p>Market Score: {(state.buyerScore * 100).toFixed(1)}%</p>
-          )}
+          <p>Current Firms: {formatNumber(regionData.firms_current_year)}</p>
+          <p>Growth Rate: {(regionData.historical_growth_rate * 100).toFixed(2)}%</p>
+          <p>Projected Firms: {formatNumber(regionData.projected_firms)}</p>
         </div>
       </div>
     );
-  };
+  }, [data, type]);
 
   return (
-    <TooltipProvider>
-      <div className={`relative ${className}`}>
-        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-          <ToggleGroup 
-            type="single" 
-            value={viewMode} 
-            onValueChange={(value) => {
-              if (value === 'state') {
-                resetToStateView();
-              }
-              if (value) setViewMode(value as 'state' | 'msa');
-            }}
-          >
-            <ToggleGroupItem value="state" aria-label="Toggle state view">
-              <MapIcon className="h-4 w-4" />
-              <span className="ml-2">States</span>
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="msa" 
-              aria-label="Toggle MSA view"
-              disabled={!selectedState}
-            >
-              <Building2 className="h-4 w-4" />
-              <span className="ml-2">MSAs</span>
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-        <div ref={mapContainer} className="w-full h-full rounded-lg" />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-        
-        {hoveredState && (
-          <div
-            className="absolute pointer-events-none z-50 bg-black/80 text-white rounded-lg shadow-lg backdrop-blur-sm"
-            style={{
-              left: tooltipPosition.x + 10,
-              top: tooltipPosition.y + 10,
-              transform: 'translate(0, -50%)'
-            }}
-          >
-            {getTooltipContent(hoveredState)}
-          </div>
-        )}
-
-        {showReportPanel && activeState && (
-          <MapReportPanel
-            selectedState={activeState}
-            onClose={() => setShowReportPanel(false)}
-          />
-        )}
-      </div>
-    </TooltipProvider>
+    <div className="w-full h-full">
+      <div ref={mapContainer} className="w-full h-full" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+    </div>
   );
 };
 

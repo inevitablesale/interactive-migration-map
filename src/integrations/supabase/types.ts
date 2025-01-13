@@ -756,6 +756,25 @@ export type Database = {
           total_score: number
         }[]
       }
+      get_firm_density_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          region: string
+          total_firms: number
+          population: number
+          firm_density: number
+        }[]
+      }
+      get_growth_trend_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          region: string
+          firms_current_year: number
+          historical_growth_rate: number
+          firms_previous_year: number
+          projected_firms: number
+        }[]
+      }
       get_market_opportunities: {
         Args: Record<PropertyKey, never>
         Returns: {
