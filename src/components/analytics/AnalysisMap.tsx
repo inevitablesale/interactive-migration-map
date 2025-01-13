@@ -111,14 +111,29 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
-        // Calculate padding based on viewport size
+        // Calculate padding based on viewport size and state bounds
         const container = map.current.getContainer();
         const viewportWidth = container.offsetWidth;
         const viewportHeight = container.offsetHeight;
         
-        // Adjust padding proportionally to viewport size (min 100px, max 20% of viewport)
-        const horizontalPadding = Math.min(Math.max(viewportWidth * 0.2, 100), viewportWidth * 0.3);
-        const verticalPadding = Math.min(Math.max(viewportHeight * 0.2, 100), viewportHeight * 0.3);
+        // Calculate the state's dimensions in degrees
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        const stateLngSpan = Math.abs(ne.lng - sw.lng);
+        const stateLatSpan = Math.abs(ne.lat - sw.lat);
+        
+        // Adjust padding based on state size (larger states get more padding)
+        const baseMinPadding = 50;
+        const paddingFactor = Math.max(stateLngSpan / 50, stateLatSpan / 30); // Adjust these divisors as needed
+        const dynamicPadding = baseMinPadding * paddingFactor;
+        
+        // Apply padding with minimum and maximum constraints
+        const horizontalPadding = Math.min(Math.max(dynamicPadding, viewportWidth * 0.1), viewportWidth * 0.3);
+        const verticalPadding = Math.min(Math.max(dynamicPadding, viewportHeight * 0.1), viewportHeight * 0.3);
+
+        // Calculate appropriate max zoom based on state size
+        const stateArea = stateLngSpan * stateLatSpan;
+        const maxZoom = Math.min(6, 7 - Math.log(stateArea) / Math.log(2) * 0.2);
 
         // Fit the map to the state bounds with dynamic padding and maxZoom
         map.current.fitBounds(bounds, {
@@ -128,8 +143,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             left: horizontalPadding,
             right: horizontalPadding
           },
-          maxZoom: 5.5, // Reduced max zoom for better overview
-          duration: 1000
+          maxZoom: maxZoom,
+          duration: 1500
         });
 
         // Only show MSA layers after data is loaded and state is zoomed
