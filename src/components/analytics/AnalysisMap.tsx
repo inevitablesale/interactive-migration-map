@@ -55,156 +55,18 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const updateMSAVisualization = useCallback((msaData: MSAData[]) => {
-    if (!map.current) {
-      console.warn('Map not ready for MSA visualization update');
-      return;
-    }
-
-    const uniqueMsaCodes = [...new Set(msaData.map(d => d.msa))];
-    console.log('Updating MSA visualization for unique codes:', uniqueMsaCodes);
-
-    try {
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-      
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-
-      const msaScores = msaData.reduce((acc, msa) => {
-        if (msa.msa) {
-          acc[msa.msa] = calculateGrowthScore(msa);
-        }
-        return acc;
-      }, {} as { [key: string]: number });
-
-      const heightMatchExpression: mapboxgl.Expression = [
-        'match',
-        ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [
-          code,
-          getHeightFromScore(msaScores[code] || 0)
-        ]),
-        20000
-      ];
-
-      const colorMatchExpression: mapboxgl.Expression = [
-        'match',
-        ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [
-          code,
-          getColorFromScore(msaScores[code] || 0)
-        ]),
-        MAP_COLORS.inactive
-      ];
-
-      map.current.setPaintProperty(
-        'msa-base',
-        'fill-extrusion-height',
-        heightMatchExpression
-      );
-      
-      map.current.setPaintProperty(
-        'msa-base',
-        'fill-extrusion-color',
-        colorMatchExpression
-      );
-
-      map.current.setFilter('msa-base', ['in', 'CBSAFP', ...uniqueMsaCodes]);
-      map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...uniqueMsaCodes]);
-
-    } catch (error) {
-      console.error('Error updating MSA visualization:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update MSA visualization",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  const fetchMSAData = useCallback(async (stateId: string) => {
-    console.log('Fetching MSA data for state:', stateId);
-    try {
-      const { data: msaCrosswalk, error: crosswalkError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('msa, msa_name')
-        .eq('state_fips', stateId);
-
-      if (crosswalkError) {
-        console.error('Error fetching MSA crosswalk:', crosswalkError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch MSA data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Deduplicate MSAs based on msa code
-      const uniqueMsaCrosswalk = msaCrosswalk.reduce((acc, current) => {
-        const exists = acc.find(item => item.msa === current.msa);
-        if (!exists) {
-          acc.push(current);
-        }
-        return acc;
-      }, [] as typeof msaCrosswalk);
-
-      const uniqueMsaCodes = uniqueMsaCrosswalk.map(m => m.msa);
-      console.log('Found unique MSAs:', uniqueMsaCodes);
-
-      if (uniqueMsaCodes.length === 0) {
-        toast({
-          title: "No MSA Data",
-          description: "This state has no Metropolitan Statistical Areas",
-          variant: "default",
-        });
-        return;
-      }
-
-      const { data: regionData, error: regionError } = await supabase
-        .from('region_data')
-        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
-        .in('msa', uniqueMsaCodes);
-
-      if (regionError) {
-        console.error('Error fetching region data:', regionError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch region economic data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const combinedData = uniqueMsaCrosswalk.map(msa => ({
-        ...msa,
-        ...regionData?.find(rd => rd.msa === msa.msa)
-      }));
-
-      setMsaData(combinedData);
-      console.log('Combined MSA data:', combinedData);
-
-      updateMSAVisualization(combinedData);
-    } catch (error) {
-      console.error('Error in fetchMSAData:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process MSA data",
-        variant: "destructive",
-      });
-    }
-  }, [toast, updateMSAVisualization]);
-
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
 
+    // Hide MSA layers
     map.current.setLayoutProperty('msa-base', 'visibility', 'none');
     map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
     
+    // Show state layers
     map.current.setLayoutProperty('state-base', 'visibility', 'visible');
     map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
 
+    // Reset camera
     map.current.easeTo({
       center: [-98.5795, 39.8283],
       zoom: 3,
@@ -275,8 +137,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
+      // Count MSAs per state and get unique states
       const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
         if (curr.state_fips) {
+          // Ensure state_fips is treated as string
           const stateFips = curr.state_fips.toString().padStart(2, '0');
           acc[stateFips] = (acc[stateFips] || 0) + 1;
         }
@@ -290,6 +154,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       setStatesWithMSA(uniqueStates);
 
       if (map.current.getLayer('state-base')) {
+        // Create color assignments based on MSA count
         const maxMSAs = Math.max(...Object.values(msaCountByState));
         const getStateColor = (stateId: string) => {
           const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
@@ -297,6 +162,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
         };
 
+        // Update the state colors based on MSA count
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'match',
           ['get', 'STATEFP'],
@@ -314,22 +180,294 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [layersAdded, toast]);
 
+  const fetchMSAData = async (stateId: string) => {
+    console.log('Fetching MSA data for state:', stateId);
+    try {
+      const { data: msaCrosswalk, error: crosswalkError } = await supabase
+        .from('msa_state_crosswalk')
+        .select('msa, msa_name')
+        .eq('state_fips', stateId);
+
+      if (crosswalkError) {
+        console.error('Error fetching MSA crosswalk:', crosswalkError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch MSA data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
+      console.log('Found MSAs:', uniqueMsaCodes);
+
+      if (uniqueMsaCodes.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "This state has no Metropolitan Statistical Areas",
+          variant: "default",
+        });
+        return;
+      }
+
+      const { data: regionData, error: regionError } = await supabase
+        .from('region_data')
+        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
+        .in('msa', uniqueMsaCodes);
+
+      if (regionError) {
+        console.error('Error fetching region data:', regionError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch region economic data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const combinedData = msaCrosswalk.map(msa => ({
+        ...msa,
+        ...regionData?.find(rd => rd.msa === msa.msa)
+      }));
+
+      setMsaData(combinedData);
+      console.log('Combined MSA data:', combinedData);
+
+      updateMSAVisualization(combinedData);
+    } catch (error) {
+      console.error('Error in fetchMSAData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process MSA data",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateMSAVisualization = (msaData: MSAData[]) => {
+    if (!map.current) {
+      console.warn('Map not ready for MSA visualization update');
+      return;
+    }
+
+    // Deduplicate MSA codes while preserving the original data
+    const uniqueMsaCodes = [...new Set(msaData.map(d => d.msa))];
+    console.log('Updating MSA visualization for unique codes:', uniqueMsaCodes);
+
+    try {
+      // Show MSA layers
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      
+      // Hide state layers when showing MSAs
+      map.current.setLayoutProperty('state-base', 'visibility', 'none');
+      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+
+      // Calculate growth scores for each MSA
+      const msaScores = msaData.reduce((acc, msa) => {
+        if (msa.msa) {
+          acc[msa.msa] = calculateGrowthScore(msa);
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+
+      // Create expressions for height and color based on growth scores
+      const heightMatchExpression: mapboxgl.Expression = [
+        'match',
+        ['get', 'CBSAFP'],
+        ...uniqueMsaCodes.flatMap(code => [
+          code,
+          getHeightFromScore(msaScores[code] || 0)
+        ]),
+        20000 // default height
+      ];
+
+      const colorMatchExpression: mapboxgl.Expression = [
+        'match',
+        ['get', 'CBSAFP'],
+        ...uniqueMsaCodes.flatMap(code => [
+          code,
+          getColorFromScore(msaScores[code] || 0)
+        ]),
+        MAP_COLORS.inactive
+      ];
+
+      // Update MSA layer with growth scores
+      map.current.setPaintProperty(
+        'msa-base',
+        'fill-extrusion-height',
+        heightMatchExpression
+      );
+      
+      map.current.setPaintProperty(
+        'msa-base',
+        'fill-extrusion-color',
+        colorMatchExpression
+      );
+
+      // Set filters for MSA layers using unique codes
+      map.current.setFilter('msa-base', ['in', 'CBSAFP', ...uniqueMsaCodes]);
+      map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...uniqueMsaCodes]);
+
+    } catch (error) {
+      console.error('Error updating MSA visualization:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update MSA visualization",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    if (!map.current) return;
+    
+    // Only pass serializable data
+    const event = new CustomEvent('stateSelected', {
+      detail: { 
+        stateId: stateId.toString(),
+        timestamp: Date.now()
+      }
+    });
+    window.dispatchEvent(event);
+  }, []);
+
+  const initializeLayers = useCallback(() => {
+    if (!map.current) return;
+    
+    try {
+      // Add state source
+      map.current.addSource('states', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.9fnr921z'
+      });
+
+      // Add MSA source
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
+      // Add state base layer with hover effect
+      map.current.addLayer({
+        'id': 'state-base',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-opacity': 0.6,
+          'fill-extrusion-base': 0
+        }
+      });
+
+      // Add state borders layer
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.primary,
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        }
+      });
+
+      // Add hover effect layer
+      map.current.addLayer({
+        'id': 'state-hover',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.highlight,
+          'fill-extrusion-height': 30000,
+          'fill-extrusion-opacity': 0,
+          'fill-extrusion-base': 0
+        }
+      });
+
+      // Add MSA base layer
+      map.current.addLayer({
+        'id': 'msa-base',
+        'type': 'fill-extrusion',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.secondary,
+          'fill-extrusion-height': 50000,
+          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-base': 0
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
+
+      // Add border layers
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.primary,
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        }
+      });
+
+      map.current.addLayer({
+        'id': 'msa-borders',
+        'type': 'line',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'line-color': MAP_COLORS.secondary,
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
+
+      setLayersAdded(true);
+      console.log('All layers added successfully');
+    } catch (error) {
+      console.error('Error initializing layers:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map layers",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
   const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
     if (!map.current) return;
     
     try {
+      // Update selected state
       setSelectedState(stateId);
+      
+      // Fetch MSA data for the selected state
       await fetchMSAData(stateId);
       
+      // Get state feature to fit the view
       const stateFeatures = map.current.querySourceFeatures('states', {
         sourceLayer: 'tl_2020_us_state-52k5uw',
         filter: ['==', ['get', 'STATEFP'], stateId]
       });
 
       if (stateFeatures.length > 0) {
+        // Calculate bounds of the state feature
         const bounds = new mapboxgl.LngLatBounds();
         const feature = stateFeatures[0];
         
+        // Safely handle different geometry types
         if (feature.geometry.type === 'Polygon') {
           (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
             bounds.extend(coord as [number, number]);
@@ -342,12 +480,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
+        // Fit map to state bounds with padding
         map.current.fitBounds(bounds, {
           padding: 50,
           duration: 1000
         });
 
+        // Set view mode to MSA
         setViewMode('msa');
+
+        // Update analysis table with serializable data
         updateAnalysisTable(stateId);
       }
     } catch (error) {
@@ -410,6 +552,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
 
+  // Add hover and click effects for states
   useEffect(() => {
     if (!map.current) return;
 
@@ -437,7 +580,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       }
     });
 
-    const handleStateClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+    map.current.on('click', 'state-base', (e) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
@@ -445,15 +588,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           fitStateAndShowMSAs(stateId);
         }
       }
-    };
-
-    map.current.on('click', 'state-base', handleStateClick);
-
-    return () => {
-      if (map.current) {
-        map.current.off('click', 'state-base', handleStateClick);
-      }
-    };
+    });
   }, [fitStateAndShowMSAs, updateAnalysisTable]);
 
   useEffect(() => {
@@ -471,6 +606,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         hoveredMsaId = e.features[0].properties?.CBSAFP;
         
         if (hoveredMsaId) {
+          // Highlight hovered MSA
           map.current?.setPaintProperty('msa-base', 'fill-extrusion-opacity', [
             'case',
             ['==', ['get', 'CBSAFP'], hoveredMsaId],
@@ -478,12 +614,15 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             0.4
           ]);
 
+          // Find MSA data
           const msaData = msaData.find(m => m.msa === hoveredMsaId);
           if (msaData) {
+            // Remove existing popup
             if (popup) {
               popup.remove();
             }
 
+            // Create new popup
             popup = new mapboxgl.Popup({
               closeButton: false,
               closeOnClick: false,
@@ -508,6 +647,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       }
     };
 
+    // Add event listeners
     map.current.on('mousemove', 'msa-base', handleMsaHover);
     map.current.on('mouseleave', 'msa-base', handleMsaLeave);
 

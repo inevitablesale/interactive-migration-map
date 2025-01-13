@@ -51,7 +51,10 @@ const Map = () => {
   const updateActiveState = useCallback((state: StateData | null) => {
     if (!state) return;
     
+    setActiveState(state);
+    
     try {
+      // Create a plain object with only the data we need
       const eventData = {
         STATEFP: state.STATEFP,
         EMP: state.EMP ? Number(state.EMP) : null,
@@ -62,6 +65,7 @@ const Map = () => {
         B25077_001E: state.B25077_001E ? Number(state.B25077_001E) : null
       };
       
+      // Dispatch event with serialized data
       const event = new CustomEvent('stateChanged', { 
         detail: eventData
       });
@@ -70,13 +74,6 @@ const Map = () => {
       console.error('Error dispatching state change event:', error);
     }
   }, []);
-
-  // Move state update to useEffect
-  useEffect(() => {
-    if (activeState) {
-      updateActiveState(activeState);
-    }
-  }, [activeState, updateActiveState]);
 
   const flyToState = useCallback((stateId: string) => {
     if (!map.current) return;
@@ -112,7 +109,7 @@ const Map = () => {
         const nextState = stateData[nextIndex];
         
         if (nextState && nextState.STATEFP) {
-          setActiveState(nextState);
+          updateActiveState(nextState);
           flyToState(nextState.STATEFP);
           
           if (map.current) {
@@ -129,7 +126,7 @@ const Map = () => {
     }, 5000);
 
     return interval;
-  }, [stateData, mapLoaded, flyToState, getStateColor]);
+  }, [stateData, mapLoaded, updateActiveState, getStateColor]);
 
   const fetchStateData = async () => {
     try {
