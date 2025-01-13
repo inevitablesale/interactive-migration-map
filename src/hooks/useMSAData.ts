@@ -12,36 +12,19 @@ export const useMSAData = () => {
     try {
       // Ensure stateId is padded to 2 digits
       const paddedStateId = stateId.padStart(2, '0');
-      console.log('Using padded state ID:', paddedStateId);
       
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
         .from('msa_state_crosswalk')
         .select('msa, msa_name')
-        .eq('state_fips', paddedStateId)
-        .order('msa_name');
+        .eq('state_fips', paddedStateId);
 
       if (crosswalkError) {
         console.error('Error fetching MSA crosswalk:', crosswalkError);
         return [];
       }
 
-      console.log('Raw MSA crosswalk data:', msaCrosswalk);
-
-      if (!msaCrosswalk || msaCrosswalk.length === 0) {
-        console.log('No MSA crosswalk data found for state:', paddedStateId);
-        
-        // Let's check what data exists in the table for debugging
-        const { data: sampleData } = await supabase
-          .from('msa_state_crosswalk')
-          .select('state_fips, msa_name')
-          .limit(5);
-        console.log('Sample data from msa_state_crosswalk:', sampleData);
-        
-        return [];
-      }
-
       const uniqueMsaCodes = [...new Set(msaCrosswalk?.map(m => m.msa) || [])];
-      console.log('Found unique MSA codes:', uniqueMsaCodes);
+      console.log('Found MSAs:', uniqueMsaCodes);
 
       if (uniqueMsaCodes.length === 0) {
         return [];
@@ -56,8 +39,6 @@ export const useMSAData = () => {
         console.error('Error fetching region data:', regionError);
         return [];
       }
-
-      console.log('Region data:', regionData);
 
       const combinedData = msaCrosswalk?.map(msa => ({
         ...msa,
@@ -99,7 +80,6 @@ export const useMSAData = () => {
       );
       
       console.log('States with MSA data:', uniqueStates);
-      console.log('MSA count by state:', msaCountByState);
       setStatesWithMSA(uniqueStates);
       setMsaCountByState(msaCountByState);
     } catch (error) {
