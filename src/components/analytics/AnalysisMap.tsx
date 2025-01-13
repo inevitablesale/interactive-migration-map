@@ -97,6 +97,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [stateData, setStateData] = useState<StateData[]>([]);
+  const [activeState, setActiveState] = useState<StateData | null>(null); // Added this line
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
@@ -316,7 +317,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       setStateData(processedData);
       
       if (processedData.length > 0) {
-        updateActiveState(processedData[0]);
+        setActiveState(processedData[0]); // Update activeState here
         if (mapLoaded) {
           flyToState(processedData[0].STATEFP);
         }
@@ -328,7 +329,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'case',
           ['in', ['get', 'STATEFP'], ['literal', stateIds]],
-          getStateColor(activeState?.STATEFP || '0'),
+          getStateColor(activeState?.STATEFP || '0'), // Use optional chaining here
           MAP_COLORS.inactive
         ]);
       }
