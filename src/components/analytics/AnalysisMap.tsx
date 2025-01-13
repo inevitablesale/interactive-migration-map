@@ -15,7 +15,8 @@ const MAP_COLORS = {
   accent: '#FFF903',
   highlight: '#94EC0E',
   active: '#FA0098',
-  inactive: '#1e293b'
+  inactive: '#1e293b',
+  disabled: '#000000' // New color for states without MSA
 };
 
 const STATE_COLORS = [
@@ -190,7 +191,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-color': [
+            'case',
+            ['in', ['get', 'STATEFP'], ['literal', statesWithMSA]],
+            MAP_COLORS.inactive,
+            MAP_COLORS.disabled
+          ],
           'fill-extrusion-height': 20000,
           'fill-extrusion-opacity': 0.6,
           'fill-extrusion-base': 0
@@ -263,7 +269,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [statesWithMSA, toast]);
 
   const fetchStatesWithMSA = useCallback(async () => {
     console.log('Fetching states with MSA data...');
