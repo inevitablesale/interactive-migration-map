@@ -471,45 +471,6 @@ export type Database = {
         }
         Relationships: []
       }
-      reports: {
-        Row: {
-          chart_config: Json | null
-          content: Json
-          created_at: string | null
-          description: string | null
-          id: string
-          insights_query: string
-          title: string
-          updated_at: string | null
-          user_id: string | null
-          visibility: Database["public"]["Enums"]["report_visibility"] | null
-        }
-        Insert: {
-          chart_config?: Json | null
-          content: Json
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          insights_query: string
-          title: string
-          updated_at?: string | null
-          user_id?: string | null
-          visibility?: Database["public"]["Enums"]["report_visibility"] | null
-        }
-        Update: {
-          chart_config?: Json | null
-          content?: Json
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          insights_query?: string
-          title?: string
-          updated_at?: string | null
-          user_id?: string | null
-          visibility?: Database["public"]["Enums"]["report_visibility"] | null
-        }
-        Relationships: []
-      }
       state_data: {
         Row: {
           B01001_001E: number | null
@@ -672,7 +633,7 @@ export type Database = {
       }
     }
     Enums: {
-      report_visibility: "public" | "private"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never

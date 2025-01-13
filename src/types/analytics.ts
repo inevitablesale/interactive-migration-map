@@ -1,27 +1,5 @@
-export interface Report {
-  id: string;
-  title: string;
-  description?: string;
-  content: any;
-  visibility: 'public' | 'private';
-  created_at?: string;
-  updated_at?: string;
-  user_id?: string;
-  insights_query: string;
-  chart_config?: any;
-}
-
-export interface PracticeAreaStats {
-  name: string;
-  firmCount: number;
-  totalEmployees: number;
-  avgEmployees: number;
-  states: Set<string>;
-  marketCoverage: number;
-}
-
 export interface EnhancedMarketScore {
-  statefp: string;
+  STATEFP: string;
   population_score: number;
   economic_score: number;
   business_density_score: number;
@@ -31,7 +9,7 @@ export interface EnhancedMarketScore {
 }
 
 export interface MarketTrend {
-  statefp: string;
+  STATEFP: string;
   year_2020_moves: number;
   year_2021_moves: number;
   year_2022_moves: number;
@@ -40,18 +18,9 @@ export interface MarketTrend {
 }
 
 export interface CompetitiveAnalysis {
-  statefp: string;
+  STATEFP: string;
   total_firms: number;
   avg_employee_count: number;
   market_concentration: number;
   competition_level: string;
-}
-
-export interface MarketOpportunityScore {
-  statefp: string;
-  countyfp: string;
-  countyname: string;
-  migration_score: number;
-  business_density_score: number;
-  service_coverage_score: number;
 }
