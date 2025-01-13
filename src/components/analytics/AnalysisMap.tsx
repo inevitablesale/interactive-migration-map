@@ -9,7 +9,6 @@ import { useMapLayers } from '@/hooks/useMapLayers';
 import { useMSAData } from '@/hooks/useMSAData';
 import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
-import type { MSAData } from '@/types/map';
 
 interface AnalysisMapProps {
   className?: string;
@@ -26,6 +25,7 @@ interface StateData {
   B08303_001E: number | null; // Average Commute Time
   B15003_022E: number | null; // Bachelor's Degree Holders
   B01002_001E: number | null; // Median Age
+  buyerScore?: number;        // Added buyerScore to the interface
 }
 
 const calculateBuyerScore = (state: StateData, allStates: StateData[]): number => {
@@ -50,6 +50,15 @@ const calculateBuyerScore = (state: StateData, allStates: StateData[]): number =
   return Math.min(Math.max(totalScore, 0), 1);
 };
 
+const getHeatmapColor = (score: number): string => {
+  // Create a color gradient from cool to warm colors
+  if (score >= 0.8) return '#FF4444';      // Very high - warm red
+  if (score >= 0.6) return '#FF7F50';      // High - coral
+  if (score >= 0.4) return '#FFD700';      // Medium - gold
+  if (score >= 0.2) return '#98FB98';      // Low - pale green
+  return '#87CEEB';                        // Very low - sky blue
+};
+
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -72,15 +81,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
   const getStateColor = useCallback((stateId: string) => {
     const state = stateData.find(s => s.STATEFP === stateId);
-    if (!state || !state.buyerScore) return MAP_COLORS.inactive;
-    
-    // Create a color gradient based on the buyer score
-    const score = state.buyerScore;
-    if (score >= 0.8) return '#00FF00'; // High score - green
-    if (score >= 0.6) return '#90EE90'; // Good score - light green
-    if (score >= 0.4) return '#FFD700'; // Medium score - yellow
-    if (score >= 0.2) return '#FFA500'; // Low score - orange
-    return '#FF0000'; // Very low score - red
+    if (!state || typeof state.buyerScore === 'undefined') return MAP_COLORS.inactive;
+    return getHeatmapColor(state.buyerScore);
   }, [stateData]);
 
   const updateAnalysisTable = useCallback((stateId: string) => {
@@ -187,15 +189,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       setStateData(processedData);
       
       if (map.current) {
+        // Update the fill-extrusion-color property for the state layer
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'case',
           ['has', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
             ...acc,
-            [state.STATEFP]: getStateColor(state.STATEFP)
+            [state.STATEFP]: getHeatmapColor(state.buyerScore || 0)
           }), {})]],
           ['get', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
             ...acc,
-            [state.STATEFP]: getStateColor(state.STATEFP)
+            [state.STATEFP]: getHeatmapColor(state.buyerScore || 0)
           }), {})]],
           MAP_COLORS.inactive
         ]);
