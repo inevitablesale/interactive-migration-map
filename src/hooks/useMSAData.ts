@@ -29,6 +29,7 @@ export const useMSAData = () => {
 
       console.log('MSA crosswalk data:', msaCrosswalk);
 
+      // Create a Set of unique MSA codes
       const uniqueMsaCodes = [...new Set(msaCrosswalk?.map(m => m.msa) || [])];
       console.log('Found unique MSA codes:', uniqueMsaCodes);
 
@@ -49,13 +50,28 @@ export const useMSAData = () => {
 
       console.log('Region data:', regionData);
 
-      const combinedData = msaCrosswalk?.map(msa => ({
-        ...msa,
-        ...regionData?.find(rd => rd.msa === msa.msa)
-      })) || [];
+      // Create a Map to store unique MSA data
+      const msaMap = new Map();
+      
+      msaCrosswalk?.forEach(msa => {
+        const regionInfo = regionData?.find(rd => rd.msa === msa.msa);
+        if (regionInfo) {
+          // Only add if not already in the map
+          if (!msaMap.has(msa.msa)) {
+            msaMap.set(msa.msa, {
+              ...msa,
+              ...regionInfo
+            });
+          }
+        }
+      });
+
+      // Convert Map values to array
+      const combinedData = Array.from(msaMap.values());
+      console.log('Combined MSA data:', combinedData);
 
       setMsaData(combinedData);
-      console.log('Combined MSA data:', combinedData);
+      console.log('Found MSAs:', combinedData);
       return combinedData;
     } catch (error) {
       console.error('Error in fetchMSAData:', error);
