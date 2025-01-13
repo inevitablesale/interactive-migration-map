@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,7 +13,9 @@ const MAP_COLORS = {
   accent: '#FFF903',
   highlight: '#94EC0E',
   active: '#FA0098',
-  inactive: '#000000'
+  inactive: '#000000',
+  stateWithMSA: '#3b82f6',
+  stateWithoutMSA: '#1e293b'
 };
 
 interface MSAData {
@@ -22,9 +24,9 @@ interface MSAData {
   EMP?: number;
   PAYANN?: number;
   ESTAB?: number;
-  B01001_001E?: number; // Population
-  B19013_001E?: number; // Median household income
-  B23025_004E?: number; // Employment
+  B01001_001E?: number;
+  B19013_001E?: number;
+  B23025_004E?: number;
 }
 
 interface AnalysisMapProps {
@@ -38,6 +40,35 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [msaData, setMsaData] = useState<MSAData[]>([]);
+  const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
+
+  const fetchStatesWithMSA = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('msa_state_crosswalk')
+        .select('state_fips')
+        .not('state_fips', 'is', null);
+
+      if (error) {
+        console.error('Error fetching states with MSA:', error);
+        return;
+      }
+
+      const uniqueStates = [...new Set(data.map(d => d.state_fips))];
+      setStatesWithMSA(uniqueStates);
+      
+      if (map.current) {
+        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
+          'case',
+          ['in', ['get', 'STATEFP'], ['literal', uniqueStates]],
+          MAP_COLORS.stateWithMSA,
+          MAP_COLORS.stateWithoutMSA
+        ]);
+      }
+    } catch (error) {
+      console.error('Error in fetchStatesWithMSA:', error);
+    }
+  };
 
   const fetchMSAData = async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
@@ -166,7 +197,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   };
 
   const fitStateAndShowMSAs = async (stateId: string) => {
-    if (!map.current) return;
+    if (!map.current || !statesWithMSA.includes(stateId)) {
+      console.log('State has no MSA data:', stateId);
+      return;
+    }
     
     console.log('Fitting state and showing MSAs for state:', stateId);
 
@@ -208,51 +242,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   };
 
-  const resetView = () => {
-    if (!map.current) return;
-
-    // Reset to default view with animation
-    map.current.easeTo({
-      pitch: 45,
-      zoom: 3,
-      center: [-98.5795, 39.8283],
-      duration: 1500
-    });
-
-    // Fade out MSA layer and fade in state layer
-    const fadeAnimation = (progress: number) => {
-      if (!map.current) return;
-      
-      map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 
-        0.6 * progress);
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-opacity', 
-        0.8 * (1 - progress));
-    };
-
-    let start: number | null = null;
-    const duration = 1000;
-
-    const animate = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      
-      fadeAnimation(progress);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        // Hide MSA layers after animation completes
-        map.current?.setLayoutProperty('msa-base', 'visibility', 'none');
-        map.current?.setLayoutProperty('msa-borders', 'visibility', 'none');
-      }
-    };
-
-    requestAnimationFrame(animate);
-
-    setSelectedState(null);
-    setViewMode('state');
-  };
-
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -291,16 +280,21 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         url: 'mapbox://inevitablesale.29jcxgnm'
       });
 
-      // Add state base layer
+      // Add state base layer with hover effect
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-color': MAP_COLORS.stateWithoutMSA,
           'fill-extrusion-height': 20000,
-          'fill-extrusion-opacity': 0.6
+          'fill-extrusion-opacity': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            0.8,
+            0.6
+          ]
         }
       });
 
@@ -349,6 +343,35 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
+      // Add hover effect for states
+      let hoveredStateId: string | null = null;
+
+      map.current.on('mousemove', 'state-base', (e) => {
+        if (e.features.length > 0) {
+          if (hoveredStateId) {
+            map.current?.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: false }
+            );
+          }
+          hoveredStateId = e.features[0].id as string;
+          map.current?.setFeatureState(
+            { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+            { hover: true }
+          );
+        }
+      });
+
+      map.current.on('mouseleave', 'state-base', () => {
+        if (hoveredStateId) {
+          map.current?.setFeatureState(
+            { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+            { hover: false }
+          );
+          hoveredStateId = null;
+        }
+      });
+
       // Add click event for state selection
       map.current.on('click', 'state-base', (e) => {
         if (e.features && e.features[0]) {
@@ -359,6 +382,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           }
         }
       });
+
+      // Fetch states with MSA data
+      fetchStatesWithMSA();
     });
 
     return () => {
