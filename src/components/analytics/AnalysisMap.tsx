@@ -108,7 +108,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }
         });
 
-        // Add borders layer
         newMap.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -121,7 +120,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }
         });
 
-        // Add click event
         newMap.on('click', 'state-base', (e) => {
           if (e.features && e.features[0]) {
             setSelectedState(e.features[0].properties);
@@ -129,7 +127,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }
         });
 
-        // Add hover events
         newMap.on('mousemove', 'state-base', (e) => {
           if (e.features && e.features.length > 0) {
             setHoveredState(e.features[0].properties);
@@ -163,7 +160,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
     if (!map || !mapLoaded || !stateData.length) return;
 
     try {
-      // Update the state colors based on firm density
       map.setPaintProperty('state-base', 'fill-extrusion-color', [
         'interpolate',
         ['linear'],
