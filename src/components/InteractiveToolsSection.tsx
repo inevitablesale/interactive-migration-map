@@ -6,9 +6,26 @@ import { StrategyBuilder } from "./analytics/StrategyBuilder";
 import { EnhancedAnalytics } from "./analytics/EnhancedAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import AnalysisMap from "./analytics/AnalysisMap";
+import { useSearchParams } from "react-router-dom";
 
 export const InteractiveToolsSection = () => {
   const [showComparison, setShowComparison] = useState(false);
+  const [searchParams] = useSearchParams();
+  const activeFilter = searchParams.get('filter');
+
+  // Map filter values to tab values
+  const getActiveTab = () => {
+    switch (activeFilter) {
+      case 'market-entry':
+        return 'opportunities';
+      case 'growth-strategy':
+        return 'strategy';
+      case 'opportunities':
+        return 'enhanced';
+      default:
+        return 'opportunities';
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
@@ -20,7 +37,7 @@ export const InteractiveToolsSection = () => {
 
       {/* Analysis Tools Section */}
       <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-200px)] overflow-y-auto">
-        <Tabs defaultValue="opportunities" className="w-full">
+        <Tabs defaultValue={getActiveTab()} value={getActiveTab()} className="w-full">
           <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-4 gap-4">
             <TabsTrigger 
               value="opportunities" 
