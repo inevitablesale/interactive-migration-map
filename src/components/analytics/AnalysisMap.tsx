@@ -210,11 +210,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         .select('state_fips')
         .not('state_fips', 'is', null);
 
-      const msaStateSet = new Set(msaStates?.map(s => s.state_fips));
+      // Create a Set of state FIPS codes that have MSAs, ensuring they're padded
+      const msaStateSet = new Set(msaStates?.map(s => s.state_fips.padStart(2, '0')) || []);
+
+      console.log('States with MSAs:', Array.from(msaStateSet));
+      console.log('California FIPS code:', '06', 'Has MSA:', msaStateSet.has('06'));
 
       const processedData = data.map(state => ({
         ...state,
-        buyerScore: msaStateSet.has(state.STATEFP) ? calculateBuyerScore(state, data) : 0
+        // Ensure STATEFP is padded when checking against msaStateSet
+        buyerScore: msaStateSet.has(state.STATEFP.padStart(2, '0')) ? calculateBuyerScore(state, data) : 0
       }));
 
       setStateData(processedData);
