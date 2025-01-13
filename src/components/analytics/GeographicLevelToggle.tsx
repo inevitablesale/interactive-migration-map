@@ -36,10 +36,10 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleFilterChange = (filter: string) => {
-    if (isFreeTier && (filter === 'growth-strategy' || filter === 'opportunities')) {
+    if (isFreeTier && filter === 'opportunities') {
       toast({
         title: "Premium Feature",
-        description: "Upgrade to access advanced analytics and growth strategies.",
+        description: "Upgrade to access advanced analytics and opportunities.",
         variant: "default",
       });
       return;
@@ -69,9 +69,6 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
         >
           <MapPin className="w-4 h-4 mr-2" />
           Growth Strategy
-          {isFreeTier && (
-            <span className="ml-1 text-xs text-yellow-500">PRO</span>
-          )}
         </ToggleGroupItem>
         <ToggleGroupItem
           value="opportunities"
