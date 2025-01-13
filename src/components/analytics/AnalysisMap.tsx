@@ -118,6 +118,70 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     `;
   }, []);
 
+  const fetchMSAData = useCallback(async (stateId: string) => {
+    console.log('Fetching MSA data for state:', stateId);
+    try {
+      const { data: msaCrosswalk, error: crosswalkError } = await supabase
+        .from('msa_state_crosswalk')
+        .select('msa, msa_name')
+        .eq('state_fips', stateId);
+
+      if (crosswalkError) {
+        console.error('Error fetching MSA crosswalk:', crosswalkError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch MSA data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
+      console.log('Found MSAs:', uniqueMsaCodes);
+
+      if (uniqueMsaCodes.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "This state has no Metropolitan Statistical Areas",
+          variant: "default",
+        });
+        return;
+      }
+
+      const { data: regionData, error: regionError } = await supabase
+        .from('region_data')
+        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
+        .in('msa', uniqueMsaCodes);
+
+      if (regionError) {
+        console.error('Error fetching region data:', regionError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch region economic data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const combinedData = msaCrosswalk.map(msa => ({
+        ...msa,
+        ...regionData?.find(rd => rd.msa === msa.msa)
+      }));
+
+      setMsaData(combinedData);
+      console.log('Combined MSA data:', combinedData);
+
+      updateMSAVisualization(combinedData);
+    } catch (error) {
+      console.error('Error in fetchMSAData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process MSA data",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
   const updateMSAVisualization = useCallback((msaData: MSAData[]) => {
     if (!map.current) {
       console.warn('Map not ready for MSA visualization update');
@@ -184,6 +248,72 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
     }
   }, [toast]);
+
+  const resetToStateView = useCallback(() => {
+    if (!map.current) return;
+
+    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+    map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
+
+    map.current.easeTo({
+      center: [-98.5795, 39.8283],
+      zoom: 3,
+      pitch: 45,
+      bearing: 0,
+      duration: 1500
+    });
+
+    setViewMode('state');
+    setSelectedState(null);
+  }, []);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+    
+    try {
+      setSelectedState(stateId);
+      await fetchMSAData(stateId);
+      
+      const stateFeatures = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
+
+      if (stateFeatures.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        const feature = stateFeatures[0];
+        
+        if (feature.geometry.type === 'Polygon') {
+          (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
+            bounds.extend(coord as [number, number]);
+          });
+        } else if (feature.geometry.type === 'MultiPolygon') {
+          (feature.geometry as GeoJSON.MultiPolygon).coordinates.forEach(polygon => {
+            polygon[0].forEach(coord => {
+              bounds.extend(coord as [number, number]);
+            });
+          });
+        }
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+
+        setViewMode('msa');
+        updateAnalysisTable(stateId);
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update map view",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, updateAnalysisTable, toast]);
 
   const initializeLayers = useCallback(() => {
     if (!map.current) return;
@@ -346,136 +476,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
     }
   }, [layersAdded, toast, getStateColor]);
-
-  const resetToStateView = useCallback(() => {
-    if (!map.current) return;
-
-    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-    map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-    map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-
-    map.current.easeTo({
-      center: [-98.5795, 39.8283],
-      zoom: 3,
-      pitch: 45,
-      bearing: 0,
-      duration: 1500
-    });
-
-    setViewMode('state');
-    setSelectedState(null);
-  }, []);
-
-  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
-    if (!map.current) return;
-    
-    try {
-      setSelectedState(stateId);
-      await fetchMSAData(stateId);
-      
-      const stateFeatures = map.current.querySourceFeatures('states', {
-        sourceLayer: 'tl_2020_us_state-52k5uw',
-        filter: ['==', ['get', 'STATEFP'], stateId]
-      });
-
-      if (stateFeatures.length > 0) {
-        const bounds = new mapboxgl.LngLatBounds();
-        const feature = stateFeatures[0];
-        
-        if (feature.geometry.type === 'Polygon') {
-          (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
-            bounds.extend(coord as [number, number]);
-          });
-        } else if (feature.geometry.type === 'MultiPolygon') {
-          (feature.geometry as GeoJSON.MultiPolygon).coordinates.forEach(polygon => {
-            polygon[0].forEach(coord => {
-              bounds.extend(coord as [number, number]);
-            });
-          });
-        }
-
-        map.current.fitBounds(bounds, {
-          padding: 50,
-          duration: 1000
-        });
-
-        setViewMode('msa');
-        updateAnalysisTable(stateId);
-      }
-    } catch (error) {
-      console.error('Error in fitStateAndShowMSAs:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update map view",
-        variant: "destructive",
-      });
-    }
-  }, [fetchMSAData, updateAnalysisTable, toast]);
-
-  const fetchMSAData = useCallback(async (stateId: string) => {
-    console.log('Fetching MSA data for state:', stateId);
-    try {
-      const { data: msaCrosswalk, error: crosswalkError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('msa, msa_name')
-        .eq('state_fips', stateId);
-
-      if (crosswalkError) {
-        console.error('Error fetching MSA crosswalk:', crosswalkError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch MSA data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
-      console.log('Found MSAs:', uniqueMsaCodes);
-
-      if (uniqueMsaCodes.length === 0) {
-        toast({
-          title: "No MSA Data",
-          description: "This state has no Metropolitan Statistical Areas",
-          variant: "default",
-        });
-        return;
-      }
-
-      const { data: regionData, error: regionError } = await supabase
-        .from('region_data')
-        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
-        .in('msa', uniqueMsaCodes);
-
-      if (regionError) {
-        console.error('Error fetching region data:', regionError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch region economic data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const combinedData = msaCrosswalk.map(msa => ({
-        ...msa,
-        ...regionData?.find(rd => rd.msa === msa.msa)
-      }));
-
-      setMsaData(combinedData);
-      console.log('Combined MSA data:', combinedData);
-
-      updateMSAVisualization(combinedData);
-    } catch (error) {
-      console.error('Error in fetchMSAData:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process MSA data",
-        variant: "destructive",
-      });
-    }
-  }, [toast, updateMSAVisualization]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
