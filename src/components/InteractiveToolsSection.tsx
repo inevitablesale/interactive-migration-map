@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { ComparisonTool } from "./ComparisonTool";
-import { MarketOpportunities } from "./analytics/MarketOpportunities";
+import { FindOpportunities } from "./analytics/FindOpportunities";
 import { ActionableInsights } from "./analytics/ActionableInsights";
 import { StrategyBuilder } from "./analytics/StrategyBuilder";
-import { EnhancedAnalytics } from "./analytics/EnhancedAnalytics";
 import { QueryBuilderPanel } from "./analytics/QueryBuilder/QueryBuilderPanel";
 import { ReportsPanel } from "./analytics/ReportsPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -15,7 +14,6 @@ export const InteractiveToolsSection = () => {
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
 
-  // Map filter values to tab values
   const getActiveTab = () => {
     switch (activeFilter) {
       case 'market-entry':
@@ -71,7 +69,7 @@ export const InteractiveToolsSection = () => {
 
           <div className="p-6 space-y-6">
             <TabsContent value="opportunities" className="mt-0 space-y-6">
-              <MarketOpportunities />
+              <FindOpportunities />
             </TabsContent>
 
             <TabsContent value="strategy" className="mt-0 space-y-6">
