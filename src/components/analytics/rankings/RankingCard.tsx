@@ -35,23 +35,11 @@ export const RankingCard = ({
   useEffect(() => {
     const fetchStateName = async () => {
       try {
-        console.log('Fetching state name for region:', region);
-        
-        // Extract state ID from the region string (format: "State XX")
-        const stateId = region.replace('State ', '');
-        console.log('Extracted state ID:', stateId);
-        
-        // Pad the state ID with leading zero if needed
-        const paddedStateId = stateId.padStart(2, '0');
-        console.log('Padded state ID:', paddedStateId);
-
         const { data, error } = await supabase
           .from('msa_county_reference')
           .select('county_name')
-          .eq('fipstate', paddedStateId)
+          .eq('fipstate', region.padStart(2, '0'))
           .limit(1);
-
-        console.log('Query result:', { data, error });
 
         if (error) {
           console.error('Error fetching state name:', error);
@@ -61,18 +49,11 @@ export const RankingCard = ({
         if (data && data.length > 0) {
           // Extract state name from county_name (format: "County Name, State Name")
           const countyName = data[0].county_name;
-          console.log('Found county name:', countyName);
-          
           const commaIndex = countyName.lastIndexOf(',');
           if (commaIndex !== -1) {
             const stateName = countyName.substring(commaIndex + 1).trim();
-            console.log('Extracted state name:', stateName);
             setDisplayName(stateName);
-          } else {
-            console.log('No comma found in county name, cannot extract state name');
           }
-        } else {
-          console.log('No data found for state ID:', paddedStateId);
         }
       } catch (error) {
         console.error('Error in fetchStateName:', error);
