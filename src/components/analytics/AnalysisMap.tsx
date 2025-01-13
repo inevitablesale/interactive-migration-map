@@ -55,6 +55,145 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
 
+  const initializeLayers = useCallback(() => {
+    if (!map.current) return;
+
+    try {
+      // Add state layers
+      map.current.addSource('states', {
+        type: 'vector',
+        url: 'mapbox://mapbox.boundaries-adm1-v3'
+      });
+
+      map.current.addLayer({
+        id: 'state-base',
+        type: 'fill-extrusion',
+        source: 'states',
+        'source-layer': 'boundaries_admin_1',
+        paint: {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.8
+        }
+      });
+
+      map.current.addLayer({
+        id: 'state-borders',
+        type: 'line',
+        source: 'states',
+        'source-layer': 'boundaries_admin_1',
+        paint: {
+          'line-color': '#fff',
+          'line-width': 1
+        }
+      });
+
+      map.current.addLayer({
+        id: 'state-hover',
+        type: 'fill-extrusion',
+        source: 'states',
+        'source-layer': 'boundaries_admin_1',
+        paint: {
+          'fill-extrusion-color': MAP_COLORS.primary,
+          'fill-extrusion-height': 30000,
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0
+        }
+      });
+
+      // Add MSA layers
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://mapbox.boundaries-metro-v3'
+      });
+
+      map.current.addLayer({
+        id: 'msa-base',
+        type: 'fill-extrusion',
+        source: 'msas',
+        'source-layer': 'boundaries_metro_1',
+        paint: {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.8
+        },
+        layout: {
+          visibility: 'none'
+        }
+      });
+
+      map.current.addLayer({
+        id: 'msa-borders',
+        type: 'line',
+        source: 'msas',
+        'source-layer': 'boundaries_metro_1',
+        paint: {
+          'line-color': '#fff',
+          'line-width': 1
+        },
+        layout: {
+          visibility: 'none'
+        }
+      });
+
+      setLayersAdded(true);
+      console.log('Map layers initialized');
+    } catch (error) {
+      console.error('Error initializing map layers:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map layers",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    // This function will be implemented later to update analysis data
+    console.log('Updating analysis for state:', stateId);
+  }, []);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      setSelectedState(stateId);
+      console.log('Fitting to state:', stateId);
+
+      // Get state bounds
+      const stateBounds = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${stateId}.json?access_token=${MAPBOX_TOKEN}&types=region`
+      ).then(res => res.json());
+
+      if (stateBounds.features && stateBounds.features[0]) {
+        const bounds = new mapboxgl.LngLatBounds(
+          stateBounds.features[0].bbox[0],
+          stateBounds.features[0].bbox[1],
+          stateBounds.features[0].bbox[2],
+          stateBounds.features[0].bbox[3]
+        );
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+
+        // Fetch and show MSA data for the selected state
+        await fetchMSAData(stateId);
+        setViewMode('msa');
+      }
+    } catch (error) {
+      console.error('Error fitting to state:', error);
+      toast({
+        title: "Error",
+        description: "Failed to zoom to selected state",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, toast]);
+
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
 
@@ -361,7 +500,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [initializeLayers]);
+  }, [initializeLayers, toast]);
 
   useEffect(() => {
     if (mapLoaded && layersAdded) {
