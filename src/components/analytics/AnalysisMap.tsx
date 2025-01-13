@@ -3,6 +3,12 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2, LineChart } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useMapInitialization } from '@/hooks/useMapInitialization';
 import { useMapLayers } from '@/hooks/useMapLayers';
@@ -99,6 +105,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     fetchMSAData,
     fetchStatesWithMSA
   } = useMSAData();
+
+  const [hoveredState, setHoveredState] = useState<StateData | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const getStateColor = useCallback((stateId: string) => {
     const state = stateData.find(s => s.STATEFP === stateId);
@@ -313,6 +322,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0.3);
           map.current?.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
           updateAnalysisTable(hoveredStateId);
+          
+          // Update tooltip data and position
+          const state = stateData.find(s => s.STATEFP === hoveredStateId);
+          if (state) {
+            setHoveredState(state);
+            setTooltipPosition({ x: e.point.x, y: e.point.y });
+          }
         }
       }
     });
@@ -321,6 +337,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       if (hoveredStateId) {
         map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         hoveredStateId = null;
+        setHoveredState(null);
       }
     });
 
@@ -333,52 +350,83 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       }
     });
-  }, [fitStateAndShowMSAs, updateAnalysisTable]);
+  }, [fitStateAndShowMSAs, updateAnalysisTable, stateData]);
+
+  const formatNumber = (num: number | null) => {
+    if (num === null) return 'N/A';
+    return new Intl.NumberFormat().format(num);
+  };
 
   return (
-    <div className={`relative ${className}`}>
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-        <ToggleGroup 
-          type="single" 
-          value={viewMode} 
-          onValueChange={(value) => {
-            if (value === 'state') {
-              resetToStateView();
-            }
-            if (value) setViewMode(value as 'state' | 'msa');
-          }}
-        >
-          <ToggleGroupItem value="state" aria-label="Toggle state view">
-            <MapIcon className="h-4 w-4" />
-            <span className="ml-2">States</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="msa" 
-            aria-label="Toggle MSA view"
-            disabled={!selectedState}
-          >
-            <Building2 className="h-4 w-4" />
-            <span className="ml-2">MSAs</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
-        
-        <ToggleGroup type="single" value={heatmapEnabled ? "enabled" : "disabled"}>
-          <ToggleGroupItem
-            value="enabled"
-            aria-label="Toggle heatmap"
-            onClick={() => {
-              setHeatmapEnabled(!heatmapEnabled);
-              fetchStateData();
+    <TooltipProvider>
+      <div className={`relative ${className}`}>
+        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+          <ToggleGroup 
+            type="single" 
+            value={viewMode} 
+            onValueChange={(value) => {
+              if (value === 'state') {
+                resetToStateView();
+              }
+              if (value) setViewMode(value as 'state' | 'msa');
             }}
           >
-            <LineChart className="h-4 w-4" />
-            <span className="ml-2">Buyer Score</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
+            <ToggleGroupItem value="state" aria-label="Toggle state view">
+              <MapIcon className="h-4 w-4" />
+              <span className="ml-2">States</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="msa" 
+              aria-label="Toggle MSA view"
+              disabled={!selectedState}
+            >
+              <Building2 className="h-4 w-4" />
+              <span className="ml-2">MSAs</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+          
+          <ToggleGroup type="single" value={heatmapEnabled ? "enabled" : "disabled"}>
+            <ToggleGroupItem
+              value="enabled"
+              aria-label="Toggle heatmap"
+              onClick={() => {
+                setHeatmapEnabled(!heatmapEnabled);
+                fetchStateData();
+              }}
+            >
+              <LineChart className="h-4 w-4" />
+              <span className="ml-2">Buyer Score</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <div ref={mapContainer} className="w-full h-full rounded-lg" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+        
+        {hoveredState && (
+          <div
+            className="absolute pointer-events-none z-50"
+            style={{
+              left: tooltipPosition.x + 10,
+              top: tooltipPosition.y + 10,
+              transform: 'translate(0, -50%)'
+            }}
+          >
+            <div className="bg-black/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
+              <h3 className="font-semibold mb-2">State Statistics</h3>
+              <div className="space-y-1 text-sm">
+                <p>Population: {formatNumber(hoveredState.B01001_001E)}</p>
+                <p>Median Income: ${formatNumber(hoveredState.B19013_001E)}</p>
+                <p>Labor Force: {formatNumber(hoveredState.B23025_004E)}</p>
+                <p>Establishments: {formatNumber(hoveredState.ESTAB)}</p>
+                {typeof hoveredState.buyerScore === 'number' && (
+                  <p>Buyer Score: {(hoveredState.buyerScore * 100).toFixed(1)}%</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div ref={mapContainer} className="w-full h-full rounded-lg" />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-    </div>
+    </TooltipProvider>
   );
 };
 
