@@ -7,6 +7,7 @@ import { HeatmapSection } from "@/components/analytics/HeatmapSection";
 import { FeaturedInsights } from "@/components/analytics/FeaturedInsights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { UpgradePrompt } from "@/components/analytics/UpgradePrompt";
+import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
 
 const Analysis = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,6 +69,7 @@ const Analysis = () => {
             
             {/* Right Column */}
             <div className="space-y-8">
+              <BuyerProfileManager />
               <AlertsPanel />
               <UpgradePrompt />
             </div>

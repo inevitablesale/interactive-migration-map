@@ -1,42 +1,23 @@
-export interface ServiceDistribution {
-  STATEFP: string;
-  specialities: string;
-  specialty_count: number;
-  specialty_percentage: number;
-}
-
-export interface MarketOpportunityScore {
-  STATEFP: string;
-  COUNTYFP: string;
-  COUNTYNAME: string;
-  migration_score: number;
-  business_density_score: number;
-  service_coverage_score: number;
-}
-
-export interface EnhancedMarketScore {
-  STATEFP: string;
-  population_score: number;
-  economic_score: number;
-  business_density_score: number;
-  employment_score: number;
-  market_potential_score: number;
-  total_score: number;
-}
-
-export interface MarketTrend {
-  STATEFP: string;
-  year_2020_moves: number;
-  year_2021_moves: number;
-  year_2022_moves: number;
-  growth_rate: number;
-  trend_direction: string;
-}
-
-export interface CompetitiveAnalysis {
-  STATEFP: string;
-  total_firms: number;
-  avg_employee_count: number;
-  market_concentration: number;
-  competition_level: string;
+export interface BuyerProfile {
+  id: string;
+  user_id: string;
+  buyer_name: string;
+  contact_email: string;
+  contact_phone?: string;
+  preferred_communication?: string;
+  target_geography: string[];
+  employee_count_min?: number;
+  employee_count_max?: number;
+  revenue_min?: number;
+  revenue_max?: number;
+  service_lines?: string[];
+  price_min?: number;
+  price_max?: number;
+  acquisition_purpose?: string;
+  growth_priorities?: string[];
+  retention_risk?: string;
+  preferred_insights?: string[];
+  engagement_frequency?: string;
+  created_at?: string;
+  updated_at?: string;
 }

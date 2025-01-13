@@ -51,6 +51,78 @@ export type Database = {
         }
         Relationships: []
       }
+      buyer_profiles: {
+        Row: {
+          acquisition_purpose: string | null
+          buyer_name: string
+          contact_email: string
+          contact_phone: string | null
+          created_at: string | null
+          employee_count_max: number | null
+          employee_count_min: number | null
+          engagement_frequency: string | null
+          growth_priorities: string[] | null
+          id: string
+          preferred_communication: string | null
+          preferred_insights: string[] | null
+          price_max: number | null
+          price_min: number | null
+          retention_risk: string | null
+          revenue_max: number | null
+          revenue_min: number | null
+          service_lines: string[] | null
+          target_geography: string[]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acquisition_purpose?: string | null
+          buyer_name: string
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string | null
+          employee_count_max?: number | null
+          employee_count_min?: number | null
+          engagement_frequency?: string | null
+          growth_priorities?: string[] | null
+          id?: string
+          preferred_communication?: string | null
+          preferred_insights?: string[] | null
+          price_max?: number | null
+          price_min?: number | null
+          retention_risk?: string | null
+          revenue_max?: number | null
+          revenue_min?: number | null
+          service_lines?: string[] | null
+          target_geography: string[]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acquisition_purpose?: string | null
+          buyer_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          employee_count_max?: number | null
+          employee_count_min?: number | null
+          engagement_frequency?: string | null
+          growth_priorities?: string[] | null
+          id?: string
+          preferred_communication?: string | null
+          preferred_insights?: string[] | null
+          price_max?: number | null
+          price_min?: number | null
+          retention_risk?: string | null
+          revenue_max?: number | null
+          revenue_min?: number | null
+          service_lines?: string[] | null
+          target_geography?: string[]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       canary_firms_data: {
         Row: {
           "Block FIPS": string | null
