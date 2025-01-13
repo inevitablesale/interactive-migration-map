@@ -10,15 +10,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { AnalyticsDashboard } from "./AnalyticsDashboard";
-import { ReportsPanel } from "./ReportsPanel";
-import { TrackersPanel } from "./TrackersPanel";
-import { FirmDirectory } from "./FirmDirectory";
 import { useToast } from "@/components/ui/use-toast";
 
-export function AppSidebar() {
+export function AppSidebar({ onTabChange }: { onTabChange: (tab: string) => void }) {
   const [activeTab, setActiveTab] = useState("analytics");
   const { toast } = useToast();
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    onTabChange(tab);
+  };
 
   const handlePremiumFeature = () => {
     toast({
@@ -36,7 +37,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
-                  onClick={() => setActiveTab("analytics")}
+                  onClick={() => handleTabChange("analytics")}
                   className={`w-full ${activeTab === "analytics" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
                   <BarChart className="w-4 h-4" />
@@ -46,7 +47,7 @@ export function AppSidebar() {
               
               <SidebarMenuItem>
                 <SidebarMenuButton 
-                  onClick={() => setActiveTab("reports")}
+                  onClick={() => handleTabChange("reports")}
                   className={`w-full ${activeTab === "reports" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
                   <FileText className="w-4 h-4" />
@@ -56,7 +57,7 @@ export function AppSidebar() {
 
               <SidebarMenuItem>
                 <SidebarMenuButton 
-                  onClick={() => setActiveTab("trackers")}
+                  onClick={() => handleTabChange("trackers")}
                   className={`w-full ${activeTab === "trackers" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
                   <Bell className="w-4 h-4" />
@@ -79,14 +80,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <div className="p-4">
-          {activeTab === "analytics" && <AnalyticsDashboard />}
-          {activeTab === "reports" && <ReportsPanel />}
-          {activeTab === "trackers" && <TrackersPanel />}
-          {activeTab === "directory" && <FirmDirectory />}
-        </div>
       </SidebarContent>
     </Sidebar>
   );
-};
+}
