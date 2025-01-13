@@ -5,6 +5,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { calculateGrowthScore, getColorFromScore, getHeightFromScore } from '@/utils/growthScoreCalculator';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -203,23 +204,36 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setLayoutProperty('state-base', 'visibility', 'none');
       map.current.setLayoutProperty('state-borders', 'visibility', 'none');
 
-      // Create a match expression for height
+      // Calculate growth scores for each MSA
+      const msaScores = msaData.reduce((acc, msa) => {
+        if (msa.msa) {
+          acc[msa.msa] = calculateGrowthScore(msa);
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+
+      // Create expressions for height and color based on growth scores
       const heightMatchExpression: mapboxgl.Expression = [
         'match',
         ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [code, 50000]),
-        0
+        ...uniqueMsaCodes.flatMap(code => [
+          code,
+          getHeightFromScore(msaScores[code] || 0)
+        ]),
+        20000 // default height
       ];
 
-      // Create a match expression for color
       const colorMatchExpression: mapboxgl.Expression = [
         'match',
         ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [code, MAP_COLORS.secondary]),
+        ...uniqueMsaCodes.flatMap(code => [
+          code,
+          getColorFromScore(msaScores[code] || 0)
+        ]),
         MAP_COLORS.inactive
       ];
 
-      // Update MSA layer with economic data
+      // Update MSA layer with growth scores
       map.current.setPaintProperty(
         'msa-base',
         'fill-extrusion-height',
