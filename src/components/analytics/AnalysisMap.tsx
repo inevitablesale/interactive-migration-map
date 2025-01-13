@@ -389,9 +389,20 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       if (stateFeatures.length > 0) {
         // Calculate bounds of the state feature
         const bounds = new mapboxgl.LngLatBounds();
-        stateFeatures[0].geometry.coordinates[0].forEach((coord: any) => {
-          bounds.extend(coord as [number, number]);
-        });
+        const feature = stateFeatures[0];
+        
+        // Safely handle different geometry types
+        if (feature.geometry.type === 'Polygon') {
+          (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
+            bounds.extend(coord as [number, number]);
+          });
+        } else if (feature.geometry.type === 'MultiPolygon') {
+          (feature.geometry as GeoJSON.MultiPolygon).coordinates.forEach(polygon => {
+            polygon[0].forEach(coord => {
+              bounds.extend(coord as [number, number]);
+            });
+          });
+        }
 
         // Fit map to state bounds with padding
         map.current.fitBounds(bounds, {
