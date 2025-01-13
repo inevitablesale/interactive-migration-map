@@ -77,17 +77,16 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         setMapLoaded(true);
         if (!newMap) return;
 
-        // Use Mapbox's built-in state boundaries tileset
         newMap.addSource('states', {
           type: 'vector',
-          url: 'mapbox://mapbox.boundaries-adm1-v3'
+          url: 'mapbox://inevitablesale.9fnr921z'
         });
 
         newMap.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
           'source': 'states',
-          'source-layer': 'boundaries_admin_1',
+          'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'fill-extrusion-color': [
               'interpolate',
@@ -106,8 +105,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             ],
             'fill-extrusion-opacity': 0.8,
             'fill-extrusion-base': 0
-          },
-          'filter': ['==', ['get', 'iso_3166_1'], 'US']
+          }
         });
 
         // Add borders layer
@@ -115,13 +113,12 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
-          'source-layer': 'boundaries_admin_1',
+          'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'line-color': MAP_COLORS.primary,
             'line-width': 1.5,
             'line-opacity': 0.8
-          },
-          'filter': ['==', ['get', 'iso_3166_1'], 'US']
+          }
         });
 
         // Add click event
