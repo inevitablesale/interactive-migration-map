@@ -54,18 +54,20 @@ const Map = () => {
     setActiveState(state);
     
     try {
+      // Create a plain object with only the data we need
       const eventData = {
         STATEFP: state.STATEFP,
-        EMP: state.EMP,
-        PAYANN: state.PAYANN,
-        ESTAB: state.ESTAB,
-        B19013_001E: state.B19013_001E,
-        B23025_004E: state.B23025_004E,
-        B25077_001E: state.B25077_001E
+        EMP: state.EMP ? Number(state.EMP) : null,
+        PAYANN: state.PAYANN ? Number(state.PAYANN) : null,
+        ESTAB: state.ESTAB ? Number(state.ESTAB) : null,
+        B19013_001E: state.B19013_001E ? Number(state.B19013_001E) : null,
+        B23025_004E: state.B23025_004E ? Number(state.B23025_004E) : null,
+        B25077_001E: state.B25077_001E ? Number(state.B25077_001E) : null
       };
       
+      // Dispatch event with serialized data
       const event = new CustomEvent('stateChanged', { 
-        detail: JSON.parse(JSON.stringify(eventData))
+        detail: eventData
       });
       window.dispatchEvent(event);
     } catch (error) {
