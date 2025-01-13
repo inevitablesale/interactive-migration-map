@@ -38,7 +38,7 @@ export const InteractiveToolsSection = () => {
       {/* Analysis Tools Section */}
       <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-200px)] overflow-y-auto">
         <Tabs defaultValue={getActiveTab()} value={getActiveTab()} className="w-full">
-          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-4 gap-4">
+          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-3 gap-4">
             <TabsTrigger 
               value="opportunities" 
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
@@ -50,12 +50,6 @@ export const InteractiveToolsSection = () => {
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
             >
               Build Strategy
-            </TabsTrigger>
-            <TabsTrigger 
-              value="insights"
-              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
-            >
-              Get Insights
             </TabsTrigger>
             <TabsTrigger 
               value="enhanced"
@@ -72,10 +66,6 @@ export const InteractiveToolsSection = () => {
 
             <TabsContent value="strategy" className="mt-0 space-y-6">
               <StrategyBuilder />
-            </TabsContent>
-
-            <TabsContent value="insights" className="mt-0 space-y-6">
-              <ActionableInsights />
             </TabsContent>
 
             <TabsContent value="enhanced" className="mt-0 space-y-6">

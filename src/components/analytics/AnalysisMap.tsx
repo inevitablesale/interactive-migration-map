@@ -470,20 +470,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
               <span className="ml-2">MSAs</span>
             </ToggleGroupItem>
           </ToggleGroup>
-          
-          <ToggleGroup type="single" value={heatmapEnabled ? "enabled" : "disabled"}>
-            <ToggleGroupItem
-              value="enabled"
-              aria-label="Toggle heatmap"
-              onClick={() => {
-                setHeatmapEnabled(!heatmapEnabled);
-                fetchStateData();
-              }}
-            >
-              <LineChart className="h-4 w-4" />
-              <span className="ml-2">Buyer Score</span>
-            </ToggleGroupItem>
-          </ToggleGroup>
         </div>
         <div ref={mapContainer} className="w-full h-full rounded-lg" />
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
