@@ -12,7 +12,18 @@ export const useMSAData = () => {
     try {
       // Ensure stateId is padded to 2 digits
       const paddedStateId = stateId.padStart(2, '0');
+      console.log('Using padded state ID:', paddedStateId);
       
+      // First, let's check what's in the crosswalk table for this state
+      const { data: rawCrosswalk, error: rawError } = await supabase
+        .from('msa_state_crosswalk')
+        .select('*')
+        .eq('state_fips', paddedStateId);
+      
+      console.log('Raw crosswalk query result:', rawCrosswalk);
+      console.log('Raw crosswalk query error:', rawError);
+
+      // Now get the actual MSA data
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
         .from('msa_state_crosswalk')
         .select('msa, msa_name')
@@ -23,10 +34,13 @@ export const useMSAData = () => {
         return [];
       }
 
+      console.log('MSA crosswalk data:', msaCrosswalk);
+
       const uniqueMsaCodes = [...new Set(msaCrosswalk?.map(m => m.msa) || [])];
-      console.log('Found MSAs:', uniqueMsaCodes);
+      console.log('Found unique MSA codes:', uniqueMsaCodes);
 
       if (uniqueMsaCodes.length === 0) {
+        console.log('No MSA codes found for state:', paddedStateId);
         return [];
       }
 
@@ -39,6 +53,8 @@ export const useMSAData = () => {
         console.error('Error fetching region data:', regionError);
         return [];
       }
+
+      console.log('Region data:', regionData);
 
       const combinedData = msaCrosswalk?.map(msa => ({
         ...msa,
@@ -67,6 +83,8 @@ export const useMSAData = () => {
         return;
       }
 
+      console.log('Raw MSA state data:', msaData);
+
       const msaCountByState = msaData?.reduce((acc: { [key: string]: number }, curr) => {
         if (curr.state_fips) {
           const stateFips = curr.state_fips.toString().padStart(2, '0');
@@ -80,6 +98,8 @@ export const useMSAData = () => {
       );
       
       console.log('States with MSA data:', uniqueStates);
+      console.log('MSA count by state:', msaCountByState);
+      
       setStatesWithMSA(uniqueStates);
       setMsaCountByState(msaCountByState);
     } catch (error) {
