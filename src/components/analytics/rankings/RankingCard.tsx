@@ -38,7 +38,7 @@ export const RankingCard = ({
         const { data, error } = await supabase
           .from('msa_county_reference')
           .select('county_name')
-          .eq('fipstate', region)
+          .eq('fipstate', region.padStart(2, '0'))
           .limit(1);
 
         if (error) {
@@ -48,8 +48,10 @@ export const RankingCard = ({
 
         if (data && data.length > 0) {
           // Extract state name from county_name (format: "County Name, State Name")
-          const stateName = data[0].county_name.split(',')[1]?.trim();
-          if (stateName) {
+          const countyName = data[0].county_name;
+          const commaIndex = countyName.lastIndexOf(',');
+          if (commaIndex !== -1) {
+            const stateName = countyName.substring(commaIndex + 1).trim();
             setDisplayName(stateName);
           }
         }
