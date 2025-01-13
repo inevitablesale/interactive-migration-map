@@ -8,6 +8,8 @@ export interface StateRanking {
   growth_rank: number;
   national_density_avg: number;
   national_growth_avg: number;
+  market_saturation: number;
+  market_saturation_rank: number;
 }
 
 export interface MSARanking {
@@ -21,4 +23,6 @@ export interface MSARanking {
   growth_rank: number;
   national_density_avg: number;
   national_growth_avg: number;
+  regional_specialization: string;
+  specialization_score: number;
 }

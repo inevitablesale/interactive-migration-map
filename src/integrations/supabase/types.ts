@@ -744,6 +744,22 @@ export type Database = {
           competition_level: string
         }[]
       }
+      get_county_rankings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          statefp: string
+          countyfp: string
+          countyname: string
+          total_firms: number
+          population: number
+          firm_density: number
+          growth_rate: number
+          density_rank: number
+          growth_rank: number
+          state_density_avg: number
+          state_growth_avg: number
+        }[]
+      }
       get_enhanced_market_scores: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -810,6 +826,8 @@ export type Database = {
           growth_rank: number
           national_density_avg: number
           national_growth_avg: number
+          regional_specialization: string
+          specialization_score: number
         }[]
       }
       get_service_distribution: {
@@ -833,6 +851,8 @@ export type Database = {
           growth_rank: number
           national_density_avg: number
           national_growth_avg: number
+          market_saturation: number
+          market_saturation_rank: number
         }[]
       }
     }
