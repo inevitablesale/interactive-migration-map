@@ -52,22 +52,27 @@ const Map = () => {
     if (!state) return;
     
     setActiveState(state);
-    // Create a plain object with only serializable data
-    const eventData = {
-      STATEFP: state.STATEFP,
-      EMP: state.EMP,
-      PAYANN: state.PAYANN,
-      ESTAB: state.ESTAB,
-      B19013_001E: state.B19013_001E,
-      B23025_004E: state.B23025_004E,
-      B25077_001E: state.B25077_001E
-    };
     
-    // Use a custom event with serializable data
-    const event = new CustomEvent('stateChanged', { 
-      detail: JSON.parse(JSON.stringify(eventData))
-    });
-    window.dispatchEvent(event);
+    try {
+      // Create a plain object with only serializable data
+      const eventData = {
+        STATEFP: state.STATEFP,
+        EMP: state.EMP,
+        PAYANN: state.PAYANN,
+        ESTAB: state.ESTAB,
+        B19013_001E: state.B19013_001E,
+        B23025_004E: state.B23025_004E,
+        B25077_001E: state.B25077_001E
+      };
+      
+      // Use a custom event with serializable data
+      const event = new CustomEvent('stateChanged', { 
+        detail: JSON.parse(JSON.stringify(eventData))
+      });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error dispatching state change event:', error);
+    }
   }, []);
 
   const flyToState = useCallback((stateId: string) => {
