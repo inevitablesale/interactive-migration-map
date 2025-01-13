@@ -93,6 +93,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
+        // Add base layer with dynamic colors based on data
         map.current.addLayer({
           'id': 'state-base',
           'type': 'fill-extrusion',
@@ -102,17 +103,43 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
-              ['coalesce', ['get', 'firm_density'], 0],
+              ['get', 'firm_density'],
               0, MAP_COLORS.primary,
               50, MAP_COLORS.secondary,
               100, MAP_COLORS.accent
             ],
-            'fill-extrusion-height': 20000,
-            'fill-extrusion-opacity': 0.6,
+            'fill-extrusion-height': [
+              'interpolate',
+              ['linear'],
+              ['get', 'firm_density'],
+              0, 20000,
+              100, 200000
+            ],
+            'fill-extrusion-opacity': 0.8,
             'fill-extrusion-base': 0
           }
         });
 
+        // Add interactive hover layer
+        map.current.addLayer({
+          'id': 'state-hover',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': MAP_COLORS.highlight,
+            'fill-extrusion-height': 250000,
+            'fill-extrusion-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.8,
+              0
+            ],
+            'fill-extrusion-base': 0
+          }
+        });
+
+        // Add borders layer
         map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -122,6 +149,47 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'line-color': MAP_COLORS.primary,
             'line-width': 1.5,
             'line-opacity': 0.8
+          }
+        });
+
+        // Add click event
+        map.current.on('click', 'state-base', (e) => {
+          if (e.features && e.features[0]) {
+            const feature = e.features[0];
+            setSelectedState(feature.properties);
+            setShowReportPanel(true);
+          }
+        });
+
+        // Add hover events
+        let hoveredStateId: string | null = null;
+
+        map.current.on('mousemove', 'state-base', (e) => {
+          if (e.features && e.features.length > 0) {
+            if (hoveredStateId) {
+              map.current?.setFeatureState(
+                { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+                { hover: false }
+              );
+            }
+            hoveredStateId = e.features[0].id as string;
+            map.current?.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: true }
+            );
+            setHoveredState(e.features[0].properties);
+            setTooltipPosition({ x: e.point.x, y: e.point.y });
+          }
+        });
+
+        map.current.on('mouseleave', 'state-base', () => {
+          if (hoveredStateId) {
+            map.current?.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: false }
+            );
+            hoveredStateId = null;
+            setHoveredState(null);
           }
         });
 
@@ -156,7 +224,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
         'interpolate',
         ['linear'],
-        ['coalesce', ['get', 'firm_density'], 0],
+        ['get', 'firm_density'],
         0, MAP_COLORS.primary,
         50, MAP_COLORS.secondary,
         100, MAP_COLORS.accent
@@ -175,6 +243,18 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           selectedState={selectedState}
           onClose={() => setShowReportPanel(false)}
         />
+      )}
+      {hoveredState && (
+        <div
+          className="absolute pointer-events-none bg-black/80 text-white p-2 rounded"
+          style={{
+            left: tooltipPosition.x + 10,
+            top: tooltipPosition.y + 10,
+          }}
+        >
+          <p className="font-semibold">{hoveredState.name}</p>
+          <p className="text-sm">Firm Density: {formatNumber(hoveredState.firm_density)}</p>
+        </div>
       )}
     </div>
   );
