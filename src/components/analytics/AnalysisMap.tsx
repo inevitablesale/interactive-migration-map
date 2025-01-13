@@ -71,7 +71,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       return;
     }
     
-    const stateInfo = stateData.find(s => s.region === stateId);
+    const stateInfo = stateData.find(s => s.STATEFP === stateId);
     console.log('Found stateInfo:', stateInfo);
     
     if (stateInfo) {
