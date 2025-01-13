@@ -45,30 +45,10 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       }
 
       setStateData(densityMetrics);
-
-      if (map && mapLoaded) {
-        const source = map.getSource('states') as mapboxgl.GeoJSONSource;
-        if (source) {
-          source.setData({
-            type: 'FeatureCollection',
-            features: densityMetrics.map((metric: any) => ({
-              type: 'Feature',
-              properties: {
-                name: metric.region,
-                firm_density: metric.firm_density || 0
-              },
-              geometry: {
-                type: 'Polygon',
-                coordinates: [] // This will be filled by Mapbox
-              }
-            }))
-          });
-        }
-      }
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
-  }, [toast, map, mapLoaded]);
+  }, [toast]);
 
   useEffect(() => {
     if (!mapContainer || map) return;
