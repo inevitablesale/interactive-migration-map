@@ -111,10 +111,24 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
-        // Fit the map to the state bounds with increased padding and maxZoom
+        // Calculate padding based on viewport size
+        const container = map.current.getContainer();
+        const viewportWidth = container.offsetWidth;
+        const viewportHeight = container.offsetHeight;
+        
+        // Adjust padding proportionally to viewport size (min 100px, max 20% of viewport)
+        const horizontalPadding = Math.min(Math.max(viewportWidth * 0.2, 100), viewportWidth * 0.3);
+        const verticalPadding = Math.min(Math.max(viewportHeight * 0.2, 100), viewportHeight * 0.3);
+
+        // Fit the map to the state bounds with dynamic padding and maxZoom
         map.current.fitBounds(bounds, {
-          padding: { top: 100, bottom: 100, left: 100, right: 100 },
-          maxZoom: 6,
+          padding: {
+            top: verticalPadding,
+            bottom: verticalPadding,
+            left: horizontalPadding,
+            right: horizontalPadding
+          },
+          maxZoom: 5.5, // Reduced max zoom for better overview
           duration: 1000
         });
 
