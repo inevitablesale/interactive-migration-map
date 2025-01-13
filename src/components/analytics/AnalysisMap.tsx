@@ -357,7 +357,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.stateWithoutMSA,
+          'fill-extrusion-color': MAP_COLORS.inactive, // Fixed: Use inactive color as default
           'fill-extrusion-height': 20000,
           'fill-extrusion-opacity': 0.6
         }
