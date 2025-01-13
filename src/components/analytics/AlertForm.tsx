@@ -21,20 +21,35 @@ interface AlertFormData {
   region: string;
   employeeCountMin: number;
   employeeCountMax: number;
-  specialties: string;
+  specialties: string[];
   frequency: "realtime" | "daily" | "weekly";
 }
+
+const regions = [
+  { value: "CA", label: "California" },
+  { value: "TX", label: "Texas" },
+  { value: "NY", label: "New York" },
+  { value: "FL", label: "Florida" },
+];
+
+const specialtiesList = [
+  { value: "tax", label: "Tax" },
+  { value: "audit", label: "Audit" },
+  { value: "advisory", label: "Advisory" },
+  { value: "payroll", label: "Payroll" },
+];
 
 export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [employeeRange, setEmployeeRange] = useState([10, 50]);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<AlertFormData>({
     defaultValues: {
       title: "",
       region: "",
-      specialties: "",
+      specialties: [],
       frequency: "daily"
     }
   });
@@ -47,7 +62,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         region: data.region,
         employee_count_min: employeeRange[0],
         employee_count_max: employeeRange[1],
-        specialties: [data.specialties],
+        specialties: selectedSpecialties,
         frequency: data.frequency,
       });
 
@@ -59,6 +74,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       });
 
       reset();
+      setSelectedSpecialties([]);
       onSuccess?.();
     } catch (error) {
       console.error('Error creating alert:', error);
@@ -70,6 +86,15 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSpecialtySelect = (value: string) => {
+    setSelectedSpecialties(prev => {
+      if (prev.includes(value)) {
+        return prev.filter(v => v !== value);
+      }
+      return [...prev, value];
+    });
   };
 
   return (
@@ -85,7 +110,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <Input
                 {...field}
                 placeholder="E.g., Tax firms in California"
-                className="mt-1.5"
+                className="mt-1.5 bg-white/5 border-white/10 text-white"
               />
             )}
           />
@@ -102,14 +127,19 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             rules={{ required: "Region is required" }}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="mt-1.5">
+                <SelectTrigger className="mt-1.5 bg-white/5 border-white/10 text-white">
                   <SelectValue placeholder="Select region" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CA">California</SelectItem>
-                  <SelectItem value="TX">Texas</SelectItem>
-                  <SelectItem value="NY">New York</SelectItem>
-                  <SelectItem value="FL">Florida</SelectItem>
+                <SelectContent className="bg-gray-900 border-white/10">
+                  {regions.map(region => (
+                    <SelectItem 
+                      key={region.value} 
+                      value={region.value}
+                      className="text-white hover:bg-white/10"
+                    >
+                      {region.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}
@@ -134,27 +164,25 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
         <div>
           <Label>Specialties</Label>
-          <Controller
-            name="specialties"
-            control={control}
-            rules={{ required: "Specialty is required" }}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Select specialties" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tax">Tax</SelectItem>
-                  <SelectItem value="audit">Audit</SelectItem>
-                  <SelectItem value="advisory">Advisory</SelectItem>
-                  <SelectItem value="payroll">Payroll</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.specialties && (
-            <p className="text-sm text-red-500 mt-1">{errors.specialties.message}</p>
-          )}
+          <div className="mt-1.5 space-y-2">
+            {specialtiesList.map(specialty => (
+              <div 
+                key={specialty.value}
+                className="flex items-center space-x-2 p-2 rounded bg-white/5 border border-white/10"
+              >
+                <input
+                  type="checkbox"
+                  id={specialty.value}
+                  checked={selectedSpecialties.includes(specialty.value)}
+                  onChange={() => handleSpecialtySelect(specialty.value)}
+                  className="rounded border-white/10"
+                />
+                <label htmlFor={specialty.value} className="text-white">
+                  {specialty.label}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div>
