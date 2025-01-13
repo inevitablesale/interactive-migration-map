@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Building2, TrendingUp, Users, DollarSign, GraduationCap } from "lucide-react";
+import { Building2, TrendingUp, Users, DollarSign, GraduationCap, Award } from "lucide-react";
 
 interface RankingCardProps {
   title: string;
@@ -14,6 +14,7 @@ interface RankingCardProps {
   marketSaturation?: number;
   avgPayrollPerFirm?: number;
   educationRate?: number;
+  specialization?: string;
 }
 
 export const RankingCard = ({
@@ -25,7 +26,8 @@ export const RankingCard = ({
   comparedToNational,
   marketSaturation,
   avgPayrollPerFirm,
-  educationRate
+  educationRate,
+  specialization
 }: RankingCardProps) => {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10 p-4">
@@ -34,6 +36,12 @@ export const RankingCard = ({
           <div>
             <h3 className="text-sm text-white/60">{title}</h3>
             <p className="text-lg font-semibold text-white">{region}</p>
+            {specialization && (
+              <div className="flex items-center gap-1 mt-1">
+                <Award className="w-4 h-4 text-yellow-400" />
+                <span className="text-sm text-white/80">{specialization}</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-blue-400" />
