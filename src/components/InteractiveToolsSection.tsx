@@ -22,23 +22,25 @@ export const InteractiveToolsSection = () => {
         return 'opportunities';
       case 'growth-strategy':
         return 'strategy';
-      case 'opportunities':
-        return 'enhanced';
+      case 'reports':
+        return 'reports';
+      case 'builder':
+        return 'builder';
       default:
         return 'opportunities';
     }
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
+    <div className="grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] gap-0">
       {/* Analysis Map Section */}
-      <div className="h-[calc(100vh-200px)] relative">
+      <div className="h-[calc(100vh-100px)] relative">
         <AnalysisMap className="h-full" />
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-transparent to-black/20" />
       </div>
 
       {/* Analysis Tools Section */}
-      <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-200px)] overflow-y-auto">
+      <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-100px)] overflow-y-auto">
         <Tabs defaultValue={getActiveTab()} value={getActiveTab()} className="w-full">
           <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-4 gap-4">
             <TabsTrigger 
