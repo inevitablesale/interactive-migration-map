@@ -245,14 +245,44 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       // Calculate bounds for the state
       const bounds = new mapboxgl.LngLatBounds();
+      let hasValidCoordinates = false;
+
       stateFeatures.forEach(feature => {
         if (feature.geometry.type === 'Polygon') {
-          const coordinates = feature.geometry.coordinates[0];
-          coordinates.forEach((coord: [number, number]) => {
-            bounds.extend(coord);
+          const coordinates = feature.geometry.coordinates;
+          if (Array.isArray(coordinates) && coordinates.length > 0 && Array.isArray(coordinates[0])) {
+            coordinates[0].forEach((coord: [number, number]) => {
+              if (Array.isArray(coord) && coord.length === 2 && 
+                  !isNaN(coord[0]) && !isNaN(coord[1])) {
+                bounds.extend(coord);
+                hasValidCoordinates = true;
+              }
+            });
+          }
+        } else if (feature.geometry.type === 'MultiPolygon') {
+          feature.geometry.coordinates.forEach(polygon => {
+            if (Array.isArray(polygon) && polygon.length > 0 && Array.isArray(polygon[0])) {
+              polygon[0].forEach((coord: [number, number]) => {
+                if (Array.isArray(coord) && coord.length === 2 && 
+                    !isNaN(coord[0]) && !isNaN(coord[1])) {
+                  bounds.extend(coord);
+                  hasValidCoordinates = true;
+                }
+              });
+            }
           });
         }
       });
+
+      if (!hasValidCoordinates) {
+        console.error('No valid coordinates found for state:', stateId);
+        toast({
+          title: "Error",
+          description: "Could not find valid coordinates for this state",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Fit the map to the state bounds
       map.current.fitBounds(bounds, {
