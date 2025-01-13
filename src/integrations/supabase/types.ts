@@ -141,7 +141,9 @@ export type Database = {
           foundedOn: number | null
           latitude: number | null
           Location: string | null
+          logoResolutionResult: string | null
           longitude: number | null
+          originalCoverImage: string | null
           PLACEFP: string | null
           PLACENAME: string | null
           PLACENS: string | null
@@ -168,7 +170,9 @@ export type Database = {
           foundedOn?: number | null
           latitude?: number | null
           Location?: string | null
+          logoResolutionResult?: string | null
           longitude?: number | null
+          originalCoverImage?: string | null
           PLACEFP?: string | null
           PLACENAME?: string | null
           PLACENS?: string | null
@@ -195,7 +199,9 @@ export type Database = {
           foundedOn?: number | null
           latitude?: number | null
           Location?: string | null
+          logoResolutionResult?: string | null
           longitude?: number | null
+          originalCoverImage?: string | null
           PLACEFP?: string | null
           PLACENAME?: string | null
           PLACENS?: string | null

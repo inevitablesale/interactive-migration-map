@@ -4,6 +4,7 @@ import { GeographicLevel } from "@/types/geography";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
 
 interface GeographicLevelToggleProps {
   value: GeographicLevel;
@@ -12,6 +13,8 @@ interface GeographicLevelToggleProps {
 
 export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggleProps) => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeFilter = searchParams.get('filter');
 
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
@@ -32,47 +35,50 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
 
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
-  const handleValueChange = (newValue: GeographicLevel) => {
-    if (isFreeTier && newValue === 'county') {
+  const handleFilterChange = (filter: string) => {
+    if (isFreeTier && (filter === 'growth-strategy' || filter === 'opportunities')) {
       toast({
         title: "Premium Feature",
-        description: "Upgrade to access county-level data analysis.",
+        description: "Upgrade to access advanced analytics and growth strategies.",
         variant: "default",
       });
       return;
     }
-    onChange(newValue);
+    setSearchParams({ filter });
   };
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-white/80">View Data By:</label>
+      <label className="text-sm font-medium text-white/80">Analysis Type:</label>
       <ToggleGroup
         type="single"
-        value={value}
-        onValueChange={handleValueChange}
+        value={activeFilter || 'market-entry'}
+        onValueChange={handleFilterChange}
         className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-1"
       >
         <ToggleGroupItem
-          value="state"
+          value="market-entry"
           className="data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
         >
           <MapPin className="w-4 h-4 mr-2" />
-          State
+          Market Entry
         </ToggleGroupItem>
         <ToggleGroupItem
-          value="msa"
+          value="growth-strategy"
           className="data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
         >
           <MapPin className="w-4 h-4 mr-2" />
-          MSA
+          Growth Strategy
+          {isFreeTier && (
+            <span className="ml-1 text-xs text-yellow-500">PRO</span>
+          )}
         </ToggleGroupItem>
         <ToggleGroupItem
-          value="county"
+          value="opportunities"
           className="data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
         >
           <MapPin className="w-4 h-4 mr-2" />
-          County
+          Opportunities
           {isFreeTier && (
             <span className="ml-1 text-xs text-yellow-500">PRO</span>
           )}
