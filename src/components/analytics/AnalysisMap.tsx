@@ -142,9 +142,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         const horizontalPadding = Math.min(Math.max(dynamicPadding, viewportWidth * 0.1), viewportWidth * 0.3);
         const verticalPadding = Math.min(Math.max(dynamicPadding, viewportHeight * 0.1), viewportHeight * 0.3);
 
-        // Calculate appropriate max zoom based on state size
+        // Calculate appropriate max zoom based on state size with a higher minimum zoom
         const stateArea = stateLngSpan * stateLatSpan;
-        const maxZoom = Math.min(6, 7 - Math.log(stateArea) / Math.log(2) * 0.2);
+        const maxZoom = Math.max(
+          Math.min(8, 9 - Math.log(stateArea) / Math.log(2) * 0.2),
+          5.5  // Set minimum zoom to ensure MSAs are visible
+        );
 
         // Important: Show MSA layers BEFORE fitting bounds
         if (map.current.getLayer('msa-base')) {
