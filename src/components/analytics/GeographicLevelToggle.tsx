@@ -33,10 +33,10 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleValueChange = (newValue: GeographicLevel) => {
-    if (isFreeTier && newValue !== 'state') {
+    if (isFreeTier && newValue === 'county') {
       toast({
         title: "Premium Feature",
-        description: "Upgrade to access MSA and county-level data analysis.",
+        description: "Upgrade to access county-level data analysis.",
         variant: "default",
       });
       return;
@@ -73,6 +73,9 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
         >
           <MapPin className="w-4 h-4 mr-2" />
           County
+          {isFreeTier && (
+            <span className="ml-1 text-xs text-yellow-500">PRO</span>
+          )}
         </ToggleGroupItem>
       </ToggleGroup>
     </div>
