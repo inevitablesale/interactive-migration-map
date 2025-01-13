@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, Building2 } from "lucide-react";
-import { MarketOpportunityScore } from "@/types/supabase";
+import { MarketOpportunityScore } from "@/types/analytics";
 
 export function MarketOpportunities() {
   const { data: opportunities } = useQuery<MarketOpportunityScore[]>({
@@ -13,7 +13,12 @@ export function MarketOpportunities() {
         .rpc('get_market_opportunities');
       
       if (error) throw error;
-      return data;
+      return data.map(item => ({
+        ...item,
+        STATEFP: item.statefp,
+        COUNTYFP: item.countyfp,
+        COUNTYNAME: item.countyname
+      }));
     }
   });
 

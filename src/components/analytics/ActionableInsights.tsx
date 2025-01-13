@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, Building2 } from "lucide-react";
-import { ServiceDistribution } from "@/types/supabase";
+import { ServiceDistribution } from "@/types/analytics";
 
 export function ActionableInsights() {
   const { data: serviceDistribution } = useQuery<ServiceDistribution[]>({
@@ -13,7 +13,10 @@ export function ActionableInsights() {
         .rpc('get_service_distribution');
       
       if (error) throw error;
-      return data;
+      return data.map(item => ({
+        ...item,
+        STATEFP: item.statefp
+      }));
     }
   });
 

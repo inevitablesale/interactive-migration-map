@@ -25,7 +25,10 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_enhanced_market_scores');
       if (error) throw error;
-      return data;
+      return data.map(item => ({
+        ...item,
+        STATEFP: item.statefp
+      }));
     }
   });
 
@@ -34,7 +37,10 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_trends');
       if (error) throw error;
-      return data;
+      return data.map(item => ({
+        ...item,
+        STATEFP: item.statefp
+      }));
     }
   });
 
@@ -43,7 +49,10 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_competitive_analysis');
       if (error) throw error;
-      return data;
+      return data.map(item => ({
+        ...item,
+        STATEFP: item.statefp
+      }));
     }
   });
 
