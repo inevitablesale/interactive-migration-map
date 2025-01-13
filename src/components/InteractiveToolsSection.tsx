@@ -10,35 +10,55 @@ export const InteractiveToolsSection = () => {
   const [showComparison, setShowComparison] = useState(false);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Analysis Map Section */}
-      <div className="h-[600px] relative rounded-lg overflow-hidden border border-white/10">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+      {/* Analysis Map Section - Full height */}
+      <div className="h-[calc(100vh-200px)] relative">
         <AnalysisMap className="h-full" />
       </div>
 
       {/* Analysis Tools Section */}
-      <div className="space-y-8">
+      <div className="bg-black/40 backdrop-blur-sm p-6 h-[calc(100vh-200px)] overflow-y-auto">
         <Tabs defaultValue="insights" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="insights">Market Insights</TabsTrigger>
-            <TabsTrigger value="predictive">Predictive</TabsTrigger>
-            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-            <TabsTrigger value="compare">Compare</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-4 bg-white/5 p-1 rounded-lg mb-6">
+            <TabsTrigger 
+              value="insights" 
+              className="data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-colors"
+            >
+              Market Insights
+            </TabsTrigger>
+            <TabsTrigger 
+              value="predictive"
+              className="data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-colors"
+            >
+              Predictive
+            </TabsTrigger>
+            <TabsTrigger 
+              value="opportunities"
+              className="data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-colors"
+            >
+              Opportunities
+            </TabsTrigger>
+            <TabsTrigger 
+              value="compare"
+              className="data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-colors"
+            >
+              Compare
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="insights" className="space-y-8">
+          <TabsContent value="insights" className="space-y-6">
             <HeatmapTool />
           </TabsContent>
 
-          <TabsContent value="predictive" className="space-y-8">
+          <TabsContent value="predictive" className="space-y-6">
             <PredictiveTools />
           </TabsContent>
 
-          <TabsContent value="opportunities" className="space-y-8">
+          <TabsContent value="opportunities" className="space-y-6">
             <OpportunityTools />
           </TabsContent>
 
-          <TabsContent value="compare" className="space-y-8">
+          <TabsContent value="compare" className="space-y-6">
             <ComparisonTool />
           </TabsContent>
         </Tabs>

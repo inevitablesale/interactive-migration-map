@@ -3,8 +3,8 @@ import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
 const Analysis = () => {
   return (
     <div className="min-h-screen bg-black/95">
-      <div className="w-full px-0 py-16">
-        <div className="mb-16 text-center">
+      <div className="w-full px-0">
+        <div className="py-12 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
             Interactive Market Analysis
           </h2>
