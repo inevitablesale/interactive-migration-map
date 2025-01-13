@@ -1,23 +1,15 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useState, useCallback } from 'react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useMapInitialization } from '@/hooks/useMapInitialization';
+import { useMapLayers } from '@/hooks/useMapLayers';
+import { useMSAData } from '@/hooks/useMSAData';
 import { calculateGrowthScore, getColorFromScore, getHeightFromScore } from '@/utils/growthScoreCalculator';
+import type { MSAData } from '@/types/map';
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
-
-const MAP_COLORS = {
-  primary: '#037CFE',
-  secondary: '#00FFE0',
-  accent: '#FFF903',
-  highlight: '#94EC0E',
-  active: '#FA0098',
-  inactive: '#1e293b',
-  disabled: '#000000'
-};
+interface AnalysisMapProps {
+  className?: string;
+}
 
 const STATE_COLORS = [
   '#e6f3ff',
@@ -30,38 +22,25 @@ const STATE_COLORS = [
   '#0066cc'
 ];
 
-interface MSAData {
-  msa: string;
-  msa_name: string;
-  EMP?: number;
-  PAYANN?: number;
-  ESTAB?: number;
-  B01001_001E?: number;
-  B19013_001E?: number;
-  B23025_004E?: number;
-}
-
-interface AnalysisMapProps {
-  className?: string;
-}
-
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [layersAdded, setLayersAdded] = useState(false);
   const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [msaData, setMsaData] = useState<MSAData[]>([]);
-  const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
-  const [msaCountByState, setMsaCountByState] = useState<{ [key: string]: number }>({});
-  const { toast } = useToast();
+  
+  const { mapContainer, map, mapLoaded } = useMapInitialization();
+  const { layersAdded, initializeLayers } = useMapLayers(map);
+  const { 
+    msaData, 
+    statesWithMSA, 
+    msaCountByState, 
+    fetchMSAData, 
+    fetchStatesWithMSA 
+  } = useMSAData();
 
   const getStateColor = useCallback((stateId: string) => {
     const msaCount = msaCountByState[stateId] || 0;
     const maxMSAs = Math.max(...Object.values(msaCountByState));
     const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
-    return STATE_COLORS[colorIndex] || MAP_COLORS.disabled;
+    return STATE_COLORS[colorIndex] || '#000000';
   }, [msaCountByState]);
 
   const updateAnalysisTable = useCallback((stateId: string) => {
