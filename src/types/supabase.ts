@@ -1,14 +1,14 @@
 export interface ServiceDistribution {
-  STATEFP: string;
+  statefp: string;
   specialities: string;
   specialty_count: number;
   specialty_percentage: number;
 }
 
 export interface MarketOpportunityScore {
-  STATEFP: string;
-  COUNTYFP: string;
-  COUNTYNAME: string;
+  statefp: string;
+  countyfp: string;
+  countyname: string;
   migration_score: number;
   business_density_score: number;
   service_coverage_score: number;
@@ -32,7 +32,7 @@ export interface Database {
       get_enhanced_market_scores: {
         Args: Record<string, never>;
         Returns: Array<{
-          STATEFP: string;
+          statefp: string;
           population_score: number;
           economic_score: number;
           business_density_score: number;
@@ -44,7 +44,7 @@ export interface Database {
       get_market_trends: {
         Args: Record<string, never>;
         Returns: Array<{
-          STATEFP: string;
+          statefp: string;
           year_2020_moves: number;
           year_2021_moves: number;
           year_2022_moves: number;
@@ -55,7 +55,7 @@ export interface Database {
       get_competitive_analysis: {
         Args: Record<string, never>;
         Returns: Array<{
-          STATEFP: string;
+          statefp: string;
           total_firms: number;
           avg_employee_count: number;
           market_concentration: number;

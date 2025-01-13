@@ -1,5 +1,5 @@
 export interface MarketTrend {
-  STATEFP: string;
+  statefp: string;
   year_2020_moves: number;
   year_2021_moves: number;
   year_2022_moves: number;
@@ -8,7 +8,7 @@ export interface MarketTrend {
 }
 
 export interface CompetitiveAnalysis {
-  STATEFP: string;
+  statefp: string;
   total_firms: number;
   avg_employee_count: number;
   market_concentration: number;
@@ -16,7 +16,7 @@ export interface CompetitiveAnalysis {
 }
 
 export interface EnhancedMarketScore {
-  STATEFP: string;
+  statefp: string;
   population_score: number;
   economic_score: number;
   business_density_score: number;
