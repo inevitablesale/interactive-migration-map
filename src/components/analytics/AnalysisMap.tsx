@@ -170,25 +170,34 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
 
-      // Create a match expression for height with unique codes
-      const heightMatchExpression = ['match', ['get', 'CBSAFP']];
-      uniqueMsaCodes.forEach(code => {
-        heightMatchExpression.push(code);
-        heightMatchExpression.push(50000);
-      });
-      heightMatchExpression.push(0); // default value
+      // Create a match expression for height
+      const heightMatchExpression: mapboxgl.Expression = [
+        'match',
+        ['get', 'CBSAFP'],
+        ...uniqueMsaCodes.flatMap(code => [code, 50000]),
+        0
+      ];
 
-      // Create a match expression for color with unique codes
-      const colorMatchExpression = ['match', ['get', 'CBSAFP']];
-      uniqueMsaCodes.forEach(code => {
-        colorMatchExpression.push(code);
-        colorMatchExpression.push(MAP_COLORS.secondary);
-      });
-      colorMatchExpression.push(MAP_COLORS.inactive); // default value
+      // Create a match expression for color
+      const colorMatchExpression: mapboxgl.Expression = [
+        'match',
+        ['get', 'CBSAFP'],
+        ...uniqueMsaCodes.flatMap(code => [code, MAP_COLORS.secondary]),
+        MAP_COLORS.inactive
+      ];
 
       // Update MSA layer with economic data
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-height', heightMatchExpression);
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-color', colorMatchExpression);
+      map.current.setPaintProperty(
+        'msa-base',
+        'fill-extrusion-height',
+        heightMatchExpression as mapboxgl.DataDrivenPropertyValueSpecification<number>
+      );
+      
+      map.current.setPaintProperty(
+        'msa-base',
+        'fill-extrusion-color',
+        colorMatchExpression as mapboxgl.DataDrivenPropertyValueSpecification<string>
+      );
 
       // Set filters for MSA layers using unique codes
       map.current.setFilter('msa-base', ['in', 'CBSAFP', ...uniqueMsaCodes]);
