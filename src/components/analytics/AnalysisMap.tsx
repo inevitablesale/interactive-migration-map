@@ -34,32 +34,46 @@ interface StateData {
 const calculateBuyerScore = (state: StateData, allStates: StateData[]): number => {
   if (!state || !allStates.length) return 0;
 
+  // Calculate metrics as per SQL query
+  const accountantEmployment = state.C24060_001E || 0;
+  const medianIncome = state.B19013_001E || 0;
+  const avgCommuteTime = state.B08303_001E || 0;
+  const population = state.B01001_001E || 1; // Avoid division by zero
+  const laborForce = state.B23025_004E || 1; // Avoid division by zero
+  const establishments = state.ESTAB || 0;
+  const payroll = state.PAYANN || 0;
+
+  // Calculate composite metrics
+  const businessDensity = establishments / population;
+  const accountingSaturation = accountantEmployment / laborForce;
+  const payrollPerEstablishment = establishments > 0 ? payroll / establishments : 0;
+
   // Find maximum values across all states
-  const maxPopulation = Math.max(...allStates.map(s => s.B01001_001E || 0));
-  const maxWorkforce = Math.max(...allStates.map(s => s.C24010_001E || 0));
-  const maxBachelors = Math.max(...allStates.map(s => s.B15003_022E || 0));
-  const maxCommuteTime = Math.max(...allStates.map(s => s.B08303_001E || 0));
+  const maxBusinessDensity = Math.max(...allStates.map(s => (s.ESTAB || 0) / (s.B01001_001E || 1)));
+  const maxAccountingSaturation = Math.max(...allStates.map(s => (s.C24060_001E || 0) / (s.B23025_004E || 1)));
+  const maxPayrollPerEstab = Math.max(...allStates.map(s => s.ESTAB && s.ESTAB > 0 ? (s.PAYANN || 0) / s.ESTAB : 0));
+  const maxMedianIncome = Math.max(...allStates.map(s => s.B19013_001E || 0));
 
   // Calculate normalized component scores
-  const populationScore = ((state.B01001_001E || 0) / maxPopulation) * 0.3;
-  const workforceScore = ((state.C24010_001E || 0) / maxWorkforce) * 0.4;
-  const educationScore = ((state.B15003_022E || 0) / maxBachelors) * 0.2;
-  const commuteScore = (1 - ((state.B08303_001E || 0) / maxCommuteTime)) * 0.1;
+  const businessDensityScore = (businessDensity / maxBusinessDensity) * 0.25;
+  const accountingSaturationScore = (accountingSaturation / maxAccountingSaturation) * 0.25;
+  const payrollScore = (payrollPerEstablishment / maxPayrollPerEstab) * 0.25;
+  const incomeScore = (medianIncome / maxMedianIncome) * 0.25;
 
   // Calculate total score
-  const totalScore = populationScore + workforceScore + educationScore + commuteScore;
+  const totalScore = businessDensityScore + accountingSaturationScore + payrollScore + incomeScore;
 
   // Ensure score is between 0 and 1
   return Math.min(Math.max(totalScore, 0), 1);
 };
 
 const getHeatmapColor = (score: number): string => {
-  // Create a color gradient from cool to warm colors
-  if (score >= 0.8) return '#FF4444';      // Very high - warm red
-  if (score >= 0.6) return '#FF7F50';      // High - coral
-  if (score >= 0.4) return '#FFD700';      // Medium - gold
-  if (score >= 0.2) return '#98FB98';      // Low - pale green
-  return '#87CEEB';                        // Very low - sky blue
+  if (score === 0) return '#000000'; // Black for states without MSAs
+  if (score >= 0.8) return '#FF4444'; // Very high - warm red
+  if (score >= 0.6) return '#FF7F50'; // High - coral
+  if (score >= 0.4) return '#FFD700'; // Medium - gold
+  if (score >= 0.2) return '#98FB98'; // Low - pale green
+  return '#87CEEB';                   // Very low - sky blue
 };
 
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
@@ -178,19 +192,30 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     try {
       const { data, error } = await supabase
         .from('state_data')
-        .select('STATEFP, B01001_001E, B19013_001E, C24060_001E, C24010_001E, PAYANN, ESTAB, B08303_001E, B15003_022E, B01002_001E');
+        .select(`
+          STATEFP, B01001_001E, B19013_001E, C24060_001E, 
+          C24010_001E, PAYANN, ESTAB, B08303_001E, B15003_022E, 
+          B01002_001E, B23025_004E, C24010_033E, C24010_034E, EMP
+        `);
 
       if (error) throw error;
 
+      // Get states with MSAs
+      const { data: msaStates } = await supabase
+        .from('msa_state_crosswalk')
+        .select('state_fips')
+        .not('state_fips', 'is', null);
+
+      const msaStateSet = new Set(msaStates?.map(s => s.state_fips));
+
       const processedData = data.map(state => ({
         ...state,
-        buyerScore: calculateBuyerScore(state, data)
+        buyerScore: msaStateSet.has(state.STATEFP) ? calculateBuyerScore(state, data) : 0
       }));
 
       setStateData(processedData);
       
       if (map.current) {
-        // Update the fill-extrusion-color property for the state layer
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'case',
           ['has', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
@@ -201,7 +226,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             ...acc,
             [state.STATEFP]: getHeatmapColor(state.buyerScore || 0)
           }), {})]],
-          MAP_COLORS.inactive
+          '#000000'
         ]);
       }
     } catch (error) {
