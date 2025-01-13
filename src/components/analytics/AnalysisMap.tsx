@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
 import { getDensityColor, getGrowthColor, formatNumber } from '@/utils/heatmapUtils';
 import { GeographicLevel } from "@/types/geography";
+import { getStateName } from '@/utils/stateUtils';
 
 interface AnalysisMapProps {
   className?: string;
@@ -62,11 +63,15 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
     }
   }, [type, toast]);
 
-  const updateAnalysisTable = useCallback((stateId: string) => {
+  const updateAnalysisTable = useCallback(async (stateId: string) => {
     if (!stateData.length) return;
     const stateInfo = stateData.find(s => s.region === stateId);
     if (stateInfo) {
-      setSelectedState(stateInfo);
+      const stateName = await getStateName(stateId);
+      setSelectedState({
+        ...stateInfo,
+        displayName: stateName
+      });
       setShowReportPanel(true);
     }
   }, [stateData]);
@@ -185,7 +190,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
     let hoveredStateId: string | null = null;
 
-    const handleMouseMove = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+    const handleMouseMove = async (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features.length > 0) {
         if (hoveredStateId) {
           map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
@@ -195,11 +200,15 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         if (hoveredStateId) {
           map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0.3);
           map.current?.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
-          updateAnalysisTable(hoveredStateId);
+          await updateAnalysisTable(hoveredStateId);
           
           const state = stateData.find(s => s.STATEFP === hoveredStateId);
           if (state) {
-            setHoveredState(state);
+            const stateName = await getStateName(hoveredStateId);
+            setHoveredState({
+              ...state,
+              displayName: stateName
+            });
             setTooltipPosition({ x: e.point.x, y: e.point.y });
           }
         }
@@ -214,12 +223,12 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       }
     };
 
-    const handleClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+    const handleClick = async (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
-          fitStateAndShowMSAs(stateId);
-          updateAnalysisTable(stateId);
+          await fitStateAndShowMSAs(stateId);
+          await updateAnalysisTable(stateId);
           setShowReportPanel(true);
         }
       }
