@@ -18,14 +18,16 @@ import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
 import { getDensityColor, getGrowthColor, formatNumber } from '@/utils/heatmapUtils';
+import { GeographicLevel } from "@/types/geography";
 
 interface AnalysisMapProps {
   className?: string;
   data?: any[];
   type: 'density' | 'growth';
+  geographicLevel: GeographicLevel;
 }
 
-const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
+const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<any | null>(null);
   const [hoveredState, setHoveredState] = useState<any | null>(null);
@@ -259,6 +261,23 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
       }
     };
   }, [fitStateAndShowMSAs, updateAnalysisTable, stateData]);
+
+  useEffect(() => {
+    // Update visibility based on geographic level
+    if (geographicLevel === 'state') {
+      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+      map.current.setLayoutProperty('county-base', 'visibility', 'none');
+    } else if (geographicLevel === 'msa') {
+      map.current.setLayoutProperty('state-base', 'visibility', 'none');
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('county-base', 'visibility', 'none');
+    } else {
+      map.current.setLayoutProperty('state-base', 'visibility', 'none');
+      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+      map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+    }
+  }, [geographicLevel, mapLoaded]);
 
   return (
     <div className="w-full h-full">
