@@ -39,15 +39,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [layersAdded, setLayersAdded] = useState(false);
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const fetchStatesWithMSA = async () => {
+  const fetchStatesWithMSA = useCallback(async () => {
     console.log('Fetching states with MSA data...');
-    if (!map.current || !mapLoaded) {
-      console.warn('Map not ready for fetching states with MSA');
+    if (!map.current || !layersAdded) {
+      console.warn('Map or layers not ready for fetching states with MSA');
       return;
     }
 
@@ -88,7 +89,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  };
+  }, [layersAdded, toast]);
 
   const fetchMSAData = async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
@@ -264,31 +265,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   };
 
-  useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+  const initializeLayers = useCallback(() => {
+    if (!map.current) return;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      zoom: 3,
-      center: [-98.5795, 39.8283],
-      pitch: 45,
-      bearing: 0,
-      interactive: true,
-    });
-
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'top-right'
-    );
-
-    map.current.on('style.load', () => {
-      if (!map.current) return;
-      
+    try {
       // Add state source
       map.current.addSource('states', {
         type: 'vector',
@@ -359,47 +339,102 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add hover effect for states
-      let hoveredStateId: string | null = null;
+      setLayersAdded(true);
+      console.log('All layers added successfully');
+    } catch (error) {
+      console.error('Error initializing layers:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map layers",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
-      map.current.on('mousemove', 'state-base', (e) => {
-        if (e.features.length > 0) {
-          if (hoveredStateId !== null) {
-            map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
-          }
-          hoveredStateId = e.features[0].id as string;
-          map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.8);
-        }
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
+
+    try {
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+      
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        zoom: 3,
+        center: [-98.5795, 39.8283],
+        pitch: 45,
+        bearing: 0,
+        interactive: true,
       });
 
-      map.current.on('mouseleave', 'state-base', () => {
+      map.current.addControl(
+        new mapboxgl.NavigationControl({
+          visualizePitch: true,
+        }),
+        'top-right'
+      );
+
+      map.current.on('style.load', () => {
+        console.log('Map style loaded');
+        setMapLoaded(true);
+        initializeLayers();
+      });
+
+      return () => {
+        map.current?.remove();
+        map.current = null;
+      };
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map",
+        variant: "destructive",
+      });
+    }
+  }, [initializeLayers]);
+
+  useEffect(() => {
+    if (mapLoaded && layersAdded) {
+      console.log('Map and layers ready, fetching states with MSA');
+      fetchStatesWithMSA();
+    }
+  }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
+
+  // Add hover effect for states
+  let hoveredStateId: string | null = null;
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    map.current.on('mousemove', 'state-base', (e) => {
+      if (e.features.length > 0) {
         if (hoveredStateId !== null) {
           map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
-          hoveredStateId = null;
         }
-      });
-
-      // Add click event for state selection
-      map.current.on('click', 'state-base', (e) => {
-        if (e.features && e.features[0]) {
-          const stateId = e.features[0].properties?.STATEFP;
-          if (stateId) {
-            console.log('State clicked:', stateId);
-            fitStateAndShowMSAs(stateId);
-          }
-        }
-      });
-
-      setMapLoaded(true);
-      // Fetch states with MSA data after all layers are added
-      fetchStatesWithMSA();
+        hoveredStateId = e.features[0].id as string;
+        map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.8);
+      }
     });
 
-    return () => {
-      map.current?.remove();
-      map.current = null;
-    };
-  }, []);
+    map.current.on('mouseleave', 'state-base', () => {
+      if (hoveredStateId !== null) {
+        map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
+        hoveredStateId = null;
+      }
+    });
+
+    // Add click event for state selection
+    map.current.on('click', 'state-base', (e) => {
+      if (e.features && e.features[0]) {
+        const stateId = e.features[0].properties?.STATEFP;
+        if (stateId) {
+          console.log('State clicked:', stateId);
+          fitStateAndShowMSAs(stateId);
+        }
+      }
+    });
+  }, [fitStateAndShowMSAs]);
 
   return (
     <div className={`relative ${className}`}>
