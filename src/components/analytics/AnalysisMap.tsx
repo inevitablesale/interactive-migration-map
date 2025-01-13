@@ -122,32 +122,48 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
-        // Calculate padding based on viewport size and state bounds
-        const container = map.current.getContainer();
-        const viewportWidth = container.offsetWidth;
-        const viewportHeight = container.offsetHeight;
-        
         // Calculate the state's dimensions in degrees
         const ne = bounds.getNorthEast();
         const sw = bounds.getSouthWest();
         const stateLngSpan = Math.abs(ne.lng - sw.lng);
         const stateLatSpan = Math.abs(ne.lat - sw.lat);
-        
-        // Adjust padding based on state size (larger states get more padding)
-        const baseMinPadding = 50;
-        const paddingFactor = Math.max(stateLngSpan / 50, stateLatSpan / 30);
-        const dynamicPadding = baseMinPadding * paddingFactor;
-        
-        // Apply padding with minimum and maximum constraints
-        const horizontalPadding = Math.min(Math.max(dynamicPadding, viewportWidth * 0.1), viewportWidth * 0.3);
-        const verticalPadding = Math.min(Math.max(dynamicPadding, viewportHeight * 0.1), viewportHeight * 0.3);
-
-        // Calculate appropriate max zoom based on state size with a higher minimum zoom
         const stateArea = stateLngSpan * stateLatSpan;
+
+        // Get viewport dimensions
+        const container = map.current.getContainer();
+        const viewportWidth = container.offsetWidth;
+        const viewportHeight = container.offsetHeight;
+
+        // Adjust padding based on state size and viewport
+        const isLargeState = stateArea > 400; // Threshold for large states like CA, TX
+        const basePadding = isLargeState ? 100 : 50;
+        const paddingFactor = Math.max(1, Math.sqrt(stateArea) / 10);
+        
+        // Calculate dynamic padding with different logic for large states
+        const horizontalPadding = isLargeState
+          ? Math.min(viewportWidth * 0.15, basePadding * paddingFactor)
+          : Math.min(Math.max(basePadding * paddingFactor, viewportWidth * 0.1), viewportWidth * 0.3);
+        
+        const verticalPadding = isLargeState
+          ? Math.min(viewportHeight * 0.15, basePadding * paddingFactor)
+          : Math.min(Math.max(basePadding * paddingFactor, viewportHeight * 0.1), viewportHeight * 0.3);
+
+        // Calculate zoom based on state size with special handling for large states
+        const baseMaxZoom = isLargeState ? 5 : 7;
+        const zoomReduction = Math.log(stateArea) / Math.log(2) * (isLargeState ? 0.15 : 0.2);
         const maxZoom = Math.max(
-          Math.min(8, 9 - Math.log(stateArea) / Math.log(2) * 0.2),
-          5.5  // Set minimum zoom to ensure MSAs are visible
+          Math.min(baseMaxZoom, baseMaxZoom - zoomReduction),
+          4.5  // Lower minimum zoom for large states
         );
+
+        console.log('State metrics:', {
+          stateId,
+          stateArea,
+          isLargeState,
+          maxZoom,
+          horizontalPadding,
+          verticalPadding
+        });
 
         // Important: Show MSA layers BEFORE fitting bounds
         if (map.current.getLayer('msa-base')) {
