@@ -6,7 +6,6 @@ import { WelcomeSection } from "@/components/analytics/WelcomeSection";
 import { HeatmapSection } from "@/components/analytics/HeatmapSection";
 import { FeaturedInsights } from "@/components/analytics/FeaturedInsights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
-import { UpgradePrompt } from "@/components/analytics/UpgradePrompt";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
 import { MarketMetricsChart } from "@/components/analytics/visualizations/MarketMetricsChart";
 import { GrowthTrendChart } from "@/components/analytics/visualizations/GrowthTrendChart";
@@ -122,18 +121,6 @@ const Analysis = () => {
             <div className="space-y-8">
               <BuyerProfileManager />
               <ListingsPanel />
-              {isFreeTier && (
-                <UpgradePrompt 
-                  title="Unlock Advanced Features"
-                  description="Get access to detailed market insights, alerts, and advanced analytics."
-                  features={[
-                    "Detailed firm listings and profiles",
-                    "Custom alerts for market opportunities",
-                    "Advanced growth strategy analytics",
-                    "Predictive market insights"
-                  ]}
-                />
-              )}
             </div>
           </div>
         </div>
