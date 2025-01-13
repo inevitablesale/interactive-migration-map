@@ -35,25 +35,31 @@ export const RankingCard = ({
   useEffect(() => {
     const fetchStateName = async () => {
       try {
-        const { data, error } = await supabase
-          .from('msa_county_reference')
-          .select('county_name')
-          .eq('fipstate', region.padStart(2, '0'))
-          .limit(1);
+        // Check if the region is a FIPS code (for state rankings)
+        if (region.match(/^\d+$/)) {
+          const { data, error } = await supabase
+            .from('msa_county_reference')
+            .select('county_name')
+            .eq('fipstate', region.padStart(2, '0'))
+            .limit(1);
 
-        if (error) {
-          console.error('Error fetching state name:', error);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          // Extract state name from county_name (format: "County Name, State Name")
-          const countyName = data[0].county_name;
-          const commaIndex = countyName.lastIndexOf(',');
-          if (commaIndex !== -1) {
-            const stateName = countyName.substring(commaIndex + 1).trim();
-            setDisplayName(stateName);
+          if (error) {
+            console.error('Error fetching state name:', error);
+            return;
           }
+
+          if (data && data.length > 0) {
+            // Extract state name from county_name (format: "County Name, State Name")
+            const countyName = data[0].county_name;
+            const commaIndex = countyName.lastIndexOf(',');
+            if (commaIndex !== -1) {
+              const stateName = countyName.substring(commaIndex + 1).trim();
+              setDisplayName(stateName);
+            }
+          }
+        } else {
+          // For MSA rankings, keep the MSA name as is
+          setDisplayName(region);
         }
       } catch (error) {
         console.error('Error in fetchStateName:', error);
