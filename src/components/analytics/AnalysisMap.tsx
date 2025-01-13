@@ -34,66 +34,52 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
   const getStateColor = useCallback((stateId: string) => {
     const msaCount = msaCountByState[stateId] || 0;
-    const colorIndex = Math.floor((msaCount / Math.max(...Object.values(msaCountByState))) * (MAP_COLORS.secondary.length - 1));
+    const maxMSAs = Math.max(...Object.values(msaCountByState));
+    const colorIndex = Math.floor((msaCount / maxMSAs) * (MAP_COLORS.secondary.length - 1));
     return MAP_COLORS.secondary[colorIndex] || MAP_COLORS.inactive;
   }, [msaCountByState]);
 
   const updateAnalysisTable = useCallback((stateId: string) => {
     if (!map.current) return;
     
-    const event = new CustomEvent('stateSelected', {
-      detail: { stateId }
-    });
-    window.dispatchEvent(event);
-  }, []);
-
-  const updateMSAVisualization = useCallback((data: MSAData[]) => {
-    if (!map.current) return;
-
-    const uniqueMsaCodes = [...new Set(data.map(d => d.msa))];
+    const eventData = {
+      stateId: stateId.toString(),
+      timestamp: Date.now()
+    };
+    
     try {
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-
-      const heightMatchExpression: mapboxgl.Expression = [
-        'match',
-        ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [code, 50000]),
-        0
-      ];
-
-      const colorMatchExpression: mapboxgl.Expression = [
-        'match',
-        ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [code, MAP_COLORS.secondary]),
-        MAP_COLORS.inactive
-      ];
-
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-height', heightMatchExpression);
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-color', colorMatchExpression);
-      map.current.setFilter('msa-base', ['in', 'CBSAFP', ...uniqueMsaCodes]);
-      map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...uniqueMsaCodes]);
-
-    } catch (error) {
-      console.error('Error updating MSA visualization:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update MSA visualization",
-        variant: "destructive",
+      const event = new CustomEvent('stateSelected', {
+        detail: eventData
       });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error dispatching state selection event:', error);
     }
-  }, [map, toast]);
+  }, []);
 
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
-    setViewMode('state');
+
+    // Hide MSA layers
     map.current.setLayoutProperty('msa-base', 'visibility', 'none');
     map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    
+    // Show state layers
     map.current.setLayoutProperty('state-base', 'visibility', 'visible');
     map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-  }, [map]);
+
+    // Reset zoom and position
+    map.current.easeTo({
+      center: [-98.5795, 39.8283],
+      zoom: 3,
+      pitch: 45,
+      bearing: 0,
+      duration: 1500
+    });
+
+    setViewMode('state');
+    setSelectedState(null);
+  }, []);
 
   const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
     if (!map.current) return;
@@ -128,6 +114,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           duration: 1000
         });
 
+        // Only show MSA layers after data is loaded and state is zoomed
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+        map.current.setLayoutProperty('state-base', 'visibility', 'none');
+        map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+
         setViewMode('msa');
         updateAnalysisTable(stateId);
       }
@@ -139,7 +131,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [map, fetchMSAData, setViewMode, setSelectedState, updateAnalysisTable, toast]);
+  }, [fetchMSAData, updateAnalysisTable, toast]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -244,7 +236,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             <MapIcon className="h-4 w-4" />
             <span className="ml-2">States</span>
           </ToggleGroupItem>
-          <ToggleGroupItem value="msa" aria-label="Toggle MSA view">
+          <ToggleGroupItem 
+            value="msa" 
+            aria-label="Toggle MSA view"
+            disabled={!selectedState} // Disable MSA toggle until a state is selected
+          >
             <Building2 className="h-4 w-4" />
             <span className="ml-2">MSAs</span>
           </ToggleGroupItem>
