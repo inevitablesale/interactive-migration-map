@@ -43,8 +43,6 @@ export const MSARankings = () => {
             growth: ranking.growth_rate / ranking.national_growth_avg,
           }}
           specialization={ranking.regional_specialization}
-          avgPayrollPerFirm={ranking.avg_payroll_per_firm}
-          educationRate={ranking.education_rate}
         />
       ))}
     </div>

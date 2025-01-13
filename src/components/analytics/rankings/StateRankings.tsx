@@ -43,8 +43,6 @@ export const StateRankings = () => {
             growth: ranking.growth_rate / ranking.national_growth_avg,
           }}
           marketSaturation={ranking.market_saturation}
-          avgPayrollPerFirm={ranking.avg_payroll_per_firm}
-          educationRate={ranking.education_rate}
         />
       ))}
     </div>

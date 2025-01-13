@@ -828,8 +828,6 @@ export type Database = {
           national_growth_avg: number
           regional_specialization: string
           specialization_score: number
-          avg_payroll_per_firm: number
-          education_rate: number
         }[]
       }
       get_service_distribution: {
@@ -855,8 +853,6 @@ export type Database = {
           national_growth_avg: number
           market_saturation: number
           market_saturation_rank: number
-          avg_payroll_per_firm: number
-          education_rate: number
         }[]
       }
     }
