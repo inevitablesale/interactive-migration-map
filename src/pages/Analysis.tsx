@@ -1,83 +1,22 @@
 import { useState } from "react";
-import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
-import { TargetCriteriaForm, TargetCriteria } from "@/components/analytics/TargetCriteriaForm";
-import { useSearchParams } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { AppSidebar } from "@/components/analytics/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
+import { ReportsPanel } from "@/components/analytics/ReportsPanel";
+import { TrackersPanel } from "@/components/analytics/TrackersPanel";
+import { FirmDirectory } from "@/components/analytics/FirmDirectory";
 
 const Analysis = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeFilter = searchParams.get('filter') || 'market-entry';
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  const handleFilterChange = (filter: string) => {
-    setSearchParams({ filter });
-  };
-
-  const handleAnalyze = async (criteria: TargetCriteria) => {
-    setIsAnalyzing(true);
-    try {
-      // Here we'll add the analysis logic later
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate analysis
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-      <div className="w-full">
-        <div className="bg-black/40 backdrop-blur-md border-b border-white/10">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-8 px-6">
-              <button
-                onClick={() => handleFilterChange('market-entry')}
-                className={cn(
-                  "py-4 text-white/80 hover:text-white transition-colors relative",
-                  activeFilter === 'market-entry' && "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
-                )}
-              >
-                Market Entry
-              </button>
-              <button
-                onClick={() => handleFilterChange('growth-strategy')}
-                className={cn(
-                  "py-4 text-white/80 hover:text-white transition-colors relative",
-                  activeFilter === 'growth-strategy' && "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
-                )}
-              >
-                Growth Strategy
-              </button>
-              <button
-                onClick={() => handleFilterChange('opportunities')}
-                className={cn(
-                  "py-4 text-white/80 hover:text-white transition-colors relative",
-                  activeFilter === 'opportunities' && "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
-                )}
-              >
-                Opportunities
-              </button>
-            </div>
-          </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+        <AppSidebar />
+        <div className="flex-1 p-6">
+          <h1 className="text-2xl font-bold text-white mb-4">Market Intelligence</h1>
+          <p className="text-gray-400">Select a tab in the sidebar to get started</p>
         </div>
-
-        <div className="py-8 px-6 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-blue-500/10 backdrop-blur-sm" />
-          <div className="relative z-10 space-y-3">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent animate-fade-in">
-              Find Your Next Move
-            </h2>
-            <p className="text-blue-100/80 max-w-2xl mx-auto text-sm">
-              Define your target criteria and analyze market opportunities
-            </p>
-          </div>
-          <div className="max-w-md mx-auto mt-6 relative z-10">
-            <TargetCriteriaForm onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />
-          </div>
-        </div>
-        
-        <InteractiveToolsSection />
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
