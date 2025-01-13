@@ -78,12 +78,12 @@ const calculateBuyerScore = (state: StateData, allStates: StateData[]): number =
 };
 
 const getHeatmapColor = (score: number): string => {
-  if (score === 0) return '#000000'; // Black for states without MSAs
-  if (score >= 0.8) return '#FF4444'; // Very high - warm red
-  if (score >= 0.6) return '#FF7F50'; // High - coral
-  if (score >= 0.4) return '#FFD700'; // Medium - gold
-  if (score >= 0.2) return '#98FB98'; // Low - pale green
-  return '#87CEEB';                   // Very low - sky blue
+  if (score === 0) return '#1e293b'; // Dark slate for states without MSAs
+  if (score >= 0.8) return '#8B5CF6'; // Vivid Purple - Highest
+  if (score >= 0.6) return '#D946EF'; // Magenta Pink - High
+  if (score >= 0.4) return '#F97316'; // Bright Orange - Medium
+  if (score >= 0.2) return '#0EA5E9'; // Ocean Blue - Low
+  return '#94EC0E';                   // Bright Green - Very Low
 };
 
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
