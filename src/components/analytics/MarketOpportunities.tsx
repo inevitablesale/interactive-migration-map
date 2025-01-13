@@ -13,12 +13,7 @@ export function MarketOpportunities() {
         .rpc('get_market_opportunities');
       
       if (error) throw error;
-      return data.map(item => ({
-        ...item,
-        STATEFP: item.statefp,
-        COUNTYFP: item.countyfp,
-        COUNTYNAME: item.countyname
-      }));
+      return data;
     }
   });
 
@@ -36,7 +31,7 @@ export function MarketOpportunities() {
               <div className="p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h4 className="text-white font-medium">{market.COUNTYNAME}</h4>
+                    <h4 className="text-white font-medium">{market.countyname}</h4>
                     <p className="text-sm text-white/60">Opportunity Score: {Math.round((market.migration_score + market.business_density_score + market.service_coverage_score) / 3)}</p>
                   </div>
                   <Button className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">

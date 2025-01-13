@@ -25,10 +25,7 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_enhanced_market_scores');
       if (error) throw error;
-      return data.map(item => ({
-        ...item,
-        STATEFP: item.statefp
-      }));
+      return data;
     }
   });
 
@@ -37,10 +34,7 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_trends');
       if (error) throw error;
-      return data.map(item => ({
-        ...item,
-        STATEFP: item.statefp
-      }));
+      return data;
     }
   });
 
@@ -49,10 +43,7 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_competitive_analysis');
       if (error) throw error;
-      return data.map(item => ({
-        ...item,
-        STATEFP: item.statefp
-      }));
+      return data;
     }
   });
 
@@ -81,7 +72,7 @@ export function EnhancedAnalytics() {
             {marketScores?.slice(0, 5).map((score, index) => (
               <div key={index} className="bg-black/20 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-white font-medium">State {score.STATEFP}</div>
+                  <div className="text-white font-medium">State {score.statefp}</div>
                   <div className="text-sm text-white/60">
                     Total Score: {Math.round(score.total_score * 100)}%
                   </div>
@@ -186,7 +177,7 @@ export function EnhancedAnalytics() {
             {marketTrends?.slice(0, 5).map((trend, index) => (
               <div key={index} className="bg-black/20 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-white font-medium">State {trend.STATEFP}</div>
+                  <div className="text-white font-medium">State {trend.statefp}</div>
                   <div className="flex items-center gap-2">
                     {getTrendIcon(trend.trend_direction)}
                     <span className="text-sm text-white/60">
@@ -227,7 +218,7 @@ export function EnhancedAnalytics() {
             {competitiveAnalysis?.slice(0, 5).map((analysis, index) => (
               <div key={index} className="bg-black/20 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-white font-medium">State {analysis.STATEFP}</div>
+                  <div className="text-white font-medium">State {analysis.statefp}</div>
                   <div className="text-sm text-white/60">
                     {analysis.competition_level} Competition
                   </div>
