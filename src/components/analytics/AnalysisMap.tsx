@@ -339,7 +339,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         pitch: 60,
         bearing: 0,
         offset: [0, 0],
-        maxZoom: currentZoom + 1 // Increase zoom level by 1
+        maxZoom: currentZoom - 1 // Decrease zoom level by 1 to zoom in
       });
 
       setSelectedState(stateId);
