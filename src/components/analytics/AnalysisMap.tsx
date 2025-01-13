@@ -41,6 +41,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
   const { msaData, setMsaData, statesWithMSA, setStatesWithMSA, fetchMSAData, fetchStatesWithMSA } = useMSAData();
 
+  const calculateFirmDensity = (stateData: any) => {
+    if (!stateData.ESTAB || !stateData.B01001_001E) return 0;
+    return (stateData.ESTAB / stateData.B01001_001E) * 10000; // Firms per 10,000 residents
+  };
+
   const fetchStateData = useCallback(async () => {
     try {
       const { data: stateMetrics, error } = await supabase
@@ -61,54 +66,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       console.error('Error in fetchStateData:', error);
     }
   }, [type, toast]);
-
-  const updateAnalysisTable = useCallback((stateId: string) => {
-    if (!stateData.length) return;
-    const stateInfo = stateData.find(s => s.region === stateId);
-    if (stateInfo) {
-      setSelectedState(stateInfo);
-      setShowReportPanel(true);
-    }
-  }, [stateData]);
-
-  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
-    if (!map.current) return;
-
-    try {
-      // Update map view for selected state
-      map.current.setFilter('state-base', ['==', ['get', 'STATEFP'], stateId]);
-      
-      // Fetch and show MSA data for the state
-      const msaResults = await fetchMSAData(stateId);
-      if (msaResults && msaResults.length > 0) {
-        setViewMode('region');
-        map.current.setLayoutProperty('region-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('region-borders', 'visibility', 'visible');
-      }
-
-      // Fit map bounds to the selected state
-      const stateBounds = map.current.querySourceFeatures('states', {
-        sourceLayer: 'tl_2020_us_state-52k5uw',
-        filter: ['==', ['get', 'STATEFP'], stateId]
-      });
-
-      if (stateBounds.length > 0 && stateBounds[0].geometry.type === 'Polygon') {
-        const bounds = new mapboxgl.LngLatBounds();
-        const geometry = stateBounds[0].geometry as GeoJSON.Polygon;
-        geometry.coordinates[0].forEach((coord: [number, number]) => {
-          bounds.extend(coord);
-        });
-        map.current.fitBounds(bounds, { padding: 50 });
-      }
-    } catch (error) {
-      console.error('Error in fitStateAndShowMSAs:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load MSA data",
-        variant: "destructive",
-      });
-    }
-  }, [map, fetchMSAData, toast]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -133,31 +90,115 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         'top-right'
       );
 
-      map.current.on('style.load', () => {
+      map.current.on('style.load', async () => {
+        if (!map.current) return;
         setMapLoaded(true);
-        initializeLayers();
-        fetchStateData();
-        
-        // Update layer visibility based on geographic level
-        if (map.current) {
-          try {
-            if (geographicLevel === 'state') {
-              map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-              map.current.setLayoutProperty('region-base', 'visibility', 'none');
-              map.current.setLayoutProperty('county-base', 'visibility', 'none');
-            } else if (geographicLevel === 'region') {
-              map.current.setLayoutProperty('state-base', 'visibility', 'none');
-              map.current.setLayoutProperty('region-base', 'visibility', 'visible');
-              map.current.setLayoutProperty('county-base', 'visibility', 'none');
-            } else {
-              map.current.setLayoutProperty('state-base', 'visibility', 'none');
-              map.current.setLayoutProperty('region-base', 'visibility', 'none');
-              map.current.setLayoutProperty('county-base', 'visibility', 'visible');
-            }
-          } catch (error) {
-            console.error('Error updating layer visibility:', error);
-          }
+
+        // Add state source
+        map.current.addSource('states', {
+          type: 'vector',
+          url: 'mapbox://inevitablesale.9fnr921z'
+        });
+
+        // Fetch state data for density calculations
+        const { data: stateData, error } = await supabase
+          .from('state_data')
+          .select('STATEFP, ESTAB, B01001_001E');
+
+        if (error) {
+          console.error('Error fetching state data:', error);
+          return;
         }
+
+        // Create a lookup for firm density by state
+        const densityByState = stateData.reduce((acc: any, state: any) => {
+          acc[state.STATEFP] = calculateFirmDensity(state);
+          return acc;
+        }, {});
+
+        // Add state base layer with density-based colors
+        map.current.addLayer({
+          'id': 'state-base',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': [
+              'interpolate',
+              ['linear'],
+              ['coalesce', 
+                ['number', ['get', ['to-string', ['get', 'STATEFP']], ['literal', densityByState]], 
+                0
+              ],
+              0, '#F2FCE2',  // Low density
+              5, '#FEF7CD',  // Medium density
+              10, '#ea384c'  // High density
+            ],
+            'fill-extrusion-height': 20000,
+            'fill-extrusion-opacity': 0.6,
+            'fill-extrusion-base': 0
+          }
+        });
+
+        // Add state borders
+        map.current.addLayer({
+          'id': 'state-borders',
+          'type': 'line',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'line-color': '#037CFE',
+            'line-width': 1.5,
+            'line-opacity': 0.8
+          }
+        });
+
+        // Add hover effect layer
+        map.current.addLayer({
+          'id': 'state-hover',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': '#94EC0E',
+            'fill-extrusion-height': 30000,
+            'fill-extrusion-opacity': 0,
+            'fill-extrusion-base': 0
+          }
+        });
+
+        // Add MSA base layer
+        map.current.addLayer({
+          'id': 'msa-base',
+          'type': 'fill-extrusion',
+          'source': 'msas',
+          'source-layer': 'tl_2020_us_cbsa-aoky0u',
+          'paint': {
+            'fill-extrusion-color': '#00FFE0',
+            'fill-extrusion-height': 50000,
+            'fill-extrusion-opacity': 0.8,
+            'fill-extrusion-base': 0
+          },
+          'layout': {
+            'visibility': 'none'
+          }
+        });
+
+        // Add border layers
+        map.current.addLayer({
+          'id': 'msa-borders',
+          'type': 'line',
+          'source': 'msas',
+          'source-layer': 'tl_2020_us_cbsa-aoky0u',
+          'paint': {
+            'line-color': '#00FFE0',
+            'line-width': 1.5,
+            'line-opacity': 0.8
+          },
+          'layout': {
+            'visibility': 'none'
+          }
+        });
       });
 
       return () => {
@@ -172,7 +213,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         variant: "destructive",
       });
     }
-  }, [initializeLayers, mapContainer, toast, fetchStateData, geographicLevel]);
+  }, [toast]);
 
   useEffect(() => {
     if (mapLoaded && layersAdded) {
