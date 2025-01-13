@@ -1,11 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
+import mapboxgl from 'mapbox-gl';
+import { useToast } from '@/components/ui/use-toast';
 import { useMapInitialization } from '@/hooks/useMapInitialization';
 import { useMapLayers } from '@/hooks/useMapLayers';
 import { useMSAData } from '@/hooks/useMSAData';
 import { calculateGrowthScore, getColorFromScore, getHeightFromScore } from '@/utils/growthScoreCalculator';
+import { supabase } from "@/integrations/supabase/client";
 import type { MSAData } from '@/types/map';
+
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
+
+const MAP_COLORS = {
+  primary: '#037CFE',
+  secondary: '#00FFE0',
+  accent: '#FFF903',
+  highlight: '#94EC0E',
+  active: '#FA0098',
+  inactive: '#1e293b',
+  disabled: '#000000'
+};
 
 interface AnalysisMapProps {
   className?: string;
@@ -25,15 +40,16 @@ const STATE_COLORS = [
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [msaData, setMsaData] = useState<MSAData[]>([]);
   
-  const { mapContainer, map, mapLoaded } = useMapInitialization();
-  const { layersAdded, initializeLayers } = useMapLayers(map);
+  const { toast } = useToast();
+  const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
+  const { layersAdded, initializeLayers, setLayersAdded } = useMapLayers(map);
   const { 
-    msaData, 
     statesWithMSA, 
-    msaCountByState, 
-    fetchMSAData, 
-    fetchStatesWithMSA 
+    msaCountByState,
+    setMsaCountByState,
+    setStatesWithMSA
   } = useMSAData();
 
   const getStateColor = useCallback((stateId: string) => {
