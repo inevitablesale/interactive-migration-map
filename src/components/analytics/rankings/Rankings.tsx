@@ -15,7 +15,7 @@ export const Rankings = () => {
             value="state"
             className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
           >
-            State Rankings
+            Rankings
           </TabsTrigger>
           <TabsTrigger 
             value="msa"

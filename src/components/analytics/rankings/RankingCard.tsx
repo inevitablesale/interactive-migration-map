@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Trophy, TrendingUp, Users, Building2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getStateName } from "@/utils/stateUtils";
 
 interface RankingCardProps {
   title: string;
@@ -28,13 +29,14 @@ export const RankingCard = ({
 }: RankingCardProps) => {
   const isDensityHigher = comparedToNational.density > 1;
   const isGrowthHigher = comparedToNational.growth > 1;
+  const stateName = getStateName(region);
 
   return (
     <Card className="p-4 bg-black/40 backdrop-blur-md border-white/10 hover:bg-black/50 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <p className="text-sm text-gray-400">{region}</p>
+          <p className="text-sm text-gray-400">{stateName}</p>
         </div>
         <Trophy className="w-6 h-6 text-yellow-400" />
       </div>
