@@ -118,6 +118,7 @@ const Analysis = () => {
               )}
             </div>
             
+            {/* Right Column */}
             <div className="space-y-8">
               <BuyerProfileManager />
               <ListingsPanel />
