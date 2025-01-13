@@ -249,9 +249,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const updateAnalysisTable = useCallback((stateId: string) => {
     if (!map.current) return;
     
-    // Dispatch event to update analysis table
+    // Only pass serializable data
     const event = new CustomEvent('stateSelected', {
-      detail: { stateId }
+      detail: { 
+        stateId: stateId.toString(),
+        timestamp: Date.now()
+      }
     });
     window.dispatchEvent(event);
   }, []);
@@ -412,6 +415,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
         // Set view mode to MSA
         setViewMode('msa');
+
+        // Update analysis table with serializable data
+        updateAnalysisTable(stateId);
       }
     } catch (error) {
       console.error('Error in fitStateAndShowMSAs:', error);
@@ -421,7 +427,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [fetchMSAData, setSelectedState, toast]);
+  }, [fetchMSAData, setSelectedState, toast, updateAnalysisTable]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -507,7 +513,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         if (stateId) {
           console.log('State clicked:', stateId);
           fitStateAndShowMSAs(stateId);
-          updateAnalysisTable(stateId);
         }
       }
     });
