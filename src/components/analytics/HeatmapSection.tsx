@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Map, Filter } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DataFilterToggle } from "./GeographicLevelToggle";
+import { DataFilterToggle } from "./DataFilterToggle";
 import AnalysisMap from "./AnalysisMap";
 
 interface HeatmapSectionProps {
@@ -36,7 +36,6 @@ export const HeatmapSection = ({ activeFilter }: HeatmapSectionProps) => {
         <AnalysisMap 
           className="w-full h-full" 
           type={selectedView}
-          geographicLevel="state"
         />
       </div>
     </Card>

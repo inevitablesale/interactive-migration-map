@@ -1,10 +1,2 @@
-export type GeographicLevel = 'state' | 'region' | 'county';
-
-export interface GeographicData {
-  id: string;
-  name: string;
-  totalFirms: number;
-  population: number;
-  firmDensity: number;
-  growthRate: number;
-}
+export type GeographicLevel = 'state' | 'county';
+export type DataVisualizationType = 'density' | 'migration';
