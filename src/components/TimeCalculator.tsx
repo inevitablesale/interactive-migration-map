@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 export function TimeCalculator() {
   const [hoursPerMonth, setHoursPerMonth] = useState<number>(10);
   const [hourlyRate, setHourlyRate] = useState<number>(150);
-  const canaryMonthlyPrice = 99; // Fixed monthly price for Canary
+  const canaryMonthlyPrice = 250; // Updated monthly price for Canary
   
   const calculateSavings = () => {
     const monthlyTimeCost = hoursPerMonth * hourlyRate;
