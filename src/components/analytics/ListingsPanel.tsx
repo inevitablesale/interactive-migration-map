@@ -18,7 +18,7 @@ export const ListingsPanel = () => {
         .from('buyer_profiles')
         .select('subscription_tier')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -53,7 +53,7 @@ export const ListingsPanel = () => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        {listings?.map((listing, index) => (
+        {listings?.map((listing) => (
           <Card 
             key={listing["Company ID"]} 
             className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'}`}
