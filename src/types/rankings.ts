@@ -10,6 +10,10 @@ export interface StateRanking {
   national_growth_avg: number;
   market_saturation: number;
   market_saturation_rank: number;
+  avg_payroll_per_firm: number;
+  education_rate: number;
+  migration_trend: number;
+  median_income: number;
 }
 
 export interface MSARanking {
@@ -25,4 +29,8 @@ export interface MSARanking {
   national_growth_avg: number;
   regional_specialization: string;
   specialization_score: number;
+  avg_payroll_per_firm: number;
+  education_rate: number;
+  migration_trend: number;
+  median_income: number;
 }
