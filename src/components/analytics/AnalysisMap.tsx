@@ -27,6 +27,7 @@ interface StateData {
   B08303_001E: number | null; // Average Commute Time
   B15003_022E: number | null; // Bachelor's Degree Holders
   B01002_001E: number | null; // Median Age
+  B23025_004E: number | null; // Labor Force
   EMP: number | null;         // Employment
   buyerScore?: number;        // Added buyerScore to the interface
 }
