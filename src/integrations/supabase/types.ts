@@ -830,6 +830,8 @@ export type Database = {
           specialization_score: number
           avg_payroll_per_firm: number
           education_rate: number
+          migration_trend: number
+          median_income: number
         }[]
       }
       get_service_distribution: {
