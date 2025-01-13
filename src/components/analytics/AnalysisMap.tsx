@@ -28,7 +28,7 @@ interface AnalysisMapProps {
 }
 
 const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProps) => {
-  const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
+  const [viewMode, setViewMode] = useState<'state' | 'region'>('state');
   const [selectedState, setSelectedState] = useState<any | null>(null);
   const [hoveredState, setHoveredState] = useState<any | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -147,7 +147,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
               map.current.setLayoutProperty('county-base', 'visibility', 'none');
             } else if (geographicLevel === 'msa') {
               map.current.setLayoutProperty('state-base', 'visibility', 'none');
-              map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+              map.current.setLayoutProperty('region-base', 'visibility', 'visible');
               map.current.setLayoutProperty('county-base', 'visibility', 'none');
             } else {
               map.current.setLayoutProperty('state-base', 'visibility', 'none');
