@@ -86,8 +86,19 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     
     try {
       setSelectedState(stateId);
+      console.log('Fetching MSA data for state:', stateId);
       const msaData = await fetchMSAData(stateId);
+      console.log('Found MSAs:', msaData);
       
+      if (!msaData || msaData.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "No Metropolitan Statistical Areas found for this state.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create a bounding box for the state
       const stateFeatures = map.current.querySourceFeatures('states', {
         sourceLayer: 'tl_2020_us_state-52k5uw',
@@ -124,7 +135,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         
         // Adjust padding based on state size (larger states get more padding)
         const baseMinPadding = 50;
-        const paddingFactor = Math.max(stateLngSpan / 50, stateLatSpan / 30); // Adjust these divisors as needed
+        const paddingFactor = Math.max(stateLngSpan / 50, stateLatSpan / 30);
         const dynamicPadding = baseMinPadding * paddingFactor;
         
         // Apply padding with minimum and maximum constraints
@@ -160,7 +171,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       console.error('Error in fitStateAndShowMSAs:', error);
       toast({
         title: "Error",
-        description: "Failed to update map view",
+        description: "Failed to load MSA data for this state",
         variant: "destructive",
       });
     }
