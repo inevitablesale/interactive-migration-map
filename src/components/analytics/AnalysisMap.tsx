@@ -23,7 +23,7 @@ import { GeographicLevel } from "@/types/geography";
 interface AnalysisMapProps {
   className?: string;
   data?: any[];
-  type: 'density' | 'growth';
+  type: 'density' | 'migration';
   geographicLevel: GeographicLevel;
 }
 
@@ -239,27 +239,35 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   }, [fitStateAndShowMSAs, updateAnalysisTable, stateData]);
 
   useEffect(() => {
-    // Update visibility based on geographic level
+    // Update visualization based on type
     if (!map.current || !mapLoaded) return;
 
     try {
-      if (geographicLevel === 'state') {
-        map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('region-base', 'visibility', 'none');
-        map.current.setLayoutProperty('county-base', 'visibility', 'none');
-      } else if (geographicLevel === 'region') {
-        map.current.setLayoutProperty('state-base', 'visibility', 'none');
-        map.current.setLayoutProperty('region-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('county-base', 'visibility', 'none');
+      if (type === 'density') {
+        // Show density-based visualization
+        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
+          'interpolate',
+          ['linear'],
+          ['get', 'firm_density'],
+          0, '#037CFE',
+          50, '#00FFE0',
+          100, '#FFF903'
+        ]);
       } else {
-        map.current.setLayoutProperty('state-base', 'visibility', 'none');
-        map.current.setLayoutProperty('region-base', 'visibility', 'none');
-        map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+        // Show migration-based visualization
+        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
+          'interpolate',
+          ['linear'],
+          ['get', 'migration_rate'],
+          0, '#9D00FF',
+          50, '#FA0098',
+          100, '#FF3366'
+        ]);
       }
     } catch (error) {
-      console.error('Error updating layer visibility:', error);
+      console.error('Error updating map visualization:', error);
     }
-  }, [geographicLevel, mapLoaded]);
+  }, [type, mapLoaded]);
 
   return (
     <div className="w-full h-full">

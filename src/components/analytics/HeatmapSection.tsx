@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Map, Filter } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GeographicLevel } from "@/types/geography";
-import { GeographicLevelToggle } from "./GeographicLevelToggle";
+import { DataFilterToggle } from "./GeographicLevelToggle";
 import AnalysisMap from "./AnalysisMap";
 
 interface HeatmapSectionProps {
@@ -11,7 +10,7 @@ interface HeatmapSectionProps {
 }
 
 export const HeatmapSection = ({ activeFilter }: HeatmapSectionProps) => {
-  const [selectedView, setSelectedView] = useState<GeographicLevel>("state");
+  const [selectedView, setSelectedView] = useState<'density' | 'migration'>("density");
 
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
@@ -22,7 +21,7 @@ export const HeatmapSection = ({ activeFilter }: HeatmapSectionProps) => {
         </div>
         
         <div className="flex items-center gap-4">
-          <GeographicLevelToggle 
+          <DataFilterToggle 
             value={selectedView} 
             onChange={setSelectedView} 
           />
@@ -36,8 +35,8 @@ export const HeatmapSection = ({ activeFilter }: HeatmapSectionProps) => {
       <div className="h-[500px] relative rounded-lg overflow-hidden">
         <AnalysisMap 
           className="w-full h-full" 
-          type="density"
-          geographicLevel={selectedView}
+          type={selectedView}
+          geographicLevel="state"
         />
       </div>
     </Card>
