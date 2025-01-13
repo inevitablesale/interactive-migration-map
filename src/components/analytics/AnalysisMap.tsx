@@ -42,7 +42,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
   const fetchStateData = useCallback(async () => {
     try {
-      const { data: stateMetrics, error } = await supabase
+      const { data: densityMetrics, error } = await supabase
         .rpc('get_firm_density_metrics');
 
       if (error) {
@@ -55,11 +55,30 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         return;
       }
 
-      setStateData(stateMetrics);
+      setStateData(densityMetrics);
+
+      // Update source data with firm density metrics
+      if (map.current && mapLoaded) {
+        const source = map.current.getSource('states') as mapboxgl.GeoJSONSource;
+        if (source) {
+          const features = map.current.querySourceFeatures('states', {
+            sourceLayer: 'tl_2020_us_state-52k5uw'
+          });
+
+          features.forEach(feature => {
+            const matchingMetric = densityMetrics.find(
+              (metric: any) => metric.region === feature.properties.name
+            );
+            if (matchingMetric) {
+              feature.properties.firm_density = matchingMetric.firm_density || 0;
+            }
+          });
+        }
+      }
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
-  }, [toast]);
+  }, [toast, map, mapLoaded]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -103,7 +122,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
-              ['get', 'firm_density'],
+              ['coalesce', ['get', 'firm_density'], 0],
               0, MAP_COLORS.primary,
               50, MAP_COLORS.secondary,
               100, MAP_COLORS.accent
@@ -111,30 +130,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-height': [
               'interpolate',
               ['linear'],
-              ['get', 'firm_density'],
+              ['coalesce', ['get', 'firm_density'], 0],
               0, 20000,
               100, 200000
             ],
             'fill-extrusion-opacity': 0.8,
-            'fill-extrusion-base': 0
-          }
-        });
-
-        // Add interactive hover layer
-        map.current.addLayer({
-          'id': 'state-hover',
-          'type': 'fill-extrusion',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'fill-extrusion-color': MAP_COLORS.highlight,
-            'fill-extrusion-height': 250000,
-            'fill-extrusion-opacity': [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              0.8,
-              0
-            ],
             'fill-extrusion-base': 0
           }
         });
@@ -162,35 +162,15 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         });
 
         // Add hover events
-        let hoveredStateId: string | null = null;
-
         map.current.on('mousemove', 'state-base', (e) => {
           if (e.features && e.features.length > 0) {
-            if (hoveredStateId) {
-              map.current?.setFeatureState(
-                { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
-                { hover: false }
-              );
-            }
-            hoveredStateId = e.features[0].id as string;
-            map.current?.setFeatureState(
-              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
-              { hover: true }
-            );
             setHoveredState(e.features[0].properties);
             setTooltipPosition({ x: e.point.x, y: e.point.y });
           }
         });
 
         map.current.on('mouseleave', 'state-base', () => {
-          if (hoveredStateId) {
-            map.current?.setFeatureState(
-              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
-              { hover: false }
-            );
-            hoveredStateId = null;
-            setHoveredState(null);
-          }
+          setHoveredState(null);
         });
 
         fetchStateData();
@@ -224,7 +204,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
         'interpolate',
         ['linear'],
-        ['get', 'firm_density'],
+        ['coalesce', ['get', 'firm_density'], 0],
         0, MAP_COLORS.primary,
         50, MAP_COLORS.secondary,
         100, MAP_COLORS.accent
@@ -253,7 +233,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }}
         >
           <p className="font-semibold">{hoveredState.name}</p>
-          <p className="text-sm">Firm Density: {formatNumber(hoveredState.firm_density)}</p>
+          <p className="text-sm">Firm Density: {formatNumber(hoveredState.firm_density || 0)}</p>
         </div>
       )}
     </div>
