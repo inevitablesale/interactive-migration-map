@@ -16,6 +16,7 @@ import { useMapLayers } from '@/hooks/useMapLayers';
 import { useMSAData } from '@/hooks/useMSAData';
 import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
+import { MapReportPanel } from './MapReportPanel';
 
 interface AnalysisMapProps {
   className?: string;
@@ -39,88 +40,25 @@ interface StateData {
   buyerScore?: number;        // Added buyerScore to the interface
 }
 
-const calculateBuyerScore = (state: StateData, allStates: StateData[]): number => {
-  if (!state || !allStates.length) return 0;
-
-  // Pad the state FIPS code with leading zero if needed
-  const paddedStateFp = state.STATEFP.padStart(2, '0');
-
-  // Calculate metrics as per SQL query
-  const accountantEmployment = state.C24060_001E || 0;
-  const medianIncome = state.B19013_001E || 0;
-  const avgCommuteTime = state.B08303_001E || 0;
-  const population = state.B01001_001E || 1; // Avoid division by zero
-  const laborForce = state.B23025_004E || 1; // Avoid division by zero
-  const establishments = state.ESTAB || 0;
-  const payroll = state.PAYANN || 0;
-
-  // Calculate composite metrics
-  const businessDensity = establishments / population;
-  const accountingSaturation = accountantEmployment / laborForce;
-  const payrollPerEstablishment = establishments > 0 ? payroll / establishments : 0;
-
-  // Find maximum values across all states
-  const maxBusinessDensity = Math.max(...allStates.map(s => (s.ESTAB || 0) / (s.B01001_001E || 1)));
-  const maxAccountingSaturation = Math.max(...allStates.map(s => (s.C24060_001E || 0) / (s.B23025_004E || 1)));
-  const maxPayrollPerEstab = Math.max(...allStates.map(s => s.ESTAB && s.ESTAB > 0 ? (s.PAYANN || 0) / s.ESTAB : 0));
-  const maxMedianIncome = Math.max(...allStates.map(s => s.B19013_001E || 0));
-
-  // Calculate normalized component scores
-  const businessDensityScore = (businessDensity / maxBusinessDensity) * 0.25;
-  const accountingSaturationScore = (accountingSaturation / maxAccountingSaturation) * 0.25;
-  const payrollScore = (payrollPerEstablishment / maxPayrollPerEstab) * 0.25;
-  const incomeScore = (medianIncome / maxMedianIncome) * 0.25;
-
-  // Calculate total score
-  const totalScore = businessDensityScore + accountingSaturationScore + payrollScore + incomeScore;
-
-  // Ensure score is between 0 and 1
-  return Math.min(Math.max(totalScore, 0), 1);
-};
-
-const getHeatmapColor = (score: number): string => {
-  if (score === 0) return '#1e293b'; // Dark slate for states without MSAs
-  if (score >= 0.9) return '#8B5CF6'; // Vivid Purple
-  if (score >= 0.8) return '#D946EF'; // Magenta Pink
-  if (score >= 0.7) return '#F97316'; // Bright Orange
-  if (score >= 0.6) return '#0EA5E9'; // Ocean Blue
-  if (score >= 0.5) return '#94EC0E'; // Bright Green
-  if (score >= 0.4) return '#FDE1D3'; // Soft Peach
-  if (score >= 0.3) return '#E5DEFF'; // Soft Purple
-  if (score >= 0.2) return '#D3E4FD'; // Soft Blue
-  if (score >= 0.1) return '#FEF7CD'; // Soft Yellow
-  return '#F2FCE2';                   // Soft Green - Lowest
-};
-
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [stateData, setStateData] = useState<StateData[]>([]);
-  const [activeState, setActiveState] = useState<StateData | null>(null); // Added this line
+  const [activeState, setActiveState] = useState<StateData | null>(null);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
-  
   const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
   const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
-  const { 
-    msaData,
-    setMsaData,
-    statesWithMSA,
-    setStatesWithMSA,
-    msaCountByState,
-    setMsaCountByState,
-    fetchMSAData,
-    fetchStatesWithMSA
-  } = useMSAData();
-
+  const { msaData, setMsaData, statesWithMSA, setStatesWithMSA, fetchMSAData, fetchStatesWithMSA } = useMSAData();
   const [hoveredState, setHoveredState] = useState<StateData | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showReportPanel, setShowReportPanel] = useState(false);
 
   const flyToState = useCallback((stateId: string) => {
     if (!map.current) return;
-    
+
     const stateFeatures = map.current.querySourceFeatures('states', {
       sourceLayer: 'tl_2020_us_state-52k5uw',
       filter: ['==', ['get', 'STATEFP'], stateId]
@@ -197,16 +135,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
   const getStateColor = useCallback((stateId: string) => {
     if (!heatmapEnabled) return MAP_COLORS.inactive;
-    
+
     const state = stateData.find(s => s.STATEFP === stateId);
     if (!state || typeof state.buyerScore === 'undefined') return MAP_COLORS.inactive;
-    
+
     // Only show heatmap for states that have MSAs
     const msaStateSet = new Set(statesWithMSA?.map(s => s.padStart(2, '0')) || []);
     if (!msaStateSet.has(stateId.padStart(2, '0'))) {
       return MAP_COLORS.inactive;
     }
-    
+
     return getHeatmapColor(state.buyerScore);
   }, [stateData, heatmapEnabled, statesWithMSA]);
 
@@ -458,6 +396,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         if (stateId) {
           fitStateAndShowMSAs(stateId);
           updateAnalysisTable(stateId);
+          setShowReportPanel(true);
         }
       }
     });
@@ -466,6 +405,23 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const formatNumber = (num: number | null) => {
     if (num === null) return 'N/A';
     return new Intl.NumberFormat().format(num);
+  };
+
+  const getTooltipContent = (state: StateData) => {
+    return (
+      <div className="p-3 max-w-xs">
+        <h4 className="font-semibold mb-2">State Statistics</h4>
+        <div className="space-y-1 text-sm">
+          <p>Population: {formatNumber(state.B01001_001E)}</p>
+          <p>Median Income: ${formatNumber(state.B19013_001E)}</p>
+          <p>Labor Force: {formatNumber(state.B23025_004E)}</p>
+          <p>Establishments: {formatNumber(state.ESTAB)}</p>
+          {typeof state.buyerScore === 'number' && (
+            <p>Market Score: {(state.buyerScore * 100).toFixed(1)}%</p>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -501,26 +457,22 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         
         {hoveredState && (
           <div
-            className="absolute pointer-events-none z-50"
+            className="absolute pointer-events-none z-50 bg-black/80 text-white rounded-lg shadow-lg backdrop-blur-sm"
             style={{
               left: tooltipPosition.x + 10,
               top: tooltipPosition.y + 10,
               transform: 'translate(0, -50%)'
             }}
           >
-            <div className="bg-black/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
-              <h3 className="font-semibold mb-2">State Statistics</h3>
-              <div className="space-y-1 text-sm">
-                <p>Population: {formatNumber(hoveredState.B01001_001E)}</p>
-                <p>Median Income: ${formatNumber(hoveredState.B19013_001E)}</p>
-                <p>Labor Force: {formatNumber(hoveredState.B23025_004E)}</p>
-                <p>Establishments: {formatNumber(hoveredState.ESTAB)}</p>
-                {typeof hoveredState.buyerScore === 'number' && (
-                  <p>Buyer Score: {(hoveredState.buyerScore * 100).toFixed(1)}%</p>
-                )}
-              </div>
-            </div>
+            {getTooltipContent(hoveredState)}
           </div>
+        )}
+
+        {showReportPanel && activeState && (
+          <MapReportPanel
+            selectedState={activeState}
+            onClose={() => setShowReportPanel(false)}
+          />
         )}
       </div>
     </TooltipProvider>
