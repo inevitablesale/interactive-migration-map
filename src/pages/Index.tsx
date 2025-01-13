@@ -4,6 +4,7 @@ import { Bird } from "lucide-react";
 import { BottomPanel } from "@/components/BottomPanel";
 import { DataSourcesSection } from "@/components/DataSourcesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
+import { TimeCalculator } from "@/components/TimeCalculator";
 
 const Index = () => {
   return (
@@ -26,6 +27,11 @@ const Index = () => {
         {/* Hero Section */}
         <div className="min-h-screen">
           <Hero />
+        </div>
+
+        {/* Time Calculator Section */}
+        <div className="py-20 px-4">
+          <TimeCalculator />
         </div>
 
         {/* Data Sources Section */}
