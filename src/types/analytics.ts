@@ -1,13 +1,3 @@
-export interface EnhancedMarketScore {
-  STATEFP: string;
-  population_score: number;
-  economic_score: number;
-  business_density_score: number;
-  employment_score: number;
-  market_potential_score: number;
-  total_score: number;
-}
-
 export interface MarketTrend {
   STATEFP: string;
   year_2020_moves: number;
@@ -23,4 +13,29 @@ export interface CompetitiveAnalysis {
   avg_employee_count: number;
   market_concentration: number;
   competition_level: string;
+}
+
+export interface EnhancedMarketScore {
+  STATEFP: string;
+  population_score: number;
+  economic_score: number;
+  business_density_score: number;
+  employment_score: number;
+  market_potential_score: number;
+  total_score: number;
+}
+
+export interface AnalysisResult {
+  stateId: string;
+  marketScore: number;
+  competitiveIndex: number;
+  growthPotential: number;
+  recommendations: string[];
+}
+
+export interface TargetCriteria {
+  industryType: string;
+  minEmployees: number;
+  maxEmployees: number;
+  targetMarket: string;
 }

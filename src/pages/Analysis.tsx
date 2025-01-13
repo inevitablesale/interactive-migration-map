@@ -1,14 +1,26 @@
+import { useState } from "react";
 import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
-import { CommandBar } from "@/components/CommandBar";
+import { TargetCriteriaForm, TargetCriteria } from "@/components/analytics/TargetCriteriaForm";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const Analysis = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter') || 'market-entry';
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleFilterChange = (filter: string) => {
     setSearchParams({ filter });
+  };
+
+  const handleAnalyze = async (criteria: TargetCriteria) => {
+    setIsAnalyzing(true);
+    try {
+      // Here we'll add the analysis logic later
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate analysis
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -55,10 +67,14 @@ const Analysis = () => {
               Find Your Next Move
             </h2>
             <p className="text-blue-100/80 max-w-2xl mx-auto text-sm">
-              Transform market data into strategic decisions
+              Define your target criteria and analyze market opportunities
             </p>
           </div>
+          <div className="max-w-md mx-auto mt-6 relative z-10">
+            <TargetCriteriaForm onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />
+          </div>
         </div>
+        
         <InteractiveToolsSection />
       </div>
     </div>
