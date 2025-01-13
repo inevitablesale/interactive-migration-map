@@ -143,12 +143,10 @@ const Map = () => {
       setStateData(serializedData);
 
       if (serializedData.length > 0) {
-        setTimeout(() => {
-          updateActiveState(serializedData[0]);
-          if (mapLoaded) {
-            flyToState(serializedData[0].STATEFP);
-          }
-        }, 2000);
+        updateActiveState(serializedData[0]);
+        if (mapLoaded) {
+          flyToState(serializedData[0].STATEFP);
+        }
       }
     } catch (err) {
       console.error('Error in fetchStateData:', err);
@@ -234,6 +232,9 @@ const Map = () => {
           'line-width': 1
         }
       });
+
+      // Start cycling immediately after map is loaded
+      fetchStateData();
     });
 
     return () => {
@@ -257,10 +258,6 @@ const Map = () => {
       }
     };
   }, [stateData, mapLoaded, startCyclingStates]);
-
-  useEffect(() => {
-    fetchStateData();
-  }, []);
 
   useEffect(() => {
     if (!map.current || !mapLoaded || !activeState?.STATEFP) return;
