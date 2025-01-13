@@ -615,8 +615,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           ]);
 
           // Find MSA data
-          const msaData = msaData.find(m => m.msa === hoveredMsaId);
-          if (msaData) {
+          const msaInfo = msaData.find(m => m.msa === hoveredMsaId);
+          if (msaInfo) {
             // Remove existing popup
             if (popup) {
               popup.remove();
@@ -629,7 +629,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
               className: 'custom-popup'
             })
               .setLngLat(e.lngLat)
-              .setHTML(createPopup(msaData))
+              .setHTML(createPopup(msaInfo))
               .addTo(map.current!);
           }
         }
