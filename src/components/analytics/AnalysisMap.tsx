@@ -173,7 +173,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [layersAdded, toast]);
 
-  const fetchMSAData = async (stateId: string) => {
+  const fetchMSAData = useCallback(async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
@@ -191,8 +191,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
-      console.log('Found MSAs:', uniqueMsaCodes);
+      // Deduplicate MSAs based on msa code
+      const uniqueMsaCrosswalk = msaCrosswalk.reduce((acc, current) => {
+        const exists = acc.find(item => item.msa === current.msa);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, [] as typeof msaCrosswalk);
+
+      const uniqueMsaCodes = uniqueMsaCrosswalk.map(m => m.msa);
+      console.log('Found unique MSAs:', uniqueMsaCodes);
 
       if (uniqueMsaCodes.length === 0) {
         toast({
@@ -218,7 +227,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      const combinedData = msaCrosswalk.map(msa => ({
+      const combinedData = uniqueMsaCrosswalk.map(msa => ({
         ...msa,
         ...regionData?.find(rd => rd.msa === msa.msa)
       }));
@@ -235,7 +244,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast, updateMSAVisualization]);
 
   const updateMSAVisualization = (msaData: MSAData[]) => {
     if (!map.current) {
@@ -533,7 +542,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       }
     });
 
-    map.current.on('click', 'state-base', (e) => {
+    const handleStateClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
@@ -541,7 +550,15 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           fitStateAndShowMSAs(stateId);
         }
       }
-    });
+    };
+
+    map.current.on('click', 'state-base', handleStateClick);
+
+    return () => {
+      if (map.current) {
+        map.current.off('click', 'state-base', handleStateClick);
+      }
+    };
   }, [fitStateAndShowMSAs, updateAnalysisTable]);
 
   useEffect(() => {
