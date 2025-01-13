@@ -113,24 +113,22 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     try {
       // Update MSA layer with economic data
       map.current.setPaintProperty('msa-base', 'fill-extrusion-height', [
-        'interpolate',
-        ['linear'],
-        ['get', 'EMP'],
-        0, 20000,
-        maxEmp, 100000
+        'case',
+        ['in', ['get', 'CBSAFP'], ...msaCodes],
+        20000,
+        0
       ]);
 
       map.current.setPaintProperty('msa-base', 'fill-extrusion-color', [
-        'interpolate',
-        ['linear'],
-        ['get', 'PAYANN'],
-        0, MAP_COLORS.inactive,
-        maxPayann, MAP_COLORS.active
+        'case',
+        ['in', ['get', 'CBSAFP'], ...msaCodes],
+        MAP_COLORS.secondary,
+        MAP_COLORS.inactive
       ]);
 
-      // Update filter using spread operator for the MSA codes array
-      map.current.setFilter('msa-base', ['in', ['get', 'CBSAFP'], ...msaCodes]);
-      map.current.setFilter('msa-borders', ['in', ['get', 'CBSAFP'], ...msaCodes]);
+      // Set filters for MSA layers
+      map.current.setFilter('msa-base', ['in', 'CBSAFP', ...msaCodes]);
+      map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...msaCodes]);
 
       // Add popup for MSA data
       const popup = new mapboxgl.Popup({
@@ -148,9 +146,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           const html = `
             <div class="p-2">
               <h3 class="font-bold">${msaInfo.msa_name}</h3>
-              <p>Population: ${msaInfo.B01001_001E?.toLocaleString()}</p>
-              <p>Employment: ${msaInfo.EMP?.toLocaleString()}</p>
-              <p>Annual Payroll: $${msaInfo.PAYANN?.toLocaleString()}</p>
+              <p>Population: ${msaInfo.B01001_001E?.toLocaleString() || 'N/A'}</p>
+              <p>Employment: ${msaInfo.EMP?.toLocaleString() || 'N/A'}</p>
+              <p>Annual Payroll: $${msaInfo.PAYANN?.toLocaleString() || 'N/A'}</p>
             </div>
           `;
           
