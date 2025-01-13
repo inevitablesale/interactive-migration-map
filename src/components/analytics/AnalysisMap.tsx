@@ -106,8 +106,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     const maxEmp = Math.max(...msaData.map(d => d.EMP || 0));
     const maxPayann = Math.max(...msaData.map(d => d.PAYANN || 0));
 
-    // Update MSA layer with economic data
+    // Get array of MSA codes for filtering
+    const msaCodes = msaData.map(d => d.msa);
+    console.log('Filtering MSAs with codes:', msaCodes);
+
     try {
+      // Update MSA layer with economic data
       map.current.setPaintProperty('msa-base', 'fill-extrusion-height', [
         'interpolate',
         ['linear'],
@@ -123,6 +127,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         0, MAP_COLORS.inactive,
         maxPayann, MAP_COLORS.active
       ]);
+
+      // Update filter to use CBSAFP field
+      map.current.setFilter('msa-base', ['in', ['get', 'CBSAFP'], msaCodes]);
+      map.current.setFilter('msa-borders', ['in', ['get', 'CBSAFP'], msaCodes]);
 
       // Add popup for MSA data
       const popup = new mapboxgl.Popup({
@@ -193,13 +201,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         bearing: 0
       });
 
-      // Show MSA layers
+      // Show MSA layers with proper visibility
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-
-      // Filter MSAs to show only those in the selected state
-      map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
-      map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
 
       setSelectedState(stateId);
       setViewMode('msa');
