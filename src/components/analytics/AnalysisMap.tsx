@@ -28,6 +28,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
   const fitStateAndShowMSAs = (stateId: string) => {
     if (!map.current) return;
+    console.log('Fitting state and showing MSAs for state:', stateId);
 
     // Query for the selected state's features
     const stateFeatures = map.current.querySourceFeatures('states', {
@@ -49,15 +50,38 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       // Fit the map to the state bounds with padding and animation
       map.current.fitBounds(bounds, {
-        padding: { top: 50, bottom: 50, left: 50, right: 50 },
+        padding: { top: 100, bottom: 100, left: 100, right: 100 },
         duration: 1500,
         pitch: 45,
         bearing: 0
       });
 
-      // Update layer visibility with transitions
-      map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.3);
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-opacity', 0.8);
+      // Gradually fade out state layer and fade in MSA layer
+      const fadeAnimation = (progress: number) => {
+        if (!map.current) return;
+        
+        map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 
+          0.6 * (1 - progress));
+        map.current.setPaintProperty('msa-base', 'fill-extrusion-opacity', 
+          0.8 * progress);
+      };
+
+      // Animate the transition
+      let start: number | null = null;
+      const duration = 1000;
+
+      const animate = (timestamp: number) => {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1);
+        
+        fadeAnimation(progress);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+
+      // Show MSA layers before starting animation
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
 
@@ -65,15 +89,20 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
       map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
 
+      // Start the animation
+      requestAnimationFrame(animate);
+
       setSelectedState(stateId);
       setViewMode('msa');
+      
+      console.log('MSA layers should now be visible');
     }
   };
 
   const resetView = () => {
     if (!map.current) return;
 
-    // Reset to default view
+    // Reset to default view with animation
     map.current.easeTo({
       pitch: 45,
       zoom: 3,
@@ -81,12 +110,35 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       duration: 1500
     });
 
-    // Reset layer visibility
-    map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
-    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-    map.current.setFilter('msa-base', null);
-    map.current.setFilter('msa-borders', null);
+    // Fade out MSA layer and fade in state layer
+    const fadeAnimation = (progress: number) => {
+      if (!map.current) return;
+      
+      map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 
+        0.6 * progress);
+      map.current.setPaintProperty('msa-base', 'fill-extrusion-opacity', 
+        0.8 * (1 - progress));
+    };
+
+    let start: number | null = null;
+    const duration = 1000;
+
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      
+      fadeAnimation(progress);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Hide MSA layers after animation completes
+        map.current?.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current?.setLayoutProperty('msa-borders', 'visibility', 'none');
+      }
+    };
+
+    requestAnimationFrame(animate);
 
     setSelectedState(null);
     setViewMode('state');
@@ -116,6 +168,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     map.current.on('style.load', () => {
       if (!map.current) return;
+      console.log('Map style loaded, adding sources and layers');
       
       setMapLoaded(true);
 
@@ -125,6 +178,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
+      // Add MSA source
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
+      // Add state base layer
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -137,12 +197,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Add MSA source and layers
-      map.current.addSource('msas', {
-        type: 'vector',
-        url: 'mapbox://inevitablesale.29jcxgnm'
-      });
-
+      // Add MSA base layer
       map.current.addLayer({
         'id': 'msa-base',
         'type': 'fill-extrusion',
@@ -151,7 +206,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'paint': {
           'fill-extrusion-color': MAP_COLORS.secondary,
           'fill-extrusion-height': 50000,
-          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-opacity': 0,
           'fill-extrusion-base': 0
         },
         'layout': {
@@ -192,6 +247,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         if (e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
+            console.log('State clicked:', stateId);
             fitStateAndShowMSAs(stateId);
             
             // Dispatch custom event with state data
