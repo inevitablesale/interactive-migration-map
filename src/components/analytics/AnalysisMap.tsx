@@ -161,34 +161,38 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       return;
     }
 
-    const msaCodes = msaData.map(d => d.msa);
-    console.log('Updating MSA visualization for codes:', msaCodes);
+    // Deduplicate MSA codes while preserving the original data
+    const uniqueMsaCodes = [...new Set(msaData.map(d => d.msa))];
+    console.log('Updating MSA visualization for unique codes:', uniqueMsaCodes);
 
     try {
       // Show MSA layers
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
 
+      // Create a match expression for height with unique codes
+      const heightMatchExpression = ['match', ['get', 'CBSAFP']];
+      uniqueMsaCodes.forEach(code => {
+        heightMatchExpression.push(code);
+        heightMatchExpression.push(50000);
+      });
+      heightMatchExpression.push(0); // default value
+
+      // Create a match expression for color with unique codes
+      const colorMatchExpression = ['match', ['get', 'CBSAFP']];
+      uniqueMsaCodes.forEach(code => {
+        colorMatchExpression.push(code);
+        colorMatchExpression.push(MAP_COLORS.secondary);
+      });
+      colorMatchExpression.push(MAP_COLORS.inactive); // default value
+
       // Update MSA layer with economic data
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-height', [
-        'match',
-        ['get', 'CBSAFP'],
-        msaCodes,
-        50000,
-        0
-      ]);
+      map.current.setPaintProperty('msa-base', 'fill-extrusion-height', heightMatchExpression);
+      map.current.setPaintProperty('msa-base', 'fill-extrusion-color', colorMatchExpression);
 
-      map.current.setPaintProperty('msa-base', 'fill-extrusion-color', [
-        'match',
-        ['get', 'CBSAFP'],
-        msaCodes,
-        MAP_COLORS.secondary,
-        MAP_COLORS.inactive
-      ]);
-
-      // Set filters for MSA layers
-      map.current.setFilter('msa-base', ['in', 'CBSAFP', ...msaCodes]);
-      map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...msaCodes]);
+      // Set filters for MSA layers using unique codes
+      map.current.setFilter('msa-base', ['in', 'CBSAFP', ...uniqueMsaCodes]);
+      map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...uniqueMsaCodes]);
 
     } catch (error) {
       console.error('Error updating MSA visualization:', error);
