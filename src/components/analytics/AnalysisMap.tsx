@@ -76,13 +76,19 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
     if (!map.current) return;
 
-    setSelectedState(stateId);
+    // Ensure stateId is properly formatted (padded with leading zero if needed)
+    const paddedStateId = stateId.padStart(2, '0');
+    
+    setSelectedState(paddedStateId);
     setViewMode('msa');
 
-    // Query the state boundaries
+    // Query the state boundaries using both padded and unpadded IDs
     const stateFeatures = map.current.querySourceFeatures('states', {
       sourceLayer: 'tl_2020_us_state-52k5uw',
-      filter: ['==', ['get', 'STATEFP'], stateId]
+      filter: ['any',
+        ['==', ['get', 'STATEFP'], paddedStateId],
+        ['==', ['get', 'STATEFP'], stateId]
+      ]
     });
 
     if (stateFeatures.length > 0) {
@@ -93,11 +99,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
 
       // Adjust padding based on state size
+      const stateBbox = bounds.toArray();
+      const [[minLng, minLat], [maxLng, maxLat]] = stateBbox;
+      const stateWidth = Math.abs(maxLng - minLng);
+      const stateHeight = Math.abs(maxLat - minLat);
+      
+      // Calculate dynamic padding based on state size
       const padding = {
-        top: 50,
-        bottom: 50,
-        left: 50,
-        right: 50
+        top: Math.max(50, stateHeight * 50),
+        bottom: Math.max(50, stateHeight * 50),
+        left: Math.max(50, stateWidth * 50),
+        right: Math.max(50, stateWidth * 50)
       };
 
       map.current.fitBounds(bounds, {
@@ -110,7 +122,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
 
       // Fetch and display MSA data
-      const msaData = await fetchMSAData(stateId);
+      const msaData = await fetchMSAData(paddedStateId);
       console.log('MSA data loaded:', msaData);
     }
   }, [map, fetchMSAData]);
