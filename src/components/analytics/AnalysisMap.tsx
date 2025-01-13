@@ -43,6 +43,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
 
   const fetchStatesWithMSA = async () => {
+    if (!map.current || !mapLoaded) return;
+
     try {
       const { data, error } = await supabase
         .from('msa_state_crosswalk')
@@ -57,7 +59,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       const uniqueStates = [...new Set(data.map(d => d.state_fips))];
       setStatesWithMSA(uniqueStates);
       
-      if (map.current) {
+      // Check if the layer exists before updating its properties
+      if (map.current.getLayer('state-base')) {
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'case',
           ['in', ['get', 'STATEFP'], ['literal', uniqueStates]],
@@ -266,8 +269,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     map.current.on('style.load', () => {
       if (!map.current) return;
-      setMapLoaded(true);
-
+      
       // Add state source
       map.current.addSource('states', {
         type: 'vector',
@@ -383,7 +385,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Fetch states with MSA data
+      setMapLoaded(true);
+      // Fetch states with MSA data after all layers are added
       fetchStatesWithMSA();
     });
 
