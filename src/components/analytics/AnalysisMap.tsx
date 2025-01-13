@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { useToast } from "@/components/ui/use-toast";
 import { MAP_COLORS } from '@/constants/colors';
 import { GeographicLevel } from "@/types/geography";
+import { MapReportPanel } from './MapReportPanel';
 
 interface AnalysisMapProps {
   className?: string;
@@ -16,6 +17,7 @@ const AnalysisMap = ({ className, type, geographicLevel }: AnalysisMapProps) => 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedState, setSelectedState] = useState<any>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -67,6 +69,61 @@ const AnalysisMap = ({ className, type, geographicLevel }: AnalysisMapProps) => 
             }
           });
         }
+
+        // Add hover effect
+        currentMap.addLayer({
+          'id': 'state-hover',
+          'type': 'fill-extrusion',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-extrusion-color': MAP_COLORS.highlight,
+            'fill-extrusion-height': 20000,
+            'fill-extrusion-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.8,
+              0
+            ]
+          }
+        });
+
+        // Add click interactions
+        let hoveredStateId: string | null = null;
+
+        currentMap.on('mousemove', 'state-base', (e) => {
+          if (e.features && e.features.length > 0) {
+            if (hoveredStateId) {
+              currentMap.setFeatureState(
+                { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+                { hover: false }
+              );
+            }
+            hoveredStateId = e.features[0].id as string;
+            currentMap.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: true }
+            );
+          }
+        });
+
+        currentMap.on('mouseleave', 'state-base', () => {
+          if (hoveredStateId) {
+            currentMap.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: false }
+            );
+            hoveredStateId = null;
+          }
+        });
+
+        currentMap.on('click', 'state-base', (e) => {
+          if (e.features && e.features.length > 0) {
+            const feature = e.features[0];
+            setSelectedState(feature.properties);
+            console.log('Selected state:', feature.properties);
+          }
+        });
       });
 
       return () => {
@@ -87,6 +144,12 @@ const AnalysisMap = ({ className, type, geographicLevel }: AnalysisMapProps) => 
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+      {selectedState && (
+        <MapReportPanel 
+          selectedState={selectedState} 
+          onClose={() => setSelectedState(null)} 
+        />
+      )}
     </div>
   );
 };
