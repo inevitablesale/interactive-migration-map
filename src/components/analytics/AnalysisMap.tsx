@@ -291,12 +291,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'paint': {
           'fill-extrusion-color': MAP_COLORS.stateWithoutMSA,
           'fill-extrusion-height': 20000,
-          'fill-extrusion-opacity': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            0.8,
-            0.6
-          ]
+          'fill-extrusion-opacity': 0.6
         }
       });
 
@@ -350,26 +345,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       map.current.on('mousemove', 'state-base', (e) => {
         if (e.features.length > 0) {
-          if (hoveredStateId) {
-            map.current?.setFeatureState(
-              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
-              { hover: false }
-            );
+          if (hoveredStateId !== null) {
+            map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
           }
           hoveredStateId = e.features[0].id as string;
-          map.current?.setFeatureState(
-            { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
-            { hover: true }
-          );
+          map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.8);
         }
       });
 
       map.current.on('mouseleave', 'state-base', () => {
-        if (hoveredStateId) {
-          map.current?.setFeatureState(
-            { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
-            { hover: false }
-          );
+        if (hoveredStateId !== null) {
+          map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
           hoveredStateId = null;
         }
       });
