@@ -282,7 +282,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       if (error) throw error;
 
-      // Get states with MSAs
+      // Get states with MSAs for filtering
       const { data: msaStates } = await supabase
         .from('msa_state_crosswalk')
         .select('state_fips')
@@ -291,29 +291,45 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       // Create a Set of state FIPS codes that have MSAs, ensuring they're padded
       const msaStateSet = new Set(msaStates?.map(s => s.state_fips.padStart(2, '0')) || []);
 
-      console.log('States with MSAs:', Array.from(msaStateSet));
-      console.log('California FIPS code:', '06', 'Has MSA:', msaStateSet.has('06'));
-
-      const processedData = data.map(state => ({
+      // Filter and process data based on active filter
+      let processedData = data.map(state => ({
         ...state,
-        // Ensure STATEFP is padded when checking against msaStateSet
-        buyerScore: msaStateSet.has(state.STATEFP.padStart(2, '0')) ? calculateBuyerScore(state, data) : 0
+        buyerScore: calculateBuyerScore(state, data)
       }));
+
+      // Filter states based on active filter criteria
+      if (activeFilter === 'market-entry') {
+        processedData = processedData.filter(state => {
+          const hasMSA = msaStateSet.has(state.STATEFP.padStart(2, '0'));
+          const hasHighIncome = (state.B19013_001E || 0) > 50000; // Median income threshold
+          const hasBusinessDensity = (state.ESTAB || 0) / (state.B01001_001E || 1) > 0.01; // Business density threshold
+          return hasMSA && hasHighIncome && hasBusinessDensity;
+        });
+      } else if (activeFilter === 'growth-strategy') {
+        processedData = processedData.filter(state => {
+          const hasEmploymentGrowth = (state.EMP || 0) > 100000; // Employment threshold
+          const hasHighPayroll = (state.PAYANN || 0) > 1000000; // Annual payroll threshold
+          return hasEmploymentGrowth && hasHighPayroll;
+        });
+      }
 
       setStateData(processedData);
       
+      if (processedData.length > 0) {
+        updateActiveState(processedData[0]);
+        if (mapLoaded) {
+          flyToState(processedData[0].STATEFP);
+        }
+      }
+
+      // Update map colors for filtered states
       if (map.current) {
+        const stateIds = processedData.map(s => s.STATEFP);
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'case',
-          ['has', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
-            ...acc,
-            [state.STATEFP]: getHeatmapColor(state.buyerScore || 0)
-          }), {})]],
-          ['get', ['to-string', ['get', 'STATEFP']], ['literal', processedData.reduce((acc, state) => ({
-            ...acc,
-            [state.STATEFP]: getHeatmapColor(state.buyerScore || 0)
-          }), {})]],
-          '#000000'
+          ['in', ['get', 'STATEFP'], ['literal', stateIds]],
+          getStateColor(activeState?.STATEFP || '0'),
+          MAP_COLORS.inactive
         ]);
       }
     } catch (error) {
