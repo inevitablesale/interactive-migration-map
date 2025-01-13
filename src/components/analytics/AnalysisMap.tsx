@@ -80,12 +80,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       // Count MSAs per state and get unique states
       const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
         if (curr.state_fips) {
-          acc[curr.state_fips] = (acc[curr.state_fips] || 0) + 1;
+          // Ensure state_fips is treated as string
+          const stateFips = curr.state_fips.toString().padStart(2, '0');
+          acc[stateFips] = (acc[stateFips] || 0) + 1;
         }
         return acc;
       }, {});
 
-      const uniqueStates = Object.keys(msaCountByState);
+      const uniqueStates = Object.keys(msaCountByState).map(state => 
+        state.toString().padStart(2, '0')
+      );
       console.log('States with MSA data:', uniqueStates);
       setStatesWithMSA(uniqueStates);
 
@@ -93,7 +97,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         // Create color assignments based on MSA count
         const maxMSAs = Math.max(...Object.values(msaCountByState));
         const getStateColor = (stateId: string) => {
-          const msaCount = msaCountByState[stateId] || 0;
+          const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
           const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
           return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
         };
@@ -265,9 +269,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       return;
     }
 
+    // Ensure stateId is padded with leading zero if needed
+    const paddedStateId = stateId.toString().padStart(2, '0');
+    console.log('Fitting state and showing MSAs for state:', paddedStateId);
+
     // Fix: Convert stateId to string for comparison
-    if (!statesWithMSA.includes(stateId.toString())) {
-      console.log('State has no MSA data:', stateId);
+    if (!statesWithMSA.includes(paddedStateId)) {
+      console.log('State has no MSA data:', paddedStateId);
       toast({
         title: "No Data Available",
         description: "This state has no Metropolitan Statistical Areas data available",
@@ -276,17 +284,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       return;
     }
     
-    console.log('Fitting state and showing MSAs for state:', stateId);
+    console.log('Fitting state and showing MSAs for state:', paddedStateId);
 
     try {
       // Query for the selected state's features
       const stateFeatures = map.current.querySourceFeatures('states', {
         sourceLayer: 'tl_2020_us_state-52k5uw',
-        filter: ['==', ['get', 'STATEFP'], stateId]
+        filter: ['==', ['get', 'STATEFP'], paddedStateId]
       });
 
       if (stateFeatures.length === 0) {
-        console.warn('No features found for state:', stateId);
+        console.warn('No features found for state:', paddedStateId);
         return;
       }
 
@@ -322,7 +330,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
 
       if (!hasValidCoordinates) {
-        console.error('No valid coordinates found for state:', stateId);
+        console.error('No valid coordinates found for state:', paddedStateId);
         toast({
           title: "Error",
           description: "Could not find valid coordinates for this state",
@@ -340,11 +348,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         offset: [0, 0],
       });
 
-      setSelectedState(stateId);
+      setSelectedState(paddedStateId);
       setViewMode('msa');
 
       // Fetch MSA data
-      await fetchMSAData(stateId);
+      await fetchMSAData(paddedStateId);
 
       // After MSA data is loaded, zoom in closer for MSA view
       map.current.fitBounds(bounds, {
