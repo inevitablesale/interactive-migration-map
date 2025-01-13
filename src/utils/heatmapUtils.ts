@@ -1,15 +1,9 @@
-export const getDensityColor = (density: number) => {
-  if (density >= 0.1) return '#ea384c'; // High density (red)
-  if (density >= 0.05) return '#FEF7CD'; // Medium density (yellow)
-  return '#F2FCE2'; // Low density (green)
+export const getDensityColor = (density: number): string => {
+  if (density >= 15) return '#FF3366'; // High density
+  if (density >= 5) return '#FFF903';  // Medium density
+  return '#037CFE';                    // Low density
 };
 
-export const getGrowthColor = (growthRate: number) => {
-  if (growthRate >= 0.1) return '#F2FCE2'; // High growth (green)
-  if (growthRate >= 0) return '#FEF7CD'; // Moderate growth (yellow)
-  return '#ea384c'; // Declining growth (red)
-};
-
-export const formatNumber = (num: number) => {
-  return new Intl.NumberFormat().format(Math.round(num));
+export const formatNumber = (num: number): string => {
+  return new Intl.NumberFormat('en-US').format(num);
 };
