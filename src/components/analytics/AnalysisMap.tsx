@@ -128,9 +128,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         maxPayann, MAP_COLORS.active
       ]);
 
-      // Update filter to use CBSAFP field
-      map.current.setFilter('msa-base', ['in', ['get', 'CBSAFP'], msaCodes]);
-      map.current.setFilter('msa-borders', ['in', ['get', 'CBSAFP'], msaCodes]);
+      // Update filter using spread operator for the MSA codes array
+      map.current.setFilter('msa-base', ['in', ['get', 'CBSAFP'], ...msaCodes]);
+      map.current.setFilter('msa-borders', ['in', ['get', 'CBSAFP'], ...msaCodes]);
 
       // Add popup for MSA data
       const popup = new mapboxgl.Popup({
