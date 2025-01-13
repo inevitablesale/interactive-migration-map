@@ -15,9 +15,19 @@ const MAP_COLORS = {
   highlight: '#94EC0E',
   active: '#FA0098',
   inactive: '#1e293b',
-  stateWithMSA: '#3b82f6',
-  stateWithoutMSA: '#1e293b'
 };
+
+// Color scale for states based on number of MSAs
+const STATE_COLORS = [
+  '#e6f3ff',
+  '#bde0ff',
+  '#94cdff',
+  '#6bb9ff',
+  '#42a6ff',
+  '#1992ff',
+  '#007fff',
+  '#0066cc',
+];
 
 interface MSAData {
   msa: string;
@@ -53,13 +63,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: msaData, error: msaError } = await supabase
         .from('msa_state_crosswalk')
-        .select('state_fips')
-        .not('state_fips', 'is', null);
+        .select('state_fips, msa');
 
-      if (error) {
-        console.error('Error fetching states with MSA:', error);
+      if (msaError) {
+        console.error('Error fetching states with MSA:', msaError);
         toast({
           title: "Error",
           description: "Failed to fetch states with MSA data",
@@ -68,17 +77,33 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      const uniqueStates = [...new Set(data.map(d => d.state_fips))];
+      // Count MSAs per state and get unique states
+      const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
+        if (curr.state_fips) {
+          acc[curr.state_fips] = (acc[curr.state_fips] || 0) + 1;
+        }
+        return acc;
+      }, {});
+
+      const uniqueStates = Object.keys(msaCountByState);
       console.log('States with MSA data:', uniqueStates);
       setStatesWithMSA(uniqueStates);
 
       if (map.current.getLayer('state-base')) {
+        // Create color assignments based on MSA count
+        const maxMSAs = Math.max(...Object.values(msaCountByState));
+        const getStateColor = (stateId: string) => {
+          const msaCount = msaCountByState[stateId] || 0;
+          const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
+          return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
+        };
+
+        // Update the state colors based on MSA count
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'match',
           ['get', 'STATEFP'],
-          uniqueStates,
-          MAP_COLORS.stateWithMSA,
-          MAP_COLORS.stateWithoutMSA
+          ...uniqueStates.flatMap(state => [state, getStateColor(state)]),
+          MAP_COLORS.inactive
         ]);
       }
     } catch (error) {
@@ -219,7 +244,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       return;
     }
 
-    if (!statesWithMSA.includes(stateId)) {
+    // Fix: Convert stateId to string for comparison
+    if (!statesWithMSA.includes(stateId.toString())) {
       console.log('State has no MSA data:', stateId);
       toast({
         title: "No Data Available",
