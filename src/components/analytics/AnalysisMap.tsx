@@ -59,13 +59,20 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const updateAnalysisTable = useCallback((stateId: string) => {
     if (!map.current) return;
     
-    const event = new CustomEvent('stateSelected', {
-      detail: { 
-        stateId: stateId.toString(),
-        timestamp: Date.now()
-      }
-    });
-    window.dispatchEvent(event);
+    // Create a plain serializable object
+    const eventData = {
+      stateId: stateId.toString(),
+      timestamp: Date.now()
+    };
+    
+    try {
+      const event = new CustomEvent('stateSelected', {
+        detail: eventData
+      });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error dispatching state selection event:', error);
+    }
   }, []);
 
   const createPopup = useCallback((msaData: MSAData) => {
@@ -307,6 +314,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         state.toString().padStart(2, '0')
       );
       console.log('States with MSA data:', uniqueStates);
+      console.log('MSA counts by state:', msaCountByState);
+      
       setStatesWithMSA(uniqueStates);
 
       if (map.current.getLayer('state-base')) {
@@ -315,16 +324,26 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         const getStateColor = (stateId: string) => {
           const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
           const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
-          return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
+          return STATE_COLORS[colorIndex] || MAP_COLORS.disabled;
         };
 
-        // Update the state colors based on MSA count
-        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
-          'match',
-          ['get', 'STATEFP'],
-          ...uniqueStates.flatMap(state => [state, getStateColor(state)]),
-          MAP_COLORS.inactive
-        ]);
+        // Create a serializable color expression for mapbox
+        const colorMatchExpression = [
+          'case',
+          ['in', ['get', 'STATEFP'], ['literal', uniqueStates]],
+          [
+            'match',
+            ['get', 'STATEFP'],
+            ...uniqueStates.flatMap(state => [state, getStateColor(state)]),
+            MAP_COLORS.disabled
+          ],
+          MAP_COLORS.disabled
+        ];
+
+        // Update the state colors
+        map.current.setPaintProperty('state-base', 'fill-extrusion-color', colorMatchExpression);
+        
+        console.log('Updated state colors with expression:', JSON.stringify(colorMatchExpression));
       }
     } catch (error) {
       console.error('Error in fetchStatesWithMSA:', error);
