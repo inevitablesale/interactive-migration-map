@@ -22,6 +22,9 @@ interface MSAData {
   EMP?: number;
   PAYANN?: number;
   ESTAB?: number;
+  B01001_001E?: number; // Population
+  B19013_001E?: number; // Median household income
+  B23025_004E?: number; // Employment
 }
 
 interface AnalysisMapProps {
@@ -39,7 +42,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const fetchMSAData = async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
-      // First get unique counties from canary_firms_data for this state
+      // Step 1: Get unique counties from canary_firms_data
       const { data: countyData, error: countyError } = await supabase
         .from('canary_firms_data')
         .select('COUNTYNAME')
@@ -51,48 +54,34 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      if (!countyData || countyData.length === 0) {
-        console.log('No counties found for state:', stateId);
-        return;
-      }
-
       const uniqueCounties = [...new Set(countyData.map(c => c.COUNTYNAME))];
-      console.log('Found unique counties:', uniqueCounties.length);
+      console.log('Found unique counties:', uniqueCounties);
 
-      // Get MSAs for these counties from crosswalk table
+      // Step 2: Get MSAs from crosswalk table
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
         .from('msa_state_crosswalk')
         .select('msa, msa_name')
-        .in('county_name', uniqueCounties)
-        .eq('state_fips', stateId);
+        .eq('state_fips', stateId)
+        .in('county_name', uniqueCounties);
 
       if (crosswalkError) {
         console.error('Error fetching MSA crosswalk:', crosswalkError);
         return;
       }
 
-      if (!msaCrosswalk || msaCrosswalk.length === 0) {
-        console.log('No MSAs found for counties');
-        return;
-      }
-
-      console.log('Found MSAs in crosswalk:', msaCrosswalk.length);
-
-      // Get unique MSA codes
       const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
+      console.log('Found MSAs:', uniqueMsaCodes);
 
-      // Get economic data for these MSAs
+      // Step 3: Get economic data for these MSAs
       const { data: regionData, error: regionError } = await supabase
         .from('region_data')
-        .select('msa, EMP, PAYANN, ESTAB')
+        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
         .in('msa', uniqueMsaCodes);
 
       if (regionError) {
         console.error('Error fetching region data:', regionError);
         return;
       }
-
-      console.log('Found region data entries:', regionData?.length);
 
       // Combine the data
       const combinedData = msaCrosswalk.map(msa => ({
@@ -102,66 +91,87 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
       setMsaData(combinedData);
       console.log('Combined MSA data:', combinedData);
+
+      // Update map visualization with MSA data
+      updateMSAVisualization(combinedData);
     } catch (error) {
       console.error('Error in fetchMSAData:', error);
     }
   };
 
-  const verifyLayers = () => {
-    if (!map.current) {
-      console.log('Map not initialized');
-      return;
-    }
-    
-    const layers = map.current.getStyle().layers;
-    console.log('All available layers:', layers?.map(l => l.id));
-    
-    // Check sources
-    const sources = map.current.getStyle().sources;
-    console.log('All available sources:', Object.keys(sources));
-    
-    // Verify specific layers
-    const stateLayer = map.current.getLayer('state-base');
-    const msaLayer = map.current.getLayer('msa-base');
-    
-    console.log('State layer exists:', !!stateLayer);
-    console.log('MSA layer exists:', !!msaLayer);
+  const updateMSAVisualization = (msaData: MSAData[]) => {
+    if (!map.current) return;
 
-    // Check MSA source data
-    const msaSource = map.current.getSource('msas');
-    console.log('MSA source exists:', !!msaSource);
-    
-    if (msaSource) {
-      try {
-        const msaFeatures = map.current.querySourceFeatures('msas', {
-          sourceLayer: 'tl_2020_us_cbsa-aoky0u'
-        });
-        console.log('Number of MSA features found:', msaFeatures.length);
-      } catch (error) {
-        console.error('Error querying MSA features:', error);
-      }
+    // Calculate min/max values for normalization
+    const maxEmp = Math.max(...msaData.map(d => d.EMP || 0));
+    const maxPayann = Math.max(...msaData.map(d => d.PAYANN || 0));
+
+    // Update MSA layer with economic data
+    try {
+      map.current.setPaintProperty('msa-base', 'fill-extrusion-height', [
+        'interpolate',
+        ['linear'],
+        ['get', 'EMP'],
+        0, 20000,
+        maxEmp, 100000
+      ]);
+
+      map.current.setPaintProperty('msa-base', 'fill-extrusion-color', [
+        'interpolate',
+        ['linear'],
+        ['get', 'PAYANN'],
+        0, MAP_COLORS.inactive,
+        maxPayann, MAP_COLORS.active
+      ]);
+
+      // Add popup for MSA data
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+
+      map.current.on('mousemove', 'msa-base', (e) => {
+        if (!e.features?.[0]) return;
+        
+        const msaCode = e.features[0].properties?.CBSAFP;
+        const msaInfo = msaData.find(m => m.msa === msaCode);
+        
+        if (msaInfo) {
+          const html = `
+            <div class="p-2">
+              <h3 class="font-bold">${msaInfo.msa_name}</h3>
+              <p>Population: ${msaInfo.B01001_001E?.toLocaleString()}</p>
+              <p>Employment: ${msaInfo.EMP?.toLocaleString()}</p>
+              <p>Annual Payroll: $${msaInfo.PAYANN?.toLocaleString()}</p>
+            </div>
+          `;
+          
+          popup.setLngLat(e.lngLat).setHTML(html).addTo(map.current);
+        }
+      });
+
+      map.current.on('mouseleave', 'msa-base', () => {
+        popup.remove();
+      });
+
+    } catch (error) {
+      console.error('Error updating MSA visualization:', error);
     }
   };
 
   const fitStateAndShowMSAs = async (stateId: string) => {
-    if (!map.current) {
-      console.log('Map not initialized in fitStateAndShowMSAs');
-      return;
-    }
+    if (!map.current) return;
+    
     console.log('Fitting state and showing MSAs for state:', stateId);
 
     // Fetch MSA data first
     await fetchMSAData(stateId);
-
-    verifyLayers();
 
     // Query for the selected state's features
     const stateFeatures = map.current.querySourceFeatures('states', {
       sourceLayer: 'tl_2020_us_state-52k5uw',
       filter: ['==', ['get', 'STATEFP'], stateId]
     });
-
-    console.log('Found state features:', stateFeatures.length);
 
     if (stateFeatures.length > 0) {
       // Calculate bounds for the state
@@ -175,46 +185,21 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
-      // Fit the map to the state bounds with padding and animation
+      // Fit the map to the state bounds
       map.current.fitBounds(bounds, {
         padding: { top: 50, bottom: 50, left: 50, right: 50 },
         duration: 1500,
         pitch: 60,
-        bearing: 0,
-        maxZoom: 8 // Limit zoom to ensure MSAs are visible
+        bearing: 0
       });
 
-      // Show MSA layers before starting animation
-      try {
-        console.log('Attempting to show MSA layers...');
-        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-        console.log('MSA layers visibility set to visible');
-        
-        // Update MSA layer with new data
-        if (msaData.length > 0) {
-          console.log('Updating MSA layer with data:', msaData);
-          map.current.setPaintProperty('msa-base', 'fill-extrusion-height', [
-            'interpolate',
-            ['linear'],
-            ['get', 'EMP'],
-            0, 20000,
-            100000, 100000
-          ]);
-        }
-        
-      } catch (error) {
-        console.error('Error setting MSA layer visibility:', error);
-      }
+      // Show MSA layers
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
 
       // Filter MSAs to show only those in the selected state
-      try {
-        console.log('Setting MSA layer filter for state:', stateId);
-        map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
-        map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
-      } catch (error) {
-        console.error('Error setting MSA layer filter:', error);
-      }
+      map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
+      map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
 
       setSelectedState(stateId);
       setViewMode('msa');
@@ -269,7 +254,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    console.log('Initializing map...');
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
     map.current = new mapboxgl.Map({
@@ -291,106 +275,77 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
     map.current.on('style.load', () => {
       if (!map.current) return;
-      console.log('Map style loaded, adding sources and layers');
-      
       setMapLoaded(true);
 
       // Add state source
-      try {
-        map.current.addSource('states', {
-          type: 'vector',
-          url: 'mapbox://inevitablesale.9fnr921z'
-        });
-        console.log('Added states source');
-      } catch (error) {
-        console.error('Error adding states source:', error);
-      }
+      map.current.addSource('states', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.9fnr921z'
+      });
 
       // Add MSA source
-      try {
-        map.current.addSource('msas', {
-          type: 'vector',
-          url: 'mapbox://inevitablesale.29jcxgnm'
-        });
-        console.log('Added MSAs source');
-      } catch (error) {
-        console.error('Error adding MSAs source:', error);
-      }
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
 
       // Add state base layer
-      try {
-        map.current.addLayer({
-          'id': 'state-base',
-          'type': 'fill-extrusion',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'fill-extrusion-color': MAP_COLORS.inactive,
-            'fill-extrusion-height': 20000,
-            'fill-extrusion-opacity': 0.6
-          }
-        });
-        console.log('Added state base layer');
-      } catch (error) {
-        console.error('Error adding state base layer:', error);
-      }
+      map.current.addLayer({
+        'id': 'state-base',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-opacity': 0.6
+        }
+      });
 
       // Add MSA base layer
-      try {
-        map.current.addLayer({
-          'id': 'msa-base',
-          'type': 'fill-extrusion',
-          'source': 'msas',
-          'source-layer': 'tl_2020_us_cbsa-aoky0u',
-          'paint': {
-            'fill-extrusion-color': MAP_COLORS.secondary,
-            'fill-extrusion-height': 50000,
-            'fill-extrusion-opacity': 0.8,
-            'fill-extrusion-base': 0
-          },
-          'layout': {
-            'visibility': 'none'
-          }
-        });
-        console.log('Added MSA base layer');
-      } catch (error) {
-        console.error('Error adding MSA base layer:', error);
-      }
+      map.current.addLayer({
+        'id': 'msa-base',
+        'type': 'fill-extrusion',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.secondary,
+          'fill-extrusion-height': 50000,
+          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-base': 0
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
 
       // Add border layers
-      try {
-        map.current.addLayer({
-          'id': 'state-borders',
-          'type': 'line',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'line-color': MAP_COLORS.primary,
-            'line-width': 1.5,
-            'line-opacity': 0.8
-          }
-        });
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.primary,
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        }
+      });
 
-        map.current.addLayer({
-          'id': 'msa-borders',
-          'type': 'line',
-          'source': 'msas',
-          'source-layer': 'tl_2020_us_cbsa-aoky0u',
-          'paint': {
-            'line-color': MAP_COLORS.secondary,
-            'line-width': 1.5,
-            'line-opacity': 0.8
-          },
-          'layout': {
-            'visibility': 'none'
-          }
-        });
-        console.log('Added border layers');
-      } catch (error) {
-        console.error('Error adding border layers:', error);
-      }
-
-      verifyLayers();
+      map.current.addLayer({
+        'id': 'msa-borders',
+        'type': 'line',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'line-color': MAP_COLORS.secondary,
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
 
       // Add click event for state selection
       map.current.on('click', 'state-base', (e) => {
@@ -409,18 +364,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current = null;
     };
   }, []);
-
-  const updateViewMode = (mode: 'state' | 'msa') => {
-    if (mode === 'state') {
-      resetView();
-    }
-  };
-
-  useEffect(() => {
-    if (viewMode === 'state' && selectedState) {
-      resetView();
-    }
-  }, [viewMode]);
 
   return (
     <div className={`relative ${className}`}>
