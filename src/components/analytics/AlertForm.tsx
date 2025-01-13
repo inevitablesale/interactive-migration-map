@@ -39,7 +39,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         region: data.region,
         employee_count_min: employeeRange[0],
         employee_count_max: employeeRange[1],
-        specialties: [data.specialties],
+        specialties: [data.specialties], // <-- This was the issue, removing the extra array wrapper
         frequency: data.frequency,
       });
 
