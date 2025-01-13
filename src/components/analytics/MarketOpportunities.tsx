@@ -10,9 +10,7 @@ export function MarketOpportunities() {
     queryKey: ['marketOpportunities'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc('get_market_opportunities')
-        .order('migration_score', { ascending: false })
-        .limit(5);
+        .rpc('get_market_opportunities');
       
       if (error) throw error;
       return data;

@@ -10,8 +10,7 @@ export function ActionableInsights() {
     queryKey: ['serviceDistribution'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc('get_service_distribution')
-        .order('specialty_percentage', { ascending: false });
+        .rpc('get_service_distribution');
       
       if (error) throw error;
       return data;
