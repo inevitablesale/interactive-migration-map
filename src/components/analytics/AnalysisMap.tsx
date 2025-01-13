@@ -54,8 +54,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
-  const { toast } = useToast();
   const [msaCountByState, setMsaCountByState] = useState<{ [key: string]: number }>({});
+  const { toast } = useToast();
 
   const getStateColor = useCallback((stateId: string) => {
     const msaCount = msaCountByState[stateId] || 0;
@@ -117,70 +117,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       </div>
     `;
   }, []);
-
-  const fetchMSAData = useCallback(async (stateId: string) => {
-    console.log('Fetching MSA data for state:', stateId);
-    try {
-      const { data: msaCrosswalk, error: crosswalkError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('msa, msa_name')
-        .eq('state_fips', stateId);
-
-      if (crosswalkError) {
-        console.error('Error fetching MSA crosswalk:', crosswalkError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch MSA data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
-      console.log('Found MSAs:', uniqueMsaCodes);
-
-      if (uniqueMsaCodes.length === 0) {
-        toast({
-          title: "No MSA Data",
-          description: "This state has no Metropolitan Statistical Areas",
-          variant: "default",
-        });
-        return;
-      }
-
-      const { data: regionData, error: regionError } = await supabase
-        .from('region_data')
-        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
-        .in('msa', uniqueMsaCodes);
-
-      if (regionError) {
-        console.error('Error fetching region data:', regionError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch region economic data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const combinedData = msaCrosswalk.map(msa => ({
-        ...msa,
-        ...regionData?.find(rd => rd.msa === msa.msa)
-      }));
-
-      setMsaData(combinedData);
-      console.log('Combined MSA data:', combinedData);
-
-      updateMSAVisualization(combinedData);
-    } catch (error) {
-      console.error('Error in fetchMSAData:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process MSA data",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
 
   const updateMSAVisualization = useCallback((msaData: MSAData[]) => {
     if (!map.current) {
@@ -248,6 +184,70 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
     }
   }, [toast]);
+
+  const fetchMSAData = useCallback(async (stateId: string) => {
+    console.log('Fetching MSA data for state:', stateId);
+    try {
+      const { data: msaCrosswalk, error: crosswalkError } = await supabase
+        .from('msa_state_crosswalk')
+        .select('msa, msa_name')
+        .eq('state_fips', stateId);
+
+      if (crosswalkError) {
+        console.error('Error fetching MSA crosswalk:', crosswalkError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch MSA data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
+      console.log('Found MSAs:', uniqueMsaCodes);
+
+      if (uniqueMsaCodes.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "This state has no Metropolitan Statistical Areas",
+          variant: "default",
+        });
+        return;
+      }
+
+      const { data: regionData, error: regionError } = await supabase
+        .from('region_data')
+        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
+        .in('msa', uniqueMsaCodes);
+
+      if (regionError) {
+        console.error('Error fetching region data:', regionError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch region economic data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const combinedData = msaCrosswalk.map(msa => ({
+        ...msa,
+        ...regionData?.find(rd => rd.msa === msa.msa)
+      }));
+
+      setMsaData(combinedData);
+      console.log('Combined MSA data:', combinedData);
+
+      updateMSAVisualization(combinedData);
+    } catch (error) {
+      console.error('Error in fetchMSAData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process MSA data",
+        variant: "destructive",
+      });
+    }
+  }, [toast, updateMSAVisualization]);
 
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
