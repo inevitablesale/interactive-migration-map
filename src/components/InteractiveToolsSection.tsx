@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ComparisonTool } from "./ComparisonTool";
-import { FindOpportunities } from "./analytics/FindOpportunities";
 import { ActionableInsights } from "./analytics/ActionableInsights";
 import { StrategyBuilder } from "./analytics/StrategyBuilder";
 import { QueryBuilderPanel } from "./analytics/QueryBuilder/QueryBuilderPanel";
@@ -16,8 +15,6 @@ export const InteractiveToolsSection = () => {
 
   const getActiveTab = () => {
     switch (activeFilter) {
-      case 'market-entry':
-        return 'opportunities';
       case 'growth-strategy':
         return 'strategy';
       case 'reports':
@@ -25,7 +22,7 @@ export const InteractiveToolsSection = () => {
       case 'builder':
         return 'builder';
       default:
-        return 'opportunities';
+        return 'strategy';
     }
   };
 
@@ -40,13 +37,7 @@ export const InteractiveToolsSection = () => {
       {/* Analysis Tools Section */}
       <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-100px)] overflow-y-auto">
         <Tabs defaultValue={getActiveTab()} value={getActiveTab()} className="w-full">
-          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-4 gap-4">
-            <TabsTrigger 
-              value="opportunities" 
-              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
-            >
-              Find Opportunities
-            </TabsTrigger>
+          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-3 gap-4">
             <TabsTrigger 
               value="strategy"
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
@@ -68,10 +59,6 @@ export const InteractiveToolsSection = () => {
           </TabsList>
 
           <div className="p-6 space-y-6">
-            <TabsContent value="opportunities" className="mt-0 space-y-6">
-              <FindOpportunities />
-            </TabsContent>
-
             <TabsContent value="strategy" className="mt-0 space-y-6">
               <StrategyBuilder />
             </TabsContent>
