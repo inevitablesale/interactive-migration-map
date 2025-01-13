@@ -86,8 +86,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     
     try {
       setSelectedState(stateId);
-      await fetchMSAData(stateId);
+      const msaData = await fetchMSAData(stateId);
       
+      // Create a bounding box for the state
       const stateFeatures = map.current.querySourceFeatures('states', {
         sourceLayer: 'tl_2020_us_state-52k5uw',
         filter: ['==', ['get', 'STATEFP'], stateId]
@@ -97,6 +98,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         const bounds = new mapboxgl.LngLatBounds();
         const feature = stateFeatures[0];
         
+        // Add state boundaries to the bounds
         if (feature.geometry.type === 'Polygon') {
           (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
             bounds.extend(coord as [number, number]);
@@ -109,8 +111,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
+        // Fit the map to the state bounds with padding
         map.current.fitBounds(bounds, {
-          padding: 50,
+          padding: { top: 50, bottom: 50, left: 50, right: 50 },
           duration: 1000
         });
 
