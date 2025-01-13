@@ -34,6 +34,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
+  const { fetchMSAData } = useMSAData();
 
   const fetchStateData = useCallback(async () => {
     try {
@@ -123,7 +124,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         variant: "destructive",
       });
     }
-  }, [map, fetchMSAData, toast]);
+  }, [fetchMSAData, toast]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
