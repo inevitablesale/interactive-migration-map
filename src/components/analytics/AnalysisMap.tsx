@@ -20,11 +20,14 @@ interface StateData {
   B19013_001E: number | null; // Median Income
   C24060_001E: number | null; // Total Accountant Employment
   C24010_001E: number | null; // Total Workforce
+  C24010_033E: number | null; // Additional workforce metric
+  C24010_034E: number | null; // Additional workforce metric
   PAYANN: number | null;      // Total Annual Payroll
   ESTAB: number | null;       // Total Establishments
   B08303_001E: number | null; // Average Commute Time
   B15003_022E: number | null; // Bachelor's Degree Holders
   B01002_001E: number | null; // Median Age
+  EMP: number | null;         // Employment
   buyerScore?: number;        // Added buyerScore to the interface
 }
 
@@ -89,15 +92,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     const state = stateData.find(s => s.STATEFP === stateId);
     if (!state) return;
 
-    // Create a plain object with only the data we need
+    // Create a plain object with only the serializable data we need
     const eventData = {
       stateId,
       data: {
         STATEFP: state.STATEFP,
         B19013_001E: state.B19013_001E,
-        C24010_033E: state.C24010_033E,
-        C24010_034E: state.C24010_034E,
-        EMP: state.EMP,
+        C24010_001E: state.C24010_001E,
         ESTAB: state.ESTAB,
         PAYANN: state.PAYANN,
         buyerScore: state.buyerScore
