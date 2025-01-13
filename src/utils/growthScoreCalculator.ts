@@ -66,16 +66,13 @@ export const calculateGrowthScore = (msaData: MSAData): number => {
 };
 
 export const getColorFromScore = (score: number): string => {
-  // Color scale from cool (blue) to warm (red)
+  // Color scale from green (low) to red (high growth)
   const colors = [
-    '#0000ff', // Blue (low growth)
-    '#4169e1',
-    '#6495ed',
-    '#87ceeb',
-    '#ffd700',
-    '#ffa500',
-    '#ff6347',
-    '#ff0000'  // Red (high growth)
+    '#F2FCE2', // Soft Green (lowest growth)
+    '#8B5CF6', // Vivid Purple (medium-low growth)
+    '#FEC6A1', // Soft Orange (medium growth)
+    '#F97316', // Bright Orange (medium-high growth)
+    '#ea384c'  // Red (highest growth)
   ];
 
   const index = Math.min(Math.floor(score * colors.length), colors.length - 1);
