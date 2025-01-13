@@ -11,9 +11,10 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import type { PracticeAreaStats } from "@/types/analytics";
 
 export function AnalyticsDashboard() {
-  const { data: practiceMetrics } = useQuery({
+  const { data: practiceMetrics, isLoading } = useQuery({
     queryKey: ['practiceMetrics'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -24,8 +25,11 @@ export function AnalyticsDashboard() {
       if (error) throw error;
 
       // Process specialties data
-      const specialtiesMap = new Map();
+      const specialtiesMap = new Map<string, PracticeAreaStats>();
+      
       data.forEach(firm => {
+        if (!firm.specialities) return;
+        
         const specialties = firm.specialities.split(',').map(s => s.trim());
         specialties.forEach(specialty => {
           if (!specialtiesMap.has(specialty)) {
@@ -33,16 +37,21 @@ export function AnalyticsDashboard() {
               name: specialty,
               firmCount: 0,
               totalEmployees: 0,
-              states: new Set()
+              avgEmployees: 0,
+              states: new Set(),
+              marketCoverage: 0
             });
           }
-          const stats = specialtiesMap.get(specialty);
+          const stats = specialtiesMap.get(specialty)!;
           stats.firmCount += 1;
           stats.totalEmployees += firm.employeeCount || 0;
-          stats.states.add(firm["State Name"]);
+          if (firm["State Name"]) {
+            stats.states.add(firm["State Name"]);
+          }
         });
       });
 
+      // Convert map to array and calculate averages
       return Array.from(specialtiesMap.values())
         .map(stats => ({
           ...stats,
@@ -55,18 +64,28 @@ export function AnalyticsDashboard() {
     }
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
+
+  const topPractice = practiceMetrics?.[0];
+
   const metrics = [
     {
       title: "Top Practice Areas",
-      value: practiceMetrics?.[0]?.name || "Loading...",
-      change: `${practiceMetrics?.[0]?.firmCount || 0} firms`,
+      value: topPractice?.name || "Loading...",
+      change: `${topPractice?.firmCount || 0} firms`,
       icon: Briefcase,
       description: "Most common specialty",
       action: "View all practices"
     },
     {
       title: "Market Coverage",
-      value: practiceMetrics?.[0]?.marketCoverage || 0,
+      value: topPractice?.marketCoverage || 0,
       change: "states",
       icon: Building2,
       description: "Geographic reach of top practice",
@@ -74,13 +93,19 @@ export function AnalyticsDashboard() {
     },
     {
       title: "Practice Size",
-      value: practiceMetrics?.[0]?.avgEmployees?.toLocaleString() || "0",
+      value: topPractice?.avgEmployees?.toLocaleString() || "0",
       change: "avg employees",
       icon: Users,
       description: "Average firm size in top practice",
       action: "Size breakdown"
     }
   ];
+
+  const chartData = practiceMetrics?.map(practice => ({
+    name: practice.name,
+    firms: practice.firmCount,
+    employees: practice.avgEmployees
+  }));
 
   return (
     <div className="space-y-6">
@@ -109,7 +134,7 @@ export function AnalyticsDashboard() {
         <h3 className="text-lg font-semibold text-white mb-4">Practice Area Distribution</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={practiceMetrics}>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
               <XAxis 
                 dataKey="name" 
@@ -129,7 +154,7 @@ export function AnalyticsDashboard() {
                 }}
                 labelStyle={{ color: '#fff' }}
               />
-              <Bar dataKey="firmCount" fill="#3b82f6" name="Number of Firms" />
+              <Bar dataKey="firms" fill="#3b82f6" name="Number of Firms" />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -48,3 +48,12 @@ export interface MarketOpportunityScore {
   business_density_score: number;
   service_coverage_score: number;
 }
+
+export interface PracticeAreaStats {
+  name: string;
+  firmCount: number;
+  totalEmployees: number;
+  avgEmployees: number;
+  states: Set<string>;
+  marketCoverage: number;
+}
