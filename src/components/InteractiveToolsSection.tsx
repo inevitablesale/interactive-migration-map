@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ComparisonTool } from "./ComparisonTool";
-import { HeatmapTool } from "./analytics/HeatmapTool";
-import { PredictiveTools } from "./analytics/PredictiveTools";
-import { OpportunityTools } from "./analytics/OpportunityTools";
+import { MarketOpportunities } from "./analytics/MarketOpportunities";
+import { ActionableInsights } from "./analytics/ActionableInsights";
+import { StrategyBuilder } from "./analytics/StrategyBuilder";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import AnalysisMap from "./analytics/AnalysisMap";
 
@@ -19,49 +19,39 @@ export const InteractiveToolsSection = () => {
 
       {/* Analysis Tools Section */}
       <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-132px)] overflow-y-auto">
-        <Tabs defaultValue="insights" className="w-full">
-          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-4 grid grid-cols-4 gap-2">
+        <Tabs defaultValue="opportunities" className="w-full">
+          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-4 grid grid-cols-3 gap-2">
             <TabsTrigger 
-              value="insights" 
+              value="opportunities" 
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200"
             >
-              Insights
+              Find Opportunities
             </TabsTrigger>
             <TabsTrigger 
-              value="predictive"
+              value="strategy"
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200"
             >
-              Predict
+              Build Strategy
             </TabsTrigger>
             <TabsTrigger 
-              value="opportunities"
+              value="insights"
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200"
             >
-              Discover
-            </TabsTrigger>
-            <TabsTrigger 
-              value="compare"
-              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200"
-            >
-              Compare
+              Get Insights
             </TabsTrigger>
           </TabsList>
 
           <div className="p-4 space-y-4">
-            <TabsContent value="insights" className="mt-0 space-y-4">
-              <HeatmapTool />
-            </TabsContent>
-
-            <TabsContent value="predictive" className="mt-0 space-y-4">
-              <PredictiveTools />
-            </TabsContent>
-
             <TabsContent value="opportunities" className="mt-0 space-y-4">
-              <OpportunityTools />
+              <MarketOpportunities />
             </TabsContent>
 
-            <TabsContent value="compare" className="mt-0 space-y-4">
-              <ComparisonTool />
+            <TabsContent value="strategy" className="mt-0 space-y-4">
+              <StrategyBuilder />
+            </TabsContent>
+
+            <TabsContent value="insights" className="mt-0 space-y-4">
+              <ActionableInsights />
             </TabsContent>
           </div>
         </Tabs>
