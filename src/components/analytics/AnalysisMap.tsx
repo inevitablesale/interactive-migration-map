@@ -26,6 +26,38 @@ interface StateData {
   buyerScore?: number;
 }
 
+const calculateBuyerScore = (state: StateData): number => {
+  if (!state) return 0;
+
+  // Initialize weights for each factor (total should be 1)
+  const weights = {
+    financialEmployment: 0.2,    // 20% weight for financial sector employment
+    medianIncome: 0.2,          // 20% weight for median household income
+    totalEmployment: 0.2,        // 20% weight for total employment
+    establishments: 0.2,         // 20% weight for number of establishments
+    annualPayroll: 0.2          // 20% weight for annual payroll
+  };
+
+  // Calculate normalized scores (0-1) for each factor
+  const financialEmploymentScore = (state.C24010_033E + state.C24010_034E) / 10000; // Normalize by assumed max
+  const medianIncomeScore = state.B19013_001E / 100000; // Normalize by 100k
+  const totalEmploymentScore = state.EMP / 1000000; // Normalize by 1M
+  const establishmentsScore = state.ESTAB / 10000; // Normalize by 10k
+  const annualPayrollScore = state.PAYANN / 1000000000; // Normalize by 1B
+
+  // Calculate weighted score
+  const score = (
+    (financialEmploymentScore * weights.financialEmployment) +
+    (medianIncomeScore * weights.medianIncome) +
+    (totalEmploymentScore * weights.totalEmployment) +
+    (establishmentsScore * weights.establishments) +
+    (annualPayrollScore * weights.annualPayroll)
+  );
+
+  // Ensure score is between 0 and 1
+  return Math.min(Math.max(score, 0), 1);
+};
+
 const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -63,12 +95,24 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     const state = stateData.find(s => s.STATEFP === stateId);
     if (!state) return;
 
-    // Dispatch custom event with state data
-    const event = new CustomEvent('analysisStateChanged', {
-      detail: {
-        stateId,
-        data: state
+    // Create a plain object with only the data we need
+    const eventData = {
+      stateId,
+      data: {
+        STATEFP: state.STATEFP,
+        B19013_001E: state.B19013_001E,
+        C24010_033E: state.C24010_033E,
+        C24010_034E: state.C24010_034E,
+        EMP: state.EMP,
+        ESTAB: state.ESTAB,
+        PAYANN: state.PAYANN,
+        buyerScore: state.buyerScore
       }
+    };
+
+    // Dispatch event with serializable data
+    const event = new CustomEvent('analysisStateChanged', {
+      detail: JSON.parse(JSON.stringify(eventData))
     });
     window.dispatchEvent(event);
   }, [stateData]);
