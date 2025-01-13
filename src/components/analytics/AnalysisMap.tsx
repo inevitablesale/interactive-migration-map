@@ -18,7 +18,6 @@ const MAP_COLORS = {
   inactive: '#1e293b'    // Dark slate for inactive states
 };
 
-// Updated electric color palette for state visualization
 const STATE_COLORS = [
   '#8B5CF6', // Vivid Purple (softer entry point)
   '#0EA5E9', // Ocean Blue (calming transition)
@@ -55,6 +54,147 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const initializeLayers = useCallback(() => {
+    if (!map.current) {
+      console.warn('Map not ready for layer initialization');
+      return;
+    }
+
+    try {
+      // Add state source
+      map.current.addSource('states', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.9fnr921z'
+      });
+
+      // Add state base layer
+      map.current.addLayer({
+        'id': 'state-base',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 10000,
+          'fill-extrusion-opacity': 0.6
+        }
+      });
+
+      // Add state hover layer
+      map.current.addLayer({
+        'id': 'state-hover',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.highlight,
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-opacity': 0
+        }
+      });
+
+      // Add state borders
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.primary,
+          'line-width': 1
+        }
+      });
+
+      // Add MSA source and layers
+      map.current.addSource('msa', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.9fnr921z'
+      });
+
+      map.current.addLayer({
+        'id': 'msa-base',
+        'type': 'fill-extrusion',
+        'source': 'msa',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 10000,
+          'fill-extrusion-opacity': 0.6
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
+
+      map.current.addLayer({
+        'id': 'msa-borders',
+        'type': 'line',
+        'source': 'msa',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.secondary,
+          'line-width': 1
+        },
+        'layout': {
+          'visibility': 'none'
+        }
+      });
+
+      setLayersAdded(true);
+      console.log('Map layers initialized successfully');
+    } catch (error) {
+      console.error('Error initializing map layers:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map layers",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    // This function will be implemented when we add the analysis table component
+    console.log('Updating analysis table for state:', stateId);
+  }, []);
+
+  const fitStateAndShowMSAs = useCallback((stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      const paddedStateId = stateId.padStart(2, '0');
+      setSelectedState(paddedStateId);
+      
+      // Fit to state bounds
+      const stateFeatures = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], paddedStateId]
+      });
+
+      if (stateFeatures.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
+        geometry.coordinates[0].forEach((coord: [number, number]) => {
+          bounds.extend(coord);
+        });
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+
+        // Fetch and show MSA data for the selected state
+        fetchMSAData(paddedStateId);
+      }
+    } catch (error) {
+      console.error('Error fitting to state:', error);
+      toast({
+        title: "Error",
+        description: "Failed to zoom to selected state",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, toast]);
 
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
