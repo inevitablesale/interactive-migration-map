@@ -1,38 +1,50 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Map as MapIcon } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Map as MapIcon, Building2, LineChart } from 'lucide-react';
 import { useSearchParams } from "react-router-dom";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { useMapInitialization } from '@/hooks/useMapInitialization';
+import { useMapLayers } from '@/hooks/useMapLayers';
+import { useMSAData } from '@/hooks/useMSAData';
 import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
-import { formatNumber } from '@/utils/heatmapUtils';
+import { getDensityColor, getGrowthColor, formatNumber } from '@/utils/heatmapUtils';
 import { GeographicLevel } from "@/types/geography";
 
 interface AnalysisMapProps {
   className?: string;
   data?: any[];
-  type: 'density' | 'migration';
+  type: 'density' | 'growth';
   geographicLevel: GeographicLevel;
 }
 
 const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProps) => {
+  const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [selectedState, setSelectedState] = useState<any | null>(null);
   const [hoveredState, setHoveredState] = useState<any | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [stateData, setStateData] = useState<any[]>([]);
-  const [mapContainer, setMapContainer] = useState<HTMLDivElement | null>(null);
-  const [map, setMap] = useState<mapboxgl.Map | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const activeFilter = searchParams.get('filter');
+  const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
+  const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
+  const { msaData, setMsaData, statesWithMSA, setStatesWithMSA, fetchMSAData, fetchStatesWithMSA } = useMSAData();
 
   const fetchStateData = useCallback(async () => {
     try {
-      const { data: densityMetrics, error } = await supabase
-        .rpc('get_firm_density_metrics');
+      const { data: stateMetrics, error } = await supabase
+        .rpc(type === 'density' ? 'get_firm_density_metrics' : 'get_growth_trend_metrics');
 
       if (error) {
         console.error('Error fetching state data:', error);
@@ -44,20 +56,68 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         return;
       }
 
-      setStateData(densityMetrics);
+      setStateData(stateMetrics);
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
-  }, [toast]);
+  }, [type, toast]);
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    if (!stateData.length) return;
+    const stateInfo = stateData.find(s => s.region === stateId);
+    if (stateInfo) {
+      setSelectedState(stateInfo);
+      setShowReportPanel(true);
+    }
+  }, [stateData]);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      // Update map view for selected state
+      map.current.setFilter('state-base', ['==', ['get', 'STATEFP'], stateId]);
+      
+      // Fetch and show MSA data for the state
+      const msaResults = await fetchMSAData(stateId);
+      if (msaResults && msaResults.length > 0) {
+        setViewMode('msa');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      }
+
+      // Fit map bounds to the selected state
+      const stateBounds = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
+
+      if (stateBounds.length > 0 && stateBounds[0].geometry.type === 'Polygon') {
+        const bounds = new mapboxgl.LngLatBounds();
+        const geometry = stateBounds[0].geometry as GeoJSON.Polygon;
+        geometry.coordinates[0].forEach((coord: [number, number]) => {
+          bounds.extend(coord);
+        });
+        map.current.fitBounds(bounds, { padding: 50 });
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load MSA data",
+        variant: "destructive",
+      });
+    }
+  }, [map, fetchMSAData, toast]);
 
   useEffect(() => {
-    if (!mapContainer || map) return;
+    if (!mapContainer.current || map.current) return;
 
     try {
       mapboxgl.accessToken = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
       
-      const newMap = new mapboxgl.Map({
-        container: mapContainer,
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
         style: 'mapbox://styles/mapbox/dark-v11',
         zoom: 3,
         center: [-98.5795, 39.8283],
@@ -66,85 +126,43 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         interactive: true,
       });
 
-      newMap.addControl(
+      map.current.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
         'top-right'
       );
 
-      newMap.on('style.load', () => {
+      map.current.on('style.load', () => {
         setMapLoaded(true);
-        if (!newMap) return;
-
-        newMap.addSource('states', {
-          type: 'vector',
-          url: 'mapbox://inevitablesale.9fnr921z'
-        });
-
-        newMap.addLayer({
-          'id': 'state-base',
-          'type': 'fill-extrusion',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'fill-extrusion-color': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['get', 'firm_density'], 0],
-              0, MAP_COLORS.primary,
-              50, MAP_COLORS.secondary,
-              100, MAP_COLORS.accent
-            ],
-            'fill-extrusion-height': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['get', 'firm_density'], 0],
-              0, 20000,
-              100, 200000
-            ],
-            'fill-extrusion-opacity': 0.8,
-            'fill-extrusion-base': 0
-          }
-        });
-
-        newMap.addLayer({
-          'id': 'state-borders',
-          'type': 'line',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'line-color': MAP_COLORS.primary,
-            'line-width': 1.5,
-            'line-opacity': 0.8
-          }
-        });
-
-        newMap.on('click', 'state-base', (e) => {
-          if (e.features && e.features[0]) {
-            setSelectedState(e.features[0].properties);
-            setShowReportPanel(true);
-          }
-        });
-
-        newMap.on('mousemove', 'state-base', (e) => {
-          if (e.features && e.features.length > 0) {
-            setHoveredState(e.features[0].properties);
-            setTooltipPosition({ x: e.point.x, y: e.point.y });
-          }
-        });
-
-        newMap.on('mouseleave', 'state-base', () => {
-          setHoveredState(null);
-        });
-
+        initializeLayers();
         fetchStateData();
+        
+        // Update layer visibility based on geographic level
+        if (map.current) {
+          try {
+            if (geographicLevel === 'state') {
+              map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+              map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+              map.current.setLayoutProperty('county-base', 'visibility', 'none');
+            } else if (geographicLevel === 'msa') {
+              map.current.setLayoutProperty('state-base', 'visibility', 'none');
+              map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+              map.current.setLayoutProperty('county-base', 'visibility', 'none');
+            } else {
+              map.current.setLayoutProperty('state-base', 'visibility', 'none');
+              map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+              map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+            }
+          } catch (error) {
+            console.error('Error updating layer visibility:', error);
+          }
+        }
       });
 
-      setMap(newMap);
-
       return () => {
-        newMap.remove();
+        map.current?.remove();
+        map.current = null;
       };
     } catch (error) {
       console.error('Error initializing map:', error);
@@ -154,46 +172,104 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         variant: "destructive",
       });
     }
-  }, [fetchStateData]);
+  }, [initializeLayers, mapContainer, toast, fetchStateData, geographicLevel]);
 
   useEffect(() => {
-    if (!map || !mapLoaded || !stateData.length) return;
+    if (mapLoaded && layersAdded) {
+      fetchStatesWithMSA();
+    }
+  }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    let hoveredStateId: string | null = null;
+
+    const handleMouseMove = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+      if (e.features && e.features.length > 0) {
+        if (hoveredStateId) {
+          map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
+        }
+        hoveredStateId = e.features[0].properties?.STATEFP;
+        
+        if (hoveredStateId) {
+          map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0.3);
+          map.current?.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
+          updateAnalysisTable(hoveredStateId);
+          
+          const state = stateData.find(s => s.STATEFP === hoveredStateId);
+          if (state) {
+            setHoveredState(state);
+            setTooltipPosition({ x: e.point.x, y: e.point.y });
+          }
+        }
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (hoveredStateId) {
+        map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
+        hoveredStateId = null;
+        setHoveredState(null);
+      }
+    };
+
+    const handleClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+      if (e.features && e.features[0]) {
+        const stateId = e.features[0].properties?.STATEFP;
+        if (stateId) {
+          fitStateAndShowMSAs(stateId);
+          updateAnalysisTable(stateId);
+          setShowReportPanel(true);
+        }
+      }
+    };
+
+    map.current.on('mousemove', 'state-base', handleMouseMove);
+    map.current.on('mouseleave', 'state-base', handleMouseLeave);
+    map.current.on('click', 'state-base', handleClick);
+
+    return () => {
+      if (map.current) {
+        map.current.off('mousemove', 'state-base', handleMouseMove);
+        map.current.off('mouseleave', 'state-base', handleMouseLeave);
+        map.current.off('click', 'state-base', handleClick);
+      }
+    };
+  }, [fitStateAndShowMSAs, updateAnalysisTable, stateData]);
+
+  useEffect(() => {
+    // Update visibility based on geographic level
+    if (!map.current || !mapLoaded) return;
 
     try {
-      map.setPaintProperty('state-base', 'fill-extrusion-color', [
-        'interpolate',
-        ['linear'],
-        ['coalesce', ['get', 'firm_density'], 0],
-        0, MAP_COLORS.primary,
-        50, MAP_COLORS.secondary,
-        100, MAP_COLORS.accent
-      ]);
+      if (geographicLevel === 'state') {
+        map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current.setLayoutProperty('county-base', 'visibility', 'none');
+      } else if (geographicLevel === 'msa') {
+        map.current.setLayoutProperty('state-base', 'visibility', 'none');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('county-base', 'visibility', 'none');
+      } else {
+        map.current.setLayoutProperty('state-base', 'visibility', 'none');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+      }
     } catch (error) {
-      console.error('Error updating map colors:', error);
+      console.error('Error updating layer visibility:', error);
     }
-  }, [stateData, mapLoaded]);
+  }, [geographicLevel, mapLoaded]);
 
   return (
     <div className="w-full h-full">
-      <div ref={setMapContainer} className="w-full h-full" />
+      <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
       {showReportPanel && selectedState && (
         <MapReportPanel
           selectedState={selectedState}
           onClose={() => setShowReportPanel(false)}
         />
-      )}
-      {hoveredState && (
-        <div
-          className="absolute pointer-events-none bg-black/80 text-white p-2 rounded"
-          style={{
-            left: tooltipPosition.x + 10,
-            top: tooltipPosition.y + 10,
-          }}
-        >
-          <p className="font-semibold">{hoveredState.name}</p>
-          <p className="text-sm">Firm Density: {formatNumber(hoveredState.firm_density || 0)}</p>
-        </div>
       )}
     </div>
   );

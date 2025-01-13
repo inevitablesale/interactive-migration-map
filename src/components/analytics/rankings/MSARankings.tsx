@@ -33,7 +33,7 @@ export const MSARankings = () => {
       {rankings.slice(0, 6).map((ranking) => (
         <RankingCard
           key={ranking.msa}
-          title="Region Ranking"
+          title="MSA Ranking"
           region={ranking.msa_name}
           firmCount={ranking.total_firms}
           densityRank={ranking.density_rank}

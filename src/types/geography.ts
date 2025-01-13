@@ -1,4 +1,4 @@
-export type GeographicLevel = 'state' | 'region' | 'county';
+export type GeographicLevel = 'state' | 'msa' | 'county';
 
 export interface GeographicData {
   id: string;
