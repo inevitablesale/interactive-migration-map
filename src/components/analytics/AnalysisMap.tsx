@@ -142,13 +142,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
       map.current.on('style.load', async () => {
         if (!map.current) return;
-        setMapLoaded(true);
-
-        // Add state source
-        map.current.addSource('states', {
-          type: 'vector',
-          url: 'mapbox://inevitablesale.9fnr921z'
-        });
 
         // Fetch state data for density calculations
         const { data: stateData, error } = await supabase
@@ -166,6 +159,12 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           return acc;
         }, {});
 
+        // Add state source with firm density data
+        map.current.addSource('states', {
+          type: 'vector',
+          url: 'mapbox://inevitablesale.9fnr921z'
+        });
+
         // Add state base layer with density-based colors
         map.current.addLayer({
           'id': 'state-base',
@@ -176,7 +175,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
-              ['get', 'firm_density'],
+              ['coalesce', ['number', ['get', ['to-string', ['get', 'STATEFP']]], 0], 0],
               0, '#F2FCE2',
               5, '#FEF7CD',
               10, '#ea384c'
@@ -213,6 +212,8 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-base': 0
           }
         });
+
+        setMapLoaded(true);
       });
 
       return () => {
