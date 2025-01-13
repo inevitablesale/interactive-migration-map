@@ -145,7 +145,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
               map.current.setLayoutProperty('state-base', 'visibility', 'visible');
               map.current.setLayoutProperty('msa-base', 'visibility', 'none');
               map.current.setLayoutProperty('county-base', 'visibility', 'none');
-            } else if (geographicLevel === 'msa') {
+            } else if (geographicLevel === 'region') {
               map.current.setLayoutProperty('state-base', 'visibility', 'none');
               map.current.setLayoutProperty('region-base', 'visibility', 'visible');
               map.current.setLayoutProperty('county-base', 'visibility', 'none');
@@ -247,7 +247,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         map.current.setLayoutProperty('state-base', 'visibility', 'visible');
         map.current.setLayoutProperty('region-base', 'visibility', 'none');
         map.current.setLayoutProperty('county-base', 'visibility', 'none');
-      } else if (geographicLevel === 'msa') {
+      } else if (geographicLevel === 'region') {
         map.current.setLayoutProperty('state-base', 'visibility', 'none');
         map.current.setLayoutProperty('region-base', 'visibility', 'visible');
         map.current.setLayoutProperty('county-base', 'visibility', 'none');
