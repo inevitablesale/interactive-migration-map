@@ -5,7 +5,6 @@ import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
 import { WelcomeSection } from "@/components/analytics/WelcomeSection";
 import { HeatmapSection } from "@/components/analytics/HeatmapSection";
 import { FeaturedInsights } from "@/components/analytics/FeaturedInsights";
-import { PredictiveTools } from "@/components/analytics/PredictiveTools";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { UpgradePrompt } from "@/components/analytics/UpgradePrompt";
 
@@ -70,7 +69,6 @@ const Analysis = () => {
             {/* Right Column */}
             <div className="space-y-8">
               <AlertsPanel />
-              <PredictiveTools />
               <UpgradePrompt />
             </div>
           </div>
