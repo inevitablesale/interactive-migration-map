@@ -5,6 +5,7 @@ import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { ReportsPanel } from "@/components/analytics/ReportsPanel";
 import { TrackersPanel } from "@/components/analytics/TrackersPanel";
 import { FirmDirectory } from "@/components/analytics/FirmDirectory";
+import { QueryBuilderPanel } from "@/components/analytics/QueryBuilder/QueryBuilderPanel";
 
 const Analysis = () => {
   const [activeTab, setActiveTab] = useState("analytics");
@@ -15,6 +16,8 @@ const Analysis = () => {
         return <AnalyticsDashboard />;
       case "reports":
         return <ReportsPanel />;
+      case "query-builder":
+        return <QueryBuilderPanel />;
       case "trackers":
         return <TrackersPanel />;
       case "directory":
