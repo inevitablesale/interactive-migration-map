@@ -8,6 +8,8 @@ import { FeaturedInsights } from "@/components/analytics/FeaturedInsights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { UpgradePrompt } from "@/components/analytics/UpgradePrompt";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
+import { MarketMetricsChart } from "@/components/analytics/visualizations/MarketMetricsChart";
+import { GrowthTrendChart } from "@/components/analytics/visualizations/GrowthTrendChart";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
@@ -103,7 +105,15 @@ const Analysis = () => {
             {/* Left Column */}
             <div className="space-y-8">
               <HeatmapSection activeFilter={activeFilter} />
-              {!isFreeTier && <FeaturedInsights />}
+              {!isFreeTier && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <MarketMetricsChart />
+                    <GrowthTrendChart />
+                  </div>
+                  <FeaturedInsights />
+                </>
+              )}
             </div>
             
             {/* Right Column */}
