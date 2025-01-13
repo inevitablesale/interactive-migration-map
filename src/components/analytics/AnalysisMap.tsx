@@ -24,6 +24,73 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+
+  const fitStateAndShowMSAs = (stateId: string) => {
+    if (!map.current) return;
+
+    // Query for the selected state's features
+    const stateFeatures = map.current.querySourceFeatures('states', {
+      sourceLayer: 'tl_2020_us_state-52k5uw',
+      filter: ['==', ['get', 'STATEFP'], stateId]
+    });
+
+    if (stateFeatures.length > 0) {
+      // Calculate bounds for the state
+      const bounds = new mapboxgl.LngLatBounds();
+      stateFeatures.forEach(feature => {
+        if (feature.geometry.type === 'Polygon') {
+          const coordinates = feature.geometry.coordinates[0];
+          coordinates.forEach((coord: [number, number]) => {
+            bounds.extend(coord);
+          });
+        }
+      });
+
+      // Fit the map to the state bounds with padding and animation
+      map.current.fitBounds(bounds, {
+        padding: { top: 50, bottom: 50, left: 50, right: 50 },
+        duration: 1500,
+        pitch: 45,
+        bearing: 0
+      });
+
+      // Update layer visibility with transitions
+      map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.3);
+      map.current.setPaintProperty('msa-base', 'fill-extrusion-opacity', 0.8);
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+
+      // Filter MSAs to show only those in the selected state
+      map.current.setFilter('msa-base', ['==', ['get', 'STATEFP'], stateId]);
+      map.current.setFilter('msa-borders', ['==', ['get', 'STATEFP'], stateId]);
+
+      setSelectedState(stateId);
+      setViewMode('msa');
+    }
+  };
+
+  const resetView = () => {
+    if (!map.current) return;
+
+    // Reset to default view
+    map.current.easeTo({
+      pitch: 45,
+      zoom: 3,
+      center: [-98.5795, 39.8283],
+      duration: 1500
+    });
+
+    // Reset layer visibility
+    map.current.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
+    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    map.current.setFilter('msa-base', null);
+    map.current.setFilter('msa-borders', null);
+
+    setSelectedState(null);
+    setViewMode('state');
+  };
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -52,6 +119,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       
       setMapLoaded(true);
 
+      // Add state source and layers
       map.current.addSource('states', {
         type: 'vector',
         url: 'mapbox://inevitablesale.9fnr921z'
@@ -69,6 +137,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
+      // Add MSA source and layers
       map.current.addSource('msas', {
         type: 'vector',
         url: 'mapbox://inevitablesale.29jcxgnm'
@@ -90,6 +159,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         }
       });
 
+      // Add border layers
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -122,25 +192,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         if (e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
+            fitStateAndShowMSAs(stateId);
+            
             // Dispatch custom event with state data
             const event = new CustomEvent('stateSelected', { 
               detail: { stateId }
             });
             window.dispatchEvent(event);
-
-            // Highlight selected state
-            map.current?.setPaintProperty('state-base', 'fill-extrusion-color', [
-              'match',
-              ['get', 'STATEFP'],
-              stateId,
-              MAP_COLORS.accent,
-              MAP_COLORS.inactive
-            ]);
           }
         }
       });
-
-      updateViewMode(viewMode);
     });
 
     return () => {
@@ -150,36 +211,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   }, []);
 
   const updateViewMode = (mode: 'state' | 'msa') => {
-    if (!map.current || !mapLoaded) return;
-
     if (mode === 'state') {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-      
-      map.current.easeTo({
-        pitch: 45,
-        zoom: 3,
-        duration: 1000
-      });
-    } else {
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-      
-      map.current.easeTo({
-        pitch: 60,
-        zoom: 3,
-        duration: 1000
-      });
+      resetView();
     }
   };
 
   useEffect(() => {
-    updateViewMode(viewMode);
-  }, [viewMode, mapLoaded]);
+    if (viewMode === 'state' && selectedState) {
+      resetView();
+    }
+  }, [viewMode]);
 
   return (
     <div className={`relative ${className}`}>
