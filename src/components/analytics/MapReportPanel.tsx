@@ -10,6 +10,8 @@ interface MapReportPanelProps {
 }
 
 export const MapReportPanel = ({ selectedState, onClose }: MapReportPanelProps) => {
+  console.log('MapReportPanel rendered with selectedState:', selectedState);
+  
   return (
     <Card className="absolute top-4 right-4 w-80 bg-black/40 backdrop-blur-md border-white/10 p-4">
       <div className="flex items-center justify-between mb-4">

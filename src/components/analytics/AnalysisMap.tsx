@@ -64,15 +64,28 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   }, [type, toast]);
 
   const updateAnalysisTable = useCallback(async (stateId: string) => {
-    if (!stateData.length) return;
+    console.log('updateAnalysisTable called with stateId:', stateId);
+    
+    if (!stateData.length) {
+      console.log('No stateData available');
+      return;
+    }
+    
     const stateInfo = stateData.find(s => s.region === stateId);
+    console.log('Found stateInfo:', stateInfo);
+    
     if (stateInfo) {
+      console.log('Fetching state name for:', stateId);
       const stateName = await getStateName(stateId);
+      console.log('Retrieved state name:', stateName);
+      
       setSelectedState({
         ...stateInfo,
         displayName: stateName
       });
       setShowReportPanel(true);
+    } else {
+      console.log('No state info found for stateId:', stateId);
     }
   }, [stateData]);
 
