@@ -15,6 +15,7 @@ interface RankingCardProps {
     growth: number;
   };
   specialization?: string;
+  marketSaturation?: number;
 }
 
 export const RankingCard = ({
@@ -24,7 +25,8 @@ export const RankingCard = ({
   densityRank,
   growthRank,
   comparedToNational,
-  specialization
+  specialization,
+  marketSaturation
 }: RankingCardProps) => {
   const [displayName, setDisplayName] = useState(region);
   const isDensityHigher = comparedToNational.density > 1;
@@ -93,6 +95,13 @@ export const RankingCard = ({
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-400">Specialization</span>
             <span className="text-sm text-blue-400">{specialization}</span>
+          </div>
+        )}
+
+        {marketSaturation && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">Market Saturation</span>
+            <span className="text-sm text-purple-400">{(marketSaturation * 100).toFixed(1)}%</span>
           </div>
         )}
       </div>
