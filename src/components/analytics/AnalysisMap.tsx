@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2, LineChart } from 'lucide-react';
+import { useSearchParams } from "react-router-dom";
 import {
   Tooltip,
   TooltipContent,
@@ -97,6 +98,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [stateData, setStateData] = useState<StateData[]>([]);
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const activeFilter = searchParams.get('filter');
   
   const { mapContainer, map, mapLoaded, setMapLoaded } = useMapInitialization();
   const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
@@ -113,6 +116,49 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
 
   const [hoveredState, setHoveredState] = useState<StateData | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  // Update map view based on filter
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    switch (activeFilter) {
+      case 'market-entry':
+        map.current.easeTo({
+          pitch: 45,
+          bearing: 0,
+          zoom: 3.5,
+          duration: 1000
+        });
+        setHeatmapEnabled(true);
+        break;
+      case 'growth-strategy':
+        map.current.easeTo({
+          pitch: 60,
+          bearing: 30,
+          zoom: 4,
+          duration: 1000
+        });
+        setHeatmapEnabled(true);
+        break;
+      case 'opportunities':
+        map.current.easeTo({
+          pitch: 0,
+          bearing: 0,
+          zoom: 3,
+          duration: 1000
+        });
+        setHeatmapEnabled(false);
+        break;
+      default:
+        map.current.easeTo({
+          pitch: 45,
+          bearing: 0,
+          zoom: 3,
+          duration: 1000
+        });
+        setHeatmapEnabled(false);
+    }
+  }, [activeFilter, map, mapLoaded]);
 
   const getStateColor = useCallback((stateId: string) => {
     const state = stateData.find(s => s.STATEFP === stateId);
