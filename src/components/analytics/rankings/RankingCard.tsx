@@ -16,8 +16,6 @@ interface RankingCardProps {
   };
   specialization?: string;
   marketSaturation?: number;
-  avgPayrollPerFirm?: number;
-  educationRate?: number;
 }
 
 export const RankingCard = ({
@@ -28,9 +26,7 @@ export const RankingCard = ({
   growthRank,
   comparedToNational,
   specialization,
-  marketSaturation,
-  avgPayrollPerFirm,
-  educationRate
+  marketSaturation
 }: RankingCardProps) => {
   const [displayName, setDisplayName] = useState(region);
   const isDensityHigher = comparedToNational.density > 1;
@@ -51,6 +47,7 @@ export const RankingCard = ({
         }
 
         if (data && data.length > 0) {
+          // Extract state name from county_name (format: "County Name, State Name")
           const countyName = data[0].county_name;
           const commaIndex = countyName.lastIndexOf(',');
           if (commaIndex !== -1) {
@@ -71,9 +68,6 @@ export const RankingCard = ({
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-sm text-gray-400">{displayName}</p>
-          {specialization && (
-            <p className="text-xs text-blue-400 mt-1">{specialization}</p>
-          )}
         </div>
         <Trophy className="w-6 h-6 text-yellow-400" />
       </div>
@@ -119,24 +113,17 @@ export const RankingCard = ({
           </div>
         </div>
 
-        {marketSaturation !== undefined && (
+        {specialization && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">Specialization</span>
+            <span className="text-sm text-blue-400">{specialization}</span>
+          </div>
+        )}
+
+        {marketSaturation && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-400">Market Saturation</span>
             <span className="text-sm text-purple-400">{(marketSaturation * 100).toFixed(1)}%</span>
-          </div>
-        )}
-
-        {avgPayrollPerFirm !== undefined && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Avg Payroll/Firm</span>
-            <span className="text-sm text-green-400">${avgPayrollPerFirm.toLocaleString()}</span>
-          </div>
-        )}
-
-        {educationRate !== undefined && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Education Rate</span>
-            <span className="text-sm text-blue-400">{educationRate.toFixed(1)}%</span>
           </div>
         )}
       </div>
