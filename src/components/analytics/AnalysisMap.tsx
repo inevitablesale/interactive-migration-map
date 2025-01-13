@@ -105,6 +105,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         filter: ['==', ['get', 'STATEFP'], stateId]
       });
 
+      console.log('State features found:', stateFeatures.length);
+
       if (stateFeatures.length > 0) {
         const bounds = new mapboxgl.LngLatBounds();
         const feature = stateFeatures[0];
@@ -133,33 +135,32 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         const stateLngSpan = Math.abs(ne.lng - sw.lng);
         const stateLatSpan = Math.abs(ne.lat - sw.lat);
         
+        // Special handling for large states (TX and CA)
+        const isLargeState = stateId === "48" || stateId === "06"; // TX or CA
+        
         // Adjust padding based on state size (larger states get more padding)
-        const baseMinPadding = 50;
+        const baseMinPadding = isLargeState ? 30 : 50; // Smaller padding for large states
         const paddingFactor = Math.max(stateLngSpan / 50, stateLatSpan / 30);
         const dynamicPadding = baseMinPadding * paddingFactor;
         
         // Apply padding with minimum and maximum constraints
-        const horizontalPadding = Math.min(Math.max(dynamicPadding, viewportWidth * 0.1), viewportWidth * 0.3);
-        const verticalPadding = Math.min(Math.max(dynamicPadding, viewportHeight * 0.1), viewportHeight * 0.3);
+        const horizontalPadding = Math.min(Math.max(dynamicPadding, viewportWidth * 0.1), viewportWidth * 0.2);
+        const verticalPadding = Math.min(Math.max(dynamicPadding, viewportHeight * 0.1), viewportHeight * 0.2);
 
         // Calculate appropriate max zoom based on state size
-        const stateArea = stateLngSpan * stateLatSpan;
-        const maxZoom = Math.min(6, 7 - Math.log(stateArea) / Math.log(2) * 0.2);
+        const maxZoom = isLargeState ? 4.5 : Math.min(6, 7 - Math.log(stateArea) / Math.log(2) * 0.2);
 
-        // Wait for the map to load before changing layer visibility
-        map.current.once('idle', () => {
-          // Show MSA layers
-          if (map.current?.getLayer('msa-base')) {
-            map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-            map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-          }
-          
-          // Hide state layers
-          if (map.current?.getLayer('state-base')) {
-            map.current.setLayoutProperty('state-base', 'visibility', 'none');
-            map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-          }
-        });
+        // Show MSA layers immediately
+        if (map.current.getLayer('msa-base')) {
+          map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+          map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+        }
+        
+        // Hide state layers immediately
+        if (map.current.getLayer('state-base')) {
+          map.current.setLayoutProperty('state-base', 'visibility', 'none');
+          map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+        }
 
         // Fit the map to the state bounds with dynamic padding and maxZoom
         map.current.fitBounds(bounds, {
