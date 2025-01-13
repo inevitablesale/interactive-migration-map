@@ -18,11 +18,9 @@ interface AnalysisMapProps {
 interface StateData {
   STATEFP: string;
   B19013_001E: number; // Median household income
-  C24010_033E: number; // Financial sector employment (male)
-  C24010_034E: number; // Financial sector employment (female)
-  EMP: number;         // Total employment
-  ESTAB: number;       // Number of establishments
-  PAYANN: number;      // Annual payroll
+  B25001_001E: number; // Housing units
+  B25077_001E: number; // Median home value
+  B25064_001E: number; // Median gross rent
   buyerScore?: number;
 }
 
@@ -47,35 +45,47 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   } = useMSAData();
 
   const calculateBuyerScore = (state: StateData): number => {
-    if (!state.B19013_001E || !state.EMP || !state.ESTAB || !state.PAYANN) return 0;
-    
-    // Calculate financial sector employment (combining male and female)
-    const financialSectorEmp = (state.C24010_033E || 0) + (state.C24010_034E || 0);
+    if (!state.B19013_001E || !state.B25077_001E || !state.B25064_001E) return 0;
     
     // Normalize values between 0 and 1
     const incomeScore = state.B19013_001E / 100000; // Assuming max income of 100k
-    const establishmentScore = Math.min(state.ESTAB / 1000, 1); // Cap at 1000 establishments
-    const employmentScore = Math.min(state.EMP / 10000, 1); // Cap at 10000 employees
-    const payrollScore = Math.min(state.PAYANN / 1000000, 1); // Cap at 1M annual payroll
-    const financialSectorScore = Math.min(financialSectorEmp / 5000, 1); // Cap at 5000 financial sector employees
+    const homeValueScore = 1 - (state.B25077_001E / 1000000); // Inverse, assuming max value of 1M
+    const rentScore = 1 - (state.B25064_001E / 3000); // Inverse, assuming max rent of 3k
     
-    // Weight the scores (adjust weights based on importance)
+    // Weight the scores (adjust weights as needed)
     const weightedScore = (
-      incomeScore * 0.2 +           // 20% weight on income
-      establishmentScore * 0.2 +    // 20% weight on number of establishments
-      employmentScore * 0.2 +       // 20% weight on total employment
-      payrollScore * 0.2 +          // 20% weight on annual payroll
-      financialSectorScore * 0.2    // 20% weight on financial sector employment
+      incomeScore * 0.4 + 
+      homeValueScore * 0.4 + 
+      rentScore * 0.2
     );
     
     return Math.max(0, Math.min(1, weightedScore));
   };
 
+  const getStateColor = useCallback((stateId: string) => {
+    if (heatmapEnabled) {
+      const stateInfo = stateData.find(s => s.STATEFP === stateId);
+      if (stateInfo?.buyerScore !== undefined) {
+        // Use a gradient from red (less favorable) to green (more favorable)
+        const score = stateInfo.buyerScore;
+        const r = Math.round(255 * (1 - score));
+        const g = Math.round(255 * score);
+        return `rgb(${r}, ${g}, 100)`;
+      }
+      return MAP_COLORS.inactive;
+    }
+    
+    const msaCount = msaCountByState[stateId] || 0;
+    const maxMSAs = Math.max(...Object.values(msaCountByState));
+    const colorIndex = Math.floor((msaCount / maxMSAs) * (MAP_COLORS.secondary.length - 1));
+    return MAP_COLORS.secondary[colorIndex] || MAP_COLORS.inactive;
+  }, [msaCountByState, heatmapEnabled, stateData]);
+
   const fetchStateData = async () => {
     try {
       const { data, error } = await supabase
         .from('state_data')
-        .select('STATEFP, B19013_001E, C24010_033E, C24010_034E, EMP, ESTAB, PAYANN');
+        .select('STATEFP, B19013_001E, B25001_001E, B25077_001E, B25064_001E');
 
       if (error) throw error;
 
@@ -109,6 +119,168 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
     }
   };
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    if (!map.current) return;
+    
+    const eventData = {
+      stateId: stateId.toString(),
+      timestamp: Date.now()
+    };
+    
+    try {
+      const event = new CustomEvent('stateSelected', {
+        detail: eventData
+      });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error dispatching state selection event:', error);
+    }
+  }, []);
+
+  const resetToStateView = useCallback(() => {
+    if (!map.current) return;
+
+    // Hide MSA layers
+    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    
+    // Show state layers
+    map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+    map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
+
+    // Reset zoom and position
+    map.current.easeTo({
+      center: [-98.5795, 39.8283],
+      zoom: 3,
+      pitch: 45,
+      bearing: 0,
+      duration: 1500
+    });
+
+    setViewMode('state');
+    setSelectedState(null);
+  }, []);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+    
+    try {
+      setSelectedState(stateId);
+      console.log('Fetching MSA data for state:', stateId);
+      const msaData = await fetchMSAData(stateId);
+      console.log('Found MSAs:', msaData);
+      
+      if (!msaData || msaData.length === 0) {
+        toast({
+          title: "No MSA Data",
+          description: "No Metropolitan Statistical Areas found for this state.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create a bounding box for the state
+      const stateFeatures = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
+
+      if (stateFeatures.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        const feature = stateFeatures[0];
+        
+        // Add state boundaries to the bounds
+        if (feature.geometry.type === 'Polygon') {
+          (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
+            bounds.extend(coord as [number, number]);
+          });
+        } else if (feature.geometry.type === 'MultiPolygon') {
+          (feature.geometry as GeoJSON.MultiPolygon).coordinates.forEach(polygon => {
+            polygon[0].forEach(coord => {
+              bounds.extend(coord as [number, number]);
+            });
+          });
+        }
+
+        // Calculate the state's dimensions in degrees
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        const stateLngSpan = Math.abs(ne.lng - sw.lng);
+        const stateLatSpan = Math.abs(ne.lat - sw.lat);
+        const stateArea = stateLngSpan * stateLatSpan;
+
+        // Get viewport dimensions
+        const container = map.current.getContainer();
+        const viewportWidth = container.offsetWidth;
+        const viewportHeight = container.offsetHeight;
+
+        // Adjust padding based on state size and viewport
+        const isLargeState = stateArea > 400; // Threshold for large states like CA, TX
+        const basePadding = isLargeState ? 100 : 50;
+        const paddingFactor = Math.max(1, Math.sqrt(stateArea) / 10);
+        
+        // Calculate dynamic padding with different logic for large states
+        const horizontalPadding = isLargeState
+          ? Math.min(viewportWidth * 0.15, basePadding * paddingFactor)
+          : Math.min(Math.max(basePadding * paddingFactor, viewportWidth * 0.1), viewportWidth * 0.3);
+        
+        const verticalPadding = isLargeState
+          ? Math.min(viewportHeight * 0.15, basePadding * paddingFactor)
+          : Math.min(Math.max(basePadding * paddingFactor, viewportHeight * 0.1), viewportHeight * 0.3);
+
+        // Calculate zoom based on state size with special handling for large states
+        const baseMaxZoom = isLargeState ? 5 : 7;
+        const zoomReduction = Math.log(stateArea) / Math.log(2) * (isLargeState ? 0.15 : 0.2);
+        const maxZoom = Math.max(
+          Math.min(baseMaxZoom, baseMaxZoom - zoomReduction),
+          4.5  // Lower minimum zoom for large states
+        );
+
+        console.log('State metrics:', {
+          stateId,
+          stateArea,
+          isLargeState,
+          maxZoom,
+          horizontalPadding,
+          verticalPadding
+        });
+
+        // Important: Show MSA layers BEFORE fitting bounds
+        if (map.current.getLayer('msa-base')) {
+          map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+          map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+        }
+        
+        if (map.current.getLayer('state-base')) {
+          map.current.setLayoutProperty('state-base', 'visibility', 'none');
+          map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+        }
+
+        // Fit the map to the state bounds with dynamic padding and maxZoom
+        map.current.fitBounds(bounds, {
+          padding: {
+            top: verticalPadding,
+            bottom: verticalPadding,
+            left: horizontalPadding,
+            right: horizontalPadding
+          },
+          maxZoom: maxZoom,
+          duration: 1500
+        });
+
+        setViewMode('msa');
+        updateAnalysisTable(stateId);
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load MSA data for this state",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, updateAnalysisTable, toast]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
