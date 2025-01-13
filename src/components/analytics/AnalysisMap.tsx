@@ -31,6 +31,7 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
   const [hoveredState, setHoveredState] = useState<any | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showReportPanel, setShowReportPanel] = useState(false);
+  const [stateData, setStateData] = useState<any[]>([]);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
@@ -38,13 +39,80 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
   const { layersAdded, setLayersAdded, initializeLayers } = useMapLayers(map);
   const { msaData, setMsaData, statesWithMSA, setStatesWithMSA, fetchMSAData, fetchStatesWithMSA } = useMSAData();
 
+  const fetchStateData = useCallback(async () => {
+    try {
+      const { data: stateMetrics, error } = await supabase
+        .rpc(type === 'density' ? 'get_firm_density_metrics' : 'get_growth_trend_metrics');
+
+      if (error) {
+        console.error('Error fetching state data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch state data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setStateData(stateMetrics);
+    } catch (error) {
+      console.error('Error in fetchStateData:', error);
+    }
+  }, [type, toast]);
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    if (!stateData) return;
+    const stateInfo = stateData.find(s => s.STATEFP === stateId);
+    if (stateInfo) {
+      setSelectedState(stateId);
+    }
+  }, [stateData]);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      // Update map view for selected state
+      map.current.setFilter('state-base', ['==', ['get', 'STATEFP'], stateId]);
+      
+      // Fetch and show MSA data for the state
+      const msaResults = await fetchMSAData(stateId);
+      if (msaResults && msaResults.length > 0) {
+        setViewMode('msa');
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      }
+
+      // Fit map bounds to the selected state
+      const stateBounds = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
+
+      if (stateBounds.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        stateBounds[0].geometry.coordinates[0].forEach((coord: any) => {
+          bounds.extend(coord as [number, number]);
+        });
+        map.current.fitBounds(bounds, { padding: 50 });
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load MSA data",
+        variant: "destructive",
+      });
+    }
+  }, [map, fetchMSAData, toast]);
+
   useEffect(() => {
     if (!map.current || !data || !mapLoaded) return;
 
     // Update map colors based on data type
     map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
       'case',
-      ['in', ['get', 'STATEFP'], ['literal', data.map(d => d.region)]],
+      ['in', ['get', 'STATEFP'], ['literal', data.map((d: any) => d.region)]],
       type === 'density' 
         ? getDensityColor(data.find((d: any) => d.region === ['get', 'STATEFP'])?.firm_density || 0)
         : getGrowthColor(data.find((d: any) => d.region === ['get', 'STATEFP'])?.historical_growth_rate || 0),
@@ -124,7 +192,7 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  }, [initializeLayers, mapContainer, toast]);
+  }, [initializeLayers, mapContainer, toast, fetchStateData]);
 
   useEffect(() => {
     if (mapLoaded && layersAdded) {
@@ -137,8 +205,8 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
 
     let hoveredStateId: string | null = null;
 
-    map.current.on('mousemove', 'state-base', (e) => {
-      if (e.features.length > 0) {
+    const handleMouseMove = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+      if (e.features && e.features.length > 0) {
         if (hoveredStateId) {
           map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         }
@@ -149,25 +217,24 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
           map.current?.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
           updateAnalysisTable(hoveredStateId);
           
-          // Update tooltip data and position
-          const state = data.find(s => s.STATEFP === hoveredStateId);
+          const state = stateData.find(s => s.STATEFP === hoveredStateId);
           if (state) {
             setHoveredState(state);
             setTooltipPosition({ x: e.point.x, y: e.point.y });
           }
         }
       }
-    });
+    };
 
-    map.current.on('mouseleave', 'state-base', () => {
+    const handleMouseLeave = () => {
       if (hoveredStateId) {
         map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         hoveredStateId = null;
         setHoveredState(null);
       }
-    });
+    };
 
-    map.current.on('click', 'state-base', (e) => {
+    const handleClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
@@ -176,13 +243,31 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
           setShowReportPanel(true);
         }
       }
-    });
-  }, [fitStateAndShowMSAs, updateAnalysisTable, data]);
+    };
+
+    map.current.on('mousemove', 'state-base', handleMouseMove);
+    map.current.on('mouseleave', 'state-base', handleMouseLeave);
+    map.current.on('click', 'state-base', handleClick);
+
+    return () => {
+      if (map.current) {
+        map.current.off('mousemove', 'state-base', handleMouseMove);
+        map.current.off('mouseleave', 'state-base', handleMouseLeave);
+        map.current.off('click', 'state-base', handleClick);
+      }
+    };
+  }, [fitStateAndShowMSAs, updateAnalysisTable, stateData]);
 
   return (
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+      {showReportPanel && selectedState && (
+        <MapReportPanel
+          stateId={selectedState}
+          onClose={() => setShowReportPanel(false)}
+        />
+      )}
     </div>
   );
 };
