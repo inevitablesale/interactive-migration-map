@@ -38,7 +38,7 @@ export function AnalyticsDashboard() {
               firmCount: 0,
               totalEmployees: 0,
               avgEmployees: 0,
-              states: new Set(),
+              states: new Set<string>(),
               marketCoverage: 0
             });
           }

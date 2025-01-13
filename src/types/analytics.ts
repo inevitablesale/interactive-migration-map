@@ -16,7 +16,7 @@ export interface PracticeAreaStats {
   firmCount: number;
   totalEmployees: number;
   avgEmployees: number;
-  states: Set<string> | string[];
+  states: Set<string>;
   marketCoverage: number;
 }
 
