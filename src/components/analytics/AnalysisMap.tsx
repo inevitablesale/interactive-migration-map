@@ -331,22 +331,30 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      // Fit the map to the state bounds with adjusted zoom level
-      const currentZoom = map.current.getZoom();
+      // First fit to state bounds with state-level zoom
       map.current.fitBounds(bounds, {
         padding: { top: 50, bottom: 50, left: 50, right: 50 },
         duration: 1500,
         pitch: 60,
         bearing: 0,
         offset: [0, 0],
-        maxZoom: currentZoom - 1 // Decrease zoom level by 1 to zoom in
       });
 
       setSelectedState(stateId);
       setViewMode('msa');
 
-      // Fetch and show MSA data
+      // Fetch MSA data
       await fetchMSAData(stateId);
+
+      // After MSA data is loaded, zoom in closer for MSA view
+      map.current.fitBounds(bounds, {
+        padding: { top: 50, bottom: 50, left: 50, right: 50 },
+        duration: 1000,
+        pitch: 60,
+        bearing: 0,
+        offset: [0, 0],
+        maxZoom: map.current.getZoom() + 1 // Increase zoom level by 1 for MSA view
+      });
 
     } catch (error) {
       console.error('Error in fitStateAndShowMSAs:', error);
