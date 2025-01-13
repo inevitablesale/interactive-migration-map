@@ -81,9 +81,9 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
       // Fetch and show MSA data for the state
       const msaResults = await fetchMSAData(stateId);
       if (msaResults && msaResults.length > 0) {
-        setViewMode('msa');
-        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+        setViewMode('region');
+        map.current.setLayoutProperty('region-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('region-borders', 'visibility', 'visible');
       }
 
       // Fit map bounds to the selected state
@@ -245,15 +245,15 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
     try {
       if (geographicLevel === 'state') {
         map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-        map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current.setLayoutProperty('region-base', 'visibility', 'none');
         map.current.setLayoutProperty('county-base', 'visibility', 'none');
       } else if (geographicLevel === 'msa') {
         map.current.setLayoutProperty('state-base', 'visibility', 'none');
-        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('region-base', 'visibility', 'visible');
         map.current.setLayoutProperty('county-base', 'visibility', 'none');
       } else {
         map.current.setLayoutProperty('state-base', 'visibility', 'none');
-        map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+        map.current.setLayoutProperty('region-base', 'visibility', 'none');
         map.current.setLayoutProperty('county-base', 'visibility', 'visible');
       }
     } catch (error) {
