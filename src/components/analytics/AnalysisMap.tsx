@@ -55,7 +55,83 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const fetchMSAData = async (stateId: string) => {
+  const updateMSAVisualization = useCallback((msaData: MSAData[]) => {
+    if (!map.current) {
+      console.warn('Map not ready for MSA visualization update');
+      return;
+    }
+
+    // Deduplicate MSA codes while preserving the original data
+    const uniqueMsaCodes = [...new Set(msaData.map(d => d.msa))];
+    console.log('Updating MSA visualization for unique codes:', uniqueMsaCodes);
+
+    try {
+      // Show MSA layers and ensure they're visible
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      
+      // Hide state layers when showing MSAs
+      map.current.setLayoutProperty('state-base', 'visibility', 'none');
+      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+
+      // Calculate growth scores for each MSA
+      const msaScores = msaData.reduce((acc, msa) => {
+        if (msa.msa) {
+          acc[msa.msa] = calculateGrowthScore(msa);
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+
+      // Create expressions for height and color based on growth scores
+      const heightMatchExpression: mapboxgl.Expression = [
+        'match',
+        ['get', 'CBSAFP'],
+        ...uniqueMsaCodes.flatMap(code => [
+          code,
+          getHeightFromScore(msaScores[code] || 0)
+        ]),
+        20000 // default height
+      ];
+
+      const colorMatchExpression: mapboxgl.Expression = [
+        'match',
+        ['get', 'CBSAFP'],
+        ...uniqueMsaCodes.flatMap(code => [
+          code,
+          getColorFromScore(msaScores[code] || 0)
+        ]),
+        'transparent' // Make non-matching MSAs transparent
+      ];
+
+      // Update MSA layer with growth scores
+      map.current.setPaintProperty(
+        'msa-base',
+        'fill-extrusion-height',
+        heightMatchExpression
+      );
+      
+      map.current.setPaintProperty(
+        'msa-base',
+        'fill-extrusion-color',
+        colorMatchExpression
+      );
+
+      // Remove any filters that might be hiding MSAs
+      map.current.setFilter('msa-base', ['in', ['get', 'CBSAFP'], ...uniqueMsaCodes]);
+      map.current.setFilter('msa-borders', ['in', ['get', 'CBSAFP'], ...uniqueMsaCodes]);
+
+      console.log('MSA visualization updated with filters:', uniqueMsaCodes);
+    } catch (error) {
+      console.error('Error updating MSA visualization:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update MSA visualization",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const fetchMSAData = useCallback(async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
@@ -117,7 +193,45 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast, updateMSAVisualization]);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      setSelectedState(stateId);
+      console.log('Fitting to state:', stateId);
+
+      // Get state bounds
+      const stateBounds = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${stateId}.json?access_token=${MAPBOX_TOKEN}&types=region`
+      ).then(res => res.json());
+
+      if (stateBounds.features && stateBounds.features[0]) {
+        const bbox = stateBounds.features[0].bbox;
+        const bounds = new mapboxgl.LngLatBounds(
+          [bbox[0], bbox[1]],
+          [bbox[2], bbox[3]]
+        );
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+
+        // Fetch and show MSA data for the selected state
+        await fetchMSAData(stateId);
+        setViewMode('msa');
+      }
+    } catch (error) {
+      console.error('Error fitting to state:', error);
+      toast({
+        title: "Error",
+        description: "Failed to zoom to selected state",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, setViewMode, toast]);
 
   const initializeLayers = useCallback(() => {
     if (!map.current) return;
@@ -213,250 +327,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
     }
   }, [toast]);
-
-  const updateAnalysisTable = useCallback((stateId: string) => {
-    // This function will be implemented later to update analysis data
-    console.log('Updating analysis for state:', stateId);
-  }, []);
-
-  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
-    if (!map.current) return;
-
-    try {
-      setSelectedState(stateId);
-      console.log('Fitting to state:', stateId);
-
-      // Get state bounds
-      const stateBounds = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${stateId}.json?access_token=${MAPBOX_TOKEN}&types=region`
-      ).then(res => res.json());
-
-      if (stateBounds.features && stateBounds.features[0]) {
-        const bbox = stateBounds.features[0].bbox;
-        const bounds = new mapboxgl.LngLatBounds(
-          [bbox[0], bbox[1]],
-          [bbox[2], bbox[3]]
-        );
-
-        map.current.fitBounds(bounds, {
-          padding: 50,
-          duration: 1000
-        });
-
-        // Fetch and show MSA data for the selected state
-        await fetchMSAData(stateId);
-        setViewMode('msa');
-      }
-    } catch (error) {
-      console.error('Error fitting to state:', error);
-      toast({
-        title: "Error",
-        description: "Failed to zoom to selected state",
-        variant: "destructive",
-      });
-    }
-  }, [fetchMSAData, toast]);
-
-  const resetToStateView = useCallback(() => {
-    if (!map.current) return;
-
-    // Hide MSA layers
-    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-    
-    // Show state layers
-    map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-    map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-
-    // Reset camera
-    map.current.easeTo({
-      center: [-98.5795, 39.8283],
-      zoom: 3,
-      pitch: 45,
-      bearing: 0,
-      duration: 1500
-    });
-
-    setViewMode('state');
-    setSelectedState(null);
-  }, []);
-
-  const createPopup = useCallback((msaData: MSAData) => {
-    const growthScore = calculateGrowthScore(msaData);
-    const formattedEmployment = msaData.EMP?.toLocaleString() || 'N/A';
-    const formattedEstablishments = msaData.ESTAB?.toLocaleString() || 'N/A';
-    const formattedPayroll = msaData.PAYANN ? `$${(msaData.PAYANN / 1000000).toFixed(1)}M` : 'N/A';
-    const formattedPopulation = msaData.B01001_001E?.toLocaleString() || 'N/A';
-    
-    return `
-      <div class="bg-black/90 p-4 rounded-lg shadow-lg text-white min-w-[240px]">
-        <h3 class="font-bold text-lg mb-2">${msaData.msa_name}</h3>
-        <div class="space-y-1 text-sm">
-          <p class="flex justify-between">
-            <span class="text-gray-400">Growth Score:</span>
-            <span class="font-medium">${(growthScore * 100).toFixed(1)}%</span>
-          </p>
-          <p class="flex justify-between">
-            <span class="text-gray-400">Employment:</span>
-            <span class="font-medium">${formattedEmployment}</span>
-          </p>
-          <p class="flex justify-between">
-            <span class="text-gray-400">Businesses:</span>
-            <span class="font-medium">${formattedEstablishments}</span>
-          </p>
-          <p class="flex justify-between">
-            <span class="text-gray-400">Annual Payroll:</span>
-            <span class="font-medium">${formattedPayroll}</span>
-          </p>
-          <p class="flex justify-between">
-            <span class="text-gray-400">Population:</span>
-            <span class="font-medium">${formattedPopulation}</span>
-          </p>
-        </div>
-      </div>
-    `;
-  }, []);
-
-  const fetchStatesWithMSA = useCallback(async () => {
-    console.log('Fetching states with MSA data...');
-    if (!map.current || !layersAdded) {
-      console.warn('Map or layers not ready for fetching states with MSA');
-      return;
-    }
-
-    try {
-      const { data: msaData, error: msaError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('state_fips, msa');
-
-      if (msaError) {
-        console.error('Error fetching states with MSA:', msaError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch states with MSA data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Count MSAs per state and get unique states
-      const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
-        if (curr.state_fips) {
-          // Ensure state_fips is treated as string
-          const stateFips = curr.state_fips.toString().padStart(2, '0');
-          acc[stateFips] = (acc[stateFips] || 0) + 1;
-        }
-        return acc;
-      }, {});
-
-      const uniqueStates = Object.keys(msaCountByState).map(state => 
-        state.toString().padStart(2, '0')
-      );
-      console.log('States with MSA data:', uniqueStates);
-      setStatesWithMSA(uniqueStates);
-
-      if (map.current.getLayer('state-base')) {
-        // Create color assignments based on MSA count
-        const maxMSAs = Math.max(...Object.values(msaCountByState));
-        const getStateColor = (stateId: string) => {
-          const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
-          const colorIndex = Math.floor((msaCount / maxMSAs) * (STATE_COLORS.length - 1));
-          return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
-        };
-
-        // Update the state colors based on MSA count
-        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
-          'match',
-          ['get', 'STATEFP'],
-          ...uniqueStates.flatMap(state => [state, getStateColor(state)]),
-          MAP_COLORS.inactive
-        ]);
-      }
-    } catch (error) {
-      console.error('Error in fetchStatesWithMSA:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update state colors",
-        variant: "destructive",
-      });
-    }
-  }, [layersAdded, toast]);
-
-  const updateMSAVisualization = (msaData: MSAData[]) => {
-    if (!map.current) {
-      console.warn('Map not ready for MSA visualization update');
-      return;
-    }
-
-    // Deduplicate MSA codes while preserving the original data
-    const uniqueMsaCodes = [...new Set(msaData.map(d => d.msa))];
-    console.log('Updating MSA visualization for unique codes:', uniqueMsaCodes);
-
-    try {
-      // Show MSA layers and ensure they're visible
-      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-      
-      // Hide state layers when showing MSAs
-      map.current.setLayoutProperty('state-base', 'visibility', 'none');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-
-      // Calculate growth scores for each MSA
-      const msaScores = msaData.reduce((acc, msa) => {
-        if (msa.msa) {
-          acc[msa.msa] = calculateGrowthScore(msa);
-        }
-        return acc;
-      }, {} as { [key: string]: number });
-
-      // Create expressions for height and color based on growth scores
-      const heightMatchExpression: mapboxgl.Expression = [
-        'match',
-        ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [
-          code,
-          getHeightFromScore(msaScores[code] || 0)
-        ]),
-        20000 // default height
-      ];
-
-      const colorMatchExpression: mapboxgl.Expression = [
-        'match',
-        ['get', 'CBSAFP'],
-        ...uniqueMsaCodes.flatMap(code => [
-          code,
-          getColorFromScore(msaScores[code] || 0)
-        ]),
-        'transparent' // Make non-matching MSAs transparent instead of using the inactive color
-      ];
-
-      // Update MSA layer with growth scores
-      map.current.setPaintProperty(
-        'msa-base',
-        'fill-extrusion-height',
-        heightMatchExpression
-      );
-      
-      map.current.setPaintProperty(
-        'msa-base',
-        'fill-extrusion-color',
-        colorMatchExpression
-      );
-
-      // Important: Remove any filters that might be hiding MSAs
-      map.current.setFilter('msa-base', ['in', ['get', 'CBSAFP'], ...uniqueMsaCodes]);
-      map.current.setFilter('msa-borders', ['in', ['get', 'CBSAFP'], ...uniqueMsaCodes]);
-
-      console.log('MSA visualization updated with filters:', uniqueMsaCodes);
-    } catch (error) {
-      console.error('Error updating MSA visualization:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update MSA visualization",
-        variant: "destructive",
-      });
-    }
-  };
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
