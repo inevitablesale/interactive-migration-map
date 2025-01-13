@@ -194,6 +194,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       // Show MSA layers
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      
+      // Hide state layers when showing MSAs
+      map.current.setLayoutProperty('state-base', 'visibility', 'none');
+      map.current.setLayoutProperty('state-borders', 'visibility', 'none');
 
       // Create a match expression for height
       const heightMatchExpression: mapboxgl.Expression = [
@@ -215,13 +219,13 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       map.current.setPaintProperty(
         'msa-base',
         'fill-extrusion-height',
-        heightMatchExpression as mapboxgl.DataDrivenPropertyValueSpecification<number>
+        heightMatchExpression
       );
       
       map.current.setPaintProperty(
         'msa-base',
         'fill-extrusion-color',
-        colorMatchExpression as mapboxgl.DataDrivenPropertyValueSpecification<string>
+        colorMatchExpression
       );
 
       // Set filters for MSA layers using unique codes
@@ -237,6 +241,23 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
     }
   };
+
+  // Update the viewMode effect to handle layer visibility
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    if (viewMode === 'state') {
+      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    } else {
+      // MSA visibility is handled in updateMSAVisualization
+      if (selectedState) {
+        fetchMSAData(selectedState);
+      }
+    }
+  }, [viewMode, mapLoaded, selectedState]);
 
   const fitStateAndShowMSAs = async (stateId: string) => {
     if (!map.current) {
