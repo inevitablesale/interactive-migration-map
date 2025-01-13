@@ -9,24 +9,24 @@ import { useToast } from "@/components/ui/use-toast";
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const MAP_COLORS = {
-  primary: '#037CFE',
-  secondary: '#00FFE0',
-  accent: '#FFF903',
-  highlight: '#94EC0E',
-  active: '#FA0098',
-  inactive: '#1e293b',
+  primary: '#037CFE',    // Bright blue for primary elements
+  secondary: '#00FFE0',  // Cyan for secondary elements
+  accent: '#FFF903',     // Yellow for accents
+  highlight: '#94EC0E',  // Lime for highlights
+  active: '#FA0098',     // Pink for active states
+  inactive: '#1e293b'    // Dark slate for inactive states
 };
 
 // Color scale for states based on number of MSAs
 const STATE_COLORS = [
-  '#e6f3ff',
+  '#e6f3ff',  // Lightest blue
   '#bde0ff',
   '#94cdff',
   '#6bb9ff',
   '#42a6ff',
   '#1992ff',
   '#007fff',
-  '#0066cc',
+  '#0066cc'   // Darkest blue
 ];
 
 interface MSAData {
@@ -246,133 +246,15 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   };
 
-  // Update the viewMode effect to handle layer visibility
-  useEffect(() => {
-    if (!map.current || !mapLoaded) return;
-
-    if (viewMode === 'state') {
-      map.current.setLayoutProperty('state-base', 'visibility', 'visible');
-      map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
-      map.current.setLayoutProperty('msa-base', 'visibility', 'none');
-      map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
-    } else {
-      // MSA visibility is handled in updateMSAVisualization
-      if (selectedState) {
-        fetchMSAData(selectedState);
-      }
-    }
-  }, [viewMode, mapLoaded, selectedState]);
-
-  const fitStateAndShowMSAs = async (stateId: string) => {
-    if (!map.current) {
-      console.warn('Map not ready for state fitting');
-      return;
-    }
-
-    // Ensure stateId is padded with leading zero if needed
-    const paddedStateId = stateId.toString().padStart(2, '0');
-    console.log('Fitting state and showing MSAs for state:', paddedStateId);
-
-    // Fix: Convert stateId to string for comparison
-    if (!statesWithMSA.includes(paddedStateId)) {
-      console.log('State has no MSA data:', paddedStateId);
-      toast({
-        title: "No Data Available",
-        description: "This state has no Metropolitan Statistical Areas data available",
-        variant: "default",
-      });
-      return;
-    }
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    if (!map.current) return;
     
-    console.log('Fitting state and showing MSAs for state:', paddedStateId);
-
-    try {
-      // Query for the selected state's features
-      const stateFeatures = map.current.querySourceFeatures('states', {
-        sourceLayer: 'tl_2020_us_state-52k5uw',
-        filter: ['==', ['get', 'STATEFP'], paddedStateId]
-      });
-
-      if (stateFeatures.length === 0) {
-        console.warn('No features found for state:', paddedStateId);
-        return;
-      }
-
-      // Calculate bounds for the state
-      const bounds = new mapboxgl.LngLatBounds();
-      let hasValidCoordinates = false;
-
-      stateFeatures.forEach(feature => {
-        if (feature.geometry.type === 'Polygon') {
-          const coordinates = feature.geometry.coordinates;
-          if (Array.isArray(coordinates) && coordinates.length > 0 && Array.isArray(coordinates[0])) {
-            coordinates[0].forEach((coord: [number, number]) => {
-              if (Array.isArray(coord) && coord.length === 2 && 
-                  !isNaN(coord[0]) && !isNaN(coord[1])) {
-                bounds.extend(coord);
-                hasValidCoordinates = true;
-              }
-            });
-          }
-        } else if (feature.geometry.type === 'MultiPolygon') {
-          feature.geometry.coordinates.forEach(polygon => {
-            if (Array.isArray(polygon) && polygon.length > 0 && Array.isArray(polygon[0])) {
-              polygon[0].forEach((coord: [number, number]) => {
-                if (Array.isArray(coord) && coord.length === 2 && 
-                    !isNaN(coord[0]) && !isNaN(coord[1])) {
-                  bounds.extend(coord);
-                  hasValidCoordinates = true;
-                }
-              });
-            }
-          });
-        }
-      });
-
-      if (!hasValidCoordinates) {
-        console.error('No valid coordinates found for state:', paddedStateId);
-        toast({
-          title: "Error",
-          description: "Could not find valid coordinates for this state",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // First fit to state bounds with state-level zoom
-      map.current.fitBounds(bounds, {
-        padding: { top: 50, bottom: 50, left: 50, right: 50 },
-        duration: 1500,
-        pitch: 60,
-        bearing: 0,
-        offset: [0, 0],
-      });
-
-      setSelectedState(paddedStateId);
-      setViewMode('msa');
-
-      // Fetch MSA data
-      await fetchMSAData(paddedStateId);
-
-      // After MSA data is loaded, zoom in closer for MSA view
-      map.current.fitBounds(bounds, {
-        padding: { top: 50, bottom: 50, left: 50, right: 50 },
-        duration: 1000,
-        pitch: 60,
-        bearing: 0,
-        offset: [0, 0],
-        maxZoom: map.current.getZoom() + 1 // Increase zoom level by 1 for MSA view
-      });
-
-    } catch (error) {
-      console.error('Error in fitStateAndShowMSAs:', error);
-      toast({
-        title: "Error",
-        description: "Failed to focus on selected state",
-        variant: "destructive",
-      });
-    }
-  };
+    // Dispatch event to update analysis table
+    const event = new CustomEvent('stateSelected', {
+      detail: { stateId }
+    });
+    window.dispatchEvent(event);
+  }, []);
 
   const initializeLayers = useCallback(() => {
     if (!map.current) return;
@@ -397,9 +279,37 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': MAP_COLORS.inactive, // Fixed: Use inactive color as default
+          'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 20000,
-          'fill-extrusion-opacity': 0.6
+          'fill-extrusion-opacity': 0.6,
+          'fill-extrusion-base': 0
+        }
+      });
+
+      // Add state borders layer
+      map.current.addLayer({
+        'id': 'state-borders',
+        'type': 'line',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'line-color': MAP_COLORS.primary,
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        }
+      });
+
+      // Add hover effect layer
+      map.current.addLayer({
+        'id': 'state-hover',
+        'type': 'fill-extrusion',
+        'source': 'states',
+        'source-layer': 'tl_2020_us_state-52k5uw',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.highlight,
+          'fill-extrusion-height': 30000,
+          'fill-extrusion-opacity': 0,
+          'fill-extrusion-base': 0
         }
       });
 
@@ -510,40 +420,45 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
 
-  // Add hover effect for states
-  let hoveredStateId: string | null = null;
-
+  // Add hover and click effects for states
   useEffect(() => {
     if (!map.current) return;
 
+    let hoveredStateId: string | null = null;
+
     map.current.on('mousemove', 'state-base', (e) => {
       if (e.features.length > 0) {
-        if (hoveredStateId !== null) {
-          map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
+        if (hoveredStateId) {
+          map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         }
-        hoveredStateId = e.features[0].id as string;
-        map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.8);
+        hoveredStateId = e.features[0].properties?.STATEFP;
+        
+        if (hoveredStateId) {
+          map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0.3);
+          map.current?.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
+          updateAnalysisTable(hoveredStateId);
+        }
       }
     });
 
     map.current.on('mouseleave', 'state-base', () => {
-      if (hoveredStateId !== null) {
-        map.current?.setPaintProperty('state-base', 'fill-extrusion-opacity', 0.6);
+      if (hoveredStateId) {
+        map.current?.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
         hoveredStateId = null;
       }
     });
 
-    // Add click event for state selection
     map.current.on('click', 'state-base', (e) => {
       if (e.features && e.features[0]) {
         const stateId = e.features[0].properties?.STATEFP;
         if (stateId) {
           console.log('State clicked:', stateId);
           fitStateAndShowMSAs(stateId);
+          updateAnalysisTable(stateId);
         }
       }
     });
-  }, [fitStateAndShowMSAs]);
+  }, [fitStateAndShowMSAs, updateAnalysisTable]);
 
   return (
     <div className={`relative ${className}`}>
