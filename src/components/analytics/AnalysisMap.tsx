@@ -58,15 +58,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const resetToStateView = useCallback(() => {
     if (!map.current) return;
 
-    // Hide MSA layers
     map.current.setLayoutProperty('msa-base', 'visibility', 'none');
     map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
     
-    // Show state layers
     map.current.setLayoutProperty('state-base', 'visibility', 'visible');
     map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
 
-    // Reset camera
     map.current.easeTo({
       center: [-98.5795, 39.8283],
       zoom: 3,
@@ -137,10 +134,8 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      // Count MSAs per state and get unique states
       const msaCountByState = msaData.reduce((acc: { [key: string]: number }, curr) => {
         if (curr.state_fips) {
-          // Ensure state_fips is treated as string
           const stateFips = curr.state_fips.toString().padStart(2, '0');
           acc[stateFips] = (acc[stateFips] || 0) + 1;
         }
@@ -154,7 +149,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       setStatesWithMSA(uniqueStates);
 
       if (map.current.getLayer('state-base')) {
-        // Create color assignments based on MSA count
         const maxMSAs = Math.max(...Object.values(msaCountByState));
         const getStateColor = (stateId: string) => {
           const msaCount = msaCountByState[stateId.toString().padStart(2, '0')] || 0;
@@ -162,7 +156,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           return STATE_COLORS[colorIndex] || MAP_COLORS.inactive;
         };
 
-        // Update the state colors based on MSA count
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'match',
           ['get', 'STATEFP'],
@@ -250,20 +243,16 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       return;
     }
 
-    // Deduplicate MSA codes while preserving the original data
     const uniqueMsaCodes = [...new Set(msaData.map(d => d.msa))];
     console.log('Updating MSA visualization for unique codes:', uniqueMsaCodes);
 
     try {
-      // Show MSA layers
       map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
       map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
       
-      // Hide state layers when showing MSAs
       map.current.setLayoutProperty('state-base', 'visibility', 'none');
       map.current.setLayoutProperty('state-borders', 'visibility', 'none');
 
-      // Calculate growth scores for each MSA
       const msaScores = msaData.reduce((acc, msa) => {
         if (msa.msa) {
           acc[msa.msa] = calculateGrowthScore(msa);
@@ -271,7 +260,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return acc;
       }, {} as { [key: string]: number });
 
-      // Create expressions for height and color based on growth scores
       const heightMatchExpression: mapboxgl.Expression = [
         'match',
         ['get', 'CBSAFP'],
@@ -279,7 +267,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           code,
           getHeightFromScore(msaScores[code] || 0)
         ]),
-        20000 // default height
+        20000
       ];
 
       const colorMatchExpression: mapboxgl.Expression = [
@@ -292,7 +280,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         MAP_COLORS.inactive
       ];
 
-      // Update MSA layer with growth scores
       map.current.setPaintProperty(
         'msa-base',
         'fill-extrusion-height',
@@ -305,7 +292,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         colorMatchExpression
       );
 
-      // Set filters for MSA layers using unique codes
       map.current.setFilter('msa-base', ['in', 'CBSAFP', ...uniqueMsaCodes]);
       map.current.setFilter('msa-borders', ['in', 'CBSAFP', ...uniqueMsaCodes]);
 
@@ -322,7 +308,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const updateAnalysisTable = useCallback((stateId: string) => {
     if (!map.current) return;
     
-    // Only pass serializable data
     const event = new CustomEvent('stateSelected', {
       detail: { 
         stateId: stateId.toString(),
@@ -333,22 +318,17 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   }, []);
 
   const initializeLayers = useCallback(() => {
-    if (!map.current) return;
-    
+    if (!map.current) {
+      console.warn('Map not ready for layer initialization');
+      return;
+    }
+
     try {
-      // Add state source
       map.current.addSource('states', {
         type: 'vector',
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
-      // Add MSA source
-      map.current.addSource('msas', {
-        type: 'vector',
-        url: 'mapbox://inevitablesale.29jcxgnm'
-      });
-
-      // Add state base layer with hover effect
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
@@ -356,26 +336,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.inactive,
-          'fill-extrusion-height': 20000,
-          'fill-extrusion-opacity': 0.6,
-          'fill-extrusion-base': 0
+          'fill-extrusion-height': 10000,
+          'fill-extrusion-opacity': 0.6
         }
       });
 
-      // Add state borders layer
-      map.current.addLayer({
-        'id': 'state-borders',
-        'type': 'line',
-        'source': 'states',
-        'source-layer': 'tl_2020_us_state-52k5uw',
-        'paint': {
-          'line-color': MAP_COLORS.primary,
-          'line-width': 1.5,
-          'line-opacity': 0.8
-        }
-      });
-
-      // Add hover effect layer
       map.current.addLayer({
         'id': 'state-hover',
         'type': 'fill-extrusion',
@@ -383,30 +348,11 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'fill-extrusion-color': MAP_COLORS.highlight,
-          'fill-extrusion-height': 30000,
-          'fill-extrusion-opacity': 0,
-          'fill-extrusion-base': 0
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-opacity': 0
         }
       });
 
-      // Add MSA base layer
-      map.current.addLayer({
-        'id': 'msa-base',
-        'type': 'fill-extrusion',
-        'source': 'msas',
-        'source-layer': 'tl_2020_us_cbsa-aoky0u',
-        'paint': {
-          'fill-extrusion-color': MAP_COLORS.secondary,
-          'fill-extrusion-height': 50000,
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 0
-        },
-        'layout': {
-          'visibility': 'none'
-        }
-      });
-
-      // Add border layers
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -414,8 +360,27 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'line-color': MAP_COLORS.primary,
-          'line-width': 1.5,
-          'line-opacity': 0.8
+          'line-width': 1
+        }
+      });
+
+      map.current.addSource('msas', {
+        type: 'vector',
+        url: 'mapbox://inevitablesale.29jcxgnm'
+      });
+
+      map.current.addLayer({
+        'id': 'msa-base',
+        'type': 'fill-extrusion',
+        'source': 'msas',
+        'source-layer': 'tl_2020_us_cbsa-aoky0u',
+        'paint': {
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 10000,
+          'fill-extrusion-opacity': 0.6
+        },
+        'layout': {
+          'visibility': 'none'
         }
       });
 
@@ -426,8 +391,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         'source-layer': 'tl_2020_us_cbsa-aoky0u',
         'paint': {
           'line-color': MAP_COLORS.secondary,
-          'line-width': 1.5,
-          'line-opacity': 0.8
+          'line-width': 1
         },
         'layout': {
           'visibility': 'none'
@@ -435,9 +399,9 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       });
 
       setLayersAdded(true);
-      console.log('All layers added successfully');
+      console.log('Map layers initialized successfully');
     } catch (error) {
-      console.error('Error initializing layers:', error);
+      console.error('Error initializing map layers:', error);
       toast({
         title: "Error",
         description: "Failed to initialize map layers",
@@ -450,24 +414,18 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     if (!map.current) return;
     
     try {
-      // Update selected state
       setSelectedState(stateId);
-      
-      // Fetch MSA data for the selected state
       await fetchMSAData(stateId);
       
-      // Get state feature to fit the view
       const stateFeatures = map.current.querySourceFeatures('states', {
         sourceLayer: 'tl_2020_us_state-52k5uw',
         filter: ['==', ['get', 'STATEFP'], stateId]
       });
 
       if (stateFeatures.length > 0) {
-        // Calculate bounds of the state feature
         const bounds = new mapboxgl.LngLatBounds();
         const feature = stateFeatures[0];
         
-        // Safely handle different geometry types
         if (feature.geometry.type === 'Polygon') {
           (feature.geometry as GeoJSON.Polygon).coordinates[0].forEach((coord) => {
             bounds.extend(coord as [number, number]);
@@ -480,16 +438,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           });
         }
 
-        // Fit map to state bounds with padding
         map.current.fitBounds(bounds, {
           padding: 50,
           duration: 1000
         });
 
-        // Set view mode to MSA
         setViewMode('msa');
-
-        // Update analysis table with serializable data
         updateAnalysisTable(stateId);
       }
     } catch (error) {
@@ -552,7 +506,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [mapLoaded, layersAdded, fetchStatesWithMSA]);
 
-  // Add hover and click effects for states
   useEffect(() => {
     if (!map.current) return;
 
@@ -606,7 +559,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         hoveredMsaId = e.features[0].properties?.CBSAFP;
         
         if (hoveredMsaId) {
-          // Highlight hovered MSA
           map.current?.setPaintProperty('msa-base', 'fill-extrusion-opacity', [
             'case',
             ['==', ['get', 'CBSAFP'], hoveredMsaId],
@@ -614,15 +566,12 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
             0.4
           ]);
 
-          // Find MSA data
           const msaData = msaData.find(m => m.msa === hoveredMsaId);
           if (msaData) {
-            // Remove existing popup
             if (popup) {
               popup.remove();
             }
 
-            // Create new popup
             popup = new mapboxgl.Popup({
               closeButton: false,
               closeOnClick: false,
@@ -647,7 +596,6 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       }
     };
 
-    // Add event listeners
     map.current.on('mousemove', 'msa-base', handleMsaHover);
     map.current.on('mouseleave', 'msa-base', handleMsaLeave);
 
