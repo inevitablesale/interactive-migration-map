@@ -39,10 +39,31 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const fetchMSAData = async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
-      // First get MSAs for the state from crosswalk table
+      // First get unique counties from canary_firms_data for this state
+      const { data: countyData, error: countyError } = await supabase
+        .from('canary_firms_data')
+        .select('COUNTYNAME')
+        .eq('STATEFP', parseInt(stateId))
+        .not('COUNTYNAME', 'is', null);
+
+      if (countyError) {
+        console.error('Error fetching county data:', countyError);
+        return;
+      }
+
+      if (!countyData || countyData.length === 0) {
+        console.log('No counties found for state:', stateId);
+        return;
+      }
+
+      const uniqueCounties = [...new Set(countyData.map(c => c.COUNTYNAME))];
+      console.log('Found unique counties:', uniqueCounties.length);
+
+      // Get MSAs for these counties from crosswalk table
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
         .from('msa_state_crosswalk')
         .select('msa, msa_name')
+        .in('county_name', uniqueCounties)
         .eq('state_fips', stateId);
 
       if (crosswalkError) {
@@ -51,20 +72,20 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       }
 
       if (!msaCrosswalk || msaCrosswalk.length === 0) {
-        console.log('No MSAs found for state:', stateId);
+        console.log('No MSAs found for counties');
         return;
       }
 
       console.log('Found MSAs in crosswalk:', msaCrosswalk.length);
 
-      // Get the MSA codes to query region_data
-      const msaCodes = msaCrosswalk.map(m => m.msa);
+      // Get unique MSA codes
+      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
 
-      // Then get economic data for these MSAs
+      // Get economic data for these MSAs
       const { data: regionData, error: regionError } = await supabase
         .from('region_data')
         .select('msa, EMP, PAYANN, ESTAB')
-        .in('msa', msaCodes);
+        .in('msa', uniqueMsaCodes);
 
       if (regionError) {
         console.error('Error fetching region data:', regionError);
