@@ -71,6 +71,7 @@ export type Database = {
           revenue_max: number | null
           revenue_min: number | null
           service_lines: string[] | null
+          subscription_tier: string
           target_geography: string[]
           updated_at: string | null
           user_id: string | null
@@ -94,6 +95,7 @@ export type Database = {
           revenue_max?: number | null
           revenue_min?: number | null
           service_lines?: string[] | null
+          subscription_tier?: string
           target_geography: string[]
           updated_at?: string | null
           user_id?: string | null
@@ -117,6 +119,7 @@ export type Database = {
           revenue_max?: number | null
           revenue_min?: number | null
           service_lines?: string[] | null
+          subscription_tier?: string
           target_geography?: string[]
           updated_at?: string | null
           user_id?: string | null

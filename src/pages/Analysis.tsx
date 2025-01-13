@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
@@ -8,12 +8,45 @@ import { FeaturedInsights } from "@/components/analytics/FeaturedInsights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { UpgradePrompt } from "@/components/analytics/UpgradePrompt";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Analysis = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter') || 'market-entry';
+  const { toast } = useToast();
+
+  // Fetch user's subscription tier
+  const { data: profile } = useQuery({
+    queryKey: ['buyerProfile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('buyer_profiles')
+        .select('subscription_tier')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleFilterChange = (filter: string) => {
+    if (isFreeTier && (filter === 'growth-strategy' || filter === 'opportunities')) {
+      toast({
+        title: "Premium Feature",
+        description: "Upgrade to access advanced analytics and growth strategies.",
+        variant: "default",
+      });
+      return;
+    }
     setSearchParams({ filter });
   };
 
@@ -36,20 +69,26 @@ const Analysis = () => {
               <button
                 onClick={() => handleFilterChange('growth-strategy')}
                 className={cn(
-                  "py-4 text-white/80 hover:text-white transition-colors relative",
+                  "py-4 text-white/80 hover:text-white transition-colors relative group",
                   activeFilter === 'growth-strategy' && "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
                 )}
               >
                 Growth Strategy
+                {isFreeTier && (
+                  <Lock className="w-4 h-4 inline-block ml-2 text-yellow-500" />
+                )}
               </button>
               <button
                 onClick={() => handleFilterChange('opportunities')}
                 className={cn(
-                  "py-4 text-white/80 hover:text-white transition-colors relative",
+                  "py-4 text-white/80 hover:text-white transition-colors relative group",
                   activeFilter === 'opportunities' && "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
                 )}
               >
                 Opportunities
+                {isFreeTier && (
+                  <Lock className="w-4 h-4 inline-block ml-2 text-yellow-500" />
+                )}
               </button>
             </div>
           </div>
@@ -64,14 +103,26 @@ const Analysis = () => {
             {/* Left Column */}
             <div className="space-y-8">
               <HeatmapSection activeFilter={activeFilter} />
-              <FeaturedInsights />
+              {!isFreeTier && <FeaturedInsights />}
             </div>
             
             {/* Right Column */}
             <div className="space-y-8">
               <BuyerProfileManager />
-              <AlertsPanel />
-              <UpgradePrompt />
+              {!isFreeTier ? (
+                <AlertsPanel />
+              ) : (
+                <UpgradePrompt 
+                  title="Unlock Advanced Features"
+                  description="Get access to detailed market insights, alerts, and advanced analytics."
+                  features={[
+                    "Detailed firm listings and profiles",
+                    "Custom alerts for market opportunities",
+                    "Advanced growth strategy analytics",
+                    "Predictive market insights"
+                  ]}
+                />
+              )}
             </div>
           </div>
         </div>
