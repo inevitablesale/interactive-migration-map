@@ -7,11 +7,13 @@ import { EnhancedAnalytics } from "./analytics/EnhancedAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import AnalysisMap from "./analytics/AnalysisMap";
 import { useSearchParams } from "react-router-dom";
+import { GeographicLevel } from "@/types/geography";
 
 export const InteractiveToolsSection = () => {
   const [showComparison, setShowComparison] = useState(false);
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
+  const [geographicLevel, setGeographicLevel] = useState<GeographicLevel>('state');
 
   // Map filter values to tab values
   const getActiveTab = () => {
@@ -31,7 +33,11 @@ export const InteractiveToolsSection = () => {
     <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
       {/* Analysis Map Section */}
       <div className="h-[calc(100vh-200px)] relative">
-        <AnalysisMap className="h-full" type="density" />
+        <AnalysisMap 
+          className="h-full" 
+          type="density" 
+          geographicLevel={geographicLevel}
+        />
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-transparent to-black/20" />
       </div>
 

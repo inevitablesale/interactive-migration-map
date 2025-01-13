@@ -111,51 +111,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   }, [map, fetchMSAData, toast]);
 
   useEffect(() => {
-    if (!map.current || !data || !mapLoaded) return;
-
-    // Update map colors based on data type
-    map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
-      'case',
-      ['in', ['get', 'STATEFP'], ['literal', data.map((d: any) => d.region)]],
-      type === 'density' 
-        ? ['get', 'firm_density']
-        : ['get', 'historical_growth_rate'],
-      MAP_COLORS.inactive
-    ]);
-  }, [data, type, mapLoaded]);
-
-  const getTooltipContent = useCallback((feature: any) => {
-    if (!data) return null;
-
-    const regionData = data.find(d => d.region === feature.properties.COUNTYNAME);
-    if (!regionData) return null;
-
-    if (type === 'density') {
-      return (
-        <div className="p-3 max-w-xs">
-          <h4 className="font-semibold mb-2">{regionData.region}</h4>
-          <div className="space-y-1 text-sm">
-            <p>Total Firms: {formatNumber(regionData.total_firms)}</p>
-            <p>Population: {formatNumber(regionData.population)}</p>
-            <p>Firm Density: {(regionData.firm_density * 100).toFixed(2)}%</p>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="p-3 max-w-xs">
-        <h4 className="font-semibold mb-2">{regionData.region}</h4>
-        <div className="space-y-1 text-sm">
-          <p>Current Firms: {formatNumber(regionData.firms_current_year)}</p>
-          <p>Growth Rate: {(regionData.historical_growth_rate * 100).toFixed(2)}%</p>
-          <p>Projected Firms: {formatNumber(regionData.projected_firms)}</p>
-        </div>
-      </div>
-    );
-  }, [data, type]);
-
-  useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
     try {
@@ -182,6 +137,23 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         setMapLoaded(true);
         initializeLayers();
         fetchStateData();
+        
+        // Update layer visibility based on geographic level
+        if (map.current) {
+          if (geographicLevel === 'state') {
+            map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+            map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+            map.current.setLayoutProperty('county-base', 'visibility', 'none');
+          } else if (geographicLevel === 'msa') {
+            map.current.setLayoutProperty('state-base', 'visibility', 'none');
+            map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+            map.current.setLayoutProperty('county-base', 'visibility', 'none');
+          } else {
+            map.current.setLayoutProperty('state-base', 'visibility', 'none');
+            map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+            map.current.setLayoutProperty('county-base', 'visibility', 'visible');
+          }
+        }
       });
 
       return () => {
