@@ -46,30 +46,94 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     fetchStatesWithMSA
   } = useMSAData();
 
-  const calculateBuyerScore = (state: StateData): number => {
-    if (!state.B19013_001E || !state.EMP || !state.ESTAB || !state.PAYANN) return 0;
+  const getStateColor = useCallback((stateId: string) => {
+    const state = stateData.find(s => s.STATEFP === stateId);
+    if (!state || !state.buyerScore) return MAP_COLORS.inactive;
     
-    // Calculate financial sector employment (combining male and female)
-    const financialSectorEmp = (state.C24010_033E || 0) + (state.C24010_034E || 0);
-    
-    // Normalize values between 0 and 1
-    const incomeScore = state.B19013_001E / 100000; // Assuming max income of 100k
-    const establishmentScore = Math.min(state.ESTAB / 1000, 1); // Cap at 1000 establishments
-    const employmentScore = Math.min(state.EMP / 10000, 1); // Cap at 10000 employees
-    const payrollScore = Math.min(state.PAYANN / 1000000, 1); // Cap at 1M annual payroll
-    const financialSectorScore = Math.min(financialSectorEmp / 5000, 1); // Cap at 5000 financial sector employees
-    
-    // Weight the scores (adjust weights based on importance)
-    const weightedScore = (
-      incomeScore * 0.2 +           // 20% weight on income
-      establishmentScore * 0.2 +    // 20% weight on number of establishments
-      employmentScore * 0.2 +       // 20% weight on total employment
-      payrollScore * 0.2 +          // 20% weight on annual payroll
-      financialSectorScore * 0.2    // 20% weight on financial sector employment
-    );
-    
-    return Math.max(0, Math.min(1, weightedScore));
-  };
+    // Create a color gradient based on the buyer score
+    const score = state.buyerScore;
+    if (score >= 0.8) return '#00FF00'; // High score - green
+    if (score >= 0.6) return '#90EE90'; // Good score - light green
+    if (score >= 0.4) return '#FFD700'; // Medium score - yellow
+    if (score >= 0.2) return '#FFA500'; // Low score - orange
+    return '#FF0000'; // Very low score - red
+  }, [stateData]);
+
+  const updateAnalysisTable = useCallback((stateId: string) => {
+    const state = stateData.find(s => s.STATEFP === stateId);
+    if (!state) return;
+
+    // Dispatch custom event with state data
+    const event = new CustomEvent('analysisStateChanged', {
+      detail: {
+        stateId,
+        data: state
+      }
+    });
+    window.dispatchEvent(event);
+  }, [stateData]);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    setSelectedState(stateId);
+    setViewMode('msa');
+
+    // Query the state boundaries
+    const stateFeatures = map.current.querySourceFeatures('states', {
+      sourceLayer: 'tl_2020_us_state-52k5uw',
+      filter: ['==', ['get', 'STATEFP'], stateId]
+    });
+
+    if (stateFeatures.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds();
+      const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
+      geometry.coordinates[0].forEach((coord: [number, number]) => {
+        bounds.extend(coord);
+      });
+
+      // Adjust padding based on state size
+      const padding = {
+        top: 50,
+        bottom: 50,
+        left: 50,
+        right: 50
+      };
+
+      map.current.fitBounds(bounds, {
+        padding,
+        duration: 1000
+      });
+
+      // Show MSA layers
+      map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+      map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+
+      // Fetch and display MSA data
+      const msaData = await fetchMSAData(stateId);
+      console.log('MSA data loaded:', msaData);
+    }
+  }, [map, fetchMSAData]);
+
+  const resetToStateView = useCallback(() => {
+    if (!map.current) return;
+
+    setSelectedState(null);
+    setViewMode('state');
+
+    // Hide MSA layers
+    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+
+    // Reset map view
+    map.current.easeTo({
+      center: [-98.5795, 39.8283],
+      zoom: 3,
+      pitch: 45,
+      bearing: 0,
+      duration: 1000
+    });
+  }, [map]);
 
   const fetchStateData = async () => {
     try {
