@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarChart, FileText, Bell, Building2, Lock } from "lucide-react";
+import { BarChart, Target, BookOpen, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,19 +13,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 
 export function AppSidebar({ onTabChange }: { onTabChange: (tab: string) => void }) {
-  const [activeTab, setActiveTab] = useState("analytics");
+  const [activeTab, setActiveTab] = useState("opportunities");
   const { toast } = useToast();
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     onTabChange(tab);
-  };
-
-  const handlePremiumFeature = () => {
-    toast({
-      title: "Premium Feature",
-      description: "Upgrade to access detailed firm information and advanced analytics",
-    });
   };
 
   return (
@@ -37,44 +30,41 @@ export function AppSidebar({ onTabChange }: { onTabChange: (tab: string) => void
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
-                  onClick={() => handleTabChange("analytics")}
-                  className={`w-full ${activeTab === "analytics" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
+                  onClick={() => handleTabChange("opportunities")}
+                  className={`w-full ${activeTab === "opportunities" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
-                  <BarChart className="w-4 h-4" />
-                  <span>Analytics Dashboard</span>
+                  <Target className="w-4 h-4" />
+                  <span>Find Opportunities</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               
               <SidebarMenuItem>
                 <SidebarMenuButton 
+                  onClick={() => handleTabChange("strategy")}
+                  className={`w-full ${activeTab === "strategy" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
+                >
+                  <BarChart className="w-4 h-4" />
+                  <span>Build Strategy</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton 
                   onClick={() => handleTabChange("reports")}
                   className={`w-full ${activeTab === "reports" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Community Reports</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => handleTabChange("builder")}
+                  className={`w-full ${activeTab === "builder" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
+                >
                   <FileText className="w-4 h-4" />
-                  <span>Reports & Insights</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => handleTabChange("trackers")}
-                  className={`w-full ${activeTab === "trackers" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
-                >
-                  <Bell className="w-4 h-4" />
-                  <span>Market Trackers</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={handlePremiumFeature}
-                  className="w-full text-white/50 hover:bg-white/10"
-                >
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    <span>Firm Directory</span>
-                    <Lock className="w-3 h-3 text-yellow-400 ml-auto" />
-                  </div>
+                  <span>Report Builder</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
