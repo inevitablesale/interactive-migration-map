@@ -146,16 +146,20 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         const stateArea = stateLngSpan * stateLatSpan;
         const maxZoom = Math.min(6, 7 - Math.log(stateArea) / Math.log(2) * 0.2);
 
-        // Important: Show MSA layers BEFORE fitting bounds
-        if (map.current.getLayer('msa-base')) {
-          map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
-          map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
-        }
-        
-        if (map.current.getLayer('state-base')) {
-          map.current.setLayoutProperty('state-base', 'visibility', 'none');
-          map.current.setLayoutProperty('state-borders', 'visibility', 'none');
-        }
+        // Wait for the map to load before changing layer visibility
+        map.current.once('idle', () => {
+          // Show MSA layers
+          if (map.current?.getLayer('msa-base')) {
+            map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+            map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+          }
+          
+          // Hide state layers
+          if (map.current?.getLayer('state-base')) {
+            map.current.setLayoutProperty('state-base', 'visibility', 'none');
+            map.current.setLayoutProperty('state-borders', 'visibility', 'none');
+          }
+        });
 
         // Fit the map to the state bounds with dynamic padding and maxZoom
         map.current.fitBounds(bounds, {
