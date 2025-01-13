@@ -25,7 +25,7 @@ const Index = () => {
       {/* Scrollable Content */}
       <div className="relative z-10">
         {/* Hero Section */}
-        <div className="min-h-[50vh]">
+        <div className="min-h-screen">
           <Hero />
         </div>
 
