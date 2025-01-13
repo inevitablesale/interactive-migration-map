@@ -10,24 +10,17 @@ export const useMSAData = () => {
   const fetchMSAData = useCallback(async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
-      // Ensure stateId is padded to 2 digits
+      // Create both padded and unpadded versions of the state ID
       const paddedStateId = stateId.padStart(2, '0');
+      const unpaddenStateId = parseInt(stateId, 10).toString();
       console.log('Using padded state ID:', paddedStateId);
+      console.log('Using unpadded state ID:', unpaddenStateId);
       
-      // First, let's check what's in the crosswalk table for this state
-      const { data: rawCrosswalk, error: rawError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('*')
-        .eq('state_fips', paddedStateId);
-      
-      console.log('Raw crosswalk query result:', rawCrosswalk);
-      console.log('Raw crosswalk query error:', rawError);
-
-      // Now get the actual MSA data
+      // Query using both padded and unpadded state IDs
       const { data: msaCrosswalk, error: crosswalkError } = await supabase
         .from('msa_state_crosswalk')
         .select('msa, msa_name')
-        .eq('state_fips', paddedStateId);
+        .or(`state_fips.eq.${paddedStateId},state_fips.eq.${unpaddenStateId}`);
 
       if (crosswalkError) {
         console.error('Error fetching MSA crosswalk:', crosswalkError);
