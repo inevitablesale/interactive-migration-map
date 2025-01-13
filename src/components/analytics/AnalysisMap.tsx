@@ -27,7 +27,7 @@ interface AnalysisMapProps {
 
 const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
   const [viewMode, setViewMode] = useState<'state' | 'msa'>('state');
-  const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [selectedState, setSelectedState] = useState<any | null>(null);
   const [hoveredState, setHoveredState] = useState<any | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showReportPanel, setShowReportPanel] = useState(false);
@@ -61,10 +61,11 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
   }, [type, toast]);
 
   const updateAnalysisTable = useCallback((stateId: string) => {
-    if (!stateData) return;
-    const stateInfo = stateData.find(s => s.STATEFP === stateId);
+    if (!stateData.length) return;
+    const stateInfo = stateData.find(s => s.region === stateId);
     if (stateInfo) {
-      setSelectedState(stateId);
+      setSelectedState(stateInfo);
+      setShowReportPanel(true);
     }
   }, [stateData]);
 
@@ -89,10 +90,11 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
         filter: ['==', ['get', 'STATEFP'], stateId]
       });
 
-      if (stateBounds.length > 0) {
+      if (stateBounds.length > 0 && stateBounds[0].geometry.type === 'Polygon') {
         const bounds = new mapboxgl.LngLatBounds();
-        stateBounds[0].geometry.coordinates[0].forEach((coord: any) => {
-          bounds.extend(coord as [number, number]);
+        const geometry = stateBounds[0].geometry as GeoJSON.Polygon;
+        geometry.coordinates[0].forEach((coord: [number, number]) => {
+          bounds.extend(coord);
         });
         map.current.fitBounds(bounds, { padding: 50 });
       }
@@ -114,8 +116,8 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
       'case',
       ['in', ['get', 'STATEFP'], ['literal', data.map((d: any) => d.region)]],
       type === 'density' 
-        ? getDensityColor(data.find((d: any) => d.region === ['get', 'STATEFP'])?.firm_density || 0)
-        : getGrowthColor(data.find((d: any) => d.region === ['get', 'STATEFP'])?.historical_growth_rate || 0),
+        ? ['get', 'firm_density']
+        : ['get', 'historical_growth_rate'],
       MAP_COLORS.inactive
     ]);
   }, [data, type, mapLoaded]);
@@ -264,7 +266,7 @@ const AnalysisMap = ({ className, data, type }: AnalysisMapProps) => {
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
       {showReportPanel && selectedState && (
         <MapReportPanel
-          stateId={selectedState}
+          selectedState={selectedState}
           onClose={() => setShowReportPanel(false)}
         />
       )}
