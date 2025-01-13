@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -56,10 +55,14 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const fetchMSAData = async (stateId: string) => {
+  const updateMSAVisualization = useCallback((data: MSAData[]) => {
+    // Implementation will be added later
+    console.log('Updating MSA visualization with data:', data);
+  }, []);
+
+  const fetchMSAData = useCallback(async (stateId: string) => {
     console.log('Fetching MSA data for state:', stateId);
     try {
-      // Ensure state_fips is properly padded
       const paddedStateId = stateId.padStart(2, '0');
       console.log('Padded state ID:', paddedStateId);
 
@@ -78,7 +81,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      const uniqueMsaCodes = [...new Set(msaCrosswalk.map(m => m.msa))];
+      const uniqueMsaCodes = [...new Set(msaCrosswalk?.map(m => m.msa) || [])];
       console.log('Found MSAs:', uniqueMsaCodes);
 
       if (uniqueMsaCodes.length === 0) {
@@ -105,10 +108,10 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         return;
       }
 
-      const combinedData = msaCrosswalk.map(msa => ({
+      const combinedData = msaCrosswalk?.map(msa => ({
         ...msa,
         ...regionData?.find(rd => rd.msa === msa.msa)
-      }));
+      })) || [];
 
       setMsaData(combinedData);
       console.log('Combined MSA data:', combinedData);
@@ -122,7 +125,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast, updateMSAVisualization]);
 
   const initializeLayers = useCallback(() => {
     if (!map.current) {
@@ -243,4 +246,63 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
       if (stateFeatures.length > 0) {
         const bounds = new mapboxgl.LngLatBounds();
         const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
-        geometry.coordinates[0].forEach
+        geometry.coordinates[0].forEach((coord) => {
+          bounds.extend(coord as [number, number]);
+        });
+
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          maxZoom: 8
+        });
+
+        fetchMSAData(paddedStateId);
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to focus on selected state",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, toast]);
+
+  useEffect(() => {
+    if (!mapContainer.current) return;
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-98.5795, 39.8283],
+      zoom: 3
+    });
+
+    map.current.on('load', () => {
+      setMapLoaded(true);
+      initializeLayers();
+    });
+
+    return () => {
+      map.current?.remove();
+    };
+  }, [initializeLayers]);
+
+  return (
+    <div className={`relative w-full h-[600px] ${className || ''}`}>
+      <div ref={mapContainer} className="w-full h-full rounded-lg" />
+      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg">
+        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'state' | 'msa')}>
+          <ToggleGroupItem value="state" aria-label="Toggle state view">
+            <MapIcon className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="msa" aria-label="Toggle MSA view">
+            <Building2 className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+    </div>
+  );
+};
+
+export default AnalysisMap;
