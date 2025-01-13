@@ -370,6 +370,48 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [toast]);
 
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+    
+    try {
+      // Update selected state
+      setSelectedState(stateId);
+      
+      // Fetch MSA data for the selected state
+      await fetchMSAData(stateId);
+      
+      // Get state feature to fit the view
+      const stateFeatures = map.current.querySourceFeatures('states', {
+        sourceLayer: 'tl_2020_us_state-52k5uw',
+        filter: ['==', ['get', 'STATEFP'], stateId]
+      });
+
+      if (stateFeatures.length > 0) {
+        // Calculate bounds of the state feature
+        const bounds = new mapboxgl.LngLatBounds();
+        stateFeatures[0].geometry.coordinates[0].forEach((coord: any) => {
+          bounds.extend(coord as [number, number]);
+        });
+
+        // Fit map to state bounds with padding
+        map.current.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+
+        // Set view mode to MSA
+        setViewMode('msa');
+      }
+    } catch (error) {
+      console.error('Error in fitStateAndShowMSAs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update map view",
+        variant: "destructive",
+      });
+    }
+  }, [fetchMSAData, setSelectedState, toast]);
+
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
