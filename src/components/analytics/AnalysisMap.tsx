@@ -159,7 +159,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           return acc;
         }, {});
 
-        // Add state source with firm density data
+        // Add state source
         map.current.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
@@ -175,10 +175,13 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
-              ['coalesce', ['number', ['get', ['to-string', ['get', 'STATEFP']]], 0], 0],
-              0, '#F2FCE2',
-              5, '#FEF7CD',
-              10, '#ea384c'
+              ['coalesce', 
+                ['number', ['get', ['to-string', ['get', 'STATEFP']]], densityByState], 
+                0
+              ],
+              0, '#037CFE',
+              50, '#00FFE0',
+              100, '#FFF903'
             ],
             'fill-extrusion-height': 20000,
             'fill-extrusion-opacity': 0.6,
