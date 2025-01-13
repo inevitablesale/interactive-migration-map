@@ -46,6 +46,56 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
     return (stateData.ESTAB / stateData.B01001_001E) * 10000; // Firms per 10,000 residents
   };
 
+  const updateAnalysisTable = useCallback(async (stateId: string) => {
+    try {
+      const { data: stateInfo } = await supabase
+        .from('state_data')
+        .select('*')
+        .eq('STATEFP', stateId)
+        .single();
+
+      if (stateInfo) {
+        setSelectedState(stateInfo);
+      }
+    } catch (error) {
+      console.error('Error updating analysis table:', error);
+    }
+  }, []);
+
+  const fitStateAndShowMSAs = useCallback(async (stateId: string) => {
+    if (!map.current) return;
+
+    try {
+      // Fetch state boundary
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${stateId}.json?access_token=${mapboxgl.accessToken}&types=region`
+      );
+      const data = await response.json();
+
+      if (data.features && data.features[0]) {
+        const [minLng, minLat, maxLng, maxLat] = data.features[0].bbox;
+        map.current.fitBounds(
+          [[minLng, minLat], [maxLng, maxLat]],
+          { padding: 50, duration: 1000 }
+        );
+      }
+
+      // Show MSA layers for the selected state
+      const msaData = await fetchMSAData(stateId);
+      if (msaData && msaData.length > 0) {
+        map.current.setLayoutProperty('msa-base', 'visibility', 'visible');
+        map.current.setLayoutProperty('msa-borders', 'visibility', 'visible');
+      }
+    } catch (error) {
+      console.error('Error fitting to state:', error);
+      toast({
+        title: "Error",
+        description: "Failed to zoom to selected state",
+        variant: "destructive",
+      });
+    }
+  }, [map, fetchMSAData, toast]);
+
   const fetchStateData = useCallback(async () => {
     try {
       const { data: stateMetrics, error } = await supabase
@@ -126,13 +176,10 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
-              ['coalesce', 
-                ['number', ['get', ['to-string', ['get', 'STATEFP']]], 0],
-                0
-              ],
-              0, '#F2FCE2',  // Low density
-              5, '#FEF7CD',  // Medium density
-              10, '#ea384c'  // High density
+              ['get', 'firm_density'],
+              0, '#F2FCE2',
+              5, '#FEF7CD',
+              10, '#ea384c'
             ],
             'fill-extrusion-height': 20000,
             'fill-extrusion-opacity': 0.6,
@@ -164,39 +211,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
             'fill-extrusion-height': 30000,
             'fill-extrusion-opacity': 0,
             'fill-extrusion-base': 0
-          }
-        });
-
-        // Add MSA base layer
-        map.current.addLayer({
-          'id': 'msa-base',
-          'type': 'fill-extrusion',
-          'source': 'msas',
-          'source-layer': 'tl_2020_us_cbsa-aoky0u',
-          'paint': {
-            'fill-extrusion-color': '#00FFE0',
-            'fill-extrusion-height': 50000,
-            'fill-extrusion-opacity': 0.8,
-            'fill-extrusion-base': 0
-          },
-          'layout': {
-            'visibility': 'none'
-          }
-        });
-
-        // Add border layers
-        map.current.addLayer({
-          'id': 'msa-borders',
-          'type': 'line',
-          'source': 'msas',
-          'source-layer': 'tl_2020_us_cbsa-aoky0u',
-          'paint': {
-            'line-color': '#00FFE0',
-            'line-width': 1.5,
-            'line-opacity': 0.8
-          },
-          'layout': {
-            'visibility': 'none'
           }
         });
       });
