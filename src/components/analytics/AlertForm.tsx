@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 interface AlertFormData {
   title: string;
@@ -29,7 +30,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [employeeRange, setEmployeeRange] = useState([10, 50]);
 
-  const { register, handleSubmit, reset } = useForm<AlertFormData>();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<AlertFormData>();
 
   const onSubmit = async (data: AlertFormData) => {
     setLoading(true);
@@ -46,16 +47,17 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       if (error) throw error;
 
       toast({
-        title: "Alert created",
+        title: "Alert created successfully",
         description: "You will be notified when matching opportunities are found.",
       });
 
       reset();
       onSuccess?.();
     } catch (error) {
+      console.error('Error creating alert:', error);
       toast({
-        title: "Error",
-        description: "Failed to create alert. Please try again.",
+        title: "Error creating alert",
+        description: "Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -69,15 +71,18 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         <div>
           <Label>Alert Name</Label>
           <Input
-            {...register("title")}
+            {...register("title", { required: "Alert name is required" })}
             placeholder="E.g., Tax firms in California"
             className="mt-1.5"
           />
+          {errors.title && (
+            <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+          )}
         </div>
 
         <div>
           <Label>Region</Label>
-          <Select {...register("region")}>
+          <Select {...register("region", { required: "Region is required" })}>
             <SelectTrigger className="mt-1.5">
               <SelectValue placeholder="Select region" />
             </SelectTrigger>
@@ -88,6 +93,9 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <SelectItem value="FL">Florida</SelectItem>
             </SelectContent>
           </Select>
+          {errors.region && (
+            <p className="text-sm text-red-500 mt-1">{errors.region.message}</p>
+          )}
         </div>
 
         <div>
@@ -105,7 +113,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
         <div>
           <Label>Specialties</Label>
-          <Select {...register("specialties")}>
+          <Select {...register("specialties", { required: "Specialty is required" })}>
             <SelectTrigger className="mt-1.5">
               <SelectValue placeholder="Select specialties" />
             </SelectTrigger>
@@ -116,6 +124,9 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <SelectItem value="payroll">Payroll</SelectItem>
             </SelectContent>
           </Select>
+          {errors.specialties && (
+            <p className="text-sm text-red-500 mt-1">{errors.specialties.message}</p>
+          )}
         </div>
 
         <div>
@@ -138,7 +149,14 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating Alert..." : "Create Alert"}
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creating Alert...
+          </>
+        ) : (
+          "Create Alert"
+        )}
       </Button>
     </form>
   );
