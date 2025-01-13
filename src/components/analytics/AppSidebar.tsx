@@ -27,32 +27,17 @@ export function AppSidebar() {
     });
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "analytics":
-        return <AnalyticsDashboard />;
-      case "reports":
-        return <ReportsPanel />;
-      case "trackers":
-        return <TrackersPanel />;
-      case "directory":
-        return <FirmDirectory />;
-      default:
-        return <AnalyticsDashboard />;
-    }
-  };
-
   return (
-    <Sidebar className="bg-[#1a1a1a] border-r border-white/10">
+    <Sidebar className="bg-[#1a1a1a] border-r border-white/10 w-64 min-w-64">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Market Intelligence</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/70">Market Intelligence</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={() => setActiveTab("analytics")}
-                  className={activeTab === "analytics" ? "bg-blue-500/20 text-blue-400" : ""}
+                  className={`w-full ${activeTab === "analytics" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
                   <BarChart className="w-4 h-4" />
                   <span>Analytics Dashboard</span>
@@ -62,7 +47,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={() => setActiveTab("reports")}
-                  className={activeTab === "reports" ? "bg-blue-500/20 text-blue-400" : ""}
+                  className={`w-full ${activeTab === "reports" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
                   <FileText className="w-4 h-4" />
                   <span>Reports & Insights</span>
@@ -72,7 +57,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={() => setActiveTab("trackers")}
-                  className={activeTab === "trackers" ? "bg-blue-500/20 text-blue-400" : ""}
+                  className={`w-full ${activeTab === "trackers" ? "bg-blue-500/20 text-blue-400" : "text-white/70 hover:bg-white/10"}`}
                 >
                   <Bell className="w-4 h-4" />
                   <span>Market Trackers</span>
@@ -82,7 +67,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={handlePremiumFeature}
-                  className="opacity-75"
+                  className="w-full text-white/50 hover:bg-white/10"
                 >
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
@@ -95,8 +80,13 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {renderContent()}
+        <div className="p-4">
+          {activeTab === "analytics" && <AnalyticsDashboard />}
+          {activeTab === "reports" && <ReportsPanel />}
+          {activeTab === "trackers" && <TrackersPanel />}
+          {activeTab === "directory" && <FirmDirectory />}
+        </div>
       </SidebarContent>
     </Sidebar>
   );
-}
+};

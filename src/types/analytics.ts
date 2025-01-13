@@ -39,3 +39,12 @@ export interface TargetCriteria {
   maxEmployees: number;
   targetMarket: string;
 }
+
+export interface MarketOpportunityScore {
+  statefp: string;
+  countyfp: string;
+  countyname: string;
+  migration_score: number;
+  business_density_score: number;
+  service_coverage_score: number;
+}
