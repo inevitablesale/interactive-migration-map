@@ -127,7 +127,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
               'interpolate',
               ['linear'],
               ['coalesce', 
-                ['number', ['get', ['to-string', ['get', 'STATEFP']], ['literal', densityByState]], 
+                ['number', ['get', ['to-string', ['get', 'STATEFP']]], 0],
                 0
               ],
               0, '#F2FCE2',  // Low density
