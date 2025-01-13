@@ -5,7 +5,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Map as MapIcon, Building2 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { calculateGrowthScore, getColorFromScore, getHeightFromScore } from '@/utils/growthScoreCalculator';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -17,17 +16,6 @@ const MAP_COLORS = {
   active: '#FA0098',
   inactive: '#1e293b'
 };
-
-const STATE_COLORS = [
-  '#e6f3ff',
-  '#bde0ff',
-  '#94cdff',
-  '#6bb9ff',
-  '#42a6ff',
-  '#1992ff',
-  '#007fff',
-  '#0066cc'
-];
 
 interface MSAData {
   msa: string;
@@ -54,6 +42,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
+  const popupRef = useRef<mapboxgl.Popup | null>(null);
 
   const fetchStatesWithMSA = useCallback(async () => {
     try {
@@ -301,7 +290,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
       
-      map.current = new mapboxgl.Map({
+      const mapInstance = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/dark-v11',
         zoom: 3,
@@ -311,22 +300,27 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
         interactive: true,
       });
 
-      map.current.addControl(
+      // Store only the map instance, not the entire class
+      map.current = mapInstance;
+
+      mapInstance.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
         'top-right'
       );
 
-      map.current.on('style.load', () => {
+      mapInstance.on('style.load', () => {
         console.log('Map style loaded');
         setMapLoaded(true);
         initializeLayers();
       });
 
       return () => {
-        map.current?.remove();
-        map.current = null;
+        if (map.current) {
+          map.current.remove();
+          map.current = null;
+        }
       };
     } catch (error) {
       console.error('Error initializing map:', error);
