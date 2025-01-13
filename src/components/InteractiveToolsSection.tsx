@@ -3,6 +3,7 @@ import { ComparisonTool } from "./ComparisonTool";
 import { MarketOpportunities } from "./analytics/MarketOpportunities";
 import { ActionableInsights } from "./analytics/ActionableInsights";
 import { StrategyBuilder } from "./analytics/StrategyBuilder";
+import { EnhancedAnalytics } from "./analytics/EnhancedAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import AnalysisMap from "./analytics/AnalysisMap";
 
@@ -20,7 +21,7 @@ export const InteractiveToolsSection = () => {
       {/* Analysis Tools Section */}
       <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-132px)] overflow-y-auto">
         <Tabs defaultValue="opportunities" className="w-full">
-          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-4 grid grid-cols-3 gap-2">
+          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-4 grid grid-cols-4 gap-2">
             <TabsTrigger 
               value="opportunities" 
               className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200"
@@ -39,6 +40,12 @@ export const InteractiveToolsSection = () => {
             >
               Get Insights
             </TabsTrigger>
+            <TabsTrigger 
+              value="enhanced"
+              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200"
+            >
+              Enhanced Analytics
+            </TabsTrigger>
           </TabsList>
 
           <div className="p-4 space-y-4">
@@ -53,9 +60,13 @@ export const InteractiveToolsSection = () => {
             <TabsContent value="insights" className="mt-0 space-y-4">
               <ActionableInsights />
             </TabsContent>
+
+            <TabsContent value="enhanced" className="mt-0 space-y-4">
+              <EnhancedAnalytics />
+            </TabsContent>
           </div>
         </Tabs>
       </div>
     </div>
   );
-};
+}
