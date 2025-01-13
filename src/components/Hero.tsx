@@ -1,6 +1,5 @@
 import { ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 interface StateData {
   STATEFP: string;
@@ -14,35 +13,22 @@ interface StateData {
 
 export function Hero() {
   const [activeState, setActiveState] = useState<StateData | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     const handleStateChange = (event: Event) => {
       const customEvent = event as CustomEvent<StateData>;
       const stateData = customEvent.detail;
       setActiveState(stateData);
-
-      // Calculate average payroll
-      const avgPayroll = stateData.PAYANN && stateData.EMP 
-        ? Math.round(stateData.PAYANN / stateData.EMP)
-        : 0;
-
-      // Show toast with key metrics
-      toast({
-        title: `State ${stateData.STATEFP}`,
-        description: `${stateData.ESTAB?.toLocaleString()} firms • $${avgPayroll.toLocaleString()} avg payroll`,
-        duration: 2000,
-      });
     };
 
     window.addEventListener('stateChanged', handleStateChange);
     return () => {
       window.removeEventListener('stateChanged', handleStateChange);
     };
-  }, [toast]);
+  }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-white px-4 hero-section">
+    <div className="flex flex-col items-center justify-center min-h-[50vh] text-white px-4 hero-section">
       <div className="text-center max-w-4xl animate-fade-in">
         <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">AI-POWERED MARKET INTELLIGENCE</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
@@ -52,7 +38,7 @@ export function Hero() {
         </h1>
         <div className="flex justify-center">
           <button 
-            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+            onClick={() => window.scrollTo({ top: window.innerHeight / 2, behavior: 'smooth' })}
             className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"
           >
             <span className="text-sm uppercase tracking-wider mb-2">Explore the Map</span>

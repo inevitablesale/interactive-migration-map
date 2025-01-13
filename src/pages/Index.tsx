@@ -25,18 +25,18 @@ const Index = () => {
       {/* Scrollable Content */}
       <div className="relative z-10">
         {/* Hero Section */}
-        <div className="min-h-screen">
+        <div className="min-h-[50vh]">
           <Hero />
         </div>
+
+        {/* Data Sources Section */}
+        <DataSourcesSection />
 
         {/* Solutions Section */}
         <SolutionsSection />
 
         {/* Interactive Tools Section */}
         <InteractiveToolsSection />
-
-        {/* Data Sources Section */}
-        <DataSourcesSection />
       </div>
 
       {/* Fixed UI Elements */}

@@ -54,7 +54,6 @@ const Map = () => {
     setActiveState(state);
     
     try {
-      // Create a plain object with only serializable data
       const eventData = {
         STATEFP: state.STATEFP,
         EMP: state.EMP,
@@ -65,7 +64,6 @@ const Map = () => {
         B25077_001E: state.B25077_001E
       };
       
-      // Use a custom event with serializable data
       const event = new CustomEvent('stateChanged', { 
         detail: JSON.parse(JSON.stringify(eventData))
       });
@@ -141,7 +139,6 @@ const Map = () => {
         return;
       }
 
-      // Ensure the data is serializable
       const serializedData = JSON.parse(JSON.stringify(data || []));
       setStateData(serializedData);
 
