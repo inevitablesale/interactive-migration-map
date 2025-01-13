@@ -1,15 +1,16 @@
-import { Filter } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { GeographicLevel } from "@/types/geography";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface DataFilterToggleProps {
-  value: 'density' | 'migration';
-  onChange: (value: 'density' | 'migration') => void;
+interface GeographicLevelToggleProps {
+  value: GeographicLevel;
+  onChange: (value: GeographicLevel) => void;
 }
 
-export const DataFilterToggle = ({ value, onChange }: DataFilterToggleProps) => {
+export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggleProps) => {
   const { toast } = useToast();
 
   const { data: profile } = useQuery({
@@ -31,11 +32,11 @@ export const DataFilterToggle = ({ value, onChange }: DataFilterToggleProps) => 
 
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
-  const handleValueChange = (newValue: 'density' | 'migration') => {
-    if (isFreeTier && newValue === 'migration') {
+  const handleValueChange = (newValue: GeographicLevel) => {
+    if (isFreeTier && newValue === 'county') {
       toast({
         title: "Premium Feature",
-        description: "Upgrade to access migration data analysis.",
+        description: "Upgrade to access county-level data analysis.",
         variant: "default",
       });
       return;
@@ -53,18 +54,25 @@ export const DataFilterToggle = ({ value, onChange }: DataFilterToggleProps) => 
         className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-1"
       >
         <ToggleGroupItem
-          value="density"
+          value="state"
           className="data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
         >
-          <Filter className="w-4 h-4 mr-2" />
-          Density
+          <MapPin className="w-4 h-4 mr-2" />
+          State
         </ToggleGroupItem>
         <ToggleGroupItem
-          value="migration"
+          value="msa"
           className="data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
         >
-          <Filter className="w-4 h-4 mr-2" />
-          Migration
+          <MapPin className="w-4 h-4 mr-2" />
+          MSA
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="county"
+          className="data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
+        >
+          <MapPin className="w-4 h-4 mr-2" />
+          County
           {isFreeTier && (
             <span className="ml-1 text-xs text-yellow-500">PRO</span>
           )}
