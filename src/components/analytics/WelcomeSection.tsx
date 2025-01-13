@@ -1,8 +1,18 @@
 import { Bell, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { AlertForm } from "./AlertForm";
 
 export const WelcomeSection = () => {
+  const [showAlertForm, setShowAlertForm] = useState(false);
+
   return (
     <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -17,13 +27,22 @@ export const WelcomeSection = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              variant="outline" 
-              className="bg-white/5 border-white/10 hover:bg-white/10"
-            >
-              <Bell className="w-4 h-4 mr-2" />
-              Set Up Alerts
-            </Button>
+            <Dialog open={showAlertForm} onOpenChange={setShowAlertForm}>
+              <Button 
+                variant="outline" 
+                className="bg-white/5 border-white/10 hover:bg-white/10"
+                onClick={() => setShowAlertForm(true)}
+              >
+                <Bell className="w-4 h-4 mr-2" />
+                Set Up Alerts
+              </Button>
+              <DialogContent className="bg-gray-900 border-white/10 text-white">
+                <DialogHeader>
+                  <DialogTitle>Create New Alert</DialogTitle>
+                </DialogHeader>
+                <AlertForm onSuccess={() => setShowAlertForm(false)} />
+              </DialogContent>
+            </Dialog>
             <Button className="bg-blue-500 hover:bg-blue-600">
               View Opportunities
               <ArrowRight className="w-4 h-4 ml-2" />
