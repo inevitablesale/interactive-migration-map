@@ -4,13 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataFilterToggle } from "./DataFilterToggle";
 import AnalysisMap from "./AnalysisMap";
+import { DataVisualizationType } from "@/types/geography";
 
 interface HeatmapSectionProps {
   activeFilter: string;
 }
 
 export const HeatmapSection = ({ activeFilter }: HeatmapSectionProps) => {
-  const [selectedView, setSelectedView] = useState<'density' | 'migration'>("density");
+  const [selectedView, setSelectedView] = useState<DataVisualizationType>("density");
 
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
@@ -36,6 +37,7 @@ export const HeatmapSection = ({ activeFilter }: HeatmapSectionProps) => {
         <AnalysisMap 
           className="w-full h-full" 
           type={selectedView}
+          geographicLevel="state"
         />
       </div>
     </Card>
