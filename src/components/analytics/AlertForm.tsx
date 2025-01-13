@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,14 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [employeeRange, setEmployeeRange] = useState([10, 50]);
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<AlertFormData>();
+  const { control, handleSubmit, formState: { errors }, reset } = useForm<AlertFormData>({
+    defaultValues: {
+      title: "",
+      region: "",
+      specialties: "",
+      frequency: "daily"
+    }
+  });
 
   const onSubmit = async (data: AlertFormData) => {
     setLoading(true);
@@ -40,7 +47,7 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         region: data.region,
         employee_count_min: employeeRange[0],
         employee_count_max: employeeRange[1],
-        specialties: [data.specialties], // Convert single specialty to array
+        specialties: [data.specialties],
         frequency: data.frequency,
       });
 
@@ -70,10 +77,17 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       <div className="space-y-4">
         <div>
           <Label>Alert Name</Label>
-          <Input
-            {...register("title", { required: "Alert name is required" })}
-            placeholder="E.g., Tax firms in California"
-            className="mt-1.5"
+          <Controller
+            name="title"
+            control={control}
+            rules={{ required: "Alert name is required" }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="E.g., Tax firms in California"
+                className="mt-1.5"
+              />
+            )}
           />
           {errors.title && (
             <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
@@ -82,17 +96,24 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
         <div>
           <Label>Region</Label>
-          <Select {...register("region", { required: "Region is required" })}>
-            <SelectTrigger className="mt-1.5">
-              <SelectValue placeholder="Select region" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="CA">California</SelectItem>
-              <SelectItem value="TX">Texas</SelectItem>
-              <SelectItem value="NY">New York</SelectItem>
-              <SelectItem value="FL">Florida</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="region"
+            control={control}
+            rules={{ required: "Region is required" }}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select region" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CA">California</SelectItem>
+                  <SelectItem value="TX">Texas</SelectItem>
+                  <SelectItem value="NY">New York</SelectItem>
+                  <SelectItem value="FL">Florida</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.region && (
             <p className="text-sm text-red-500 mt-1">{errors.region.message}</p>
           )}
@@ -113,17 +134,24 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
         <div>
           <Label>Specialties</Label>
-          <Select {...register("specialties", { required: "Specialty is required" })}>
-            <SelectTrigger className="mt-1.5">
-              <SelectValue placeholder="Select specialties" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="tax">Tax</SelectItem>
-              <SelectItem value="audit">Audit</SelectItem>
-              <SelectItem value="advisory">Advisory</SelectItem>
-              <SelectItem value="payroll">Payroll</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="specialties"
+            control={control}
+            rules={{ required: "Specialty is required" }}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select specialties" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tax">Tax</SelectItem>
+                  <SelectItem value="audit">Audit</SelectItem>
+                  <SelectItem value="advisory">Advisory</SelectItem>
+                  <SelectItem value="payroll">Payroll</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.specialties && (
             <p className="text-sm text-red-500 mt-1">{errors.specialties.message}</p>
           )}
@@ -131,20 +159,30 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
         <div>
           <Label>Notification Frequency</Label>
-          <RadioGroup defaultValue="daily" className="mt-1.5">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="realtime" id="realtime" />
-              <Label htmlFor="realtime">Real-time</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="daily" id="daily" />
-              <Label htmlFor="daily">Daily Digest</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="weekly" id="weekly" />
-              <Label htmlFor="weekly">Weekly Summary</Label>
-            </div>
-          </RadioGroup>
+          <Controller
+            name="frequency"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue="daily"
+                className="mt-1.5"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="realtime" id="realtime" />
+                  <Label htmlFor="realtime">Real-time</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="daily" id="daily" />
+                  <Label htmlFor="daily">Daily Digest</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="weekly" id="weekly" />
+                  <Label htmlFor="weekly">Weekly Summary</Label>
+                </div>
+              </RadioGroup>
+            )}
+          />
         </div>
       </div>
 
