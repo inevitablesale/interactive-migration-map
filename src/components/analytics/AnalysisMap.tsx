@@ -130,6 +130,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           duration: 1000
         });
         setHeatmapEnabled(true);
+        fetchStateData(); // Refetch data when filter changes
         break;
       case 'growth-strategy':
         map.current.easeTo({
@@ -139,6 +140,7 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
           duration: 1000
         });
         setHeatmapEnabled(true);
+        fetchStateData(); // Refetch data when filter changes
         break;
       case 'opportunities':
         map.current.easeTo({
@@ -160,11 +162,27 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     }
   }, [activeFilter, map, mapLoaded]);
 
+  // Update heatmap when enabled state changes
+  useEffect(() => {
+    if (heatmapEnabled) {
+      fetchStateData();
+    }
+  }, [heatmapEnabled]);
+
   const getStateColor = useCallback((stateId: string) => {
+    if (!heatmapEnabled) return MAP_COLORS.inactive;
+    
     const state = stateData.find(s => s.STATEFP === stateId);
     if (!state || typeof state.buyerScore === 'undefined') return MAP_COLORS.inactive;
+    
+    // Only show heatmap for states that have MSAs
+    const msaStateSet = new Set(statesWithMSA?.map(s => s.padStart(2, '0')) || []);
+    if (!msaStateSet.has(stateId.padStart(2, '0'))) {
+      return MAP_COLORS.inactive;
+    }
+    
     return getHeatmapColor(state.buyerScore);
-  }, [stateData]);
+  }, [stateData, heatmapEnabled, statesWithMSA]);
 
   const updateAnalysisTable = useCallback((stateId: string) => {
     const state = stateData.find(s => s.STATEFP === stateId);
