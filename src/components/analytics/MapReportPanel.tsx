@@ -32,7 +32,7 @@ export const MapReportPanel = ({ selectedState, onClose }: MapReportPanelProps) 
         .from('buyer_profiles')
         .select('subscription_tier')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -72,7 +72,8 @@ export const MapReportPanel = ({ selectedState, onClose }: MapReportPanelProps) 
           title: `Market Analysis Report - State ${selectedState?.STATEFP}`,
           description: "Generated from map analysis",
           content: reportContent,
-          visibility: 'private'
+          visibility: 'private',
+          insights_query: `SELECT * FROM state_data WHERE STATEFP = '${selectedState?.STATEFP}'`
         });
 
       if (error) throw error;

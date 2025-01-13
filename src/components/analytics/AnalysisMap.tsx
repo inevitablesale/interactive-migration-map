@@ -17,6 +17,7 @@ import { useMSAData } from '@/hooks/useMSAData';
 import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
+import { getHeatmapColor, calculateBuyerScore } from '@/utils/mapUtils';
 
 interface AnalysisMapProps {
   className?: string;
