@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+.custom-popup .mapboxgl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.custom-popup .mapboxgl-popup-tip {
+  border-top-color: rgba(0, 0, 0, 0.9) !important;
+}

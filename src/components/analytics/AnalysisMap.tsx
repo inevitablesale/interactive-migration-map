@@ -10,24 +10,23 @@ import { calculateGrowthScore, getColorFromScore, getHeightFromScore } from '@/u
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
 const MAP_COLORS = {
-  primary: '#037CFE',    // Bright blue for primary elements
-  secondary: '#00FFE0',  // Cyan for secondary elements
-  accent: '#FFF903',     // Yellow for accents
-  highlight: '#94EC0E',  // Lime for highlights
-  active: '#FA0098',     // Pink for active states
-  inactive: '#1e293b'    // Dark slate for inactive states
+  primary: '#037CFE',
+  secondary: '#00FFE0',
+  accent: '#FFF903',
+  highlight: '#94EC0E',
+  active: '#FA0098',
+  inactive: '#1e293b'
 };
 
-// Color scale for states based on number of MSAs
 const STATE_COLORS = [
-  '#e6f3ff',  // Lightest blue
+  '#e6f3ff',
   '#bde0ff',
   '#94cdff',
   '#6bb9ff',
   '#42a6ff',
   '#1992ff',
   '#007fff',
-  '#0066cc'   // Darkest blue
+  '#0066cc'
 ];
 
 interface MSAData {
@@ -55,6 +54,66 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
   const [msaData, setMsaData] = useState<MSAData[]>([]);
   const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const resetToStateView = useCallback(() => {
+    if (!map.current) return;
+
+    // Hide MSA layers
+    map.current.setLayoutProperty('msa-base', 'visibility', 'none');
+    map.current.setLayoutProperty('msa-borders', 'visibility', 'none');
+    
+    // Show state layers
+    map.current.setLayoutProperty('state-base', 'visibility', 'visible');
+    map.current.setLayoutProperty('state-borders', 'visibility', 'visible');
+
+    // Reset camera
+    map.current.easeTo({
+      center: [-98.5795, 39.8283],
+      zoom: 3,
+      pitch: 45,
+      bearing: 0,
+      duration: 1500
+    });
+
+    setViewMode('state');
+    setSelectedState(null);
+  }, []);
+
+  const createPopup = useCallback((msaData: MSAData) => {
+    const growthScore = calculateGrowthScore(msaData);
+    const formattedEmployment = msaData.EMP?.toLocaleString() || 'N/A';
+    const formattedEstablishments = msaData.ESTAB?.toLocaleString() || 'N/A';
+    const formattedPayroll = msaData.PAYANN ? `$${(msaData.PAYANN / 1000000).toFixed(1)}M` : 'N/A';
+    const formattedPopulation = msaData.B01001_001E?.toLocaleString() || 'N/A';
+    
+    return `
+      <div class="bg-black/90 p-4 rounded-lg shadow-lg text-white min-w-[240px]">
+        <h3 class="font-bold text-lg mb-2">${msaData.msa_name}</h3>
+        <div class="space-y-1 text-sm">
+          <p class="flex justify-between">
+            <span class="text-gray-400">Growth Score:</span>
+            <span class="font-medium">${(growthScore * 100).toFixed(1)}%</span>
+          </p>
+          <p class="flex justify-between">
+            <span class="text-gray-400">Employment:</span>
+            <span class="font-medium">${formattedEmployment}</span>
+          </p>
+          <p class="flex justify-between">
+            <span class="text-gray-400">Businesses:</span>
+            <span class="font-medium">${formattedEstablishments}</span>
+          </p>
+          <p class="flex justify-between">
+            <span class="text-gray-400">Annual Payroll:</span>
+            <span class="font-medium">${formattedPayroll}</span>
+          </p>
+          <p class="flex justify-between">
+            <span class="text-gray-400">Population:</span>
+            <span class="font-medium">${formattedPopulation}</span>
+          </p>
+        </div>
+      </div>
+    `;
+  }, []);
 
   const fetchStatesWithMSA = useCallback(async () => {
     console.log('Fetching states with MSA data...');
@@ -532,10 +591,90 @@ const AnalysisMap = ({ className }: AnalysisMapProps) => {
     });
   }, [fitStateAndShowMSAs, updateAnalysisTable]);
 
+  useEffect(() => {
+    if (!map.current) return;
+
+    let hoveredMsaId: string | null = null;
+    let popup: mapboxgl.Popup | null = null;
+
+    const handleMsaHover = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
+      if (e.features && e.features.length > 0) {
+        if (hoveredMsaId) {
+          map.current?.setPaintProperty('msa-base', 'fill-extrusion-opacity', 0.8);
+        }
+        
+        hoveredMsaId = e.features[0].properties?.CBSAFP;
+        
+        if (hoveredMsaId) {
+          // Highlight hovered MSA
+          map.current?.setPaintProperty('msa-base', 'fill-extrusion-opacity', [
+            'case',
+            ['==', ['get', 'CBSAFP'], hoveredMsaId],
+            1,
+            0.4
+          ]);
+
+          // Find MSA data
+          const msaData = msaData.find(m => m.msa === hoveredMsaId);
+          if (msaData) {
+            // Remove existing popup
+            if (popup) {
+              popup.remove();
+            }
+
+            // Create new popup
+            popup = new mapboxgl.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              className: 'custom-popup'
+            })
+              .setLngLat(e.lngLat)
+              .setHTML(createPopup(msaData))
+              .addTo(map.current!);
+          }
+        }
+      }
+    };
+
+    const handleMsaLeave = () => {
+      if (hoveredMsaId) {
+        map.current?.setPaintProperty('msa-base', 'fill-extrusion-opacity', 0.8);
+        hoveredMsaId = null;
+      }
+      if (popup) {
+        popup.remove();
+        popup = null;
+      }
+    };
+
+    // Add event listeners
+    map.current.on('mousemove', 'msa-base', handleMsaHover);
+    map.current.on('mouseleave', 'msa-base', handleMsaLeave);
+
+    return () => {
+      if (map.current) {
+        map.current.off('mousemove', 'msa-base', handleMsaHover);
+        map.current.off('mouseleave', 'msa-base', handleMsaLeave);
+      }
+      if (popup) {
+        popup.remove();
+      }
+    };
+  }, [msaData, createPopup]);
+
   return (
     <div className={`relative ${className}`}>
       <div className="absolute top-4 left-4 z-10">
-        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'state' | 'msa')}>
+        <ToggleGroup 
+          type="single" 
+          value={viewMode} 
+          onValueChange={(value) => {
+            if (value === 'state') {
+              resetToStateView();
+            }
+            if (value) setViewMode(value as 'state' | 'msa');
+          }}
+        >
           <ToggleGroupItem value="state" aria-label="Toggle state view">
             <MapIcon className="h-4 w-4" />
             <span className="ml-2">States</span>
