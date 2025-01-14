@@ -9,9 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { AlertForm } from "./AlertForm";
+import { useSearchParams } from "react-router-dom";
 
 export const WelcomeSection = () => {
   const [showAlertForm, setShowAlertForm] = useState(false);
+  const [, setSearchParams] = useSearchParams();
+
+  const handleViewOpportunities = () => {
+    setSearchParams({ filter: 'opportunities' });
+  };
 
   return (
     <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
@@ -43,7 +49,10 @@ export const WelcomeSection = () => {
                 <AlertForm onSuccess={() => setShowAlertForm(false)} />
               </DialogContent>
             </Dialog>
-            <Button className="bg-blue-500 hover:bg-blue-600">
+            <Button 
+              className="bg-blue-500 hover:bg-blue-600"
+              onClick={handleViewOpportunities}
+            >
               View Opportunities
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
