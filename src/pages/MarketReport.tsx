@@ -6,50 +6,7 @@ import { ArrowLeft, Users, Building2, TrendingUp, GraduationCap, Briefcase, Car,
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-interface TopFirm {
-  company_name: string;
-  employee_count: number;
-  follower_count: number;
-  follower_ratio: number;
-}
-
-interface AdjacentCounty {
-  county_name: string;
-  population: number;
-  median_income: number;
-}
-
-interface ComprehensiveMarketData {
-  total_population: number | null;
-  median_household_income: number | null;
-  median_gross_rent: number | null;
-  median_home_value: number | null;
-  employed_population: number | null;
-  private_sector_accountants: number | null;
-  public_sector_accountants: number | null;
-  firms_per_10k_population: number | null;
-  growth_rate_percentage: number | null;
-  market_saturation_index: number | null;
-  total_education_population: number | null;
-  bachelors_degree_holders: number | null;
-  masters_degree_holders: number | null;
-  doctorate_degree_holders: number | null;
-  avg_accountant_payroll: number | null;
-  public_to_private_ratio: number | null;
-  avg_commute_time: number | null;
-  commute_rank: number | null;
-  poverty_rate: number | null;
-  poverty_rank: number | null;
-  vacancy_rate: number | null;
-  vacancy_rank: number | null;
-  income_rank: number | null;
-  population_rank: number | null;
-  rent_rank: number | null;
-  top_firms: TopFirm[] | null;
-  state_avg_income: number | null;
-  adjacent_counties: AdjacentCounty[] | null;
-}
+import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export default function MarketReport() {
   const { county, state } = useParams();
@@ -62,7 +19,7 @@ export default function MarketReport() {
         .from('state_fips_codes')
         .select('fips_code')
         .eq('state', state)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching state FIPS:', error);
@@ -70,7 +27,7 @@ export default function MarketReport() {
         throw error;
       }
 
-      return data.fips_code;
+      return data?.fips_code;
     },
   });
 
@@ -97,17 +54,18 @@ export default function MarketReport() {
         return null;
       }
 
-      const rawData = data[0] as unknown;
-      const typedData = rawData as ComprehensiveMarketData;
+      // Ensure proper typing of the response
+      const marketData = data[0] as ComprehensiveMarketData;
       
-      if (typedData.top_firms) {
-        typedData.top_firms = JSON.parse(JSON.stringify(typedData.top_firms));
+      // Parse JSON fields if they're returned as strings
+      if (typeof marketData.top_firms === 'string') {
+        marketData.top_firms = JSON.parse(marketData.top_firms);
       }
-      if (typedData.adjacent_counties) {
-        typedData.adjacent_counties = JSON.parse(JSON.stringify(typedData.adjacent_counties));
+      if (typeof marketData.adjacent_counties === 'string') {
+        marketData.adjacent_counties = JSON.parse(marketData.adjacent_counties);
       }
 
-      return typedData;
+      return marketData;
     },
     enabled: !!stateFips,
     retry: 1,
@@ -254,12 +212,6 @@ export default function MarketReport() {
       </div>
     );
   }
-
-  const accountantsPerFirm = calculateAccountantsPerFirm(
-    marketData.private_sector_accountants || 0,
-    marketData.public_sector_accountants || 0,
-    marketData.firms_per_10k_population ? (marketData.firms_per_10k_population * marketData.total_population / 10000) : 0
-  );
 
   return (
     <div className="min-h-screen bg-[#222222] p-8">
@@ -508,4 +460,3 @@ export default function MarketReport() {
       </div>
     </div>
   );
-}
