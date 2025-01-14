@@ -56,7 +56,8 @@ export default function MarketReport() {
       rank: marketData.population_rank
     },
     {
-      label: "Median Household Income",
+      label: "Median Household",
+      sublabel: "Income",
       value: `$${marketData.median_household_income?.toLocaleString()}`,
       type: "money" as const,
       rank: marketData.income_rank
@@ -80,7 +81,8 @@ export default function MarketReport() {
 
   const marketDynamicsMetrics = [
     {
-      label: "Firms per 10k Population",
+      label: "Firms per 10k",
+      sublabel: "Population",
       value: marketData.firms_per_10k_population?.toFixed(1),
       type: "density" as const,
       rank: marketData.density_rank
