@@ -6,6 +6,7 @@ export const getStateName = async (stateId: string): Promise<string> => {
   try {
     // Ensure stateId is padded with leading zero if needed
     const paddedStateId = stateId.padStart(2, '0');
+    console.log('Padded stateId:', paddedStateId);
     
     // Query the state_fips_codes table
     const { data, error } = await supabase
@@ -19,12 +20,12 @@ export const getStateName = async (stateId: string): Promise<string> => {
       return `State ${stateId}`;
     }
 
-    if (!data) {
-      console.log('No data found for stateId:', stateId);
+    if (!data || !data.state) {
+      console.log('No state name found for stateId:', stateId);
       return `State ${stateId}`;
     }
 
-    console.log('Found state_name:', data.state);
+    console.log('Found state name:', data.state);
     return data.state;
   } catch (error) {
     console.error('Unexpected error in getStateName:', error);
