@@ -31,7 +31,7 @@ export default function MarketReport() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-8">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse text-white/80">Loading comprehensive market data...</div>
         </div>
@@ -41,7 +41,7 @@ export default function MarketReport() {
 
   if (!hasMarketData || !marketData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl font-bold text-white mb-4">Market not found</h1>
           <Button onClick={() => navigate(-1)} variant="outline" className="text-white">
@@ -64,8 +64,8 @@ export default function MarketReport() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-      <div className="sticky top-0 z-10 backdrop-blur-md bg-black/40 border-b border-white/10">
+    <div className="min-h-screen bg-[#0B1120]">
+      <div className="sticky top-0 z-10 backdrop-blur-xl bg-black/40 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             <Button 
@@ -88,8 +88,32 @@ export default function MarketReport() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
+          <div className="p-4 rounded-lg bg-black/40 backdrop-blur-xl border border-white/10 mb-4">
+            <h3 className="text-sm font-medium text-white mb-2">Metric Scale:</h3>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                <span className="text-xs text-white/60">High</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                <span className="text-xs text-white/60">Strong</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                <span className="text-xs text-white/60">Average</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                <span className="text-xs text-white/60">Below Avg</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                <span className="text-xs text-white/60">Low</span>
+              </div>
+            </div>
+          </div>
           <MarketRankingBadges marketData={marketData} />
-          <ColorScaleLegend />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -161,7 +185,7 @@ export default function MarketReport() {
         </div>
 
         {marketData.top_firms && marketData.top_firms.length > 0 && (
-          <Card className="bg-black/40 backdrop-blur-md border-white/10">
+          <Card className="bg-black/40 backdrop-blur-xl border-white/10">
             <CardHeader>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <CardTitle className="flex items-center text-white">
