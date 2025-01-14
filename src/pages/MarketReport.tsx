@@ -84,7 +84,7 @@ export default function MarketReport() {
       
       console.log('Fetching data for:', { county, stateFips });
       
-      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
+      const { data: responseData, error } = await supabase.rpc('get_comprehensive_county_data', {
         p_county_name: county,
         p_state_fp: stateFips
       });
@@ -95,16 +95,21 @@ export default function MarketReport() {
         throw error;
       }
 
-      if (!data || data.length === 0) {
+      if (!responseData || responseData.length === 0) {
         toast.error('No data found for this location');
         return null;
       }
 
-      const rawData = data[0];
+      const rawData = responseData[0];
+      
+      // Safely cast the JSON fields to their respective types
+      const topFirms = rawData.top_firms as unknown as TopFirm[];
+      const adjacentCounties = rawData.adjacent_counties as unknown as AdjacentCounty[];
+
       return {
         ...rawData,
-        top_firms: rawData.top_firms as TopFirm[],
-        adjacent_counties: rawData.adjacent_counties as AdjacentCounty[]
+        top_firms: topFirms,
+        adjacent_counties: adjacentCounties
       } as ComprehensiveMarketData;
     },
     enabled: !!stateFips,
