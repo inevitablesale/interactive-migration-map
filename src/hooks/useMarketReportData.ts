@@ -27,26 +27,27 @@ export const useMarketReportData = (county: string | undefined, state: string | 
     enabled: !!state,
   });
 
-  // Query for market data from the materialized view
+  // Query for market data
   const { data: marketData, isLoading, error } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       if (!stateFips || !county) return null;
 
-      const { data, error } = await supabase
+      // First get the county data
+      const { data: countyData, error: countyError } = await supabase
         .from('county_data')
-        .select('*, state_fips_codes!inner(state)')
+        .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateFips)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching market data:', error);
+      if (countyError) {
+        console.error('Error fetching market data:', countyError);
         toast.error('Error fetching market data');
-        throw error;
+        throw countyError;
       }
 
-      if (!data) {
+      if (!countyData) {
         toast.error('No data found for this location');
         return null;
       }
@@ -81,41 +82,41 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       // Transform the data to match ComprehensiveMarketData type
       const marketData: ComprehensiveMarketData = {
-        total_population: data.B01001_001E,
-        median_household_income: data.B19013_001E,
-        median_gross_rent: data.B25064_001E,
-        median_home_value: data.B25077_001E,
-        employed_population: data.EMP, // Updated to use EMP instead of B23025_004E
-        private_sector_accountants: data.C24060_004E,
-        public_sector_accountants: data.C24060_007E,
-        firms_per_10k_population: data.ESTAB ? (data.ESTAB / data.B01001_001E) * 10000 : null,
-        growth_rate_percentage: data.population_growth_rate,
+        total_population: countyData.B01001_001E,
+        median_household_income: countyData.B19013_001E,
+        median_gross_rent: countyData.B25064_001E,
+        median_home_value: countyData.B25077_001E,
+        employed_population: countyData.EMP,
+        private_sector_accountants: countyData.C24060_004E,
+        public_sector_accountants: countyData.C24060_007E,
+        firms_per_10k_population: countyData.ESTAB ? (countyData.ESTAB / countyData.B01001_001E) * 10000 : null,
+        growth_rate_percentage: countyData.population_growth_rate,
         market_saturation_index: null,
-        total_education_population: data.B15003_001E,
-        bachelors_degree_holders: data.B15003_022E,
-        masters_degree_holders: data.B15003_023E,
-        doctorate_degree_holders: data.B15003_025E,
-        avg_accountant_payroll: data.PAYANN, // Using PAYANN directly
-        public_to_private_ratio: data.C24060_007E / (data.C24060_004E || 1),
-        avg_commute_time: data.B08303_001E ? data.B08303_001E / (12 * 20) : null,
+        total_education_population: countyData.B15003_001E,
+        bachelors_degree_holders: countyData.B15003_022E,
+        masters_degree_holders: countyData.B15003_023E,
+        doctorate_degree_holders: countyData.B15003_025E,
+        avg_accountant_payroll: countyData.PAYANN,
+        public_to_private_ratio: countyData.C24060_007E / (countyData.C24060_004E || 1),
+        avg_commute_time: countyData.B08303_001E ? countyData.B08303_001E / (12 * 20) : null,
         commute_rank: null,
-        poverty_rate: data.B17001_002E && data.B17001_001E 
-          ? (data.B17001_002E / data.B17001_001E) * 100 
+        poverty_rate: countyData.B17001_002E && countyData.B17001_001E 
+          ? (countyData.B17001_002E / countyData.B17001_001E) * 100 
           : null,
         poverty_rank: null,
-        vacancy_rate: data.vacancy_rate,
-        vacancy_rank: data.vacancy_rank,
-        income_rank: data.income_rank,
-        population_rank: data.population_rank,
-        rent_rank: data.rent_rank,
-        density_rank: data.firm_density_rank,
-        growth_rank: data.growth_rank,
+        vacancy_rate: countyData.vacancy_rate,
+        vacancy_rank: countyData.vacancy_rank,
+        income_rank: countyData.income_rank,
+        population_rank: countyData.population_rank,
+        rent_rank: countyData.rent_rank,
+        density_rank: countyData.firm_density_rank,
+        growth_rank: countyData.growth_rank,
         top_firms: topFirms,
         state_avg_income: null,
         adjacent_counties: null
       };
 
-      console.log('Market Data:', marketData); // Added for debugging
+      console.log('Market Data:', marketData);
       return marketData;
     },
     enabled: !!stateFips && !!county,
