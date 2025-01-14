@@ -34,8 +34,8 @@ export const useMarketReportData = (county: string | undefined, state: string | 
       if (!stateFips || !county) return null;
 
       const { data, error } = await supabase
-        .from('county_rankings')
-        .select('*')
+        .from('county_data')
+        .select('*, state_fips_codes!inner(state)')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateFips)
         .maybeSingle();
@@ -85,17 +85,17 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         median_household_income: data.B19013_001E,
         median_gross_rent: data.B25064_001E,
         median_home_value: data.B25077_001E,
-        employed_population: data.B23025_004E, // Total employed population
-        private_sector_accountants: data.C24060_004E, // Private sector accountants
-        public_sector_accountants: data.C24060_007E, // Public sector accountants
-        firms_per_10k_population: data.firms_per_10k,
+        employed_population: data.EMP, // Updated to use EMP instead of B23025_004E
+        private_sector_accountants: data.C24060_004E,
+        public_sector_accountants: data.C24060_007E,
+        firms_per_10k_population: data.ESTAB ? (data.ESTAB / data.B01001_001E) * 10000 : null,
         growth_rate_percentage: data.population_growth_rate,
         market_saturation_index: null,
         total_education_population: data.B15003_001E,
         bachelors_degree_holders: data.B15003_022E,
         masters_degree_holders: data.B15003_023E,
         doctorate_degree_holders: data.B15003_025E,
-        avg_accountant_payroll: data.PAYANN, // Average annual payroll
+        avg_accountant_payroll: data.PAYANN, // Using PAYANN directly
         public_to_private_ratio: data.C24060_007E / (data.C24060_004E || 1),
         avg_commute_time: data.B08303_001E ? data.B08303_001E / (12 * 20) : null,
         commute_rank: null,
@@ -115,6 +115,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         adjacent_counties: null
       };
 
+      console.log('Market Data:', marketData); // Added for debugging
       return marketData;
     },
     enabled: !!stateFips && !!county,
