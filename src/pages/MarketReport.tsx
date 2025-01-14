@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase, Star } from "lucide-react";
+import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase, Star, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { EducationDistributionCard } from "@/components/market-report/EducationDistributionCard";
@@ -10,13 +11,18 @@ import { MarketRankingBadges } from "@/components/market-report/MarketRankingBad
 import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
+import { useState } from "react";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d';
+const FIRMS_PER_PAGE = 5;
 
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
   const { marketData, isLoading, hasMarketData } = useMarketReportData(county, state);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   if (isLoading) {
     return (
@@ -87,9 +93,19 @@ export default function MarketReport() {
     }
   ];
 
+  // Filter and paginate firms
+  const filteredFirms = marketData.top_firms?.filter(firm => 
+    firm.company_name.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+  
+  const totalPages = Math.ceil(filteredFirms.length / FIRMS_PER_PAGE);
+  const paginatedFirms = filteredFirms.slice(
+    (currentPage - 1) * FIRMS_PER_PAGE,
+    currentPage * FIRMS_PER_PAGE
+  );
+
   return (
     <div className="min-h-screen bg-[#222222]">
-      {/* Header Section */}
       <div className="bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto p-8">
           <Button onClick={() => navigate(-1)} variant="outline" className="text-white mb-4">
@@ -148,14 +164,28 @@ export default function MarketReport() {
         {marketData.top_firms && marketData.top_firms.length > 0 && (
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <LayoutGrid className="w-5 h-5 mr-2" />
-                Leading Firms
-              </CardTitle>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <CardTitle className="flex items-center text-white">
+                  <LayoutGrid className="w-5 h-5 mr-2" />
+                  Leading Firms
+                </CardTitle>
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search firms..."
+                    className="pl-8 bg-black/20 border-white/10 text-white"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {marketData.top_firms.map((firm, index) => (
+                {paginatedFirms.map((firm, index) => (
                   <Card key={index} className="bg-black/20 border-white/5 overflow-hidden group hover:border-white/20 transition-all duration-200">
                     <CardContent className="p-0">
                       <div className="relative h-32 overflow-hidden">
@@ -242,6 +272,38 @@ export default function MarketReport() {
                   </Card>
                 ))}
               </div>
+
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          className="text-white hover:text-white"
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="text-white hover:text-white"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          className="text-white hover:text-white"
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -249,4 +311,3 @@ export default function MarketReport() {
     </div>
   );
 }
-

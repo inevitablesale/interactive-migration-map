@@ -57,8 +57,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', parseInt(stateFips))
-        .order('followerCount', { ascending: false })
-        .limit(6);
+        .order('followerCount', { ascending: false });
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
