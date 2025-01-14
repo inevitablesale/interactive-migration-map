@@ -44,7 +44,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateFips)
-        .single(); // Use single() instead of maybeSingle() to get exactly one row
+        .maybeSingle();
 
       if (countyError) {
         console.error('Error fetching market data:', countyError);
