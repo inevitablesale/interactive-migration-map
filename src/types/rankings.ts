@@ -68,6 +68,14 @@ export interface ComprehensiveMarketData {
     employee_count: number;
     follower_count: number;
     follower_ratio: number;
+    logoResolutionResult?: string;
+    originalCoverImage?: string;
+    primarySubtitle?: string;
+    employeeCountRangeLow?: number;
+    employeeCountRangeHigh?: number;
+    foundedOn?: string;
+    specialities?: string;
+    websiteUrl?: string;
   }> | null;
   state_avg_income: number | null;
   adjacent_counties: Array<{
