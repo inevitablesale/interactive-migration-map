@@ -9,36 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      adjacent_counties: {
-        Row: {
-          county_name: string
-          created_at: string | null
-          id: number
-          median_income: number | null
-          population: number | null
-          state_fp: string
-          updated_at: string | null
-        }
-        Insert: {
-          county_name: string
-          created_at?: string | null
-          id?: number
-          median_income?: number | null
-          population?: number | null
-          state_fp: string
-          updated_at?: string | null
-        }
-        Update: {
-          county_name?: string
-          created_at?: string | null
-          id?: number
-          median_income?: number | null
-          population?: number | null
-          state_fp?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       alerts: {
         Row: {
           created_at: string | null
