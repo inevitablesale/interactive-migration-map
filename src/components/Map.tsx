@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
@@ -14,12 +14,6 @@ interface StateData {
   B23025_004E: number | null;
   B25077_001E: number | null;
   displayName?: string;
-  firmDensity?: number;
-}
-
-interface DensityMetric {
-  STATEFP: string;
-  density: number;
 }
 
 const Map = () => {
@@ -29,34 +23,12 @@ const Map = () => {
   const [activeState, setActiveState] = useState<StateData | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const getFirmDensityColor = useCallback((density: number) => {
-    if (density >= 6.5) return MAP_COLORS.primary;     // Very high density
-    if (density >= 5.5) return MAP_COLORS.secondary;   // High density
-    if (density >= 4.5) return MAP_COLORS.accent;      // Medium-high density
-    if (density >= 3.5) return MAP_COLORS.highlight;   // Medium density
-    return MAP_COLORS.active;                          // Lower density
-  }, []);
-
   const fetchStateData = async () => {
     try {
       console.log('Fetching state data...');
-      // First, get density metrics
-      const { data: densityMetrics, error: densityError } = await supabase
-        .from('state_density_metrics')
-        .select('STATEFP, density')
-        .not('STATEFP', 'is', null)
-        .not('density', 'is', null);
-
-      if (densityError) {
-        console.error('Error fetching density metrics:', densityError);
-        return;
-      }
-
-      // Then, get full state data
       const { data: fullStateData, error: stateError } = await supabase
         .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
-        .in('STATEFP', densityMetrics.map(d => d.STATEFP));
+        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E');
 
       if (stateError) {
         console.error('Error fetching state data:', stateError);
@@ -66,12 +38,10 @@ const Map = () => {
       // Combine the data
       const combinedData = await Promise.all(
         fullStateData.map(async (state) => {
-          const densityMetric = densityMetrics.find(d => d.STATEFP === state.STATEFP);
           const stateName = await getStateName(state.STATEFP);
           return {
             ...state,
             displayName: stateName,
-            firmDensity: densityMetric?.density || 0
           };
         })
       );
@@ -159,7 +129,7 @@ const Map = () => {
           'fill-extrusion-color': [
             'case',
             ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            activeState?.firmDensity ? getFirmDensityColor(activeState.firmDensity) : STATE_COLORS[0],
+            STATE_COLORS[0],
             'transparent'
           ],
           'fill-extrusion-height': [
@@ -239,10 +209,6 @@ const Map = () => {
       rotateMap();
     });
 
-    mapInstance.on('moveend', () => {
-      spinGlobe();
-    });
-
     // Start the globe spinning
     rotateMap();
 
@@ -269,10 +235,10 @@ const Map = () => {
     map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
       'case',
       ['==', ['get', 'STATEFP'], activeState.STATEFP],
-      getFirmDensityColor(activeState.firmDensity || 0),
+      STATE_COLORS[0],
       'transparent'
     ]);
-  }, [activeState, getFirmDensityColor]);
+  }, [activeState]);
 
   return (
     <div className="w-full h-full">
@@ -283,40 +249,8 @@ const Map = () => {
       {activeState && (
         <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-lg p-4 rounded-xl border border-white/10">
           <h3 className="text-white text-lg font-medium">{activeState.displayName}</h3>
-          {activeState.firmDensity && (
-            <p className="text-white/80 text-sm">
-              Firm Density: {activeState.firmDensity.toFixed(2)}
-            </p>
-          )}
         </div>
       )}
-      
-      {/* Legend with updated styling */}
-      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-lg p-4 rounded-xl border border-white/10">
-        <h3 className="text-white text-sm font-medium mb-2">Firm Density</h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.primary }} />
-            <span className="text-white text-xs">Very High (6.5+)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.secondary }} />
-            <span className="text-white text-xs">High (5.5-6.5)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.accent }} />
-            <span className="text-white text-xs">Medium-High (4.5-5.5)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.highlight }} />
-            <span className="text-white text-xs">Medium (3.5-4.5)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.active }} />
-            <span className="text-white text-xs">Lower (&lt;3.5)</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
