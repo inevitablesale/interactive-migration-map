@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { TrendingUp, Users, Target } from "lucide-react";
+import { TrendingUp, Users, Target, InfoIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MarketGrowthMetric {
   county_name: string;
@@ -34,7 +35,21 @@ export function KeyInsightsPanel() {
         ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
         : "Loading...",
       insight: topGrowthRegion
-        ? `${topGrowthRegion.growth_rate_percentage}% growth, ${topGrowthRegion.population_growth.toLocaleString()} new residents`
+        ? (
+          <div className="flex items-center gap-2">
+            <span>{`${topGrowthRegion.growth_rate_percentage}% growth, ${topGrowthRegion.population_growth.toLocaleString()} new residents`}</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[300px]">
+                  <p>Growth rate is calculated as the percentage change in population moves from 2020 to 2022. It compares the total number of people who moved into the region in 2022 versus 2020 to identify trending growth areas.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )
         : "Analyzing regional data",
       icon: TrendingUp,
     },
