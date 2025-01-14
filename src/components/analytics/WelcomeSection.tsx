@@ -30,7 +30,7 @@ export const WelcomeSection = () => {
             Discover and analyze potential acquisition targets with our
             data-driven insights and market analysis tools.
           </p>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-8">
             <Dialog open={showAlertForm} onOpenChange={setShowAlertForm}>
               <Button
                 variant="outline"
