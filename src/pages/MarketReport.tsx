@@ -90,7 +90,7 @@ export default function MarketReport() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: marketData, isLoading } = useQuery({
+  const { data: marketData, isLoading } = useQuery<ComprehensiveMarketData | null>({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       if (!stateFips) return null;
@@ -98,8 +98,9 @@ export default function MarketReport() {
       console.log('Fetching comprehensive data for:', { county, stateFips });
       
       try {
+        const countyName = county?.replace(' County', '');
         const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-          p_county_name: county?.replace(' County', ''),
+          p_county_name: countyName,
           p_state_fp: stateFips
         });
 
@@ -110,13 +111,20 @@ export default function MarketReport() {
         }
 
         if (!data || data.length === 0) {
-          console.error('No data found for:', { county, stateFips });
+          console.error('No data found for:', { county: countyName, stateFips });
           toast.error('No data found for this location');
           return null;
         }
 
-        console.log('Received market data:', data[0]);
-        return data[0];
+        // Ensure proper typing of the response
+        const marketData: ComprehensiveMarketData = {
+          ...data[0],
+          top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms : [],
+          adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties : []
+        };
+
+        console.log('Received market data:', marketData);
+        return marketData;
       } catch (err) {
         console.error('Error in marketData query:', err);
         toast.error('Error fetching market data');
