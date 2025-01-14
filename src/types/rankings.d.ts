@@ -16,7 +16,6 @@ export interface ComprehensiveMarketData {
   public_to_private_ratio?: number;
   avg_accountant_payroll?: number;
   employed_population?: number;
-  firms_per_10k_population?: number;
   total_education_population?: number;
   bachelors_degree_holders?: number;
   masters_degree_holders?: number;

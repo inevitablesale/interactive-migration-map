@@ -19,29 +19,29 @@ interface MarketMetricsCardProps {
 export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsCardProps) {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-2xl font-medium text-white/80">
-          <Icon className="w-6 h-6" />
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-xl font-medium text-white/80">
+          <Icon className="w-5 h-5" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-12">
+      <CardContent className="space-y-8">
         {metrics.map((metric, index) => (
-          <div key={index} className="space-y-8">
+          <div key={index} className="space-y-4">
             <div>
-              <h3 className="text-gray-400 text-lg mb-2">
+              <h3 className="text-gray-400 text-sm mb-1">
                 {metric.label}
                 {metric.sublabel && (
-                  <span className="block mt-1">{metric.sublabel}</span>
+                  <span className="block mt-0.5 text-xs">{metric.sublabel}</span>
                 )}
               </h3>
-              <p className={`text-6xl font-bold tracking-tight ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
+              <p className={`text-4xl font-bold tracking-tight break-words ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
                 {metric.value || 'N/A'}
               </p>
               {metric.rank && (
-                <div className="mt-4">
-                  <p className="text-gray-500 text-base mb-1">Rank:</p>
-                  <p className="text-4xl text-white/90 font-medium">{metric.rank.toLocaleString()}</p>
+                <div className="mt-2">
+                  <p className="text-gray-500 text-xs mb-0.5">Rank:</p>
+                  <p className="text-2xl text-white/90 font-medium">{metric.rank.toLocaleString()}</p>
                 </div>
               )}
             </div>
