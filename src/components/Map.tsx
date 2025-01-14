@@ -35,7 +35,6 @@ interface StateData {
   B23025_004E: number | null;
   B25077_001E: number | null;
   displayName?: string;
-  firmDensity?: number;
 }
 
 const Map = () => {
@@ -51,14 +50,6 @@ const Map = () => {
     return STATE_COLORS[colorIndex];
   }, []);
 
-  const getFirmDensityColor = useCallback((density: number) => {
-    if (density >= 80) return '#037CFE';  // High density - blue
-    if (density >= 60) return '#00FFE0';  // Good density - cyan
-    if (density >= 40) return '#FFF903';  // Medium density - yellow
-    if (density >= 20) return '#94EC0E';  // Low-medium density - green
-    return '#FA0098';                     // Low density - pink
-  }, []);
-
   const updateActiveState = useCallback(async (state: StateData | null) => {
     if (!state) return;
     
@@ -71,17 +62,14 @@ const Map = () => {
       
       setActiveState(stateWithName);
       
-      // Create a simplified event payload with only necessary data
       const eventData = {
         STATEFP: state.STATEFP,
         displayName: stateName,
-        firmDensity: state.firmDensity,
         EMP: state.EMP,
         PAYANN: state.PAYANN,
         ESTAB: state.ESTAB
       };
       
-      // Ensure the data is cloneable by stringifying and parsing
       const event = new CustomEvent('stateChanged', { 
         detail: JSON.parse(JSON.stringify(eventData))
       });
@@ -132,7 +120,7 @@ const Map = () => {
             map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
               'case',
               ['==', ['get', 'STATEFP'], nextState.STATEFP],
-              nextState.firmDensity ? getFirmDensityColor(nextState.firmDensity) : getStateColor(nextState.STATEFP),
+              getStateColor(nextState.STATEFP),
               'transparent'
             ]);
           }
@@ -142,13 +130,13 @@ const Map = () => {
     }, 5000);
 
     return interval;
-  }, [stateData, mapLoaded, updateActiveState, getStateColor, getFirmDensityColor]);
+  }, [stateData, mapLoaded, updateActiveState, getStateColor]);
 
   const fetchStateData = async () => {
     try {
       const { data, error } = await supabase
         .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E, B01001_001E')
+        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
         .not('STATEFP', 'is', null)
         .not('ESTAB', 'is', null);
 
@@ -157,14 +145,7 @@ const Map = () => {
         return;
       }
 
-      const statesWithDensity = data.map(state => ({
-        ...state,
-        firmDensity: state.ESTAB && state.B01001_001E ? 
-          (state.ESTAB / state.B01001_001E) * 10000 : 0
-      }));
-
-      // Ensure the data is cloneable
-      const serializedData = JSON.parse(JSON.stringify(statesWithDensity));
+      const serializedData = JSON.parse(JSON.stringify(data));
       setStateData(serializedData);
 
       if (serializedData.length > 0) {
@@ -218,12 +199,7 @@ const Map = () => {
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': [
-            'case',
-            ['has', 'firmDensity'],
-            ['interpolate', ['linear'], ['get', 'firmDensity'], 0, '#FA0098', 20, '#94EC0E', 40, '#FFF903', 60, '#00FFE0', 80, '#037CFE'],
-            MAP_COLORS.inactive
-          ],
+          'fill-extrusion-color': MAP_COLORS.inactive,
           'fill-extrusion-height': 10000,
           'fill-extrusion-opacity': 0.6
         }
@@ -238,7 +214,7 @@ const Map = () => {
           'fill-extrusion-color': [
             'case',
             ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            activeState?.firmDensity ? getFirmDensityColor(activeState.firmDensity) : getStateColor(activeState?.STATEFP || '0'),
+            getStateColor(activeState?.STATEFP || '0'),
             'transparent'
           ],
           'fill-extrusion-height': [
@@ -310,33 +286,6 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-black/60 p-4 rounded-lg">
-        <h3 className="text-white text-sm font-medium mb-2">Firm Density</h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#037CFE' }} />
-            <span className="text-white text-xs">Very High (80+)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#00FFE0' }} />
-            <span className="text-white text-xs">High (60-80)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFF903' }} />
-            <span className="text-white text-xs">Medium (40-60)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#94EC0E' }} />
-            <span className="text-white text-xs">Low (20-40)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-            <span className="text-white text-xs">Very Low (0-20)</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
