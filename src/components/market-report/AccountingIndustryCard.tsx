@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, TrendingUp, DollarSign, Info } from 'lucide-react';
+import { Building2, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -11,17 +11,17 @@ interface AccountingIndustryCardProps {
 }
 
 export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ marketData }) => {
-  const getMetricBadge = (value: number, type: 'density' | 'growth' | 'payroll') => {
+  const getMetricBadge = (value: number, type: 'density' | 'employment' | 'payroll') => {
     const thresholds = {
       density: { high: 20, medium: 10 },
-      growth: { high: 5, medium: 0 },
-      payroll: { high: 80, medium: 60 }
+      employment: { high: 1000000, medium: 500000 },
+      payroll: { high: 80000, medium: 60000 }
     };
     
     const t = thresholds[type];
-    if (value > t.high) return <Badge className="bg-emerald-500">High Performance</Badge>;
-    if (value > t.medium) return <Badge className="bg-blue-500">Strong</Badge>;
-    return <Badge className="bg-yellow-500">Average</Badge>;
+    if (value > t.high) return { label: "High Performance", color: "bg-emerald-500/90 hover:bg-emerald-500/80" };
+    if (value > t.medium) return { label: "Strong", color: "bg-blue-500/90 hover:bg-blue-500/80" };
+    return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
   return (
@@ -48,7 +48,11 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {getMetricBadge(marketData.firms_per_10k_population || 0, 'density')}
+            {marketData.firms_per_10k_population && (
+              <Badge className={`${getMetricBadge(marketData.firms_per_10k_population, 'density').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(marketData.firms_per_10k_population, 'density').label}
+              </Badge>
+            )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
             {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'} per 10k residents
@@ -69,7 +73,11 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {getMetricBadge(marketData.growth_rate_percentage || 0, 'growth')}
+            {marketData.employed_population && (
+              <Badge className={`${getMetricBadge(marketData.employed_population, 'employment').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(marketData.employed_population, 'employment').label}
+              </Badge>
+            )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.employed_population || 0, 'population')}`}>
             {marketData.employed_population?.toLocaleString() ?? 'N/A'}
@@ -90,9 +98,13 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {getMetricBadge(marketData.avg_accountant_payroll || 0, 'payroll')}
+            {marketData.avg_accountant_payroll && (
+              <Badge className={`${getMetricBadge(marketData.avg_accountant_payroll * 1000, 'payroll').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(marketData.avg_accountant_payroll * 1000, 'payroll').label}
+              </Badge>
+            )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
+          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll * 1000 || 0, 'money')}`}>
             ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll * 1000).toLocaleString() : 'N/A'}
           </p>
         </div>

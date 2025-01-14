@@ -3,12 +3,7 @@ import { Briefcase, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMetricColor } from '@/utils/market-report/formatters';
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ComprehensiveMarketData } from '@/types/rankings';
 
 interface EmploymentMetricsCardProps {
@@ -16,25 +11,17 @@ interface EmploymentMetricsCardProps {
 }
 
 export const EmploymentMetricsCard: React.FC<EmploymentMetricsCardProps> = ({ marketData }) => {
-  const getEmploymentBadge = (value: number) => {
-    if (value >= 1000000) return "Major Employment Hub";
-    if (value >= 500000) return "Large Employment Base";
-    if (value >= 100000) return "Mid-Size Market";
-    return "Emerging Market";
-  };
-
-  const getSalaryBadge = (value: number) => {
-    if (value >= 200000000) return "Premium Market";
-    if (value >= 100000000) return "High-Value Market";
-    if (value >= 50000000) return "Competitive Market";
-    return "Developing Market";
-  };
-
-  const getRatioBadge = (value: number) => {
-    if (value >= 3) return "Public Sector Dominant";
-    if (value >= 2) return "Balanced Market";
-    if (value >= 1) return "Private Sector Focus";
-    return "Private Sector Dominant";
+  const getEmploymentBadge = (value: number, type: 'population' | 'salary' | 'ratio') => {
+    const thresholds = {
+      population: { high: 1000000, medium: 500000 },
+      salary: { high: 80000, medium: 60000 },
+      ratio: { high: 3, medium: 2 }
+    };
+    
+    const t = thresholds[type];
+    if (value > t.high) return { label: "High Performance", color: "bg-emerald-500/90 hover:bg-emerald-500/80" };
+    if (value > t.medium) return { label: "Strong", color: "bg-blue-500/90 hover:bg-blue-500/80" };
+    return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
   return (
@@ -48,22 +35,22 @@ export const EmploymentMetricsCard: React.FC<EmploymentMetricsCardProps> = ({ ma
       <CardContent className="space-y-4">
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-gray-400 flex items-center">
-              Employed Population
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Employed Population</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Info className="w-4 h-4 ml-2 text-gray-400" />
+                    <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm">Total number of employed individuals in the region</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </p>
+            </div>
             {marketData.employed_population && (
-              <Badge className={`${getMetricColor(marketData.employed_population, 'population')}`}>
-                {getEmploymentBadge(marketData.employed_population)}
+              <Badge className={`${getEmploymentBadge(marketData.employed_population, 'population').color} text-white font-medium px-3 py-1`}>
+                {getEmploymentBadge(marketData.employed_population, 'population').label}
               </Badge>
             )}
           </div>
@@ -74,22 +61,22 @@ export const EmploymentMetricsCard: React.FC<EmploymentMetricsCardProps> = ({ ma
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-gray-400 flex items-center">
-              Average Accountant Salary
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Average Accountant Salary</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Info className="w-4 h-4 ml-2 text-gray-400" />
+                    <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm">Average annual salary for accountants in the region</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </p>
+            </div>
             {marketData.avg_accountant_payroll && (
-              <Badge className={`${getMetricColor(marketData.avg_accountant_payroll * 1000, 'money')}`}>
-                {getSalaryBadge(marketData.avg_accountant_payroll * 1000)}
+              <Badge className={`${getEmploymentBadge(marketData.avg_accountant_payroll * 1000, 'salary').color} text-white font-medium px-3 py-1`}>
+                {getEmploymentBadge(marketData.avg_accountant_payroll * 1000, 'salary').label}
               </Badge>
             )}
           </div>
@@ -100,22 +87,22 @@ export const EmploymentMetricsCard: React.FC<EmploymentMetricsCardProps> = ({ ma
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-gray-400 flex items-center">
-              Public/Private Sector Ratio
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Public/Private Sector Ratio</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Info className="w-4 h-4 ml-2 text-gray-400" />
+                    <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm">Ratio of public sector to private sector employment</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </p>
+            </div>
             {marketData.public_to_private_ratio && (
-              <Badge className={`${getMetricColor(marketData.public_to_private_ratio, 'density')}`}>
-                {getRatioBadge(marketData.public_to_private_ratio)}
+              <Badge className={`${getEmploymentBadge(marketData.public_to_private_ratio, 'ratio').color} text-white font-medium px-3 py-1`}>
+                {getEmploymentBadge(marketData.public_to_private_ratio, 'ratio').label}
               </Badge>
             )}
           </div>
