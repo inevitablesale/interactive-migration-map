@@ -52,18 +52,13 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       // Get the top firms data
-      let topFirms = [];
-      if (rankingData.top_firms) {
-        const { data: firmsData, error: firmsError } = await supabase
-          .from('canary_firms_data')
-          .select('*')
-          .in('Company ID', rankingData.top_firms);
+      const { data: firmsData, error: firmsError } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .in('Company ID', rankingData.top_firms);
 
-        if (firmsError) {
-          console.error('Error fetching firms data:', firmsError);
-        } else {
-          topFirms = firmsData || [];
-        }
+      if (firmsError) {
+        console.error('Error fetching firms data:', firmsError);
       }
 
       // Transform the data to match ComprehensiveMarketData type
@@ -76,7 +71,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         private_sector_accountants: null,
         public_sector_accountants: null,
         firms_per_10k_population: rankingData.firms_per_10k,
-        growth_rate_percentage: rankingData.growth_rate,
+        growth_rate_percentage: rankingData.population_growth_rate,
         market_saturation_index: null,
         total_education_population: null,
         bachelors_degree_holders: null,
@@ -93,9 +88,9 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         income_rank: null,
         population_rank: rankingData.population_rank,
         rent_rank: null,
-        density_rank: rankingData.density_rank,
+        density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
-        top_firms: topFirms,
+        top_firms: firmsData || [],
         state_avg_income: null,
         adjacent_counties: null
       };
