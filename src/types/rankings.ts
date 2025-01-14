@@ -50,12 +50,10 @@ export interface ComprehensiveMarketData {
   bachelors_degree_holders: number | null;
   masters_degree_holders: number | null;
   doctorate_degree_holders: number | null;
-  avg_accountant_payroll: number | null;
+  payann: number | null;
+  total_establishments: number | null;
+  emp: number | null;
   public_to_private_ratio: number | null;
-  avg_commute_time: number | null;
-  commute_rank: number | null;
-  poverty_rate: number | null;
-  poverty_rank: number | null;
   vacancy_rate: number | null;
   vacancy_rank: number | null;
   income_rank: number | null;
@@ -76,11 +74,7 @@ export interface ComprehensiveMarketData {
     foundedOn?: string;
     specialities?: string;
     websiteUrl?: string;
-  }> | null;
-  state_avg_income: number | null;
-  adjacent_counties: Array<{
-    county_name: string;
-    population: number;
-    median_income: number;
+    Location?: string;
+    Summary?: string;
   }> | null;
 }
