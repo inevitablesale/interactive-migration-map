@@ -41,7 +41,7 @@ export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsC
                 </p>
                 {metric.rank && (
                   <div className="text-right">
-                    <p className="text-gray-500 text-xs mb-0.5">Rank:</p>
+                    <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
                     <p className="text-2xl text-white/90 font-medium">{metric.rank.toLocaleString()}</p>
                   </div>
                 )}
