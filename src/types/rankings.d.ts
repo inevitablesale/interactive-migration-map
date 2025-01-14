@@ -1,51 +1,39 @@
+export interface ComprehensiveMarketData {
+  total_population?: number;
+  median_household_income?: number;
+  income_rank?: number;
+  median_gross_rent?: number;
+  rent_rank?: number;
+  vacancy_rate?: number;
+  vacancy_rank?: number;
+  firms_per_10k_population?: number;
+  density_rank?: number;
+  growth_rate_percentage?: number;
+  growth_rank?: number;
+  top_firms?: TopFirm[];
+  private_sector_accountants?: number;
+  public_sector_accountants?: number;
+  public_to_private_ratio?: number;
+  avg_accountant_payroll?: number;
+  employed_population?: number;
+  firms_per_10k_population?: number;
+  total_education_population?: number;
+  bachelors_degree_holders?: number;
+  masters_degree_holders?: number;
+  doctorate_degree_holders?: number;
+}
+
 export interface TopFirm {
   company_name: string;
   employee_count: number;
   follower_count: number;
   follower_ratio: number;
-  specialities?: string;
   logoResolutionResult?: string;
   originalCoverImage?: string;
+  primarySubtitle?: string;
   employeeCountRangeLow?: number;
   employeeCountRangeHigh?: number;
-  foundedOn?: number;
+  foundedOn?: string;
+  specialities?: string;
   websiteUrl?: string;
-  primarySubtitle?: string;
-}
-
-export interface ComprehensiveMarketData {
-  total_population: number | null;
-  median_household_income: number | null;
-  median_gross_rent: number | null;
-  median_home_value: number | null;
-  employed_population: number | null;
-  private_sector_accountants: number | null;
-  public_sector_accountants: number | null;
-  firms_per_10k_population: number | null;
-  growth_rate_percentage: number | null;
-  market_saturation_index: number | null;
-  total_education_population: number | null;
-  bachelors_degree_holders: number | null;
-  masters_degree_holders: number | null;
-  doctorate_degree_holders: number | null;
-  avg_accountant_payroll: number | null;
-  public_to_private_ratio: number | null;
-  avg_commute_time: number | null;
-  commute_rank: number | null;
-  poverty_rate: number | null;
-  poverty_rank: number | null;
-  vacancy_rate: number | null;
-  vacancy_rank: number | null;
-  income_rank: number | null;
-  population_rank: number | null;
-  rent_rank: number | null;
-  density_rank: number | null;
-  growth_rank: number | null;
-  top_firms: TopFirm[] | null;
-  state_avg_income: number | null;
-  adjacent_counties: Array<{
-    county_name: string;
-    population: number;
-    median_income: number;
-  }> | null;
 }
