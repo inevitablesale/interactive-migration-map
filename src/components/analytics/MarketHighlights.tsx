@@ -77,24 +77,24 @@ export function MarketHighlights() {
   const [activeTab, setActiveTab] = useState("growth");
 
   return (
-    <Card className="p-6 bg-[#1A1F2C]/60 backdrop-blur-md border-[#6E59A5]/20">
+    <Card className="p-6 bg-[#403E43]/60 backdrop-blur-md border-[#555555]/20">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 mb-6 bg-[#221F26]/60">
+        <TabsList className="grid w-full grid-cols-3 mb-6 bg-[#333333]/60">
           <TabsTrigger 
             value="growth"
-            className="data-[state=active]:bg-[#9b87f5]/20 data-[state=active]:text-[#9b87f5]"
+            className="data-[state=active]:bg-[#D3E4FD]/20 data-[state=active]:text-[#D3E4FD]"
           >
             Growth Leaders
           </TabsTrigger>
           <TabsTrigger 
             value="competitive"
-            className="data-[state=active]:bg-[#9b87f5]/20 data-[state=active]:text-[#9b87f5]"
+            className="data-[state=active]:bg-[#D3E4FD]/20 data-[state=active]:text-[#D3E4FD]"
           >
             Competitive Insights
           </TabsTrigger>
           <TabsTrigger 
             value="service"
-            className="data-[state=active]:bg-[#9b87f5]/20 data-[state=active]:text-[#9b87f5]"
+            className="data-[state=active]:bg-[#D3E4FD]/20 data-[state=active]:text-[#D3E4FD]"
           >
             Service Specialization
           </TabsTrigger>
@@ -103,18 +103,18 @@ export function MarketHighlights() {
         <TabsContent value="growth">
           <Table>
             <TableHeader>
-              <TableRow className="border-[#6E59A5]/20">
-                <TableHead className="text-[#8E9196]">Region</TableHead>
-                <TableHead className="text-[#8E9196]">Growth Rate (YoY)</TableHead>
-                <TableHead className="text-[#8E9196]">Avg Firms/10k</TableHead>
-                <TableHead className="text-[#8E9196]">Avg Payroll</TableHead>
+              <TableRow className="border-[#555555]/20">
+                <TableHead className="text-[#C8C8C9]">Region</TableHead>
+                <TableHead className="text-[#C8C8C9]">Growth Rate (YoY)</TableHead>
+                <TableHead className="text-[#C8C8C9]">Avg Firms/10k</TableHead>
+                <TableHead className="text-[#C8C8C9]">Avg Payroll</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {growthLeaders.map((item) => (
-                <TableRow key={item.region} className="border-[#6E59A5]/20">
+                <TableRow key={item.region} className="border-[#555555]/20">
                   <TableCell className="text-[#F1F0FB]">{item.region}</TableCell>
-                  <TableCell className="text-[#9b87f5]">{item.growthRate}</TableCell>
+                  <TableCell className="text-[#D3E4FD]">{item.growthRate}</TableCell>
                   <TableCell>{item.firmDensity}</TableCell>
                   <TableCell>{item.avgPayroll}</TableCell>
                 </TableRow>
@@ -126,19 +126,19 @@ export function MarketHighlights() {
         <TabsContent value="competitive">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Region</TableHead>
-                <TableHead>Firm Density</TableHead>
-                <TableHead>Avg Growth Rate</TableHead>
-                <TableHead>Economic Stability</TableHead>
+              <TableRow className="border-[#555555]/20">
+                <TableHead className="text-[#C8C8C9]">Region</TableHead>
+                <TableHead className="text-[#C8C8C9]">Firm Density</TableHead>
+                <TableHead className="text-[#C8C8C9]">Avg Growth Rate</TableHead>
+                <TableHead className="text-[#C8C8C9]">Economic Stability</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {competitiveInsights.map((item) => (
-                <TableRow key={item.region}>
-                  <TableCell>{item.region}</TableCell>
+                <TableRow key={item.region} className="border-[#555555]/20">
+                  <TableCell className="text-[#F1F0FB]">{item.region}</TableCell>
                   <TableCell>{item.firmDensity}</TableCell>
-                  <TableCell>{item.growthRate}</TableCell>
+                  <TableCell className="text-[#D3E4FD]">{item.growthRate}</TableCell>
                   <TableCell>{item.stability}</TableCell>
                 </TableRow>
               ))}
@@ -149,20 +149,20 @@ export function MarketHighlights() {
         <TabsContent value="service">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Region</TableHead>
-                <TableHead>Specialized Service</TableHead>
-                <TableHead>Avg Firms/10k</TableHead>
-                <TableHead>Growth Rate (YoY)</TableHead>
+              <TableRow className="border-[#555555]/20">
+                <TableHead className="text-[#C8C8C9]">Region</TableHead>
+                <TableHead className="text-[#C8C8C9]">Specialized Service</TableHead>
+                <TableHead className="text-[#C8C8C9]">Avg Firms/10k</TableHead>
+                <TableHead className="text-[#C8C8C9]">Growth Rate (YoY)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {serviceSpecialization.map((item) => (
-                <TableRow key={item.region}>
-                  <TableCell>{item.region}</TableCell>
+                <TableRow key={item.region} className="border-[#555555]/20">
+                  <TableCell className="text-[#F1F0FB]">{item.region}</TableCell>
                   <TableCell>{item.service}</TableCell>
                   <TableCell>{item.firmDensity}</TableCell>
-                  <TableCell>{item.growthRate}</TableCell>
+                  <TableCell className="text-[#D3E4FD]">{item.growthRate}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
