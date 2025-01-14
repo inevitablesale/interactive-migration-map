@@ -27,8 +27,8 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
   // Calculate total number of accountants (private + public sector)
   const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
 
-  // Calculate average payroll per firm using PAYANN / ESTAB (total annual payroll divided by number of establishments)
-  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.total_establishments
+  // Calculate average payroll per firm using PAYANN / ESTAB
+  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.total_establishments && marketData.total_establishments > 0
     ? Math.round(marketData.avg_accountant_payroll / marketData.total_establishments)
     : null;
 
@@ -43,6 +43,15 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
     return `$${value.toLocaleString()}`;
   };
+
+  // Add console logs for debugging
+  console.log('Market Data:', {
+    avg_accountant_payroll: marketData.avg_accountant_payroll,
+    total_establishments: marketData.total_establishments,
+    totalAccountants,
+    avgPayrollPerFirm,
+    avgSalaryPerEmployee
+  });
 
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">

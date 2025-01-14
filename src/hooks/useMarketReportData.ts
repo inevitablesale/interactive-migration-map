@@ -50,6 +50,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
+      console.log('Raw ranking data:', rankingData); // Debug log
+
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
         total_population: rankingData.B01001_001E,
@@ -80,6 +82,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         growth_rank: rankingData.growth_rank,
         top_firms: rankingData.top_firms || [],
       };
+
+      console.log('Transformed market data:', transformedData); // Debug log
 
       return transformedData;
     },

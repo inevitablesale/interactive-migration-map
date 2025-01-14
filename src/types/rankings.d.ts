@@ -16,11 +16,11 @@ export interface ComprehensiveMarketData {
   avg_accountant_payroll?: number;
   total_establishments?: number;
   public_to_private_ratio?: number;
+  vacancy_rate?: number;
+  vacancy_rank?: number;
   income_rank?: number;
   population_rank?: number;
   rent_rank?: number;
-  vacancy_rate?: number;
-  vacancy_rank?: number;
   density_rank?: number;
   growth_rank?: number;
   top_firms?: TopFirm[];
