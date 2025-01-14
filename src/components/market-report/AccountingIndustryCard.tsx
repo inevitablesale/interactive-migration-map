@@ -24,8 +24,13 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
-  // Calculate average payroll per employee
-  const avgPayrollPerEmployee = marketData.avg_accountant_payroll && marketData.employed_population
+  // Calculate average payroll per firm
+  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.firms_per_10k_population
+    ? Math.round(marketData.avg_accountant_payroll)
+    : null;
+
+  // Calculate average salary per employee (total payroll / total employed)
+  const avgSalaryPerEmployee = marketData.avg_accountant_payroll && marketData.employed_population
     ? Math.round(marketData.avg_accountant_payroll / marketData.employed_population)
     : null;
 
@@ -74,52 +79,52 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <p className="text-gray-400">Average Annual Payroll</p>
+              <p className="text-gray-400">Average Annual Payroll per Firm</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Average annual payroll for accounting firms</p>
+                    <p className="text-sm">Average annual payroll per accounting firm</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {marketData.avg_accountant_payroll && (
-              <Badge className={`${getMetricBadge(marketData.avg_accountant_payroll, 'payroll').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(marketData.avg_accountant_payroll, 'payroll').label}
+            {avgPayrollPerFirm && (
+              <Badge className={`${getMetricBadge(avgPayrollPerFirm, 'payroll').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(avgPayrollPerFirm, 'payroll').label}
               </Badge>
             )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
-            {marketData.avg_accountant_payroll ? formatCurrency(marketData.avg_accountant_payroll) : 'N/A'}
+          <p className={`text-xl font-bold ${getMetricColor(avgPayrollPerFirm || 0, 'money')}`}>
+            {avgPayrollPerFirm ? formatCurrency(avgPayrollPerFirm) : 'N/A'}
           </p>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <p className="text-gray-400">Average Salary</p>
+              <p className="text-gray-400">Average Salary per Employee</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Average salary per employee</p>
+                    <p className="text-sm">Average salary per employee in accounting firms</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {avgPayrollPerEmployee && (
-              <Badge className={`${getMetricBadge(avgPayrollPerEmployee, 'payroll').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(avgPayrollPerEmployee, 'payroll').label}
+            {avgSalaryPerEmployee && (
+              <Badge className={`${getMetricBadge(avgSalaryPerEmployee, 'payroll').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(avgSalaryPerEmployee, 'payroll').label}
               </Badge>
             )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(avgPayrollPerEmployee || 0, 'money')}`}>
-            {avgPayrollPerEmployee ? formatCurrency(avgPayrollPerEmployee) : 'N/A'}
+          <p className={`text-xl font-bold ${getMetricColor(avgSalaryPerEmployee || 0, 'money')}`}>
+            {avgSalaryPerEmployee ? formatCurrency(avgSalaryPerEmployee) : 'N/A'}
           </p>
         </div>
       </CardContent>
