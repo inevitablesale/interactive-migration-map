@@ -3,7 +3,6 @@ import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
-import { MarketInsightsPanel } from "@/components/analytics/insights/MarketInsightsPanel";
 
 const stats = [
   {
@@ -53,10 +52,6 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-white">Market Insights at a Glance</h2>
-          <MarketInsightsPanel />
-        </div>
         <KeyInsightsPanel />
         <MarketHighlights />
         <AlertsPanel />
