@@ -86,13 +86,8 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
-    // Census data provides mean travel time directly in minutes
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = Math.round(minutes % 60);
-    if (hours === 0) {
-      return `${remainingMinutes} minutes`;
-    }
-    return `${hours}h ${remainingMinutes}m`;
+    // The Census B08303_001E column represents mean travel time in minutes
+    return `${minutes.toFixed(1)} minutes`;
   };
 
   if (isLoading) {
@@ -332,5 +327,4 @@ export default function MarketReport() {
       </div>
     </div>
   );
-
 }
