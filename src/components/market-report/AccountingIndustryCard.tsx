@@ -27,10 +27,8 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
   // Calculate total number of accountants (private + public sector)
   const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
 
-  // Calculate average payroll per firm using PAYANN / ESTAB
-  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.firms_per_10k_population
-    ? Math.round(marketData.avg_accountant_payroll / (marketData.firms_per_10k_population / 10000))
-    : null;
+  // Calculate average payroll per firm using PAYANN directly
+  const avgPayrollPerFirm = marketData.avg_accountant_payroll || 0;
 
   // Calculate average salary per employee using PAYANN / total accountants
   const avgSalaryPerEmployee = marketData.avg_accountant_payroll && totalAccountants > 0
@@ -89,7 +87,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Average annual payroll divided by number of firms</p>
+                    <p className="text-sm">Total annual payroll (PAYANN)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -115,7 +113,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Average annual payroll divided by total number of accountants</p>
+                    <p className="text-sm">Total annual payroll divided by total number of accountants</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
