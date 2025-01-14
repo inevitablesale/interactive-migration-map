@@ -7,6 +7,19 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+interface TopFirm {
+  company_name: string;
+  employee_count: number;
+  follower_count: number;
+  follower_ratio: number;
+}
+
+interface AdjacentCounty {
+  county_name: string;
+  population: number;
+  median_income: number;
+}
+
 interface ComprehensiveMarketData {
   total_population: number | null;
   median_household_income: number | null;
@@ -32,18 +45,19 @@ interface ComprehensiveMarketData {
   vacancy_rank: number | null;
   income_rank: number | null;
   population_rank: number | null;
-  top_firms: Array<{
-    company_name: string;
-    employee_count: number;
-    follower_count: number;
-    follower_ratio: number;
-  }> | null;
+  rent_rank: number | null;
+  firms_density_rank: number | null;
+  growth_rank: number | null;
+  bachelors_rank: number | null;
+  masters_rank: number | null;
+  doctorate_rank: number | null;
+  employment_rank: number | null;
+  salary_rank: number | null;
+  sector_ratio_rank: number | null;
+  saturation_rank: number | null;
+  top_firms: TopFirm[] | null;
   state_avg_income: number | null;
-  adjacent_counties: Array<{
-    county_name: string;
-    population: number;
-    median_income: number;
-  }> | null;
+  adjacent_counties: AdjacentCounty[] | null;
 }
 
 export default function MarketReport() {
@@ -93,8 +107,10 @@ export default function MarketReport() {
           return null;
         }
 
-        console.log('Received market data:', data);
-        return data[0] as ComprehensiveMarketData;
+        // Type assertion to ensure the response matches our interface
+        const typedData = data[0] as unknown as ComprehensiveMarketData;
+        console.log('Received market data:', typedData);
+        return typedData;
       } catch (error) {
         console.error('Error in market data query:', error);
         toast.error('Failed to load market data');
