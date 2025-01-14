@@ -105,7 +105,7 @@ export function KeyInsightsPanel() {
                         <div>Total Moves</div>
                         <div>Move %</div>
                       </div>
-                      {topRegions?.map((region, index) => (
+                      {growthMetrics?.map((region, index) => (
                         <div 
                           key={`${region.county_name}-${region.state}-${index}`}
                           className="grid grid-cols-6 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
