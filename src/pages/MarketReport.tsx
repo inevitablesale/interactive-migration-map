@@ -64,7 +64,7 @@ export default function MarketReport() {
         .from('state_fips_codes')
         .select('fips_code')
         .eq('state', state)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching state FIPS:', error);
@@ -72,7 +72,7 @@ export default function MarketReport() {
         throw error;
       }
 
-      return data.fips_code;
+      return data?.fips_code;
     },
   });
 
@@ -99,26 +99,47 @@ export default function MarketReport() {
         return null;
       }
 
-      const rawData = data[0];
-      
-      // Transform the data to ensure proper typing
+      // Transform the data without using spread operator
       const transformedData: ComprehensiveMarketData = {
-        ...rawData,
-        top_firms: Array.isArray(rawData.top_firms) 
-          ? rawData.top_firms.map((firm: any) => ({
-              company_name: firm.company_name,
-              employee_count: firm.employee_count,
-              follower_count: firm.follower_count,
-              follower_ratio: firm.follower_ratio
-            }))
-          : [],
-        adjacent_counties: Array.isArray(rawData.adjacent_counties)
-          ? rawData.adjacent_counties.map((county: any) => ({
-              county_name: county.county_name,
-              population: county.population,
-              median_income: county.median_income
-            }))
-          : []
+        total_population: data[0].total_population,
+        median_household_income: data[0].median_household_income,
+        median_gross_rent: data[0].median_gross_rent,
+        median_home_value: data[0].median_home_value,
+        employed_population: data[0].employed_population,
+        private_sector_accountants: data[0].private_sector_accountants,
+        public_sector_accountants: data[0].public_sector_accountants,
+        firms_per_10k_population: data[0].firms_per_10k_population,
+        growth_rate_percentage: data[0].growth_rate_percentage,
+        market_saturation_index: data[0].market_saturation_index,
+        total_education_population: data[0].total_education_population,
+        bachelors_degree_holders: data[0].bachelors_degree_holders,
+        masters_degree_holders: data[0].masters_degree_holders,
+        doctorate_degree_holders: data[0].doctorate_degree_holders,
+        avg_accountant_payroll: data[0].avg_accountant_payroll,
+        public_to_private_ratio: data[0].public_to_private_ratio,
+        avg_commute_time: data[0].avg_commute_time,
+        commute_rank: data[0].commute_rank,
+        poverty_rate: data[0].poverty_rate,
+        poverty_rank: data[0].poverty_rank,
+        vacancy_rate: data[0].vacancy_rate,
+        vacancy_rank: data[0].vacancy_rank,
+        income_rank: data[0].income_rank,
+        population_rank: data[0].population_rank,
+        rent_rank: data[0].rent_rank,
+        density_rank: data[0].density_rank,
+        growth_rank: data[0].growth_rank,
+        top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms.map((firm: any) => ({
+          company_name: firm.company_name,
+          employee_count: firm.employee_count,
+          follower_count: firm.follower_count,
+          follower_ratio: firm.follower_ratio
+        })) : [],
+        state_avg_income: data[0].state_avg_income,
+        adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties.map((county: any) => ({
+          county_name: county.county_name,
+          population: county.population,
+          median_income: county.median_income
+        })) : []
       };
 
       return transformedData;
@@ -528,4 +549,4 @@ export default function MarketReport() {
       </div>
     </div>
   );
-}
+};
