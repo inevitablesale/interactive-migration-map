@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, Fragment } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useSearchParams } from "react-router-dom";
@@ -14,7 +14,7 @@ interface AnalysisMapProps {
   geographicLevel: 'state' | 'county' | 'msa';
 }
 
-const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProps) => {
+const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geographicLevel }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [selectedState, setSelectedState] = useState<any | null>(null);
@@ -160,37 +160,39 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
   }, [fetchStateData, toast]);
 
   return (
-    <div className="w-full h-full">
-      <div ref={mapContainer} className="w-full h-full" />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-black/60 p-4 rounded-lg">
-        <h3 className="text-white text-sm font-medium mb-2">Firm Density</h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#037CFE' }} />
-            <span className="text-white text-xs">Very High (5.5+)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#00FFE0' }} />
-            <span className="text-white text-xs">High (4.5-5.5)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFF903' }} />
-            <span className="text-white text-xs">Medium (3.5-4.5)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#94EC0E' }} />
-            <span className="text-white text-xs">Low (2.5-3.5)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-            <span className="text-white text-xs">Very Low (&lt;2.5)</span>
+    <Fragment>
+      <div className="w-full h-full">
+        <div ref={mapContainer} className="w-full h-full" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+        
+        {/* Legend */}
+        <div className="absolute bottom-4 right-4 bg-black/60 p-4 rounded-lg">
+          <h3 className="text-white text-sm font-medium mb-2">Firm Density</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#037CFE' }} />
+              <span className="text-white text-xs">Very High (5.5+)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#00FFE0' }} />
+              <span className="text-white text-xs">High (4.5-5.5)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFF903' }} />
+              <span className="text-white text-xs">Medium (3.5-4.5)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#94EC0E' }} />
+              <span className="text-white text-xs">Low (2.5-3.5)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
+              <span className="text-white text-xs">Very Low (&lt;2.5)</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Fragment>
   );
 };
 
