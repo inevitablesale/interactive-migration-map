@@ -637,44 +637,44 @@ export type Database = {
         Row: {
           annual_revenue: number | null
           asking_price: number | null
-          city: string | null
+          City: string | null
           clientele: string | null
-          county: number | null
+          County: number | null
           employee_count: number | null
-          fips: number | null
-          latitude: number | null
-          longitude: number | null
-          msa: number | null
+          FIPS: number | null
+          Latitude: number | null
+          Longitude: number | null
+          MSA: number | null
           service_lines: string | null
-          state: string | null
+          State: string | null
         }
         Insert: {
           annual_revenue?: number | null
           asking_price?: number | null
-          city?: string | null
+          City?: string | null
           clientele?: string | null
-          county?: number | null
+          County?: number | null
           employee_count?: number | null
-          fips?: number | null
-          latitude?: number | null
-          longitude?: number | null
-          msa?: number | null
+          FIPS?: number | null
+          Latitude?: number | null
+          Longitude?: number | null
+          MSA?: number | null
           service_lines?: string | null
-          state?: string | null
+          State?: string | null
         }
         Update: {
           annual_revenue?: number | null
           asking_price?: number | null
-          city?: string | null
+          City?: string | null
           clientele?: string | null
-          county?: number | null
+          County?: number | null
           employee_count?: number | null
-          fips?: number | null
-          latitude?: number | null
-          longitude?: number | null
-          msa?: number | null
+          FIPS?: number | null
+          Latitude?: number | null
+          Longitude?: number | null
+          MSA?: number | null
           service_lines?: string | null
-          state?: string | null
+          State?: string | null
         }
         Relationships: []
       }
