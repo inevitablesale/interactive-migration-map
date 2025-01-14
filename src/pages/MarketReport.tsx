@@ -53,11 +53,6 @@ interface ComprehensiveMarketData {
   adjacent_counties: AdjacentCounty[] | null;
 }
 
-const calculateAccountantsPerFirm = (private_accountants: number, public_accountants: number, total_firms: number) => {
-  if (total_firms === 0) return 0;
-  return ((private_accountants + public_accountants) / total_firms).toFixed(2);
-};
-
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
@@ -124,6 +119,7 @@ export default function MarketReport() {
 
   const formatCommuteTime = (seconds: number | null) => {
     if (!seconds) return 'N/A';
+    // Convert seconds to minutes
     const minutesPerDay = Math.round(seconds / 60);
     return `${minutesPerDay} minutes/day`;
   };
@@ -133,193 +129,103 @@ export default function MarketReport() {
     return `#${rank.toLocaleString()}`;
   };
 
-  const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation' | 'money' | 'population' | 'education' | 'housing' | 'employment') => {
+  const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation' | 'money' | 'population') => {
     switch(type) {
-      case 'population':
-        if (value >= 1000000) return 'text-purple-400'; // High population
-        if (value >= 500000) return 'text-purple-500'; // Medium population
-        return 'text-purple-600'; // Low population
-      case 'money':
-        if (value >= 75000) return 'text-green-400';
-        if (value >= 50000) return 'text-green-500';
-        return 'text-green-600';
-      case 'housing':
-        if (value >= 2000) return 'text-sky-400';
-        if (value >= 1000) return 'text-sky-500';
-        return 'text-sky-600';
-      case 'employment':
-        if (value >= 70) return 'text-rose-400';
-        if (value >= 50) return 'text-rose-500';
-        return 'text-rose-600';
-      case 'education':
-        if (value >= 40) return 'text-indigo-400';
-        if (value >= 25) return 'text-indigo-500';
-        return 'text-indigo-600';
       case 'growth':
-        if (value >= 5) return 'text-teal-400';
-        if (value >= 0) return 'text-teal-500';
-        return 'text-red-500';
+        if (value >= 5) return 'text-emerald-400';
+        if (value >= 0) return 'text-yellow-400';
+        return 'text-red-400';
       case 'density':
         if (value >= 2) return 'text-blue-400';
-        if (value >= 1) return 'text-blue-500';
-        return 'text-blue-600';
+        if (value >= 1) return 'text-indigo-400';
+        return 'text-purple-400';
       case 'saturation':
-        if (value <= 0.3) return 'text-emerald-400';
-        if (value <= 0.5) return 'text-emerald-500';
-        return 'text-emerald-600';
+        if (value <= 0.3) return 'text-teal-400';
+        if (value <= 0.5) return 'text-cyan-400';
+        return 'text-sky-400';
+      case 'money':
+        return 'text-green-400';
+      case 'population':
+        return 'text-violet-400';
       default:
         return 'text-white';
     }
   };
 
+  const calculateAccountantsPerFirm = (private_accountants: number, public_accountants: number, total_firms: number) => {
+    if (!total_firms) return 0;
+    return ((private_accountants + public_accountants) / total_firms).toFixed(1);
+  };
+
   const ColorScaleLegend = () => (
-    <div className="bg-black/40 backdrop-blur-md border-white/10 p-6 rounded-lg mb-8">
-      <h3 className="text-white text-lg font-medium mb-4">Metric Color Scale</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-white font-medium mb-2">Population & Demographics</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-                <span className="text-sm text-white/60">High (&gt;1M)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                <span className="text-sm text-white/60">Medium (500k-1M)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-600"></div>
-                <span className="text-sm text-white/60">Low (&lt;500k)</span>
-              </div>
+    <div className="bg-black/40 backdrop-blur-md border-white/10 p-4 rounded-lg mb-6">
+      <h3 className="text-white text-sm font-medium mb-3">Metric Color Scale</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Population</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-400"></div>
+              <span className="text-xs text-white/60">High (&gt;1M)</span>
             </div>
-          </div>
-          <div>
-            <h4 className="text-white font-medium mb-2">Education Levels</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
-                <span className="text-sm text-white/60">High (&gt;40%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                <span className="text-sm text-white/60">Medium (25-40%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
-                <span className="text-sm text-white/60">Low (&lt;25%)</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-300"></div>
+              <span className="text-xs text-white/60">Medium (500k-1M)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-200"></div>
+              <span className="text-xs text-white/60">Low (&lt;500k)</span>
             </div>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-white font-medium mb-2">Housing Market</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-sky-400"></div>
-                <span className="text-sm text-white/60">High Value (&gt;$2000)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-sky-500"></div>
-                <span className="text-sm text-white/60">Medium ($1000-$2000)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-sky-600"></div>
-                <span className="text-sm text-white/60">Low (&lt;$1000)</span>
-              </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Financial</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+              <span className="text-xs text-white/60">High (&gt;$75k)</span>
             </div>
-          </div>
-          <div>
-            <h4 className="text-white font-medium mb-2">Market Growth</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-teal-400"></div>
-                <span className="text-sm text-white/60">High Growth (≥5%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-teal-500"></div>
-                <span className="text-sm text-white/60">Stable (0-5%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className="text-sm text-white/60">Declining (&lt;0%)</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-300"></div>
+              <span className="text-xs text-white/60">Medium ($50k-$75k)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-200"></div>
+              <span className="text-xs text-white/60">Low (&lt;$50k)</span>
             </div>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-white font-medium mb-2">Market Density</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                <span className="text-sm text-white/60">High (≥2)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span className="text-sm text-white/60">Medium (1-2)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-600"></div>
-                <span className="text-sm text-white/60">Low (&lt;1)</span>
-              </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Growth</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+              <span className="text-xs text-white/60">High growth (≥5%)</span>
             </div>
-          </div>
-          <div>
-            <h4 className="text-white font-medium mb-2">Employment</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-400"></div>
-                <span className="text-sm text-white/60">High (&gt;70%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                <span className="text-sm text-white/60">Medium (50-70%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-600"></div>
-                <span className="text-sm text-white/60">Low (&lt;50%)</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <span className="text-xs text-white/60">Stable (0-5%)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-400"></div>
+              <span className="text-xs text-white/60">Declining (&lt;0%)</span>
             </div>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-white font-medium mb-2">Market Saturation</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                <span className="text-sm text-white/60">Low (&lt;30%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span className="text-sm text-white/60">Medium (30-50%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-600"></div>
-                <span className="text-sm text-white/60">High (&gt;50%)</span>
-              </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Density</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+              <span className="text-xs text-white/60">High (≥2)</span>
             </div>
-          </div>
-          <div>
-            <h4 className="text-white font-medium mb-2">Financial Metrics</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                <span className="text-sm text-white/60">High (&gt;$75k)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-sm text-white/60">Medium ($50k-$75k)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                <span className="text-sm text-white/60">Low (&lt;$50k)</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
+              <span className="text-xs text-white/60">Medium (1-2)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-purple-400"></div>
+              <span className="text-xs text-white/60">Low (&lt;1)</span>
             </div>
           </div>
         </div>
