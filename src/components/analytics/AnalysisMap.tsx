@@ -51,28 +51,33 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         return;
       }
 
-      // Calculate firm density for each state
+      // Ensure data is serializable by converting to plain objects
       const statesWithDensity = stateMetrics.map((state: any) => ({
-        ...state,
-        firmDensity: state.total_firms && state.population ? 
-          (state.total_firms / state.population) * 10000 : 0
+        ...JSON.parse(JSON.stringify({
+          ...state,
+          firmDensity: state.total_firms && state.population ? 
+            (state.total_firms / state.population) * 10000 : 0
+        }))
       }));
 
       console.log('Received state data with density:', statesWithDensity);
       setStateData(statesWithDensity);
 
-      // Update map layer with new data if map is loaded
       if (map.current && mapLoaded) {
-        // Update the layer paint properties
         map.current.setPaintProperty('state-fills', 'fill-color', [
-          'interpolate',
-          ['linear'],
-          ['get', 'density'],
-          0, '#FA0098',  // Very Low (0-20) - Pink
-          20, '#94EC0E', // Low (20-40) - Light Green
-          40, '#FFF903', // Medium (40-60) - Yellow
-          60, '#00FFE0', // High (60-80) - Cyan
-          80, '#037CFE'  // Very High (80+) - Blue
+          'case',
+          ['has', 'density'],
+          [
+            'interpolate',
+            ['linear'],
+            ['coalesce', ['get', 'density'], 0],
+            0, '#FA0098',
+            20, '#94EC0E',
+            40, '#FFF903',
+            60, '#00FFE0',
+            80, '#037CFE'
+          ],
+          '#FA0098'
         ]);
       }
     } catch (error) {
@@ -90,7 +95,9 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
       if (error) throw error;
 
-      setSelectedState(stateInfo);
+      // Ensure the state info is serializable
+      const serializableStateInfo = JSON.parse(JSON.stringify(stateInfo));
+      setSelectedState(serializableStateInfo);
       setShowReportPanel(true);
     } catch (error) {
       console.error('Error fetching state data:', error);
