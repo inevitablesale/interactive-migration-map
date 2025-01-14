@@ -27,6 +27,11 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
   // Calculate total number of accountants (private + public sector)
   const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
 
+  // Calculate average payroll per firm using PAYANN / ESTAB
+  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.firms_per_10k_population
+    ? Math.round(marketData.avg_accountant_payroll / marketData.firms_per_10k_population)
+    : null;
+
   // Calculate average salary per employee using PAYANN / total accountants
   const avgSalaryPerEmployee = marketData.avg_accountant_payroll && totalAccountants > 0
     ? Math.round(marketData.avg_accountant_payroll / totalAccountants)
@@ -84,19 +89,19 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Total annual payroll (PAYANN)</p>
+                    <p className="text-sm">Total annual payroll divided by number of establishments</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {marketData.avg_accountant_payroll && (
-              <Badge className={`${getMetricBadge(marketData.avg_accountant_payroll, 'payroll').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(marketData.avg_accountant_payroll, 'payroll').label}
+            {avgPayrollPerFirm && (
+              <Badge className={`${getMetricBadge(avgPayrollPerFirm, 'payroll').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(avgPayrollPerFirm, 'payroll').label}
               </Badge>
             )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
-            {marketData.avg_accountant_payroll ? formatCurrency(marketData.avg_accountant_payroll) : 'N/A'}
+          <p className={`text-xl font-bold ${getMetricColor(avgPayrollPerFirm || 0, 'money')}`}>
+            {avgPayrollPerFirm ? formatCurrency(avgPayrollPerFirm) : 'N/A'}
           </p>
         </div>
 
