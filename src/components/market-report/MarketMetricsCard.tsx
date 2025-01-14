@@ -35,15 +35,17 @@ export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsC
                   <span className="block mt-0.5 text-xs">{metric.sublabel}</span>
                 )}
               </h3>
-              <p className={`text-4xl font-bold tracking-tight break-words ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
-                {metric.value || 'N/A'}
-              </p>
-              {metric.rank && (
-                <div className="mt-2">
-                  <p className="text-gray-500 text-xs mb-0.5">Rank:</p>
-                  <p className="text-2xl text-white/90 font-medium">{metric.rank.toLocaleString()}</p>
-                </div>
-              )}
+              <div className="flex items-baseline justify-between">
+                <p className={`text-4xl font-bold tracking-tight break-words ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
+                  {metric.value || 'N/A'}
+                </p>
+                {metric.rank && (
+                  <div className="text-right">
+                    <p className="text-gray-500 text-xs mb-0.5">Rank</p>
+                    <p className="text-2xl text-white/90 font-medium">{metric.rank.toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}
