@@ -8,6 +8,14 @@ interface EmploymentMetricsCardProps {
 }
 
 export function EmploymentMetricsCard({ marketData }: EmploymentMetricsCardProps) {
+  // Format currency with K/M/B suffixes
+  const formatCurrency = (value: number | null): string => {
+    if (!value) return 'N/A';
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
+    return `$${value.toLocaleString()}`;
+  };
+
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader>
@@ -42,7 +50,7 @@ export function EmploymentMetricsCard({ marketData }: EmploymentMetricsCardProps
           <div className="flex justify-between items-baseline">
             <span className="text-sm text-white/60">Average Salary</span>
             <span className={`text-white font-medium ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
-              ${marketData.avg_accountant_payroll?.toLocaleString()}
+              {formatCurrency(marketData.avg_accountant_payroll)}
             </span>
           </div>
         </div>
