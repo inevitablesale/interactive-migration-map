@@ -29,12 +29,12 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
 
   // Calculate average payroll per firm using PAYANN / ESTAB
   const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.total_establishments && marketData.total_establishments > 0
-    ? Math.round(marketData.avg_accountant_payroll / marketData.total_establishments)
+    ? marketData.avg_accountant_payroll * 1000 / marketData.total_establishments  // Multiply by 1000 since PAYANN is in thousands
     : null;
 
   // Calculate average salary per employee using PAYANN / total accountants
   const avgSalaryPerEmployee = marketData.avg_accountant_payroll && totalAccountants > 0
-    ? Math.round(marketData.avg_accountant_payroll / totalAccountants)
+    ? marketData.avg_accountant_payroll * 1000 / totalAccountants  // Multiply by 1000 since PAYANN is in thousands
     : null;
 
   // Format currency with K/M/B suffixes
