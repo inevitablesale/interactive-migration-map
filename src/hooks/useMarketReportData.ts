@@ -74,6 +74,8 @@ export function useMarketReportData(county?: string, state?: string) {
           total_population: countyData.B01001_001E,
           median_household_income: countyData.B19013_001E,
           median_gross_rent: countyData.B25064_001E,
+          median_home_value: countyData.B25077_001E,
+          employed_population: countyData.B23025_004E,
           vacancy_rate: countyData.B25002_003E && countyData.B25001_001E
             ? (countyData.B25002_003E / countyData.B25001_001E) * 100
             : 0,
@@ -86,6 +88,11 @@ export function useMarketReportData(county?: string, state?: string) {
           public_to_private_ratio: countyData.C24060_004E && countyData.C24060_007E
             ? countyData.C24060_007E / countyData.C24060_004E
             : 0,
+          market_saturation_index: countyData.ESTAB && countyData.B23025_004E
+            ? (countyData.ESTAB / countyData.B23025_004E) * 100
+            : 0,
+          payann: countyData.PAYANN,
+          emp: countyData.EMP
         };
 
         return comprehensiveData;
