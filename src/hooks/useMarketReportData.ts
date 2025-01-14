@@ -6,7 +6,6 @@ import { toast } from "sonner";
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
   console.log('useMarketReportData called with:', { county, stateName }); // Debug log
 
-  // Query for market data using county_rankings view
   const { data: marketData, isLoading, error } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateName],
     queryFn: async () => {
@@ -51,64 +50,42 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
-      // Get the top firms data
-      const { data: firmsData, error: firmsError } = await supabase
-        .from('canary_firms_data')
-        .select('*')
-        .in('Company ID', rankingData.top_firms || []);
-
-      if (firmsError) {
-        console.error('Error fetching firms data:', firmsError);
-      }
-
-      // Transform firms data to match the TopFirm type
-      const transformedFirms = (firmsData || []).map(firm => ({
-        company_name: firm['Company Name'] || '',
-        employee_count: firm.employeeCount || 0,
-        follower_count: firm.followerCount || 0,
-        follower_ratio: firm.followerCount && firm.employeeCount ? firm.followerCount / firm.employeeCount : 0,
-        logoResolutionResult: firm.logoResolutionResult,
-        originalCoverImage: firm.originalCoverImage,
-        primarySubtitle: firm['Primary Subtitle'],
-        employeeCountRangeLow: firm.employeeCountRangeLow,
-        employeeCountRangeHigh: firm.employeeCountRangeHigh,
-        foundedOn: firm.foundedOn?.toString(),
-        specialities: firm.specialities,
-        websiteUrl: firm.websiteUrl
-      }));
-
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.population,
-        median_household_income: rankingData.median_household_income,
-        median_gross_rent: rankingData.median_gross_rent,
-        median_home_value: rankingData.median_home_value,
-        employed_population: rankingData.employed_population,
-        private_sector_accountants: rankingData.private_sector_accountants,
-        public_sector_accountants: rankingData.public_sector_accountants,
-        firms_per_10k_population: rankingData.firm_density,
-        growth_rate_percentage: rankingData.growth_rate,
-        market_saturation_index: rankingData.market_saturation,
-        total_education_population: rankingData.total_education_population,
-        bachelors_degree_holders: rankingData.bachelors_degree_holders,
-        masters_degree_holders: rankingData.masters_degree_holders,
-        doctorate_degree_holders: rankingData.doctorate_degree_holders,
+        total_population: rankingData.B01001_001E,
+        median_household_income: rankingData.B19013_001E,
+        median_gross_rent: rankingData.B25064_001E,
+        median_home_value: rankingData.B25077_001E,
+        employed_population: rankingData.B23025_004E,
+        private_sector_accountants: rankingData.C24060_004E,
+        public_sector_accountants: rankingData.C24060_007E,
+        firms_per_10k_population: rankingData.firms_per_10k,
+        growth_rate_percentage: rankingData.population_growth_rate,
+        market_saturation_index: rankingData.firm_density_rank,
+        total_education_population: rankingData.B15003_001E,
+        bachelors_degree_holders: rankingData.B15003_022E,
+        masters_degree_holders: rankingData.B15003_023E,
+        doctorate_degree_holders: rankingData.B15003_025E,
         avg_accountant_payroll: rankingData.PAYANN,
-        public_to_private_ratio: rankingData.public_to_private_ratio,
-        avg_commute_time: rankingData.avg_commute_time,
-        commute_rank: rankingData.commute_rank,
-        poverty_rate: rankingData.poverty_rate,
-        poverty_rank: rankingData.poverty_rank,
+        public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
+          ? rankingData.C24060_007E / rankingData.C24060_004E 
+          : null,
+        avg_commute_time: rankingData.B08303_001E,
+        commute_rank: null,
+        poverty_rate: rankingData.B17001_002E && rankingData.B17001_001E 
+          ? (rankingData.B17001_002E / rankingData.B17001_001E) * 100 
+          : null,
+        poverty_rank: null,
         vacancy_rate: rankingData.vacancy_rate,
         vacancy_rank: rankingData.vacancy_rank,
         income_rank: rankingData.income_rank,
         population_rank: rankingData.population_rank,
         rent_rank: rankingData.rent_rank,
-        density_rank: rankingData.density_rank,
+        density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
-        top_firms: transformedFirms,
-        state_avg_income: rankingData.state_avg_income,
-        adjacent_counties: rankingData.adjacent_counties
+        top_firms: rankingData.top_firms || [],
+        state_avg_income: null,
+        adjacent_counties: null
       };
 
       return transformedData;
