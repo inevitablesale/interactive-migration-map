@@ -86,8 +86,9 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
+    // Census data provides mean travel time directly in minutes
     const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
+    const remainingMinutes = Math.round(minutes % 60);
     if (hours === 0) {
       return `${remainingMinutes} minutes`;
     }
@@ -196,10 +197,8 @@ export default function MarketReport() {
               </div>
               <div>
                 <p className="text-gray-400">Growth Rate</p>
-                <p className="text-2xl font-bold text-green-400">
-                  {marketData.growth_rate_percentage ? 
-                    `${marketData.growth_rate_percentage > 0 ? '+' : ''}${marketData.growth_rate_percentage.toFixed(1)}%` 
-                    : 'N/A'}
+                <p className={`text-xl font-bold ${marketData.growth_rate_percentage && marketData.growth_rate_percentage < 0 ? 'text-red-500' : 'text-white'}`}>
+                  {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
                 </p>
               </div>
             </CardContent>
