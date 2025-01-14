@@ -32,7 +32,7 @@ export function useMarketReportData(county?: string, state?: string) {
         const { data: firmsData, error: firmsError } = await supabase
           .from("canary_firms_data")
           .select("*")
-          .eq("STATEFP", Number(stateFips.fips_code))
+          .eq("STATEFP", parseInt(stateFips.fips_code))
           .eq("COUNTYFP", countyData.COUNTYFP);
 
         if (firmsError) throw firmsError;
@@ -92,7 +92,13 @@ export function useMarketReportData(county?: string, state?: string) {
             ? (countyData.ESTAB / countyData.B23025_004E) * 100
             : 0,
           payann: countyData.PAYANN,
-          emp: countyData.EMP
+          emp: countyData.EMP,
+          vacancy_rank: 0,
+          income_rank: 0,
+          population_rank: 0,
+          rent_rank: 0,
+          density_rank: 0,
+          growth_rank: 0
         };
 
         return comprehensiveData;
