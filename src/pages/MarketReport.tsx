@@ -5,6 +5,7 @@ import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { EducationDistributionCard } from "@/components/market-report/EducationDistributionCard";
 import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
+import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
 import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
@@ -117,7 +118,8 @@ export default function MarketReport() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <AccountingIndustryCard marketData={marketData} />
           <EducationDistributionCard marketData={marketData} />
           <EmploymentMetricsCard marketData={marketData} />
         </div>
