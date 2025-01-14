@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Building2, Users, DollarSign } from "lucide-react";
+import { TrendingUp, DollarSign, Users } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -12,7 +12,7 @@ import {
 
 export function MarketOpportunities() {
   const { data: opportunities } = useQuery({
-    queryKey: ['marketOpportunities'],
+    queryKey: ['weightedMarketOpportunities'],
     queryFn: async () => {
       const { data, error } = await supabase
         .rpc('get_weighted_market_opportunities');
