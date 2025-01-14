@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Users, Building2, TrendingUp, GraduationCap, Briefcase, Car, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface ComprehensiveMarketData {
   total_population: number | null;
@@ -60,6 +61,7 @@ export default function MarketReport() {
 
       if (error) {
         console.error('Error fetching state FIPS:', error);
+        toast.error('Error fetching state data');
         throw error;
       }
 
@@ -73,20 +75,34 @@ export default function MarketReport() {
       if (!stateFips) return null;
       
       console.log('Fetching data for:', { county, stateFips });
-      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-        p_county_name: county,
-        p_state_fp: stateFips
-      });
       
-      if (error) {
-        console.error('Error fetching comprehensive market data:', error);
+      try {
+        const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
+          p_county_name: county,
+          p_state_fp: stateFips
+        });
+
+        if (error) {
+          console.error('Error fetching comprehensive market data:', error);
+          toast.error('Error fetching market data');
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          toast.error('No data found for this location');
+          return null;
+        }
+
+        console.log('Received market data:', data);
+        return data[0] as ComprehensiveMarketData;
+      } catch (error) {
+        console.error('Error in market data query:', error);
+        toast.error('Failed to load market data');
         throw error;
       }
-
-      console.log('Received market data:', data);
-      return data[0] as ComprehensiveMarketData;
     },
     enabled: !!stateFips,
+    retry: 1,
   });
 
   const formatCommuteTime = (minutes: number | null) => {
