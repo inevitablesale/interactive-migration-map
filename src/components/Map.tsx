@@ -228,15 +228,25 @@ const Map = () => {
     mapInstance.on('mousedown', () => {
       rotateCamera = false;
     });
-
+    
     mapInstance.on('mouseup', () => {
       rotateCamera = true;
       rotateMap();
     });
+    
+    mapInstance.on('touchend', () => {
+      rotateCamera = false;
+      rotateMap();
+    });
 
+    mapInstance.on('moveend', () => {
+      spinGlobe();
+    });
+
+    // Start the globe spinning
     rotateMap();
 
-    // Cleanup function
+    // Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
       if (mapInstance) {
