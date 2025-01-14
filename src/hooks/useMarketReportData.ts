@@ -38,11 +38,12 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       console.log('Fetching market data for:', { county, stateFips }); // Debug log
 
-      // Get the county data using RPC call to get_county_rankings
+      // First get the county data
       const { data: countyData, error: countyError } = await supabase
-        .rpc('get_county_rankings')
-        .eq('statefp', stateFips)
-        .eq('countyname', county)
+        .from('county_data')
+        .select('*')
+        .eq('COUNTYNAME', county)
+        .eq('STATEFP', stateFips)
         .maybeSingle();
 
       if (countyError) {
@@ -74,35 +75,47 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       console.log('Firms data found:', firmsData?.length || 0, 'records'); // Debug log
 
+      // Calculate growth rate from move-in data
+      const growthRate = countyData.MOVEDIN2022 && countyData.MOVEDIN2021
+        ? ((countyData.MOVEDIN2022 - countyData.MOVEDIN2021) / countyData.MOVEDIN2021) * 100
+        : 0;
+
+      // Calculate vacancy rate
+      const vacancyRate = countyData.B25002_003E && countyData.B25002_002E
+        ? (countyData.B25002_003E / (countyData.B25002_002E + countyData.B25002_003E)) * 100
+        : 0;
+
       // Transform the data to match ComprehensiveMarketData type
       const marketData: ComprehensiveMarketData = {
-        total_population: countyData.population,
-        median_household_income: null, // Not available in get_county_rankings
-        median_gross_rent: null,
-        median_home_value: null,
-        employed_population: null,
-        private_sector_accountants: null,
-        public_sector_accountants: null,
-        firms_per_10k_population: countyData.firm_density,
-        growth_rate_percentage: countyData.growth_rate,
+        total_population: countyData.B01001_001E,
+        median_household_income: countyData.B19013_001E,
+        median_gross_rent: countyData.B25064_001E,
+        median_home_value: countyData.B25077_001E,
+        employed_population: countyData.EMP,
+        private_sector_accountants: countyData.C24060_004E,
+        public_sector_accountants: countyData.C24060_007E,
+        firms_per_10k_population: countyData.ESTAB ? (countyData.ESTAB / countyData.B01001_001E) * 10000 : null,
+        growth_rate_percentage: growthRate,
         market_saturation_index: null,
-        total_education_population: null,
-        bachelors_degree_holders: null,
-        masters_degree_holders: null,
-        doctorate_degree_holders: null,
-        avg_accountant_payroll: null,
-        public_to_private_ratio: null,
-        avg_commute_time: null,
+        total_education_population: countyData.B15003_001E,
+        bachelors_degree_holders: countyData.B15003_022E,
+        masters_degree_holders: countyData.B15003_023E,
+        doctorate_degree_holders: countyData.B15003_025E,
+        avg_accountant_payroll: countyData.PAYANN,
+        public_to_private_ratio: countyData.C24060_007E / (countyData.C24060_004E || 1),
+        avg_commute_time: countyData.B08303_001E ? countyData.B08303_001E / (12 * 20) : null,
         commute_rank: null,
-        poverty_rate: null,
+        poverty_rate: countyData.B17001_002E && countyData.B17001_001E 
+          ? (countyData.B17001_002E / countyData.B17001_001E) * 100 
+          : null,
         poverty_rank: null,
-        vacancy_rate: null,
+        vacancy_rate: vacancyRate,
         vacancy_rank: null,
         income_rank: null,
         population_rank: null,
         rent_rank: null,
-        density_rank: countyData.density_rank,
-        growth_rank: countyData.growth_rank,
+        density_rank: null,
+        growth_rank: null,
         top_firms: firmsData?.map(firm => ({
           company_name: firm['Company Name'] || '',
           employee_count: firm.employeeCount || 0,
