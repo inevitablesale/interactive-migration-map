@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, state: string | undefined) => {
+  console.log('useMarketReportData called with:', { county, state }); // Debug log
+
   // Query for state FIPS code
   const { data: stateFips } = useQuery({
     queryKey: ['stateFips', state],
@@ -22,6 +24,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         throw error;
       }
 
+      console.log('State FIPS found:', data?.fips_code); // Debug log
       return data?.fips_code;
     },
     enabled: !!state,
@@ -32,6 +35,8 @@ export const useMarketReportData = (county: string | undefined, state: string | 
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       if (!stateFips || !county) return null;
+
+      console.log('Fetching market data for:', { county, stateFips }); // Debug log
 
       // First get the county data
       const { data: countyData, error: countyError } = await supabase
@@ -48,9 +53,12 @@ export const useMarketReportData = (county: string | undefined, state: string | 
       }
 
       if (!countyData) {
+        console.log('No county data found for:', { county, stateFips }); // Debug log
         toast.error('No data found for this location');
         return null;
       }
+
+      console.log('County data found:', countyData); // Debug log
 
       // Fetch top firms data
       const { data: firmsData, error: firmsError } = await supabase
@@ -65,20 +73,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         toast.error('Error fetching firms data');
       }
 
-      const topFirms = (firmsData || []).map(firm => ({
-        company_name: firm['Company Name'] || '',
-        employee_count: firm.employeeCount || 0,
-        follower_count: firm.followerCount || 0,
-        follower_ratio: firm.followerCount / (firm.employeeCount || 1),
-        specialities: firm.specialities || undefined,
-        logoResolutionResult: firm.logoResolutionResult || undefined,
-        originalCoverImage: firm.originalCoverImage || undefined,
-        employeeCountRangeLow: firm.employeeCountRangeLow || undefined,
-        employeeCountRangeHigh: firm.employeeCountRangeHigh || undefined,
-        foundedOn: firm.foundedOn ? firm.foundedOn.toString() : undefined,
-        websiteUrl: firm.websiteUrl || undefined,
-        primarySubtitle: firm['Primary Subtitle'] || undefined
-      }));
+      console.log('Firms data found:', firmsData?.length || 0, 'records'); // Debug log
 
       // Calculate growth rate from move-in data
       const growthRate = countyData.MOVEDIN2022 && countyData.MOVEDIN2021
@@ -121,7 +116,20 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         rent_rank: null,
         density_rank: null,
         growth_rank: null,
-        top_firms: topFirms,
+        top_firms: firmsData?.map(firm => ({
+          company_name: firm['Company Name'] || '',
+          employee_count: firm.employeeCount || 0,
+          follower_count: firm.followerCount || 0,
+          follower_ratio: firm.followerCount / (firm.employeeCount || 1),
+          specialities: firm.specialities || undefined,
+          logoResolutionResult: firm.logoResolutionResult || undefined,
+          originalCoverImage: firm.originalCoverImage || undefined,
+          employeeCountRangeLow: firm.employeeCountRangeLow || undefined,
+          employeeCountRangeHigh: firm.employeeCountRangeHigh || undefined,
+          foundedOn: firm.foundedOn ? firm.foundedOn.toString() : undefined,
+          websiteUrl: firm.websiteUrl || undefined,
+          primarySubtitle: firm['Primary Subtitle'] || undefined
+        })) || [],
         state_avg_income: null,
         adjacent_counties: null
       };

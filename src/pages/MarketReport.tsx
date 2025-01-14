@@ -20,9 +20,23 @@ const FIRMS_PER_PAGE = 6;
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
-  const { marketData, isLoading, hasMarketData } = useMarketReportData(county, state);
+  console.log('Current params:', { county, state }); // Debug log
+
+  // Format county name to ensure it ends with "County" if it doesn't already
+  const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
+  console.log('Formatted county name:', formattedCounty); // Debug log
+
+  const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, state);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  console.log('Market data status:', { isLoading, hasMarketData }); // Debug log
+  if (marketData) {
+    console.log('Market data received:', { 
+      population: marketData.total_population,
+      firms: marketData.firms_per_10k_population
+    }); // Debug log
+  }
 
   if (isLoading) {
     return (
@@ -35,6 +49,7 @@ export default function MarketReport() {
   }
 
   if (!hasMarketData || !marketData) {
+    console.log('No market data found for:', { formattedCounty, state }); // Debug log
     return (
       <div className="min-h-screen bg-[#222222] p-8">
         <div className="max-w-7xl mx-auto">
