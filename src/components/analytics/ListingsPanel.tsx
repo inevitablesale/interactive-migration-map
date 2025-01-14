@@ -41,7 +41,7 @@ export const ListingsPanel = () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .limit(5);
+        .limit(3); // Changed from 5 to 3
       
       if (error) throw error;
       return data;
