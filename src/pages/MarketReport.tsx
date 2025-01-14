@@ -200,10 +200,12 @@ export default function MarketReport() {
                         <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
                           <div className="space-y-1">
                             <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
-                            <div className="flex items-center gap-2 text-gray-300 text-sm">
-                              <MapPin className="w-4 h-4" />
-                              <span className="truncate">{firm.Location || "Location not available"}</span>
-                            </div>
+                            {firm.Location && (
+                              <div className="flex items-center gap-2 text-gray-300 text-sm">
+                                <MapPin className="w-4 h-4" />
+                                <span className="truncate">{firm.Location}</span>
+                              </div>
+                            )}
                             {firm.primarySubtitle && (
                               <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
                             )}
