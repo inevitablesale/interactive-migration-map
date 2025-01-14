@@ -5,36 +5,25 @@ export const getStateName = async (stateId: string): Promise<string> => {
   
   try {
     const { data, error } = await supabase
-      .from('msa_county_reference')
-      .select('county_name')
-      .eq('fipstate', stateId.padStart(2, '0'))
-      .limit(1);
+      .from('state_mappings')
+      .select('state_name')
+      .eq('STATEFP', stateId.padStart(2, '0'))
+      .single();
 
-    console.log('msa_county_reference query result:', { data, error });
+    console.log('state_mappings query result:', { data, error });
 
     if (error) {
       console.error('Error in getStateName:', error);
       return `State ${stateId}`;
     }
 
-    if (!data || data.length === 0) {
+    if (!data || !data.state_name) {
       console.log('No data found for stateId:', stateId);
       return `State ${stateId}`;
     }
 
-    // Extract the state name from the county name (it's usually "County Name, State Name")
-    const countyName = data[0].county_name;
-    console.log('Found county_name:', countyName);
-    
-    const commaIndex = countyName.lastIndexOf(',');
-    if (commaIndex !== -1) {
-      const stateName = countyName.substring(commaIndex + 1).trim();
-      console.log('Extracted state name:', stateName);
-      return stateName;
-    }
-
-    console.log('No comma found in county_name, returning default');
-    return `State ${stateId}`;
+    console.log('Found state_name:', data.state_name);
+    return data.state_name;
   } catch (error) {
     console.error('Unexpected error in getStateName:', error);
     return `State ${stateId}`;

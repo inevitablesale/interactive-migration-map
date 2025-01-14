@@ -791,6 +791,13 @@ export type Database = {
         }
         Relationships: []
       }
+      state_mappings: {
+        Row: {
+          state_name: string | null
+          STATEFP: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_competitive_analysis: {
@@ -953,6 +960,10 @@ export type Database = {
         }[]
       }
       refresh_state_density_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_state_mappings: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
