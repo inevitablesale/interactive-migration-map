@@ -15,7 +15,7 @@ import { useState } from "react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d';
-const FIRMS_PER_PAGE = 5;
+const FIRMS_PER_PAGE = 6;
 
 export default function MarketReport() {
   const { county, state } = useParams();
