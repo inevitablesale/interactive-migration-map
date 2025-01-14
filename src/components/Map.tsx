@@ -3,28 +3,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
 import { getStateName } from '@/utils/stateUtils';
+import { MAP_COLORS, STATE_COLORS } from '@/constants/colors';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
-
-const MAP_COLORS = {
-  primary: '#037CFE',
-  secondary: '#00FFE0',
-  accent: '#FFF903',
-  highlight: '#94EC0E',
-  active: '#FA0098',
-  inactive: '#000000'
-};
-
-const STATE_COLORS = [
-  '#037CFE',
-  '#00FFE0',
-  '#FFF903',
-  '#94EC0E',
-  '#FA0098',
-  '#9D00FF',
-  '#FF3366',
-  '#00FF66',
-];
 
 interface StateData {
   STATEFP: string;
@@ -46,137 +27,13 @@ const Map = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
 
-  const getStateColor = useCallback((stateId: string) => {
-    const colorIndex = parseInt(stateId) % STATE_COLORS.length;
-    return STATE_COLORS[colorIndex];
-  }, []);
-
   const getFirmDensityColor = useCallback((density: number) => {
-    if (density >= 80) return '#037CFE';  // High density - blue
-    if (density >= 60) return '#00FFE0';  // Good density - cyan
-    if (density >= 40) return '#FFF903';  // Medium density - yellow
-    if (density >= 20) return '#94EC0E';  // Low-medium density - green
-    return '#FA0098';                     // Low density - pink
+    if (density >= 6.5) return MAP_COLORS.primary;     // Very high density
+    if (density >= 5.5) return MAP_COLORS.secondary;   // High density
+    if (density >= 4.5) return MAP_COLORS.accent;      // Medium-high density
+    if (density >= 3.5) return MAP_COLORS.highlight;   // Medium density
+    return MAP_COLORS.active;                          // Lower density
   }, []);
-
-  const updateActiveState = useCallback(async (state: StateData | null) => {
-    if (!state) return;
-    
-    try {
-      const stateName = await getStateName(state.STATEFP);
-      const stateWithName = {
-        ...state,
-        displayName: stateName
-      };
-      
-      setActiveState(stateWithName);
-      
-      // Create a simplified event payload with only necessary data
-      const eventData = {
-        STATEFP: state.STATEFP,
-        displayName: stateName,
-        firmDensity: state.firmDensity,
-        EMP: state.EMP,
-        PAYANN: state.PAYANN,
-        ESTAB: state.ESTAB
-      };
-      
-      // Ensure the data is cloneable by stringifying and parsing
-      const event = new CustomEvent('stateChanged', { 
-        detail: JSON.parse(JSON.stringify(eventData))
-      });
-      window.dispatchEvent(event);
-    } catch (error) {
-      console.error('Error dispatching state change event:', error);
-    }
-  }, []);
-
-  const flyToState = useCallback((stateId: string) => {
-    if (!map.current) return;
-    
-    const stateFeatures = map.current.querySourceFeatures('states', {
-      sourceLayer: 'tl_2020_us_state-52k5uw',
-      filter: ['==', ['get', 'STATEFP'], stateId]
-    });
-
-    if (stateFeatures.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      const geometry = stateFeatures[0].geometry as GeoJSON.Polygon;
-      const coordinates = geometry.coordinates[0];
-      coordinates.forEach((coord: [number, number]) => {
-        bounds.extend(coord);
-      });
-
-      map.current.easeTo({
-        center: bounds.getCenter(),
-        pitch: 45,
-        bearing: Math.random() * 90 - 45,
-        duration: 2000
-      });
-    }
-  }, []);
-
-  const startCyclingStates = useCallback(() => {
-    const interval = setInterval(() => {
-      if (stateData.length === 0 || !mapLoaded) return;
-      
-      setCurrentStateIndex(prev => {
-        const nextIndex = (prev + 1) % stateData.length;
-        const nextState = stateData[nextIndex];
-        
-        if (nextState && nextState.STATEFP) {
-          updateActiveState(nextState);
-          flyToState(nextState.STATEFP);
-          
-          if (map.current) {
-            map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
-              'case',
-              ['==', ['get', 'STATEFP'], nextState.STATEFP],
-              nextState.firmDensity ? getFirmDensityColor(nextState.firmDensity) : getStateColor(nextState.STATEFP),
-              'transparent'
-            ]);
-          }
-        }
-        return nextIndex;
-      });
-    }, 5000);
-
-    return interval;
-  }, [stateData, mapLoaded, updateActiveState, getStateColor, getFirmDensityColor]);
-
-  const fetchStateData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E, B01001_001E')
-        .not('STATEFP', 'is', null)
-        .not('ESTAB', 'is', null);
-
-      if (error) {
-        console.error('Error fetching state data:', error);
-        return;
-      }
-
-      const statesWithDensity = data.map(state => ({
-        ...state,
-        firmDensity: state.ESTAB && state.B01001_001E ? 
-          (state.ESTAB / state.B01001_001E) * 10000 : 0
-      }));
-
-      // Ensure the data is cloneable
-      const serializedData = JSON.parse(JSON.stringify(statesWithDensity));
-      setStateData(serializedData);
-
-      if (serializedData.length > 0) {
-        updateActiveState(serializedData[0]);
-        if (mapLoaded) {
-          flyToState(serializedData[0].STATEFP);
-        }
-      }
-    } catch (err) {
-      console.error('Error in fetchStateData:', err);
-    }
-  };
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -189,8 +46,8 @@ const Map = () => {
       zoom: 3,
       center: [-98.5795, 39.8283],
       pitch: 45,
-      bearing: 0,
-      interactive: true,
+      bearing: -10,
+      antialias: true
     });
 
     const isHeroSection = document.querySelector('.hero-section');
@@ -207,28 +64,36 @@ const Map = () => {
       if (!map.current) return;
       setMapLoaded(true);
 
+      // Add atmosphere and fog effects
+      map.current.setFog({
+        'color': 'rgb(186, 210, 235)',
+        'high-color': 'rgb(36, 92, 223)',
+        'horizon-blend': 0.02,
+        'space-color': 'rgb(11, 11, 25)',
+        'star-intensity': 0.6
+      });
+
       map.current.addSource('states', {
         type: 'vector',
         url: 'mapbox://inevitablesale.9fnr921z'
       });
 
+      // Add base layer with 3D extrusion
       map.current.addLayer({
         'id': 'state-base',
         'type': 'fill-extrusion',
         'source': 'states',
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
-          'fill-extrusion-color': [
-            'case',
-            ['has', 'firmDensity'],
-            ['interpolate', ['linear'], ['get', 'firmDensity'], 0, '#FA0098', 20, '#94EC0E', 40, '#FFF903', 60, '#00FFE0', 80, '#037CFE'],
-            MAP_COLORS.inactive
-          ],
-          'fill-extrusion-height': 10000,
-          'fill-extrusion-opacity': 0.6
+          'fill-extrusion-color': MAP_COLORS.inactive,
+          'fill-extrusion-height': 20000,
+          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-base': 0,
+          'fill-extrusion-vertical-gradient': true
         }
       });
 
+      // Add active state layer with enhanced 3D effect
       map.current.addLayer({
         'id': 'state-active',
         'type': 'fill-extrusion',
@@ -238,7 +103,7 @@ const Map = () => {
           'fill-extrusion-color': [
             'case',
             ['==', ['get', 'STATEFP'], activeState?.STATEFP || ''],
-            activeState?.firmDensity ? getFirmDensityColor(activeState.firmDensity) : getStateColor(activeState?.STATEFP || '0'),
+            activeState?.firmDensity ? getFirmDensityColor(activeState.firmDensity) : STATE_COLORS[0],
             'transparent'
           ],
           'fill-extrusion-height': [
@@ -247,11 +112,13 @@ const Map = () => {
             100000,
             0
           ],
-          'fill-extrusion-opacity': 0.8,
-          'fill-extrusion-base': 10000
+          'fill-extrusion-opacity': 0.9,
+          'fill-extrusion-base': 20000,
+          'fill-extrusion-vertical-gradient': true
         }
       });
 
+      // Add glowing borders
       map.current.addLayer({
         'id': 'state-borders',
         'type': 'line',
@@ -259,34 +126,48 @@ const Map = () => {
         'source-layer': 'tl_2020_us_state-52k5uw',
         'paint': {
           'line-color': MAP_COLORS.primary,
-          'line-width': 1
+          'line-width': 1.5,
+          'line-opacity': 0.8,
+          'line-blur': 1
         }
       });
 
       fetchStateData();
     });
 
+    // Add smooth rotation animation
+    let rotateCamera = true;
+    const rotateMap = () => {
+      if (!map.current || !rotateCamera) return;
+      
+      const rotation = map.current.getBearing();
+      map.current.easeTo({
+        bearing: rotation + 0.5,
+        duration: 100,
+        easing: (t) => t
+      });
+      requestAnimationFrame(rotateMap);
+    };
+
+    map.current.on('mousedown', () => {
+      rotateCamera = false;
+    });
+
+    map.current.on('mouseup', () => {
+      rotateCamera = true;
+      rotateMap();
+    });
+
+    rotateMap();
+
     return () => {
+      rotateCamera = false;
       if (map.current) {
         map.current.remove();
         map.current = null;
       }
     };
   }, []);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    
-    if (stateData.length > 0 && mapLoaded) {
-      interval = startCyclingStates();
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [stateData, mapLoaded, startCyclingStates]);
 
   useEffect(() => {
     if (!map.current || !mapLoaded || !activeState?.STATEFP) return;
@@ -301,39 +182,39 @@ const Map = () => {
     map.current.setPaintProperty('state-active', 'fill-extrusion-color', [
       'case',
       ['==', ['get', 'STATEFP'], activeState.STATEFP],
-      getStateColor(activeState.STATEFP),
+      getFirmDensityColor(activeState.firmDensity || 0),
       'transparent'
     ]);
-  }, [activeState, getStateColor]);
+  }, [activeState, getFirmDensityColor]);
 
   return (
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/60 via-transparent to-black/40" />
       
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-black/60 p-4 rounded-lg">
+      {/* Legend with updated styling */}
+      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-lg p-4 rounded-xl border border-white/10">
         <h3 className="text-white text-sm font-medium mb-2">Firm Density</h3>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#037CFE' }} />
-            <span className="text-white text-xs">Very High (80+)</span>
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.primary }} />
+            <span className="text-white text-xs">Very High (6.5+)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#00FFE0' }} />
-            <span className="text-white text-xs">High (60-80)</span>
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.secondary }} />
+            <span className="text-white text-xs">High (5.5-6.5)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFF903' }} />
-            <span className="text-white text-xs">Medium (40-60)</span>
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.accent }} />
+            <span className="text-white text-xs">Medium-High (4.5-5.5)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#94EC0E' }} />
-            <span className="text-white text-xs">Low (20-40)</span>
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.highlight }} />
+            <span className="text-white text-xs">Medium (3.5-4.5)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-            <span className="text-white text-xs">Very Low (0-20)</span>
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: MAP_COLORS.active }} />
+            <span className="text-white text-xs">Lower (&lt;3.5)</span>
           </div>
         </div>
       </div>
