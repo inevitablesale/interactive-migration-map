@@ -29,9 +29,12 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     ? Math.round(marketData.avg_accountant_payroll)
     : null;
 
-  // Calculate average salary per employee (total payroll / total employed)
-  const avgSalaryPerEmployee = marketData.avg_accountant_payroll && marketData.employed_population
-    ? Math.round(marketData.avg_accountant_payroll / marketData.employed_population)
+  // Calculate total number of accountants (private + public sector)
+  const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
+
+  // Calculate average salary per employee (total payroll / total accountants)
+  const avgSalaryPerEmployee = marketData.avg_accountant_payroll && totalAccountants > 0
+    ? Math.round(marketData.avg_accountant_payroll / totalAccountants)
     : null;
 
   // Format currency with K/M/B suffixes
@@ -112,7 +115,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Average salary per employee in accounting firms</p>
+                    <p className="text-sm">Average salary per employee in accounting firms (based on total accountants)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
