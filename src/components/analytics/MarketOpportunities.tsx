@@ -10,8 +10,27 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+interface WeightedMarketOpportunity {
+  statefp: string;
+  countyfp: string;
+  countyname: string;
+  state_name: string;
+  total_score: number;
+  migration_score: number;
+  economic_score: number;
+  market_score: number;
+  details: {
+    median_income: number;
+    employment_rate: number;
+    housing_value: number;
+    education_rate: number;
+    professional_services_rate: number;
+    housing_occupancy: number;
+  };
+}
+
 export function MarketOpportunities() {
-  const { data: opportunities } = useQuery({
+  const { data: opportunities } = useQuery<WeightedMarketOpportunity[]>({
     queryKey: ['weightedMarketOpportunities'],
     queryFn: async () => {
       const { data, error } = await supabase
