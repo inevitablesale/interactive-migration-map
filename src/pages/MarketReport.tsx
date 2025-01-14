@@ -58,7 +58,9 @@ export default function MarketReport() {
         throw error;
       }
 
-      return data as ComprehensiveMarketData;
+      console.log('Received market data:', data);
+      // Since the function returns an array with one row, we take the first element
+      return data[0] as ComprehensiveMarketData;
     },
   });
 
@@ -301,4 +303,5 @@ export default function MarketReport() {
       </div>
     </div>
   );
+
 }
