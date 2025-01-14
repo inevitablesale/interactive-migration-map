@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
+import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, state: string | undefined) => {
   // Query for state FIPS code
@@ -64,7 +64,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         toast.error('Error fetching firms data');
       }
 
-      const topFirms: TopFirm[] = (firmsData || []).map(firm => ({
+      const topFirms = (firmsData || []).map(firm => ({
         company_name: firm['Company Name'] || '',
         employee_count: firm.employeeCount || 0,
         follower_count: firm.followerCount || 0,
@@ -85,9 +85,9 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         median_household_income: data.B19013_001E,
         median_gross_rent: data.B25064_001E,
         median_home_value: data.B25077_001E,
-        employed_population: data.B23025_004E,
-        private_sector_accountants: data.C24060_004E,
-        public_sector_accountants: data.C24060_007E,
+        employed_population: data.B23025_004E, // Total employed population
+        private_sector_accountants: data.C24060_004E, // Private sector accountants
+        public_sector_accountants: data.C24060_007E, // Public sector accountants
         firms_per_10k_population: data.firms_per_10k,
         growth_rate_percentage: data.population_growth_rate,
         market_saturation_index: null,
@@ -95,7 +95,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         bachelors_degree_holders: data.B15003_022E,
         masters_degree_holders: data.B15003_023E,
         doctorate_degree_holders: data.B15003_025E,
-        avg_accountant_payroll: data.PAYANN,
+        avg_accountant_payroll: data.PAYANN, // Average annual payroll
         public_to_private_ratio: data.C24060_007E / (data.C24060_004E || 1),
         avg_commute_time: data.B08303_001E ? data.B08303_001E / (12 * 20) : null,
         commute_rank: null,
