@@ -86,12 +86,12 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
-    
-    if (minutes > 120) {
-      return 'Data unavailable';
-    }
-    
-    return `${minutes.toFixed(1)} minutes`;
+    return `${minutes.toFixed(1)} minutes/day`;
+  };
+
+  const formatRank = (rank: number | null) => {
+    if (!rank) return '';
+    return `(Rank: ${rank.toLocaleString()})`;
   };
 
   if (isLoading) {
@@ -146,12 +146,18 @@ export default function MarketReport() {
                 <p className="text-gray-400">Total Population</p>
                 <p className="text-2xl font-bold text-white">
                   {marketData.total_population?.toLocaleString() ?? 'N/A'}
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.population_rank)}
+                  </span>
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Median Household Income</p>
                 <p className="text-2xl font-bold text-green-400">
                   ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.income_rank)}
+                  </span>
                 </p>
               </div>
             </CardContent>
@@ -175,6 +181,9 @@ export default function MarketReport() {
                 <p className="text-gray-400">Vacancy Rate</p>
                 <p className="text-2xl font-bold text-white">
                   {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.vacancy_rank)}
+                  </span>
                 </p>
               </div>
             </CardContent>
@@ -285,12 +294,18 @@ export default function MarketReport() {
                 <p className="text-gray-400">Average Commute Time</p>
                 <p className="text-xl font-bold text-white">
                   {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.commute_rank)}
+                  </span>
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Poverty Rate</p>
                 <p className="text-xl font-bold text-white">
                   {marketData.poverty_rate?.toFixed(1) ?? 'N/A'}%
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.poverty_rank)}
+                  </span>
                 </p>
               </div>
               <div>

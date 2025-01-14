@@ -873,8 +873,13 @@ export type Database = {
           avg_accountant_payroll: number
           public_to_private_ratio: number
           avg_commute_time: number
+          commute_rank: number
           poverty_rate: number
+          poverty_rank: number
           vacancy_rate: number
+          vacancy_rank: number
+          income_rank: number
+          population_rank: number
           top_firms: Json
           state_avg_income: number
           adjacent_counties: Json
