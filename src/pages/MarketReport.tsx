@@ -87,10 +87,6 @@ export default function MarketReport() {
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
     
-    // The B08303_001E column represents aggregate travel time data
-    // We need to normalize it by the number of commuters to get the average
-    // A typical commute time should be between 15-45 minutes
-    // If the value is unusually high, we'll mark it as potentially incorrect
     if (minutes > 120) {
       return 'Data unavailable';
     }
@@ -260,9 +256,9 @@ export default function MarketReport() {
                 </p>
               </div>
               <div>
-                <p className="text-gray-400">Average Accountant Payroll</p>
+                <p className="text-gray-400">Average Accountant Salary</p>
                 <p className="text-xl font-bold text-green-400">
-                  ${marketData.avg_accountant_payroll?.toLocaleString() ?? 'N/A'}
+                  ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll * 1000).toLocaleString() : 'N/A'}
                 </p>
               </div>
               <div>
