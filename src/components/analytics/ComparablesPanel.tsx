@@ -25,7 +25,8 @@ export function ComparablesPanel() {
       const { data: stateData, error: stateError } = await supabase
         .from('state_data')
         .select('*')
-        .order('ESTAB', { ascending: false });
+        .order('ESTAB', { ascending: false })
+        .limit(5); // Explicitly limit to 5 results
 
       if (stateError) throw stateError;
 
@@ -50,7 +51,7 @@ export function ComparablesPanel() {
             growth: 1 // Placeholder since we don't have growth data in these tables
           }
         };
-      });
+      }).slice(0, 5); // Ensure we only return 5 items
     }
   });
 
@@ -60,7 +61,6 @@ export function ComparablesPanel() {
       
       const rankingsWithNames = await Promise.all(
         rankings.map(async (ranking) => {
-          // Ensure the state FIPS code is padded with a leading zero if needed
           const paddedStateFp = ranking.statefp.padStart(2, '0');
           const stateName = await getStateName(paddedStateFp);
           return {
@@ -70,7 +70,7 @@ export function ComparablesPanel() {
         })
       );
       
-      setStateRankings(rankingsWithNames);
+      setStateRankings(rankingsWithNames.slice(0, 5)); // Ensure we only set 5 items
     };
 
     fetchStateNames();
@@ -79,18 +79,18 @@ export function ComparablesPanel() {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <div className="p-4 border-b border-white/10">
-        <h3 className="text-lg font-semibold text-white">State Rankings vs National Average</h3>
+        <h3 className="text-lg font-semibold text-white">Top 5 State Rankings vs National Average</h3>
       </div>
       <ScrollArea className="h-[400px]">
         <div className="p-4 space-y-4">
-          {stateRankings?.map((state) => (
+          {stateRankings?.slice(0, 5).map((state, index) => (
             <div
               key={state.statefp}
               className="bg-white/5 rounded-lg p-4 space-y-3 hover:bg-white/10 transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-medium text-white">{state.displayName}</h4>
+                  <h4 className="font-medium text-white">#{index + 1} {state.displayName}</h4>
                 </div>
               </div>
               
