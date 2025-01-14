@@ -45,9 +45,6 @@ interface ComprehensiveMarketData {
   vacancy_rank: number | null;
   income_rank: number | null;
   population_rank: number | null;
-  rent_rank: number | null;
-  density_rank: number | null;
-  growth_rank: number | null;
   top_firms: TopFirm[] | null;
   state_avg_income: number | null;
   adjacent_counties: AdjacentCounty[] | null;
@@ -125,8 +122,8 @@ export default function MarketReport() {
   };
 
   const formatRank = (rank: number | null) => {
-    if (!rank) return '';
-    return `(Rank: ${rank.toLocaleString()})`;
+    if (!rank) return 'N/A';
+    return `#${rank.toLocaleString()}`;
   };
 
   const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation' | 'money' | 'population') => {
@@ -294,7 +291,7 @@ export default function MarketReport() {
                   <p className={`text-2xl font-bold ${getMetricColor(marketData.total_population || 0, 'population')}`}>
                     {marketData.total_population?.toLocaleString() ?? 'N/A'}
                   </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.population_rank}</span>
+                  <span className="text-sm text-gray-400">{formatRank(marketData.population_rank)}</span>
                 </div>
               </div>
               <div>
@@ -303,7 +300,7 @@ export default function MarketReport() {
                   <p className={`text-2xl font-bold ${getMetricColor(marketData.median_household_income || 0, 'money')}`}>
                     ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
                   </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.income_rank}</span>
+                  <span className="text-sm text-gray-400">{formatRank(marketData.income_rank)}</span>
                 </div>
               </div>
             </CardContent>
@@ -323,7 +320,7 @@ export default function MarketReport() {
                   <p className={`text-2xl font-bold ${getMetricColor(marketData.median_gross_rent || 0, 'money')}`}>
                     ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
                   </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.rent_rank}</span>
+                  <span className="text-sm text-gray-400">{formatRank(marketData.rent_rank)}</span>
                 </div>
               </div>
               <div>
@@ -332,7 +329,7 @@ export default function MarketReport() {
                   <p className={`text-2xl font-bold ${getMetricColor(marketData.vacancy_rate || 0, 'saturation')}`}>
                     {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
                   </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.vacancy_rank}</span>
+                  <span className="text-sm text-gray-400">{formatRank(marketData.vacancy_rank)}</span>
                 </div>
               </div>
             </CardContent>
@@ -352,7 +349,7 @@ export default function MarketReport() {
                   <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
                     {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
                   </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.density_rank}</span>
+                  <span className="text-sm text-gray-400">{formatRank(marketData.density_rank)}</span>
                 </div>
               </div>
               <div>
@@ -361,7 +358,7 @@ export default function MarketReport() {
                   <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
                     {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
                   </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.growth_rank}</span>
+                  <span className="text-sm text-gray-400">{formatRank(marketData.growth_rank)}</span>
                 </div>
               </div>
             </CardContent>
