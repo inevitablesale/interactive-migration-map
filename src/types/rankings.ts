@@ -35,6 +35,23 @@ export interface MSARanking {
   median_income: number;
 }
 
+export interface TopFirm {
+  company_name: string;
+  employee_count: number;
+  follower_count: number;
+  follower_ratio: number;
+  logoResolutionResult?: string;
+  originalCoverImage?: string;
+  primarySubtitle?: string;
+  employeeCountRangeLow?: number;
+  employeeCountRangeHigh?: number;
+  foundedOn?: string;
+  specialities?: string;
+  websiteUrl?: string;
+  Location?: string;
+  Summary?: string;
+}
+
 export interface ComprehensiveMarketData {
   total_population: number | null;
   median_household_income: number | null;
@@ -61,20 +78,5 @@ export interface ComprehensiveMarketData {
   rent_rank: number | null;
   density_rank: number | null;
   growth_rank: number | null;
-  top_firms: Array<{
-    company_name: string;
-    employee_count: number;
-    follower_count: number;
-    follower_ratio: number;
-    logoResolutionResult?: string;
-    originalCoverImage?: string;
-    primarySubtitle?: string;
-    employeeCountRangeLow?: number;
-    employeeCountRangeHigh?: number;
-    foundedOn?: string;
-    specialities?: string;
-    websiteUrl?: string;
-    Location?: string;
-    Summary?: string;
-  }> | null;
+  top_firms: TopFirm[] | null;
 }
