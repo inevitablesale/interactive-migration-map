@@ -514,6 +514,13 @@ export type Database = {
           B25002_003E: number | null
           B25064_001E: number | null
           B25077_001E: number | null
+          C24010_001E: number | null
+          C24010_012E: number | null
+          C24010_033E: number | null
+          C24010_034E: number | null
+          C24060_001E: number | null
+          C24060_004E: number | null
+          C24060_007E: number | null
           EMP: number | null
           ESTAB: number | null
           msa: string | null
@@ -540,6 +547,13 @@ export type Database = {
           B25002_003E?: number | null
           B25064_001E?: number | null
           B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
           EMP?: number | null
           ESTAB?: number | null
           msa?: string | null
@@ -566,6 +580,13 @@ export type Database = {
           B25002_003E?: number | null
           B25064_001E?: number | null
           B25077_001E?: number | null
+          C24010_001E?: number | null
+          C24010_012E?: number | null
+          C24010_033E?: number | null
+          C24010_034E?: number | null
+          C24060_001E?: number | null
+          C24060_004E?: number | null
+          C24060_007E?: number | null
           EMP?: number | null
           ESTAB?: number | null
           msa?: string | null
@@ -774,96 +795,6 @@ export type Database = {
           fips_code?: string | null
           postal_abbr?: string | null
           state?: string | null
-        }
-        Relationships: []
-      }
-      county_rankings: {
-        Row: {
-          COUNTYNAME: string
-          STATEFP: string
-          COUNTYFP: string
-          total_population: number | null
-          median_household_income: number | null
-          median_gross_rent: number | null
-          median_home_value: number | null
-          employed_population: number | null
-          private_sector_accountants: number | null
-          public_sector_accountants: number | null
-          firms_per_10k: number | null
-          population_growth_rate: number | null
-          education_population: number | null
-          bachelors_holders: number | null
-          masters_holders: number | null
-          doctorate_holders: number | null
-          public_private_ratio: number | null
-          total_commute_time: number | null
-          poverty_count: number | null
-          poverty_population: number | null
-          vacancy_rate: number | null
-          vacancy_rank: number | null
-          income_rank: number | null
-          population_rank: number | null
-          rent_rank: number | null
-          firm_density_rank: number | null
-          growth_rank: number | null
-        }
-        Insert: {
-          COUNTYNAME: string
-          STATEFP: string
-          COUNTYFP: string
-          total_population?: number | null
-          median_household_income?: number | null
-          median_gross_rent?: number | null
-          median_home_value?: number | null
-          employed_population?: number | null
-          private_sector_accountants?: number | null
-          public_sector_accountants?: number | null
-          firms_per_10k?: number | null
-          population_growth_rate?: number | null
-          education_population?: number | null
-          bachelors_holders?: number | null
-          masters_holders?: number | null
-          doctorate_holders?: number | null
-          public_private_ratio?: number | null
-          total_commute_time?: number | null
-          poverty_count?: number | null
-          poverty_population?: number | null
-          vacancy_rate?: number | null
-          vacancy_rank?: number | null
-          income_rank?: number | null
-          population_rank?: number | null
-          rent_rank?: number | null
-          firm_density_rank?: number | null
-          growth_rank?: number | null
-        }
-        Update: {
-          COUNTYNAME?: string
-          STATEFP?: string
-          COUNTYFP?: string
-          total_population?: number | null
-          median_household_income?: number | null
-          median_gross_rent?: number | null
-          median_home_value?: number | null
-          employed_population?: number | null
-          private_sector_accountants?: number | null
-          public_sector_accountants?: number | null
-          firms_per_10k?: number | null
-          population_growth_rate?: number | null
-          education_population?: number | null
-          bachelors_holders?: number | null
-          masters_holders?: number | null
-          doctorate_holders?: number | null
-          public_private_ratio?: number | null
-          total_commute_time?: number | null
-          poverty_count?: number | null
-          poverty_population?: number | null
-          vacancy_rate?: number | null
-          vacancy_rank?: number | null
-          income_rank?: number | null
-          population_rank?: number | null
-          rent_rank?: number | null
-          firm_density_rank?: number | null
-          growth_rank?: number | null
         }
         Relationships: []
       }
@@ -1192,7 +1123,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never,
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -1204,10 +1135,10 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
-    : never
+        Row: infer R
+      }
+      ? R
+      : never
     : never
 
 export type TablesInsert<
@@ -1225,10 +1156,10 @@ export type TablesInsert<
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
 
 export type TablesUpdate<
@@ -1246,10 +1177,10 @@ export type TablesUpdate<
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+        Update: infer U
+      }
+      ? U
+      : never
     : never
 
 export type Enums<
