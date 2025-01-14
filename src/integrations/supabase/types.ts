@@ -977,6 +977,17 @@ export type Database = {
           education_rate: number
         }[]
       }
+      get_top_growth_regions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_name: string
+          growth_rate: number
+          firm_density: number
+          total_firms: number
+          total_population: number
+        }[]
+      }
       refresh_state_density_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
