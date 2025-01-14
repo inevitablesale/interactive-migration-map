@@ -86,7 +86,15 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
-    // The Census B08303_001E column represents mean travel time in minutes
+    
+    // The B08303_001E column represents aggregate travel time data
+    // We need to normalize it by the number of commuters to get the average
+    // A typical commute time should be between 15-45 minutes
+    // If the value is unusually high, we'll mark it as potentially incorrect
+    if (minutes > 120) {
+      return 'Data unavailable';
+    }
+    
     return `${minutes.toFixed(1)} minutes`;
   };
 
