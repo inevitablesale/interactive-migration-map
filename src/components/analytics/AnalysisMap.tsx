@@ -186,7 +186,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-            <span className="text-white text-xs">Very Low (<2.5)</span>
+            <span className="text-white text-xs">Very Low (&lt;2.5)</span>
           </div>
         </div>
       </div>
