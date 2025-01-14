@@ -2,7 +2,6 @@ import React from 'react';
 import { GraduationCap, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMetricColor } from '@/utils/market-report/formatters';
-import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ComprehensiveMarketData } from '@/types/rankings';
 
@@ -11,12 +10,6 @@ interface EducationDistributionCardProps {
 }
 
 export const EducationDistributionCard: React.FC<EducationDistributionCardProps> = ({ marketData }) => {
-  const getEducationBadge = (percentage: number) => {
-    if (percentage >= 20) return { label: "High Education", color: "bg-emerald-500/90 hover:bg-emerald-500/80" };
-    if (percentage >= 10) return { label: "Strong Education", color: "bg-blue-500/90 hover:bg-blue-500/80" };
-    return { label: "Developing Education", color: "bg-amber-500/90 hover:bg-amber-500/80" };
-  };
-
   const calculatePercentage = (value: number, total: number) => {
     return total ? ((value / total) * 100).toFixed(1) : 'N/A';
   };
@@ -31,27 +24,18 @@ export const EducationDistributionCard: React.FC<EducationDistributionCardProps>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <p className="text-gray-400">Bachelor's Degree Holders</p>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">Percentage of population with bachelor's degrees</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            {marketData.bachelors_degree_holders && (
-              <Badge 
-                className={`${getEducationBadge(marketData.bachelors_degree_holders / marketData.total_education_population * 100).color} text-white font-medium px-3 py-1`}
-              >
-                {getEducationBadge(marketData.bachelors_degree_holders / marketData.total_education_population * 100).label}
-              </Badge>
-            )}
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-gray-400">Bachelor's Degree Holders</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Percentage of population with bachelor's degrees</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <p className={`text-xl font-bold ${getMetricColor(
             marketData.total_education_population && marketData.bachelors_degree_holders
@@ -64,27 +48,18 @@ export const EducationDistributionCard: React.FC<EducationDistributionCardProps>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <p className="text-gray-400">Master's Degree Holders</p>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">Percentage of population with master's degrees</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            {marketData.masters_degree_holders && (
-              <Badge 
-                className={`${getEducationBadge(marketData.masters_degree_holders / marketData.total_education_population * 100).color} text-white font-medium px-3 py-1`}
-              >
-                {getEducationBadge(marketData.masters_degree_holders / marketData.total_education_population * 100).label}
-              </Badge>
-            )}
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-gray-400">Master's Degree Holders</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Percentage of population with master's degrees</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <p className={`text-xl font-bold ${getMetricColor(
             marketData.total_education_population && marketData.masters_degree_holders
@@ -97,27 +72,18 @@ export const EducationDistributionCard: React.FC<EducationDistributionCardProps>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <p className="text-gray-400">Doctorate Degree Holders</p>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">Percentage of population with doctorate degrees</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            {marketData.doctorate_degree_holders && (
-              <Badge 
-                className={`${getEducationBadge(marketData.doctorate_degree_holders / marketData.total_education_population * 100).color} text-white font-medium px-3 py-1`}
-              >
-                {getEducationBadge(marketData.doctorate_degree_holders / marketData.total_education_population * 100).label}
-              </Badge>
-            )}
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-gray-400">Doctorate Degree Holders</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Percentage of population with doctorate degrees</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <p className={`text-xl font-bold ${getMetricColor(
             marketData.total_education_population && marketData.doctorate_degree_holders
