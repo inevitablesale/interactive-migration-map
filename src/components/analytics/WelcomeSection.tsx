@@ -30,14 +30,7 @@ export const WelcomeSection = () => {
             Discover and analyze potential acquisition targets with our
             data-driven insights and market analysis tools.
           </p>
-          <div className="flex gap-4">
-            <Button 
-              className="bg-blue-500 hover:bg-blue-600"
-              onClick={handleViewOpportunities}
-            >
-              View Opportunities
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+          <div className="flex justify-between items-center">
             <Dialog open={showAlertForm} onOpenChange={setShowAlertForm}>
               <Button
                 variant="outline"
@@ -57,6 +50,13 @@ export const WelcomeSection = () => {
                 <AlertForm onSuccess={() => setShowAlertForm(false)} />
               </DialogContent>
             </Dialog>
+            <Button 
+              className="bg-blue-500 hover:bg-blue-600"
+              onClick={handleViewOpportunities}
+            >
+              View Opportunities
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
         </div>
       </div>
