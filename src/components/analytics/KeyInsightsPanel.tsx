@@ -35,14 +35,14 @@ export function KeyInsightsPanel() {
         ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
         : "Loading...",
       insight: (
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+        <div className="flex items-center gap-2 text-sm text-gray-700">
           {topGrowthRegion ? (
             <>
               {`${topGrowthRegion.growth_rate_percentage}% growth, ${topGrowthRegion.population_growth.toLocaleString()} new residents`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300" />
+                    <InfoIcon className="h-4 w-4 text-gray-600 hover:text-gray-500" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px]">
                     <p className="text-sm">Growth rate is calculated as the percentage change in population moves from 2020 to 2022. It compares the total number of people who moved into the region in 2022 versus 2020 to identify trending growth areas.</p>
@@ -85,7 +85,7 @@ export function KeyInsightsPanel() {
               <h3 className="font-semibold text-lg">{insight.title}</h3>
             </div>
             <p className="text-2xl font-bold mb-2">{insight.value}</p>
-            <div className="text-sm text-gray-400">{insight.insight}</div>
+            <div className="text-sm text-gray-700">{insight.insight}</div>
           </Card>
         ))}
       </div>
