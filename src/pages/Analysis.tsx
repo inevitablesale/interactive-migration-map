@@ -8,6 +8,8 @@ import { MarketEntryAnalysis } from "@/components/analytics/market-entry/MarketE
 import { GrowthStrategyAnalysis } from "@/components/analytics/growth/GrowthStrategyAnalysis";
 import { OpportunityAnalysis } from "@/components/analytics/opportunities/OpportunityAnalysis";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
+import { MarketGrowthSection } from "@/components/analytics/market/MarketGrowthSection";
+import { UniqueInsightsPanel } from "@/components/analytics/insights/UniqueInsightsPanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, ArrowRight, BarChart3, Map, TrendingUp } from "lucide-react";
@@ -164,6 +166,7 @@ const Analysis = () => {
           <div className="space-y-8">
             <MarketMetrics />
             <HeatmapSection activeFilter={activeFilter} />
+            <MarketGrowthSection />
             {activeFilter === 'market-entry' && <MarketEntryAnalysis />}
             {activeFilter === 'growth-strategy' && (
               isFreeTier ? (
@@ -192,6 +195,7 @@ const Analysis = () => {
           {/* Right Column */}
           <div className="space-y-8">
             <BuyerProfileManager />
+            <UniqueInsightsPanel />
           </div>
         </div>
 
