@@ -11,8 +11,9 @@ import { MarketRankingBadges } from "@/components/market-report/MarketRankingBad
 import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { supabase } from "@/integrations/supabase/client";
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d';
 const FIRMS_PER_PAGE = 6;
@@ -20,13 +21,36 @@ const FIRMS_PER_PAGE = 6;
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
-  console.log('Current params:', { county, state }); // Debug log
+  const [stateFips, setStateFips] = useState<string | undefined>();
+  
+  useEffect(() => {
+    const getStateFips = async () => {
+      if (!state) return;
+      
+      const { data, error } = await supabase
+        .from('state_fips_codes')
+        .select('fips_code')
+        .eq('state', state)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error fetching state FIPS:', error);
+        return;
+      }
+      
+      setStateFips(data?.fips_code);
+    };
+    
+    getStateFips();
+  }, [state]);
+
+  console.log('Current params:', { county, stateFips }); // Debug log
 
   // Format county name to ensure it ends with "County" if it doesn't already
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
   console.log('Formatted county name:', formattedCounty); // Debug log
 
-  const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, state);
+  const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, stateFips);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 

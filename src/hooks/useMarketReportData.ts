@@ -3,22 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ComprehensiveMarketData } from "@/types/rankings";
 import { toast } from "sonner";
 
-export const useMarketReportData = (county: string | undefined, state: string | undefined) => {
-  console.log('useMarketReportData called with:', { county, state }); // Debug log
+export const useMarketReportData = (county: string | undefined, stateFips: string | undefined) => {
+  console.log('useMarketReportData called with:', { county, stateFips }); // Debug log
 
   // Query for market data using county_rankings view
   const { data: marketData, isLoading, error } = useQuery({
-    queryKey: ['comprehensiveMarketData', county, state],
+    queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
-      if (!state || !county) return null;
+      if (!stateFips || !county) return null;
 
-      console.log('Fetching market data for:', { county, state }); // Debug log
+      console.log('Fetching market data for:', { county, stateFips }); // Debug log
 
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
         .select('*')
         .eq('countyname', county)
-        .eq('statefp', state)
+        .eq('statefp', stateFips)
         .maybeSingle();
 
       if (rankingError) {
@@ -28,21 +28,21 @@ export const useMarketReportData = (county: string | undefined, state: string | 
       }
 
       if (!rankingData) {
-        console.log('No county data found for:', { county, state }); // Debug log
+        console.log('No county data found for:', { county, stateFips }); // Debug log
         return null;
       }
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.total_population,
+        total_population: rankingData.B01001_001E,
         median_household_income: null,
         median_gross_rent: null,
         median_home_value: null,
         employed_population: null,
         private_sector_accountants: null,
         public_sector_accountants: null,
-        firms_per_10k_population: rankingData.firm_density,
-        growth_rate_percentage: rankingData.growth_rate,
+        firms_per_10k_population: rankingData.firms_per_10k,
+        growth_rate_percentage: rankingData.population_growth_rate,
         market_saturation_index: null,
         total_education_population: null,
         bachelors_degree_holders: null,
@@ -68,7 +68,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       return transformedData;
     },
-    enabled: !!state && !!county,
+    enabled: !!stateFips && !!county,
   });
 
   const hasMarketData = !!marketData;
