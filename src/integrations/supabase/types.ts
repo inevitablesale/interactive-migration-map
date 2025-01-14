@@ -832,6 +832,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           county_name: string
+          state_name: string
           state_fp: string
           county_fp: string
           total_population: number
