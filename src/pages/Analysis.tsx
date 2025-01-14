@@ -10,6 +10,7 @@ import { OpportunityAnalysis } from "@/components/analytics/opportunities/Opport
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
 import { ListingsPanel } from "@/components/analytics/ListingsPanel";
+import { FirmsForSalePanel } from "@/components/analytics/FirmsForSalePanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
@@ -141,6 +142,7 @@ const Analysis = () => {
             <div className="space-y-8">
               <BuyerProfileManager />
               <ListingsPanel />
+              <FirmsForSalePanel />
               <AlertsPanel />
             </div>
           </div>
