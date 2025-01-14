@@ -1013,6 +1013,19 @@ export type Database = {
           total_population: number
         }[]
       }
+      get_underserved_regions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_name: string
+          total_establishments: number
+          population: number
+          firms_per_10k_population: number
+          recent_movers: number
+          market_status: string
+          opportunity_status: string
+        }[]
+      }
       refresh_state_density_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined

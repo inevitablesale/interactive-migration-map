@@ -5,7 +5,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 
-// Format number to millions with proper handling of small numbers
 const formatPopulation = (value: number) => {
   if (value < 1000) {
     return value.toString();
@@ -41,6 +40,17 @@ interface CompetitiveMarketMetric {
   establishments_per_1000_population: number;
 }
 
+interface UnderservedRegionMetric {
+  county_name: string;
+  state_name: string;
+  total_establishments: number;
+  population: number;
+  firms_per_10k_population: number;
+  recent_movers: number;
+  market_status: string;
+  opportunity_status: string;
+}
+
 async function fetchMarketGrowthMetrics() {
   const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
@@ -51,6 +61,12 @@ async function fetchCompetitiveMarketMetrics() {
   const { data, error } = await supabase.rpc('get_competitive_market_metrics');
   if (error) throw error;
   return data as CompetitiveMarketMetric[];
+}
+
+async function fetchUnderservedRegions() {
+  const { data, error } = await supabase.rpc('get_underserved_regions');
+  if (error) throw error;
+  return data as UnderservedRegionMetric[];
 }
 
 export function KeyInsightsPanel() {
@@ -64,8 +80,14 @@ export function KeyInsightsPanel() {
     queryFn: fetchCompetitiveMarketMetrics,
   });
 
+  const { data: underservedMetrics } = useQuery({
+    queryKey: ['underservedRegions'],
+    queryFn: fetchUnderservedRegions,
+  });
+
   const topGrowthRegion = growthMetrics?.[0];
   const topCompetitiveMarket = competitiveMetrics?.[0];
+  const topUnderservedRegion = underservedMetrics?.[0];
 
   const insights = [
     {
@@ -232,8 +254,85 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Underserved Region",
-      value: "Montana, 1.2 firms/10k",
-      insight: "Low saturation, high opportunity",
+      value: topUnderservedRegion 
+        ? `${topUnderservedRegion.state_name}, ${topUnderservedRegion.firms_per_10k_population} firms/10k`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {topUnderservedRegion ? (
+            <>
+              {`${topUnderservedRegion.market_status}, ${topUnderservedRegion.opportunity_status}`}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <div className="space-y-2 p-1">
+                      <p className="text-sm font-medium text-white">Region Details:</p>
+                      <div className="text-sm text-gray-300">
+                        <p>County: {topUnderservedRegion.county_name}</p>
+                        <p>Population: {topUnderservedRegion.population.toLocaleString()}</p>
+                        <p>Total Establishments: {topUnderservedRegion.total_establishments}</p>
+                        <p>Recent Movers: {topUnderservedRegion.recent_movers.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span className="text-xs">View Underserved Regions</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold mb-4">Underserved Regions</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-4 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
+                        <div>Region</div>
+                        <div>Firms per 10k</div>
+                        <div>Market Status</div>
+                        <div>Opportunity</div>
+                      </div>
+                      {underservedMetrics?.map((region, index) => (
+                        <div 
+                          key={`${region.county_name}-${region.state_name}-${index}`}
+                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                        >
+                          <div>
+                            <p className="font-medium">{region.county_name}</p>
+                            <p className="text-sm text-white/60">{region.state_name}</p>
+                          </div>
+                          <div className="flex items-center">
+                            {region.firms_per_10k_population.toFixed(1)}
+                          </div>
+                          <div className="flex items-center">
+                            <span className={region.market_status === 'Underserved' ? 'text-yellow-400' : 'text-green-400'}>
+                              {region.market_status}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className={region.opportunity_status === 'High Opportunity' ? 'text-green-400' : 'text-yellow-400'}>
+                              {region.opportunity_status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data"
+          )}
+        </div>
+      ),
       icon: Target,
     },
   ];
