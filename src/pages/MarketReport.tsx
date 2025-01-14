@@ -21,7 +21,6 @@ export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
   
-  // Format county name to ensure it ends with "County" if it doesn't already
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
   console.log('Formatted county name:', formattedCounty); // Debug log
 
