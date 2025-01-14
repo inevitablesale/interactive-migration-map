@@ -25,10 +25,19 @@ export default function MarketReport() {
     queryKey: ['marketData', county, state],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_growth_metrics');
-      if (error) throw error;
-      return (data as MarketData[]).find(
+      if (error) {
+        console.error('Error fetching market data:', error);
+        throw error;
+      }
+      // Find the specific market data for this county/state
+      const marketInfo = (data as MarketData[])?.find(
         (item) => item.county_name === county && item.state === state
       );
+      if (!marketInfo) {
+        console.log('No market data found for:', { county, state });
+        return null;
+      }
+      return marketInfo;
     },
   });
 
