@@ -364,12 +364,6 @@ export default function MarketReport() {
                   <span className="text-sm text-gray-400">Rank: {marketData.growth_rank}</span>
                 </div>
               </div>
-              <div>
-                <p className="text-gray-400">Average Commute Time</p>
-                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_commute_time || 0, 'saturation')}`}>
-                  {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -429,7 +423,7 @@ export default function MarketReport() {
             <CardHeader>
               <CardTitle className="flex items-center text-white">
                 <Briefcase className="w-5 h-5 mr-2" />
-                Employment Metrics
+                Employment Overview
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -439,6 +433,31 @@ export default function MarketReport() {
                   {marketData.employed_population?.toLocaleString() ?? 'N/A'}
                 </p>
               </div>
+              <div>
+                <p className="text-gray-400">Average Commute Time</p>
+                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_commute_time || 0, 'saturation')}`}>
+                  {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400">Poverty Rate</p>
+                <p className={`text-xl font-bold ${getMetricColor(marketData.poverty_rate || 0, 'saturation')}`}>
+                  {marketData.poverty_rate?.toFixed(1) ?? 'N/A'}%
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-black/40 backdrop-blur-md border-white/10">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <Calculator className="w-5 h-5 mr-2" />
+                Accounting Industry Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Average Accountant Salary</p>
                 <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
@@ -451,29 +470,16 @@ export default function MarketReport() {
                   {marketData.public_to_private_ratio?.toFixed(2) ?? 'N/A'}
                 </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-black/40 backdrop-blur-md border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Car className="w-5 h-5 mr-2" />
-                Economic Indicators
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
               <div>
-                <p className="text-gray-400">Average Commute Time</p>
-                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_commute_time || 0, 'saturation')}`}>
-                  {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
+                <p className="text-gray-400">Private Sector Accountants</p>
+                <p className={`text-xl font-bold ${getMetricColor(marketData.private_sector_accountants || 0, 'population')}`}>
+                  {marketData.private_sector_accountants?.toLocaleString() ?? 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400">Poverty Rate</p>
-                <p className={`text-xl font-bold ${getMetricColor(marketData.poverty_rate || 0, 'saturation')}`}>
-                  {marketData.poverty_rate?.toFixed(1) ?? 'N/A'}%
+                <p className="text-gray-400">Public Sector Accountants</p>
+                <p className={`text-xl font-bold ${getMetricColor(marketData.public_sector_accountants || 0, 'population')}`}>
+                  {marketData.public_sector_accountants?.toLocaleString() ?? 'N/A'}
                 </p>
               </div>
             </CardContent>
