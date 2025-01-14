@@ -3,43 +3,44 @@ import { GripHorizontal, X, Lock, TrendingUp, Users, Building2, DollarSign, Home
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 
-interface StateData {
+interface StateMetrics {
   STATEFP: string;
-  EMP: number | null;
-  PAYANN: number | null;
-  ESTAB: number | null;
   B19013_001E: number | null;
   B23025_004E: number | null;
   B25077_001E: number | null;
+  EMP: number | null;
+  ESTAB: number | null;
+}
+
+interface StateData extends Partial<StateMetrics> {
   state_name?: string;
   growth_rate?: number;
   firm_density?: number;
   employment_rate?: number;
 }
 
-const fetchStateData = async (stateFp: string) => {
-  // First get the state name
+const fetchStateData = async (stateFp: string): Promise<StateData> => {
+  // Fetch state name
   const { data: stateData, error: stateError } = await supabase
     .from('state_fips_codes')
     .select('state')
-    .eq('fips_code', stateFp.padStart(2, '0'))
+    .eq('fips_code', stateFp)
     .single();
 
   if (stateError) throw stateError;
 
-  // Then get the metrics
-  const { data: metrics, error: metricsError } = await supabase
+  // Fetch metrics
+  const { data: metricsData, error: metricsError } = await supabase
     .from('state_data')
-    .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
+    .select('STATEFP, B19013_001E, B23025_004E, B25077_001E, EMP, ESTAB')
     .eq('STATEFP', stateFp)
     .single();
 
   if (metricsError) throw metricsError;
 
-  // Get growth rate from the market trends function
-  const { data: trends, error: trendsError } = await supabase
+  // Fetch growth trends
+  const { data: trendsData, error: trendsError } = await supabase
     .rpc('get_market_trends')
     .eq('statefp', stateFp)
     .single();
@@ -47,24 +48,24 @@ const fetchStateData = async (stateFp: string) => {
   if (trendsError) throw trendsError;
 
   // Calculate employment rate
-  const employmentRate = metrics.B23025_004E && metrics.EMP ? 
-    (metrics.EMP / metrics.B23025_004E) * 100 : null;
+  const employmentRate = metricsData.B23025_004E && metricsData.EMP ? 
+    (metricsData.EMP / metricsData.B23025_004E) * 100 : null;
 
+  // Return only the necessary data as plain objects
   return {
-    ...metrics,
     state_name: stateData.state,
-    growth_rate: trends.growth_rate,
-    firm_density: metrics.ESTAB && metrics.B23025_004E ? 
-      (metrics.ESTAB / metrics.B23025_004E) * 10000 : 0,
-    employment_rate: employmentRate
+    growth_rate: trendsData?.growth_rate || null,
+    firm_density: metricsData.ESTAB && metricsData.B23025_004E ? 
+      (metricsData.ESTAB / metricsData.B23025_004E) * 10000 : null,
+    employment_rate: employmentRate,
+    B19013_001E: metricsData.B19013_001E,
+    B25077_001E: metricsData.B25077_001E
   };
 };
 
-const formatNumber = (value: string | number | null) => {
-  if (value === null) return 'N/A';
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(num)) return 'N/A';
-  return new Intl.NumberFormat('en-US').format(num);
+const formatNumber = (value: string | number) => {
+  if (typeof value === 'string') value = parseFloat(value);
+  return new Intl.NumberFormat('en-US').format(value);
 };
 
 const formatPercentage = (value: number | null) => {
@@ -78,78 +79,94 @@ const formatCurrency = (value: number | null) => {
 };
 
 export function ComparisonTool() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [selectedStates, setSelectedStates] = useState<StateData[]>([]);
   const { toast } = useToast();
 
-  const { data: stateData } = useQuery({
-    queryKey: ['stateData', selectedStates],
-    queryFn: async () => {
-      if (selectedStates.length === 0) return [];
-      const promises = selectedStates.map(fetchStateData);
-      return Promise.all(promises);
-    },
-    enabled: selectedStates.length > 0,
-  });
+  const handleAddState = async (stateFp: string) => {
+    try {
+      const stateData = await fetchStateData(stateFp);
+      
+      // Create a new plain object with only the data we need
+      const newState: StateData = {
+        state_name: stateData.state_name,
+        growth_rate: stateData.growth_rate,
+        firm_density: stateData.firm_density,
+        employment_rate: stateData.employment_rate,
+        B19013_001E: stateData.B19013_001E,
+        B25077_001E: stateData.B25077_001E
+      };
 
-  const handleCompare = () => {
-    toast({
-      title: "Premium Feature",
-      description: "Upgrade to unlock detailed firm comparisons",
-    });
+      setSelectedStates(prev => [...prev, newState]);
+    } catch (error) {
+      console.error('Error adding state:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add state to comparison",
+        variant: "destructive",
+      });
+    }
   };
 
-  const renderMetricComparison = (metric: keyof StateData, label: string, icon: React.ReactNode, formatter?: (value: any) => string) => {
-    if (!stateData?.length) return null;
+  const handleRemoveState = (index: number) => {
+    setSelectedStates(prev => prev.filter((_, i) => i !== index));
+  };
 
+  const renderMetricComparison = (
+    key: keyof StateData,
+    label: string,
+    icon: JSX.Element,
+    formatter: (value: any) => string = formatNumber
+  ) => {
     return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-white/80">
+      <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-1 text-blue-400">
           {icon}
-          <span className="text-sm font-medium">{label}</span>
+          <span>{label}</span>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          {stateData.map((state, index) => (
-            <div key={index} className="bg-white/5 p-2 rounded">
-              <div className="text-xs text-white/60">{state.state_name || `State ${index + 1}`}</div>
-              <div className="text-sm font-medium text-white">
-                {formatter ? formatter(state[metric]) : formatNumber(state[metric])}
-              </div>
-            </div>
+        <div className="flex-1 flex items-center justify-end gap-4">
+          {selectedStates.map((state, index) => (
+            <span key={index} className="text-white">
+              {formatter(state[key])}
+            </span>
           ))}
         </div>
       </div>
     );
   };
 
-  if (!isVisible) {
-    return (
-      <Button
-        onClick={() => setIsVisible(true)}
-        className="fixed right-4 top-20 bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/70"
-      >
-        <GripHorizontal className="h-4 w-4 mr-2" />
-        Compare States
-      </Button>
-    );
-  }
-
   return (
-    <div className="fixed right-4 top-20 w-96 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 shadow-xl animate-fade-in">
-      <div className="flex items-center justify-between p-3 border-b border-white/10">
-        <h3 className="text-sm font-medium text-white">Compare States</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsVisible(false)}
-          className="text-white/60 hover:text-white"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+    <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <GripHorizontal className="w-5 h-5 text-blue-400" />
+          <h3 className="text-lg font-semibold text-white">Compare Markets</h3>
+        </div>
+        {selectedStates.length === 0 && (
+          <div className="flex items-center gap-2 text-sm text-blue-400">
+            <Lock className="w-4 h-4" />
+            <span>Select states to compare</span>
+          </div>
+        )}
       </div>
-      <div className="p-4 space-y-4">
-        {stateData && stateData.length > 0 ? (
-          <div className="space-y-4">
+
+      <div className="space-y-4">
+        {selectedStates.length > 0 ? (
+          <div className="space-y-2">
+            <div className="flex justify-end gap-4 mb-4">
+              {selectedStates.map((state, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <span className="text-white font-medium">{state.state_name}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => handleRemoveState(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
             {renderMetricComparison('firm_density', 'Firm Density', <Building2 className="h-4 w-4" />, 
               (value) => value ? formatNumber(value.toFixed(2)) : 'N/A')}
             {renderMetricComparison('growth_rate', 'Growth Rate', <TrendingUp className="h-4 w-4" />, 
@@ -163,19 +180,9 @@ export function ComparisonTool() {
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-white/60">
-              <Lock className="h-4 w-4 text-yellow-400" />
-              <span className="text-sm">Premium Feature</span>
-            </div>
-            <p className="text-xs text-white/60">
-              Compare states side by side with detailed metrics and insights
-            </p>
-            <Button
-              onClick={handleCompare}
-              className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
-            >
-              Upgrade to Compare
-            </Button>
+            <div className="h-8 bg-white/5 rounded animate-pulse" />
+            <div className="h-8 bg-white/5 rounded animate-pulse" />
+            <div className="h-8 bg-white/5 rounded animate-pulse" />
           </div>
         )}
       </div>
