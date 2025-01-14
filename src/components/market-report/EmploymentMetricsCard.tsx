@@ -1,81 +1,59 @@
-import React from 'react';
-import { Briefcase, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMetricColor } from '@/utils/market-report/formatters';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { ComprehensiveMarketData } from '@/types/rankings';
+import { Users } from "lucide-react";
+import { getMetricColor } from "@/utils/market-report/formatters";
+import type { ComprehensiveMarketData } from "@/types/rankings";
 
 interface EmploymentMetricsCardProps {
   marketData: ComprehensiveMarketData;
 }
 
-export const EmploymentMetricsCard: React.FC<EmploymentMetricsCardProps> = ({ marketData }) => {
+export function EmploymentMetricsCard({ marketData }: EmploymentMetricsCardProps) {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader>
         <CardTitle className="flex items-center text-white">
-          <Briefcase className="w-5 h-5 mr-2" />
+          <Users className="w-5 h-5 mr-2" />
           Employment Metrics
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-gray-400">Employed Population</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Total number of employed individuals in the region</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm text-white/60">Employed Population</span>
+            <span className="text-white font-medium">
+              {marketData.employed_population?.toLocaleString()}
+            </span>
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.employed_population || 0, 'population')}`}>
-            {marketData.employed_population?.toLocaleString() ?? 'N/A'}
-          </p>
-        </div>
 
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-gray-400">Average Accountant Salary</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Average annual salary for accountants in the region</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm text-white/60">Private Sector Accountants</span>
+            <span className="text-white font-medium">
+              {marketData.private_sector_accountants?.toLocaleString()}
+            </span>
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll * 1000 || 0, 'money')}`}>
-            ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll * 1000).toLocaleString() : 'N/A'}
-          </p>
-        </div>
 
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-gray-400">Public/Private Sector Ratio</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Ratio of public sector to private sector employment</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm text-white/60">Public Sector Accountants</span>
+            <span className="text-white font-medium">
+              {marketData.public_sector_accountants?.toLocaleString()}
+            </span>
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.public_to_private_ratio || 0, 'density')}`}>
-            {marketData.public_to_private_ratio?.toFixed(2) ?? 'N/A'}
-          </p>
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm text-white/60">Average Accountant Salary</span>
+            <span className={`text-white font-medium ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
+              ${marketData.avg_accountant_payroll?.toLocaleString()}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm text-white/60">Public/Private Ratio</span>
+            <span className={`text-white font-medium ${getMetricColor(marketData.public_to_private_ratio || 0, 'ratio')}`}>
+              {marketData.public_to_private_ratio?.toFixed(2)}
+            </span>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
-};
+}

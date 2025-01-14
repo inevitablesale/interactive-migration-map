@@ -11,10 +11,23 @@ import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
 
+const PLACEHOLDER_IMAGES = [
+  'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+  'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+  'https://images.unsplash.com/photo-1518770660439-4636190af475',
+  'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
+  'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d',
+  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
+];
+
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
   const { marketData, isLoading, hasMarketData } = useMarketReportData(county, state);
+
+  const getRandomPlaceholder = () => {
+    return PLACEHOLDER_IMAGES[Math.floor(Math.random() * PLACEHOLDER_IMAGES.length)];
+  };
 
   if (isLoading) {
     return (
@@ -137,8 +150,15 @@ export default function MarketReport() {
             <CardContent className="space-y-6">
               {marketData.top_firms.map((firm, index) => (
                 <div key={index} className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                      <img
+                        src={firm.logoResolutionResult || firm.originalCoverImage || getRandomPlaceholder()}
+                        alt={`${firm.company_name} logo`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
                       <p className="text-white font-medium">{firm.company_name}</p>
                       <p className="text-sm text-gray-400">{firm.employee_count} employees</p>
                     </div>
@@ -150,26 +170,11 @@ export default function MarketReport() {
                     </div>
                   </div>
 
-                  {/* New Metrics */}
                   <div className="grid grid-cols-3 gap-4 pt-2">
-                    {firm.specialization && (
+                    {firm.specialities && (
                       <div className="space-y-1">
                         <p className="text-xs text-gray-400">Specialization</p>
-                        <p className="text-sm text-white">{firm.specialization}</p>
-                      </div>
-                    )}
-                    
-                    {firm.clientele && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-gray-400">Clientele</p>
-                        <p className="text-sm text-white">{firm.clientele}</p>
-                      </div>
-                    )}
-                    
-                    {firm.industry_focus && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-gray-400">Industry Focus</p>
-                        <p className="text-sm text-white line-clamp-2">{firm.industry_focus}</p>
+                        <p className="text-sm text-white">{firm.specialities}</p>
                       </div>
                     )}
                   </div>
