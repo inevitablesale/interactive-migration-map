@@ -9,6 +9,7 @@ import type { ComprehensiveMarketData } from "@/types/rankings";
 import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { formatCommuteTime, getMetricColor } from "@/utils/market-report/formatters";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function MarketReport() {
   const { county, state } = useParams();
@@ -326,3 +327,4 @@ export default function MarketReport() {
     </div>
   );
 }
+
