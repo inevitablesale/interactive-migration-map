@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, ArrowLeft, Brain, GraduationCap } from "lucide-react";
+import { Users, Building2, TrendingUp, ArrowLeft, Brain, GraduationCap, DollarSign, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -37,6 +37,16 @@ export default function MarketReport() {
     );
   }
 
+  const marketStatus = marketData.market_saturation_index && marketData.market_saturation_index > 50 
+    ? 'Mature Market' 
+    : 'Growth Market';
+
+  const educationStatus = marketData.masters_degree_holders && marketData.total_education_population
+    ? ((marketData.masters_degree_holders / marketData.total_education_population) > 0.1
+      ? 'Strong Talent Pool'
+      : 'Developing Talent')
+    : 'Analyzing Talent';
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#111111] to-[#1a1a1a]">
       <div className="max-w-7xl mx-auto p-6">
@@ -52,20 +62,20 @@ export default function MarketReport() {
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
             <Badge variant="secondary" className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30">
-              {marketData.market_saturation_index ? 'High Growth' : 'Emerging Market'}
+              {marketStatus}
             </Badge>
             <Badge variant="secondary" className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30">
-              Active Talent Pool
+              {educationStatus}
             </Badge>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Market Overview */}
+          {/* Population & Growth */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-5 h-5 text-blue-400" />
-              <h2 className="text-lg font-semibold text-white">Market Overview</h2>
+              <Users className="w-5 h-5 text-blue-400" />
+              <h2 className="text-lg font-semibold text-white">Population & Growth</h2>
             </div>
             <div className="space-y-4">
               <div>
@@ -76,7 +86,7 @@ export default function MarketReport() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Growth Rate</p>
-                <p className="text-xl font-semibold text-emerald-400">
+                <p className={`text-xl font-semibold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
                   {marketData.growth_rate_percentage?.toFixed(1)}%
                 </p>
               </div>
@@ -86,7 +96,7 @@ export default function MarketReport() {
           {/* Economic Indicators */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Building2 className="w-5 h-5 text-yellow-400" />
+              <DollarSign className="w-5 h-5 text-green-400" />
               <h2 className="text-lg font-semibold text-white">Economic Indicators</h2>
             </div>
             <div className="space-y-4">
@@ -97,31 +107,31 @@ export default function MarketReport() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Median Home Value</p>
-                <p className="text-xl font-semibold text-yellow-400">
-                  ${marketData.median_home_value?.toLocaleString()}
+                <p className="text-sm text-gray-400">Income Rank</p>
+                <p className="text-xl font-semibold text-green-400">
+                  #{marketData.income_rank?.toLocaleString()}
                 </p>
               </div>
             </div>
           </Card>
 
-          {/* Employment Metrics */}
+          {/* Housing Market */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Employment</h2>
+              <Home className="w-5 h-5 text-yellow-400" />
+              <h2 className="text-lg font-semibold text-white">Housing Market</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-400">Employed Population</p>
+                <p className="text-sm text-gray-400">Median Home Value</p>
                 <p className="text-2xl font-bold text-white">
-                  {marketData.employed_population?.toLocaleString()}
+                  ${marketData.median_home_value?.toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Private Sector Ratio</p>
-                <p className="text-xl font-semibold text-purple-400">
-                  {((marketData.private_sector_accountants || 0) / (marketData.employed_population || 1) * 100).toFixed(1)}%
+                <p className="text-sm text-gray-400">Median Rent</p>
+                <p className="text-xl font-semibold text-yellow-400">
+                  ${marketData.median_gross_rent?.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -130,7 +140,7 @@ export default function MarketReport() {
           {/* Market Dynamics */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Brain className="w-5 h-5 text-emerald-400" />
+              <Building2 className="w-5 h-5 text-purple-400" />
               <h2 className="text-lg font-semibold text-white">Market Dynamics</h2>
             </div>
             <div className="space-y-4">
@@ -141,9 +151,9 @@ export default function MarketReport() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Market Saturation</p>
-                <p className="text-xl font-semibold text-emerald-400">
-                  {marketData.market_saturation_index?.toFixed(1)}%
+                <p className="text-sm text-gray-400">Density Rank</p>
+                <p className="text-xl font-semibold text-purple-400">
+                  #{marketData.density_rank?.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -156,21 +166,27 @@ export default function MarketReport() {
             <GraduationCap className="w-5 h-5 text-blue-400" />
             <h2 className="text-lg font-semibold text-white">Education & Workforce</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
-              <p className="text-sm text-gray-400 mb-2">Bachelor's Degree Holders</p>
+              <p className="text-sm text-gray-400 mb-2">Total Workforce</p>
+              <p className="text-2xl font-bold text-white">
+                {marketData.employed_population?.toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400 mb-2">Bachelor's Degree</p>
               <p className="text-2xl font-bold text-white">
                 {marketData.bachelors_degree_holders?.toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400 mb-2">Master's Degree Holders</p>
+              <p className="text-sm text-gray-400 mb-2">Master's Degree</p>
               <p className="text-2xl font-bold text-white">
                 {marketData.masters_degree_holders?.toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400 mb-2">Doctorate Degree Holders</p>
+              <p className="text-sm text-gray-400 mb-2">Doctorate Degree</p>
               <p className="text-2xl font-bold text-white">
                 {marketData.doctorate_degree_holders?.toLocaleString()}
               </p>
