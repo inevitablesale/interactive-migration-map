@@ -12,6 +12,7 @@ interface MarketGrowthMetric {
   total_movedin_2022: number;
   total_movedin_2021: number;
   total_movedin_2020: number;
+  total_moves: number;
 }
 
 async function fetchMarketGrowthMetrics() {
@@ -38,7 +39,7 @@ export function KeyInsightsPanel() {
         <div className="flex items-center gap-2 text-sm text-gray-700">
           {topGrowthRegion ? (
             <>
-              {`${topGrowthRegion.growth_rate_percentage}% growth, ${topGrowthRegion.population_growth.toLocaleString()} new residents`}
+              {`${topGrowthRegion.growth_rate_percentage}% of national moves, ${topGrowthRegion.total_moves.toLocaleString()} total moves`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -46,16 +47,16 @@ export function KeyInsightsPanel() {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px]">
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Growth Rate Calculation:</p>
+                      <p className="text-sm font-medium">Move-in Distribution:</p>
                       <div className="text-sm">
-                        <p>2022 Moves: {topGrowthRegion.total_movedin_2022.toLocaleString()}</p>
-                        <p>2020 Moves: {topGrowthRegion.total_movedin_2020.toLocaleString()}</p>
+                        <p>2022: {topGrowthRegion.total_movedin_2022.toLocaleString()}</p>
+                        <p>2021: {topGrowthRegion.total_movedin_2021.toLocaleString()}</p>
+                        <p>2020: {topGrowthRegion.total_movedin_2020.toLocaleString()}</p>
                         <div className="mt-2 pt-2 border-t">
-                          <p>Formula: ((2022 - 2020) / 2020) × 100</p>
+                          <p>Total Moves: {topGrowthRegion.total_moves.toLocaleString()}</p>
                           <p className="mt-1">
-                            = (({topGrowthRegion.total_movedin_2022.toLocaleString()} - {topGrowthRegion.total_movedin_2020.toLocaleString()}) / {topGrowthRegion.total_movedin_2020.toLocaleString()}) × 100
+                            Represents {topGrowthRegion.growth_rate_percentage}% of all national moves
                           </p>
-                          <p className="mt-1">= {topGrowthRegion.growth_rate_percentage}%</p>
                         </div>
                       </div>
                     </div>
