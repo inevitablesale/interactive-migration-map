@@ -106,12 +106,24 @@ export default function MarketReport() {
         return null;
       }
 
-      return data[0] as ComprehensiveMarketData;
+      // First cast to unknown, then to our interface to handle the JSON fields
+      const rawData = data[0] as unknown;
+      const typedData = rawData as ComprehensiveMarketData;
+      
+      // Parse JSON fields if they exist
+      if (typedData.top_firms) {
+        typedData.top_firms = JSON.parse(JSON.stringify(typedData.top_firms));
+      }
+      if (typedData.adjacent_counties) {
+        typedData.adjacent_counties = JSON.parse(JSON.stringify(typedData.adjacent_counties));
+      }
+
+      return typedData;
     },
     enabled: !!stateFips,
     retry: 1,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (renamed from cacheTime)
   });
 
   const formatCommuteTime = (minutes: number | null) => {
@@ -377,3 +389,4 @@ export default function MarketReport() {
     </div>
   );
 }
+
