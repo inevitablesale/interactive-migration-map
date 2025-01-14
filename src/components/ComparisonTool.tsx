@@ -13,17 +13,45 @@ interface StateData {
   B19013_001E: number | null;
   B23025_004E: number | null;
   B25077_001E: number | null;
+  state_name?: string;
+  growth_rate?: number;
+  firm_density?: number;
 }
 
 const fetchStateData = async (stateFp: string) => {
-  const { data, error } = await supabase
+  // First get the state name
+  const { data: stateData, error: stateError } = await supabase
+    .from('state_fips_codes')
+    .select('state')
+    .eq('fips_code', stateFp.padStart(2, '0'))
+    .single();
+
+  if (stateError) throw stateError;
+
+  // Then get the metrics
+  const { data: metrics, error: metricsError } = await supabase
     .from('state_data')
     .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
     .eq('STATEFP', stateFp)
     .single();
 
-  if (error) throw error;
-  return data;
+  if (metricsError) throw metricsError;
+
+  // Get growth rate from the market trends function
+  const { data: trends, error: trendsError } = await supabase
+    .rpc('get_market_trends')
+    .eq('statefp', stateFp)
+    .single();
+
+  if (trendsError) throw trendsError;
+
+  return {
+    ...metrics,
+    state_name: stateData.state,
+    growth_rate: trends.growth_rate,
+    firm_density: metrics.ESTAB && metrics.B23025_004E ? 
+      (metrics.ESTAB / metrics.B23025_004E) * 10000 : 0
+  };
 };
 
 const formatNumber = (value: string | number | null) => {
@@ -33,9 +61,9 @@ const formatNumber = (value: string | number | null) => {
   return new Intl.NumberFormat('en-US').format(num);
 };
 
-const calculateGrowth = (current: number | null, previous: number | null) => {
-  if (!current || !previous || previous === 0) return null;
-  return ((current - previous) / previous) * 100;
+const formatPercentage = (value: number | null) => {
+  if (value === null) return 'N/A';
+  return `${value.toFixed(1)}%`;
 };
 
 export function ComparisonTool() {
@@ -60,7 +88,7 @@ export function ComparisonTool() {
     });
   };
 
-  const renderMetricComparison = (metric: keyof StateData, label: string, icon: React.ReactNode) => {
+  const renderMetricComparison = (metric: keyof StateData, label: string, icon: React.ReactNode, formatter?: (value: any) => string) => {
     if (!stateData?.length) return null;
 
     return (
@@ -72,9 +100,9 @@ export function ComparisonTool() {
         <div className="grid grid-cols-2 gap-2">
           {stateData.map((state, index) => (
             <div key={index} className="bg-white/5 p-2 rounded">
-              <div className="text-xs text-white/60">State {index + 1}</div>
+              <div className="text-xs text-white/60">{state.state_name || `State ${index + 1}`}</div>
               <div className="text-sm font-medium text-white">
-                {metric === 'PAYANN' ? '$' : ''}{formatNumber(state[metric])}
+                {formatter ? formatter(state[metric]) : formatNumber(state[metric])}
               </div>
             </div>
           ))}
@@ -111,9 +139,11 @@ export function ComparisonTool() {
       <div className="p-4 space-y-4">
         {stateData && stateData.length > 0 ? (
           <div className="space-y-4">
-            {renderMetricComparison('EMP', 'Employment', <Users className="h-4 w-4" />)}
-            {renderMetricComparison('PAYANN', 'Annual Payroll', <TrendingUp className="h-4 w-4" />)}
-            {renderMetricComparison('ESTAB', 'Establishments', <Building2 className="h-4 w-4" />)}
+            {renderMetricComparison('firm_density', 'Firm Density', <Building2 className="h-4 w-4" />, 
+              (value) => value ? formatNumber(value.toFixed(2)) : 'N/A')}
+            {renderMetricComparison('growth_rate', 'Growth Rate', <TrendingUp className="h-4 w-4" />, 
+              (value) => formatPercentage(value))}
+            {renderMetricComparison('ESTAB', 'Total Firms', <Users className="h-4 w-4" />)}
           </div>
         ) : (
           <div className="space-y-2">
