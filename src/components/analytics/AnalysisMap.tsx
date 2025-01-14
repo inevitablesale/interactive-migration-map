@@ -89,6 +89,14 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         ]),
         MAP_COLORS.inactive // Default color for states not in our dataset
       ]);
+
+      // Add hover effect
+      map.current.setPaintProperty('state-fills', 'fill-opacity', [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        0.8,
+        0.6
+      ]);
     } catch (error) {
       console.error('Error updating map data:', error);
     }
@@ -117,6 +125,8 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         'top-right'
       );
 
+      let hoveredStateId: string | null = null;
+
       map.current.on('style.load', () => {
         setMapLoaded(true);
         console.log('Map style loaded');
@@ -135,7 +145,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
             'fill-color': MAP_COLORS.inactive,
-            'fill-opacity': 0.8
+            'fill-opacity': 0.6
           }
         });
 
@@ -148,6 +158,52 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
             'line-color': '#ffffff',
             'line-width': 1
           }
+        });
+
+        // Add click event
+        map.current.on('click', 'state-fills', (e) => {
+          if (e.features && e.features[0]) {
+            const stateId = e.features[0].properties.STATEFP;
+            const clickedState = stateData.find(state => state.STATEFP === stateId);
+            if (clickedState) {
+              setSelectedState(clickedState);
+              
+              // Visual feedback for clicked state
+              map.current?.setPaintProperty('state-fills', 'fill-opacity', [
+                'case',
+                ['==', ['get', 'STATEFP'], stateId],
+                0.9,
+                0.6
+              ]);
+            }
+          }
+        });
+
+        // Add hover effects
+        map.current.on('mousemove', 'state-fills', (e) => {
+          if (e.features && e.features.length > 0) {
+            if (hoveredStateId !== null) {
+              map.current?.setFeatureState(
+                { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+                { hover: false }
+              );
+            }
+            hoveredStateId = e.features[0].id as string;
+            map.current?.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: true }
+            );
+          }
+        });
+
+        map.current.on('mouseleave', 'state-fills', () => {
+          if (hoveredStateId !== null) {
+            map.current?.setFeatureState(
+              { source: 'states', sourceLayer: 'tl_2020_us_state-52k5uw', id: hoveredStateId },
+              { hover: false }
+            );
+          }
+          hoveredStateId = null;
         });
 
         // Fetch data after map is loaded
@@ -207,6 +263,14 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
             </div>
           </div>
         </div>
+
+        {/* Show MapReportPanel when a state is selected */}
+        {selectedState && (
+          <MapReportPanel 
+            selectedState={selectedState} 
+            onClose={() => setSelectedState(null)} 
+          />
+        )}
       </div>
     </React.Fragment>
   );
