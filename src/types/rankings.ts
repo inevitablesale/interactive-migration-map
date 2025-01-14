@@ -61,6 +61,8 @@ export interface ComprehensiveMarketData {
   income_rank: number | null;
   population_rank: number | null;
   rent_rank: number | null;
+  density_rank: number | null;
+  growth_rank: number | null;
   top_firms: Array<{
     company_name: string;
     employee_count: number;

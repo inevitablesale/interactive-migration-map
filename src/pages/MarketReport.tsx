@@ -54,16 +54,16 @@ export default function MarketReport() {
         return null;
       }
 
-      // Ensure proper typing of the response
-      const marketData = data[0] as ComprehensiveMarketData;
+      const marketData = data[0] as unknown as ComprehensiveMarketData;
       
-      // Parse JSON fields if they're returned as strings
-      if (typeof marketData.top_firms === 'string') {
-        marketData.top_firms = JSON.parse(marketData.top_firms);
-      }
-      if (typeof marketData.adjacent_counties === 'string') {
-        marketData.adjacent_counties = JSON.parse(marketData.adjacent_counties);
-      }
+      // Ensure top_firms and adjacent_counties are properly typed arrays
+      marketData.top_firms = Array.isArray(marketData.top_firms) 
+        ? marketData.top_firms 
+        : [];
+      
+      marketData.adjacent_counties = Array.isArray(marketData.adjacent_counties)
+        ? marketData.adjacent_counties
+        : [];
 
       return marketData;
     },
