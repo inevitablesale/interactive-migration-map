@@ -16,16 +16,25 @@ interface MarketGrowthMetric {
   total_moves: number;
 }
 
+interface CompetitiveMarketMetric {
+  county_name: string;
+  state_fp: string;
+  county_fp: string;
+  total_population: number;
+  total_establishments: number;
+  establishments_per_1000_population: number;
+}
+
 async function fetchMarketGrowthMetrics() {
   const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
   return data as MarketGrowthMetric[];
 }
 
-async function fetchTopGrowthRegions() {
-  const { data, error } = await supabase.rpc('get_market_growth_metrics');
+async function fetchCompetitiveMarketMetrics() {
+  const { data, error } = await supabase.rpc('get_competitive_market_metrics');
   if (error) throw error;
-  return data as MarketGrowthMetric[];
+  return data as CompetitiveMarketMetric[];
 }
 
 export function KeyInsightsPanel() {
@@ -34,12 +43,13 @@ export function KeyInsightsPanel() {
     queryFn: fetchMarketGrowthMetrics,
   });
 
-  const { data: topRegions } = useQuery({
-    queryKey: ['topGrowthRegions'],
-    queryFn: fetchTopGrowthRegions,
+  const { data: competitiveMetrics } = useQuery({
+    queryKey: ['competitiveMarketMetrics'],
+    queryFn: fetchCompetitiveMarketMetrics,
   });
 
   const topGrowthRegion = growthMetrics?.[0];
+  const topCompetitiveMarket = competitiveMetrics?.[0];
 
   const insights = [
     {
@@ -132,8 +142,80 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Competitive Market",
-      value: "Florida, 6.5% density",
-      insight: "Strong payroll growth",
+      value: topCompetitiveMarket 
+        ? `${topCompetitiveMarket.county_name}, ${topCompetitiveMarket.establishments_per_1000_population.toFixed(1)} firms/1k pop`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {topCompetitiveMarket ? (
+            <>
+              {`${topCompetitiveMarket.total_establishments.toLocaleString()} establishments, ${(topCompetitiveMarket.total_population / 1000000).toFixed(1)}M population`}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <div className="space-y-2 p-1">
+                      <p className="text-sm font-medium text-white">Market Details:</p>
+                      <div className="text-sm text-gray-300">
+                        <p>Total Establishments: {topCompetitiveMarket.total_establishments.toLocaleString()}</p>
+                        <p>Population: {topCompetitiveMarket.total_population.toLocaleString()}</p>
+                        <p>Density: {topCompetitiveMarket.establishments_per_1000_population.toFixed(1)} firms per 1,000 residents</p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span className="text-xs">View Top Markets</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold mb-4">Top Competitive Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-4 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
+                        <div>Rank</div>
+                        <div>Region</div>
+                        <div>Establishments</div>
+                        <div>Density</div>
+                      </div>
+                      {competitiveMetrics?.slice(0, 10).map((market, index) => (
+                        <div 
+                          key={`${market.county_name}-${market.state_fp}-${index}`}
+                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                        >
+                          <div className="flex items-center">
+                            <span className="text-lg font-bold text-accent">#{index + 1}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{market.county_name}</p>
+                            <p className="text-sm text-white/60">{market.state_fp}</p>
+                          </div>
+                          <div className="flex items-center">
+                            {market.total_establishments.toLocaleString()}
+                          </div>
+                          <div className="flex items-center">
+                            {market.establishments_per_1000_population.toFixed(1)} per 1k
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data"
+          )}
+        </div>
+      ),
       icon: Users,
     },
     {

@@ -828,6 +828,17 @@ export type Database = {
           competition_level: string
         }[]
       }
+      get_competitive_market_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_fp: string
+          county_fp: string
+          total_population: number
+          total_establishments: number
+          establishments_per_1000_population: number
+        }[]
+      }
       get_county_rankings: {
         Args: Record<PropertyKey, never>
         Returns: {
