@@ -7,20 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 interface MarketGrowthMetric {
   county_name: string;
-  state_name: string;
-  growth_rate: number;
-  firm_density: number;
-  total_firms: number;
-  total_population: number;
-}
-
-interface TopGrowthRegion {
-  county_name: string;
-  state_name: string;
-  growth_rate: number;
-  firm_density: number;
-  total_firms: number;
-  total_population: number;
+  state: string;
+  population_growth: number;
+  growth_rate_percentage: number;
+  total_movedin_2022: number;
+  total_movedin_2021: number;
+  total_movedin_2020: number;
+  total_moves: number;
 }
 
 async function fetchMarketGrowthMetrics() {
@@ -30,13 +23,13 @@ async function fetchMarketGrowthMetrics() {
 }
 
 async function fetchTopGrowthRegions() {
-  const { data, error } = await supabase.rpc('get_top_growth_regions');
+  const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
-  return data as TopGrowthRegion[];
+  return data as MarketGrowthMetric[];
 }
 
 export function KeyInsightsPanel() {
-  const { data: growthMetrics, isLoading } = useQuery({
+  const { data: growthMetrics } = useQuery({
     queryKey: ['marketGrowthMetrics'],
     queryFn: fetchMarketGrowthMetrics,
   });
@@ -46,21 +39,19 @@ export function KeyInsightsPanel() {
     queryFn: fetchTopGrowthRegions,
   });
 
-  console.log('Top regions:', topRegions); // Debug log
-
   const topGrowthRegion = growthMetrics?.[0];
 
   const insights = [
     {
       title: "Top Growth Region",
       value: topGrowthRegion 
-        ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state_name}`
+        ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthRegion ? (
             <>
-              {`${topGrowthRegion.growth_rate.toFixed(1)}% growth, ${topGrowthRegion.total_population.toLocaleString()} population`}
+              {`${topGrowthRegion.growth_rate_percentage.toFixed(1)}% of national moves, ${topGrowthRegion.total_moves.toLocaleString()} total moves`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -68,13 +59,16 @@ export function KeyInsightsPanel() {
                   </TooltipTrigger>
                   <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
                     <div className="space-y-2 p-1">
-                      <p className="text-sm font-medium text-white">Region Details:</p>
+                      <p className="text-sm font-medium text-white">Move-in Distribution:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Total Firms: {topGrowthRegion.total_firms.toLocaleString()}</p>
-                        <p>Firm Density: {topGrowthRegion.firm_density.toFixed(1)}</p>
-                        <p>Population: {topGrowthRegion.total_population.toLocaleString()}</p>
+                        <p>2022: {topGrowthRegion.total_movedin_2022.toLocaleString()}</p>
+                        <p>2021: {topGrowthRegion.total_movedin_2021.toLocaleString()}</p>
+                        <p>2020: {topGrowthRegion.total_movedin_2020.toLocaleString()}</p>
                         <div className="mt-2 pt-2 border-t border-white/10">
-                          <p>Growth Rate: {topGrowthRegion.growth_rate.toFixed(1)}%</p>
+                          <p>Total Moves: {topGrowthRegion.total_moves.toLocaleString()}</p>
+                          <p className="mt-1">
+                            Represents {topGrowthRegion.growth_rate_percentage.toFixed(1)}% of all national moves
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -98,12 +92,12 @@ export function KeyInsightsPanel() {
                         <div>Rank</div>
                         <div className="col-span-2">Region</div>
                         <div>Growth Rate</div>
-                        <div>Firm Density</div>
-                        <div>Population</div>
+                        <div>Total Moves</div>
+                        <div>Move %</div>
                       </div>
                       {topRegions?.map((region, index) => (
                         <div 
-                          key={`${region.county_name}-${region.state_name}-${index}`}
+                          key={`${region.county_name}-${region.state}-${index}`}
                           className="grid grid-cols-6 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                         >
                           <div className="flex items-center">
@@ -111,16 +105,16 @@ export function KeyInsightsPanel() {
                           </div>
                           <div className="col-span-2">
                             <p className="font-medium">{region.county_name}</p>
-                            <p className="text-sm text-white/60">{region.state_name}</p>
+                            <p className="text-sm text-white/60">{region.state}</p>
                           </div>
                           <div className="flex items-center">
-                            <span className="text-green-400">+{region.growth_rate.toFixed(1)}%</span>
+                            <span className="text-green-400">+{region.growth_rate_percentage.toFixed(1)}%</span>
                           </div>
                           <div className="flex items-center">
-                            {region.firm_density.toFixed(1)}
+                            {region.total_moves.toLocaleString()}
                           </div>
                           <div className="flex items-center">
-                            {region.total_population.toLocaleString()}
+                            {region.growth_rate_percentage.toFixed(1)}%
                           </div>
                         </div>
                       ))}
