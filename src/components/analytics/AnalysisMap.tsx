@@ -63,31 +63,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
       // Update map layer with new data if map is loaded
       if (map.current && mapLoaded) {
-        // Create a GeoJSON source with the state data
-        const statesData = {
-          type: 'FeatureCollection',
-          features: statesWithDensity.map((state: any) => ({
-            type: 'Feature',
-            properties: {
-              firmDensity: state.firmDensity,
-              stateName: state.region,
-              totalFirms: state.total_firms,
-              population: state.population
-            },
-            geometry: state.geometry
-          }))
-        };
-
-        // Update the source data
-        if (map.current.getSource('states')) {
-          (map.current.getSource('states') as mapboxgl.GeoJSONSource).setData(statesData);
-        }
-
         // Update the layer paint properties
-        map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
+        map.current.setPaintProperty('state-fills', 'fill-color', [
           'interpolate',
           ['linear'],
-          ['get', 'firmDensity'],
+          ['get', 'density'],
           0, '#FA0098',  // Very Low (0-20) - Pink
           20, '#94EC0E', // Low (20-40) - Light Green
           40, '#FFF903', // Medium (40-60) - Yellow
@@ -151,77 +131,72 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         setMapLoaded(true);
         console.log('Map style loaded');
         
-        if (!currentMap.getSource('states')) {
-          currentMap.addSource('states', {
-            type: 'vector',
-            url: 'mapbox://inevitablesale.9fnr921z'
-          });
-        }
+        // Add source for state fills
+        currentMap.addSource('states', {
+          type: 'vector',
+          url: 'mapbox://inevitablesale.9fnr921z'
+        });
 
-        // Add base layer with data-driven styling
-        if (!currentMap.getLayer('state-base')) {
-          currentMap.addLayer({
-            'id': 'state-base',
-            'type': 'fill-extrusion',
-            'source': 'states',
-            'source-layer': 'tl_2020_us_state-52k5uw',
-            'paint': {
-              'fill-extrusion-color': [
-                'interpolate',
-                ['linear'],
-                ['get', 'firmDensity'],
-                0, '#FA0098',  // Very Low (0-20) - Pink
-                20, '#94EC0E', // Low (20-40) - Light Green
-                40, '#FFF903', // Medium (40-60) - Yellow
-                60, '#00FFE0', // High (60-80) - Cyan
-                80, '#037CFE'  // Very High (80+) - Blue
-              ],
-              'fill-extrusion-height': 20000,
-              'fill-extrusion-opacity': 0.8
-            }
-          });
-        }
+        // Add the state fills layer
+        currentMap.addLayer({
+          'id': 'state-fills',
+          'type': 'fill',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-color': '#FA0098',  // Default color
+            'fill-opacity': 0.8
+          }
+        });
 
-        // Add hover layer
-        if (!currentMap.getLayer('state-hover')) {
-          currentMap.addLayer({
-            'id': 'state-hover',
-            'type': 'fill-extrusion',
-            'source': 'states',
-            'source-layer': 'tl_2020_us_state-52k5uw',
-            'paint': {
-              'fill-extrusion-color': MAP_COLORS.highlight,
-              'fill-extrusion-height': 30000,
-              'fill-extrusion-opacity': 0,
-              'fill-extrusion-base': 20000
-            }
-          });
-        }
+        // Add the state borders layer
+        currentMap.addLayer({
+          'id': 'state-borders',
+          'type': 'line',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'line-color': '#ffffff',
+            'line-width': 1
+          }
+        });
+
+        // Add hover effect layer
+        currentMap.addLayer({
+          'id': 'state-hover',
+          'type': 'fill',
+          'source': 'states',
+          'source-layer': 'tl_2020_us_state-52k5uw',
+          'paint': {
+            'fill-color': MAP_COLORS.highlight,
+            'fill-opacity': 0
+          }
+        });
 
         fetchStateData();
       });
 
       let hoveredStateId: string | null = null;
 
-      currentMap.on('mousemove', 'state-base', (e) => {
+      currentMap.on('mousemove', 'state-fills', (e) => {
         if (e.features && e.features.length > 0) {
           if (hoveredStateId) {
-            currentMap.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
+            currentMap.setPaintProperty('state-hover', 'fill-opacity', 0);
           }
           hoveredStateId = e.features[0].properties?.STATEFP;
-          currentMap.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0.3);
+          currentMap.setPaintProperty('state-hover', 'fill-opacity', 0.3);
           currentMap.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
         }
       });
 
-      currentMap.on('mouseleave', 'state-base', () => {
+      currentMap.on('mouseleave', 'state-fills', () => {
         if (hoveredStateId) {
-          currentMap.setPaintProperty('state-hover', 'fill-extrusion-opacity', 0);
+          currentMap.setPaintProperty('state-hover', 'fill-opacity', 0);
           hoveredStateId = null;
         }
       });
 
-      currentMap.on('click', 'state-base', async (e) => {
+      currentMap.on('click', 'state-fills', async (e) => {
         if (e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
