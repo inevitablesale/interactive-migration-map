@@ -33,12 +33,21 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Found state FIPS:', stateData.fips_code); // Debug log
 
+      // Convert string FIPS code to number for the query
+      const stateFipsNumber = parseInt(stateData.fips_code, 10);
+
+      if (isNaN(stateFipsNumber)) {
+        console.error('Invalid FIPS code:', stateData.fips_code);
+        toast.error('Invalid state data');
+        return null;
+      }
+
       // Then, get the county data using the FIPS code
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', stateData.fips_code)
+        .eq('STATEFP', stateFipsNumber)
         .maybeSingle();
 
       if (rankingError) {
@@ -59,7 +68,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .from('canary_firms_data')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', stateData.fips_code);
+        .eq('STATEFP', stateFipsNumber);
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
