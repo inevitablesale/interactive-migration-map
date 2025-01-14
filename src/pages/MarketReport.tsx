@@ -99,17 +99,8 @@ export default function MarketReport() {
         return null;
       }
 
-      const rawData = data[0] as unknown;
-      const typedData = rawData as ComprehensiveMarketData;
-      
-      if (typedData.top_firms) {
-        typedData.top_firms = JSON.parse(JSON.stringify(typedData.top_firms));
-      }
-      if (typedData.adjacent_counties) {
-        typedData.adjacent_counties = JSON.parse(JSON.stringify(typedData.adjacent_counties));
-      }
-
-      return typedData;
+      // Return the first result directly without additional parsing
+      return data[0] as ComprehensiveMarketData;
     },
     enabled: !!stateFips,
     retry: 1,
