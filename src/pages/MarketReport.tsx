@@ -1,5 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase, Star, Search, MapPin } from "lucide-react";
+import { 
+  Users, Building2, TrendingUp, DollarSign, ArrowLeft, 
+  LayoutGrid, Globe, Users2, Calendar, Briefcase, Star, 
+  Search, MapPin, ChevronLeft
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
@@ -8,7 +12,6 @@ import { EducationDistributionCard } from "@/components/market-report/EducationD
 import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
 import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
 import { MarketRankingBadges } from "@/components/market-report/MarketRankingBadges";
-import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
 import { useState } from "react";
@@ -22,32 +25,27 @@ export default function MarketReport() {
   const navigate = useNavigate();
   
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
-  console.log('Formatted county name:', formattedCounty); // Debug log
-
   const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, state);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  console.log('Market Report Component - Market Data:', marketData); // Debug log
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#222222] p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">Loading comprehensive market data...</div>
+          <div className="animate-pulse text-white/80">Loading comprehensive market data...</div>
         </div>
       </div>
     );
   }
 
   if (!hasMarketData || !marketData) {
-    console.log('No market data found for:', { formattedCounty, state }); // Debug log
     return (
-      <div className="min-h-screen bg-[#222222] p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl font-bold text-white mb-4">Market not found</h1>
           <Button onClick={() => navigate(-1)} variant="outline" className="text-white">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className="w-4 h-4 mr-2" />
             Back to Analysis
           </Button>
         </div>
@@ -55,43 +53,44 @@ export default function MarketReport() {
     );
   }
 
-  const filteredFirms = marketData.top_firms?.filter(firm => {
-    console.log('Filtering firm:', firm); // Debug log for each firm
-    return firm.company_name.toLowerCase().includes(searchTerm.toLowerCase());
-  }) || [];
+  const filteredFirms = marketData.top_firms?.filter(firm => 
+    firm.company_name.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
   
-  console.log('Filtered firms:', filteredFirms); // Debug log
-
   const totalPages = Math.ceil(filteredFirms.length / FIRMS_PER_PAGE);
   const paginatedFirms = filteredFirms.slice(
     (currentPage - 1) * FIRMS_PER_PAGE,
     currentPage * FIRMS_PER_PAGE
   );
 
-  console.log('Paginated firms:', paginatedFirms); // Debug log
-
   return (
-    <div className="min-h-screen bg-[#222222]">
-      <div className="bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto p-8">
-          <Button onClick={() => navigate(-1)} variant="outline" className="text-white mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Analysis
-          </Button>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="sticky top-0 z-10 backdrop-blur-md bg-black/40 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={() => navigate(-1)} 
+              variant="ghost" 
+              className="text-white hover:bg-white/10"
+            >
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
             <div>
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-white">
                 {county}, {state}
               </h1>
-              <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
+              <p className="text-gray-400">Market Analysis Report</p>
             </div>
-            <MarketRankingBadges marketData={marketData} />
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-8">
-        <ColorScaleLegend />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <MarketRankingBadges marketData={marketData} />
+          <ColorScaleLegend />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 space-y-6">
@@ -103,32 +102,31 @@ export default function MarketReport() {
                   {
                     label: "Total Population",
                     value: marketData.total_population?.toLocaleString(),
-                    type: "population" as const,
+                    type: "population",
                     rank: marketData.population_rank
                   },
                   {
-                    label: "Median Household",
-                    sublabel: "Income",
+                    label: "Median Household Income",
                     value: `$${marketData.median_household_income?.toLocaleString()}`,
-                    type: "money" as const,
+                    type: "money",
                     rank: marketData.income_rank
                   }
                 ]}
               />
               <MarketMetricsCard
-                title="Housing Metrics"
+                title="Housing Market"
                 icon={Building2}
                 metrics={[
                   {
                     label: "Median Gross Rent",
                     value: `$${marketData.median_gross_rent?.toLocaleString()}`,
-                    type: "money" as const,
+                    type: "money",
                     rank: marketData.rent_rank
                   },
                   {
                     label: "Vacancy Rate",
                     value: `${marketData.vacancy_rate?.toFixed(1)}%`,
-                    type: "saturation" as const,
+                    type: "saturation",
                     rank: marketData.vacancy_rank
                   }
                 ]}
@@ -138,16 +136,15 @@ export default function MarketReport() {
                 icon={TrendingUp}
                 metrics={[
                   {
-                    label: "Firms per 10k",
-                    sublabel: "Population",
+                    label: "Firms per 10k Population",
                     value: marketData.firms_per_10k_population?.toFixed(1),
-                    type: "density" as const,
+                    type: "density",
                     rank: marketData.density_rank
                   },
                   {
                     label: "Growth Rate",
                     value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
-                    type: "growth" as const,
+                    type: "growth",
                     rank: marketData.growth_rank
                   }
                 ]}
@@ -188,30 +185,28 @@ export default function MarketReport() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedFirms.map((firm, index) => (
-                  <Card key={index} className="bg-black/20 border-white/5 overflow-hidden group hover:border-white/20 transition-all duration-200">
+                  <Card key={index} className="group overflow-hidden bg-gradient-to-br from-black/60 to-black/40 hover:from-black/70 hover:to-black/50 border-white/5 transition-all duration-300">
                     <CardContent className="p-0">
-                      <div className="relative h-32 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 z-10"></div>
+                      <div className="relative h-32">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 z-10" />
                         <img
                           src={firm.logoResolutionResult || firm.originalCoverImage || DEFAULT_IMAGE}
                           alt={`${firm.company_name} cover`}
-                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                          <div className="space-y-1">
-                            <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
-                            {firm.Location && (
-                              <div className="flex items-center gap-2 text-gray-300 text-sm">
-                                <MapPin className="w-4 h-4" />
-                                <span className="truncate">{firm.Location}</span>
-                              </div>
-                            )}
-                            {firm.primarySubtitle && (
-                              <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
-                            )}
-                          </div>
+                          <h3 className="text-white font-medium truncate text-lg">
+                            {firm.company_name}
+                          </h3>
+                          {firm.Location && (
+                            <div className="flex items-center gap-2 text-gray-300 text-sm">
+                              <MapPin className="w-4 h-4" />
+                              <span className="truncate">{firm.Location}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
+                      
                       <div className="p-4 space-y-4">
                         {firm.Summary && (
                           <div className="space-y-1">
@@ -237,18 +232,10 @@ export default function MarketReport() {
                               <Users className="w-4 h-4 mr-1" />
                               <span>Followers</span>
                             </div>
-                            <p className="text-white font-medium">{firm.follower_count.toLocaleString()}</p>
+                            <p className="text-white font-medium">
+                              {firm.follower_count.toLocaleString()}
+                            </p>
                           </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center text-gray-400 text-sm">
-                            <Briefcase className="w-4 h-4 mr-1" />
-                            <span>Follower Ratio</span>
-                          </div>
-                          <p className={`font-medium ${getMetricColor(firm.follower_ratio, 'density')}`}>
-                            {firm.follower_ratio.toFixed(1)}
-                          </p>
                         </div>
 
                         {firm.foundedOn && (
@@ -263,10 +250,10 @@ export default function MarketReport() {
 
                         {firm.specialities && (
                           <div className="space-y-1">
-                            <p className="text-gray-400 text-sm flex items-center">
+                            <div className="flex items-center text-gray-400 text-sm">
                               <Star className="w-4 h-4 mr-1" />
-                              Specialities
-                            </p>
+                              <span>Specialities</span>
+                            </div>
                             <p className="text-white text-sm">{firm.specialities}</p>
                           </div>
                         )}
