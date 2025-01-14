@@ -14,11 +14,18 @@ interface AnalysisMapProps {
   geographicLevel: 'state' | 'county' | 'msa';
 }
 
+interface StateMetrics {
+  STATEFP: string;
+  ESTAB: number;
+  B01001_001E: number;
+  density?: number;
+}
+
 const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geographicLevel }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [selectedState, setSelectedState] = useState<any | null>(null);
-  const [stateData, setStateData] = useState<any[]>([]);
+  const [selectedState, setSelectedState] = useState<StateMetrics | null>(null);
+  const [stateData, setStateData] = useState<StateMetrics[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -51,8 +58,11 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         
         console.log(`State ${state.STATEFP} - ESTAB: ${state.ESTAB}, Population: ${state.B01001_001E}, Density: ${density}`);
         
+        // Create a plain object with only the data we need
         return {
-          ...JSON.parse(JSON.stringify(state)),
+          STATEFP: state.STATEFP,
+          ESTAB: state.ESTAB,
+          B01001_001E: state.B01001_001E,
           density
         };
       });
