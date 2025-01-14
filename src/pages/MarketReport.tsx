@@ -6,6 +6,7 @@ import { ArrowLeft, Users, Building2, TrendingUp, GraduationCap, Briefcase, Calc
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types";
 
 interface TopFirm {
   company_name: string;
@@ -99,7 +100,12 @@ export default function MarketReport() {
         return null;
       }
 
-      return data[0] as ComprehensiveMarketData;
+      const rawData = data[0];
+      return {
+        ...rawData,
+        top_firms: rawData.top_firms as TopFirm[],
+        adjacent_counties: rawData.adjacent_counties as AdjacentCounty[]
+      } as ComprehensiveMarketData;
     },
     enabled: !!stateFips,
     retry: 1,
