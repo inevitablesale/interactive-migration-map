@@ -84,6 +84,16 @@ export default function MarketReport() {
     enabled: !!stateFips,
   });
 
+  const formatCommuteTime = (minutes: number | null) => {
+    if (!minutes) return 'N/A';
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (hours === 0) {
+      return `${remainingMinutes} minutes`;
+    }
+    return `${hours}h ${remainingMinutes}m`;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
@@ -276,7 +286,7 @@ export default function MarketReport() {
               <div>
                 <p className="text-gray-400">Average Commute Time</p>
                 <p className="text-xl font-bold text-white">
-                  {marketData.avg_commute_time ? `${marketData.avg_commute_time} minutes` : 'N/A'}
+                  {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
                 </p>
               </div>
               <div>
