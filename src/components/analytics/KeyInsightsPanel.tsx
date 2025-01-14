@@ -48,6 +48,8 @@ export function KeyInsightsPanel() {
     queryFn: fetchTopGrowthRegions,
   });
 
+  console.log('Top regions:', topRegions); // Debug log
+
   const topGrowthRegion = growthMetrics?.[0];
 
   const insights = [
