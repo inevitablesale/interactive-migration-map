@@ -7,9 +7,7 @@ import { HeatmapSection } from "@/components/analytics/HeatmapSection";
 import { MarketEntryAnalysis } from "@/components/analytics/market-entry/MarketEntryAnalysis";
 import { GrowthStrategyAnalysis } from "@/components/analytics/growth/GrowthStrategyAnalysis";
 import { OpportunityAnalysis } from "@/components/analytics/opportunities/OpportunityAnalysis";
-import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
-import { ComparablesPanel } from "@/components/analytics/ComparablesPanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, ArrowRight, BarChart3, Map, TrendingUp } from "lucide-react";
@@ -194,8 +192,6 @@ const Analysis = () => {
           {/* Right Column */}
           <div className="space-y-8">
             <BuyerProfileManager />
-            <ComparablesPanel />
-            <AlertsPanel />
           </div>
         </div>
 
