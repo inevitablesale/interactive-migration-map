@@ -13,10 +13,9 @@ export interface ComprehensiveMarketData {
   bachelors_degree_holders?: number;
   masters_degree_holders?: number;
   doctorate_degree_holders?: number;
-  avg_accountant_payroll?: number;
+  payann?: number;
   total_establishments?: number;
   emp?: number;
-  payann?: number;
   public_to_private_ratio?: number | null;
   vacancy_rate?: number;
   vacancy_rank?: number;
@@ -41,5 +40,6 @@ export interface TopFirm {
   foundedOn?: string;
   specialities?: string;
   websiteUrl?: string;
-  "State Name"?: string;
+  Location?: string;
+  Summary?: string;
 }
