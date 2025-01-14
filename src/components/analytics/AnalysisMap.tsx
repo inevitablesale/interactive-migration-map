@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, Fragment } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useSearchParams } from "react-router-dom";
@@ -51,23 +51,14 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         return;
       }
 
-      // Calculate density and create serializable objects
-      const statesWithDensity = stateMetrics.map(state => {
-        const density = state.ESTAB && state.B01001_001E ? 
-          (state.ESTAB / state.B01001_001E) * 10000 : 0;
-        
-        console.log(`State ${state.STATEFP} - ESTAB: ${state.ESTAB}, Population: ${state.B01001_001E}, Density: ${density}`);
-        
-        // Create a plain object with only serializable data
-        const serializedState: StateMetrics = {
-          STATEFP: state.STATEFP,
-          ESTAB: state.ESTAB,
-          B01001_001E: state.B01001_001E,
-          density
-        };
-        
-        return serializedState;
-      });
+      // Create serializable state metrics
+      const statesWithDensity: StateMetrics[] = stateMetrics.map(state => ({
+        STATEFP: state.STATEFP,
+        ESTAB: Number(state.ESTAB),
+        B01001_001E: Number(state.B01001_001E),
+        density: state.ESTAB && state.B01001_001E ? 
+          (Number(state.ESTAB) / Number(state.B01001_001E)) * 10000 : 0
+      }));
 
       console.log('Processed state data:', statesWithDensity);
       setStateData(statesWithDensity);
@@ -172,7 +163,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
   }, [fetchStateData, toast]);
 
   return (
-    <Fragment>
+    <React.Fragment>
       <div className="w-full h-full">
         <div ref={mapContainer} className="w-full h-full" />
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
@@ -204,7 +195,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
           </div>
         </div>
       </div>
-    </Fragment>
+    </React.Fragment>
   );
 };
 
