@@ -24,8 +24,13 @@ interface ComprehensiveMarketData {
   avg_accountant_payroll: number | null;
   public_to_private_ratio: number | null;
   avg_commute_time: number | null;
+  commute_rank: number | null;
   poverty_rate: number | null;
+  poverty_rank: number | null;
   vacancy_rate: number | null;
+  vacancy_rank: number | null;
+  income_rank: number | null;
+  population_rank: number | null;
   top_firms: Array<{
     company_name: string;
     employee_count: number;
