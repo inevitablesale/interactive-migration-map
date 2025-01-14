@@ -54,10 +54,10 @@ export default function MarketReport() {
             <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
-            <Badge variant="secondary" className="bg-orange-600/20 text-orange-400 hover:bg-orange-600/30">
+            <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">
               Developing Market
             </Badge>
-            <Badge variant="secondary" className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30">
+            <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
               Moderate Growth
             </Badge>
           </div>
@@ -167,7 +167,7 @@ export default function MarketReport() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {marketData.top_firms.slice(0, 6).map((firm, index) => (
-                <Card key={index} className="bg-white/5 border-white/10 p-4">
+                <Card key={index} className="bg-black/40 backdrop-blur-md border-white/10 p-4">
                   <div className="flex items-start gap-3">
                     {firm.logoResolutionResult && (
                       <img
