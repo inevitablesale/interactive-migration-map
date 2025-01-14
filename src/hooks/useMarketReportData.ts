@@ -60,7 +60,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       console.log('County data found:', countyData); // Debug log
 
-      // Fetch top firms data
+      // Fetch top firms data using the same FIPS code
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
