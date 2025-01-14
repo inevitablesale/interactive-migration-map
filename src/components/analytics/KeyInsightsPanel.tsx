@@ -36,7 +36,7 @@ export function KeyInsightsPanel() {
         ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
         : "Loading...",
       insight: (
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+        <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthRegion ? (
             <>
               {`${topGrowthRegion.growth_rate_percentage}% of national moves, ${topGrowthRegion.total_moves.toLocaleString()} total moves`}
@@ -99,7 +99,7 @@ export function KeyInsightsPanel() {
               <h3 className="font-semibold text-lg text-white">{insight.title}</h3>
             </div>
             <p className="text-2xl font-bold text-white mb-2">{insight.value}</p>
-            <div className="text-sm text-gray-400">{insight.insight}</div>
+            <div className="text-sm text-white/80">{insight.insight}</div>
           </Card>
         ))}
       </div>
