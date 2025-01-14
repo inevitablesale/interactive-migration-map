@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
-import { WelcomeSection } from "@/components/analytics/WelcomeSection";
+import { MarketOpportunityInsights } from "@/components/analytics/insights/MarketOpportunityInsights";
+import { CompetitiveIntelligence } from "@/components/analytics/insights/CompetitiveIntelligence";
+import { RegionalHighlights } from "@/components/analytics/insights/RegionalHighlights";
 import { HeatmapSection } from "@/components/analytics/HeatmapSection";
 import { MarketEntryAnalysis } from "@/components/analytics/market-entry/MarketEntryAnalysis";
 import { GrowthStrategyAnalysis } from "@/components/analytics/growth/GrowthStrategyAnalysis";
@@ -128,39 +130,14 @@ const Analysis = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        {/* Key Insights Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-white/10 p-6">
-            <h3 className="text-lg font-semibold text-white mb-2">Economic Growth</h3>
-            <p className="text-white/60 text-sm mb-4">
-              Track YoY GDP growth rates and market performance across regions
-            </p>
-            <Button variant="outline" className="w-full border-white/10 hover:bg-white/5">
-              View Growth Map
-            </Button>
-          </Card>
-          
-          <Card className="bg-gradient-to-br from-green-500/10 to-blue-500/10 border-white/10 p-6">
-            <h3 className="text-lg font-semibold text-white mb-2">Underserved Markets</h3>
-            <p className="text-white/60 text-sm mb-4">
-              Identify high-potential regions with low firm density
-            </p>
-            <Button variant="outline" className="w-full border-white/10 hover:bg-white/5">
-              Find Opportunities
-            </Button>
-          </Card>
-          
-          <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-white/10 p-6">
-            <h3 className="text-lg font-semibold text-white mb-2">Market Specialization</h3>
-            <p className="text-white/60 text-sm mb-4">
-              Explore industry trends and specialization by region
-            </p>
-            <Button variant="outline" className="w-full border-white/10 hover:bg-white/5">
-              View Trends
-            </Button>
-          </Card>
+        {/* Market Intelligence Dashboard */}
+        <div className="space-y-6">
+          <MarketOpportunityInsights />
+          <CompetitiveIntelligence />
+          <RegionalHighlights />
         </div>
 
+        {/* Interactive Map and Analysis */}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8">
           {/* Left Column */}
           <div className="space-y-8">
@@ -198,28 +175,6 @@ const Analysis = () => {
             <UniqueInsightsPanel />
           </div>
         </div>
-
-        {/* Value-Added Insights */}
-        <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Key Findings at a Glance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="text-blue-400 font-medium mb-1">Top Growth State</div>
-              <div className="text-2xl font-bold text-white mb-1">Colorado</div>
-              <div className="text-sm text-white/60">+54.7% growth in firm density</div>
-            </div>
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="text-green-400 font-medium mb-1">Highest Employment</div>
-              <div className="text-2xl font-bold text-white mb-1">California</div>
-              <div className="text-sm text-white/60">150,000+ accountants</div>
-            </div>
-            <div className="p-4 bg-white/5 rounded-lg">
-              <div className="text-purple-400 font-medium mb-1">Emerging Market</div>
-              <div className="text-2xl font-bold text-white mb-1">Wyoming</div>
-              <div className="text-sm text-white/60">5.68 firm density, +34.6% growth</div>
-            </div>
-          </div>
-        </Card>
 
         {/* Footer CTAs */}
         <div className="flex flex-wrap gap-4 justify-center pt-8">
