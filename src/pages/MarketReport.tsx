@@ -48,9 +48,9 @@ interface ComprehensiveMarketData {
   rent_rank: number | null;
   density_rank: number | null;
   growth_rank: number | null;
-  top_firms: TopFirm[] | null;
+  top_firms: TopFirm[];
   state_avg_income: number | null;
-  adjacent_counties: AdjacentCounty[] | null;
+  adjacent_counties: AdjacentCounty[];
 }
 
 export default function MarketReport() {
@@ -99,8 +99,13 @@ export default function MarketReport() {
         return null;
       }
 
-      // Return the first result directly without additional parsing
-      return data[0] as ComprehensiveMarketData;
+      // Parse the JSON fields and ensure proper typing
+      const rawData = data[0];
+      return {
+        ...rawData,
+        top_firms: Array.isArray(rawData.top_firms) ? rawData.top_firms : [],
+        adjacent_counties: Array.isArray(rawData.adjacent_counties) ? rawData.adjacent_counties : []
+      } as ComprehensiveMarketData;
     },
     enabled: !!stateFips,
     retry: 1,
