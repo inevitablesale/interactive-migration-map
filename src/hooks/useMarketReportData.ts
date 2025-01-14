@@ -4,21 +4,21 @@ import { toast } from "sonner";
 import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, state: string | undefined) => {
-  console.log('useMarketReportData hook called with:', { county, state });
+  console.log('🔄 useMarketReportData hook called with:', { county, state });
 
   // Query for state FIPS code
   const { data: stateFips } = useQuery({
     queryKey: ['stateFips', state],
     queryFn: async () => {
       try {
-        console.log('Starting FIPS code fetch for state:', state);
+        console.log('📍 Starting FIPS code fetch for state:', state);
         
         if (!state) {
-          console.warn('No state provided for FIPS lookup');
+          console.warn('⚠️ No state provided for FIPS lookup');
           return null;
         }
 
-        console.log('Making Supabase request for state_fips_codes...');
+        console.log('🔍 Making Supabase request for state_fips_codes...');
         const { data, error } = await supabase
           .from('state_fips_codes')
           .select('fips_code')
@@ -26,7 +26,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
           .maybeSingle();
 
         if (error) {
-          console.error('Error fetching state FIPS:', error);
+          console.error('❌ Error fetching state FIPS:', error);
           console.error('Error details:', {
             message: error.message,
             details: error.details,
@@ -36,11 +36,11 @@ export const useMarketReportData = (county: string | undefined, state: string | 
           throw error;
         }
 
-        console.log('FIPS code response:', data);
-        console.log('Retrieved FIPS code:', data?.fips_code);
+        console.log('✅ FIPS code response:', data);
+        console.log('📌 Retrieved FIPS code:', data?.fips_code);
         return data?.fips_code;
       } catch (error) {
-        console.error('Error in stateFips query:', error);
+        console.error('❌ Error in stateFips query:', error);
         console.error('Full error object:', JSON.stringify(error, null, 2));
         throw error;
       }
@@ -52,20 +52,20 @@ export const useMarketReportData = (county: string | undefined, state: string | 
   const { data: marketData, isLoading, error } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
-      console.log('Market data query starting with params:', { county, stateFips });
+      console.log('🔄 Market data query starting with params:', { county, stateFips });
       
       if (!stateFips) {
-        console.warn('No stateFips available, skipping market data fetch');
+        console.warn('⚠️ No stateFips available, skipping market data fetch');
         return null;
       }
 
       if (!county) {
-        console.warn('No county provided, skipping market data fetch');
+        console.warn('⚠️ No county provided, skipping market data fetch');
         return null;
       }
 
       try {
-        console.log('Making RPC call to get_comprehensive_county_data with params:', {
+        console.log('📡 Making RPC call to get_comprehensive_county_data with params:', {
           p_county_name: county,
           p_state_fp: stateFips
         });
@@ -79,7 +79,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         );
 
         if (error) {
-          console.error('Error fetching comprehensive market data:', error);
+          console.error('❌ Error fetching comprehensive market data:', error);
           console.error('Error details:', {
             message: error.message,
             details: error.details,
@@ -89,42 +89,44 @@ export const useMarketReportData = (county: string | undefined, state: string | 
           throw error;
         }
 
-        console.log('Raw response from RPC:', rawData);
+        console.log('📦 Raw response from RPC:', rawData);
 
         // Detailed data validation logging
         if (!rawData) {
-          console.warn('RPC returned null or undefined data');
+          console.warn('⚠️ RPC returned null or undefined data');
           toast.error('No data found for this location');
           return null;
         }
 
         if (!Array.isArray(rawData)) {
-          console.warn('RPC returned non-array data:', typeof rawData);
+          console.warn('⚠️ RPC returned non-array data:', typeof rawData);
           console.log('Actual data structure:', rawData);
           toast.error('Invalid data format received');
           return null;
         }
 
         if (rawData.length === 0) {
-          console.warn('RPC returned empty array');
+          console.warn('⚠️ RPC returned empty array');
           toast.error('No data found for this location');
           return null;
         }
 
-        console.log('First row of raw data:', rawData[0]);
+        console.log('📋 First row of raw data:', rawData[0]);
 
         // Validate specific fields
         const firstRow = rawData[0];
-        console.log('Validating top_firms:', {
+        console.log('🔍 Validating top_firms:', {
           exists: 'top_firms' in firstRow,
           type: typeof firstRow.top_firms,
-          isArray: Array.isArray(firstRow.top_firms)
+          isArray: Array.isArray(firstRow.top_firms),
+          length: firstRow.top_firms?.length
         });
 
-        console.log('Validating adjacent_counties:', {
+        console.log('🔍 Validating adjacent_counties:', {
           exists: 'adjacent_counties' in firstRow,
           type: typeof firstRow.adjacent_counties,
-          isArray: Array.isArray(firstRow.adjacent_counties)
+          isArray: Array.isArray(firstRow.adjacent_counties),
+          length: firstRow.adjacent_counties?.length
         });
 
         const marketData = {
@@ -133,20 +135,22 @@ export const useMarketReportData = (county: string | undefined, state: string | 
           adjacent_counties: Array.isArray(firstRow?.adjacent_counties) ? firstRow.adjacent_counties : []
         } as ComprehensiveMarketData;
 
-        console.log('Final processed market data:', {
+        console.log('✅ Final processed market data:', {
           hasData: !!marketData,
           topFirmsCount: marketData.top_firms?.length,
           adjacentCountiesCount: marketData.adjacent_counties?.length,
           keyMetrics: {
             population: marketData.total_population,
             income: marketData.median_household_income,
-            employedPopulation: marketData.employed_population
+            employedPopulation: marketData.employed_population,
+            firmDensity: marketData.firms_per_10k_population,
+            growthRate: marketData.growth_rate_percentage
           }
         });
 
         return marketData;
       } catch (error) {
-        console.error('Error in market data query:', error);
+        console.error('❌ Error in market data query:', error);
         console.error('Full error object:', JSON.stringify(error, null, 2));
         toast.error('Failed to fetch market data');
         throw error;
@@ -158,11 +162,20 @@ export const useMarketReportData = (county: string | undefined, state: string | 
   });
 
   const hasMarketData = !!marketData;
-  console.log('useMarketReportData hook returning:', {
+  console.log('🔄 useMarketReportData hook returning:', {
     hasMarketData,
     isLoading,
-    error,
-    stateFipsAvailable: !!stateFips
+    error: error ? {
+      message: error.message,
+      details: error.details,
+      hint: error.hint
+    } : null,
+    stateFipsAvailable: !!stateFips,
+    marketDataSummary: hasMarketData ? {
+      population: marketData.total_population,
+      income: marketData.median_household_income,
+      topFirmsCount: marketData.top_firms?.length
+    } : null
   });
 
   return { marketData, isLoading, hasMarketData };
