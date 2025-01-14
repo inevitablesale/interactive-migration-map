@@ -46,15 +46,6 @@ interface ComprehensiveMarketData {
   income_rank: number | null;
   population_rank: number | null;
   rent_rank: number | null;
-  firms_density_rank: number | null;
-  growth_rank: number | null;
-  bachelors_rank: number | null;
-  masters_rank: number | null;
-  doctorate_rank: number | null;
-  employment_rank: number | null;
-  salary_rank: number | null;
-  sector_ratio_rank: number | null;
-  saturation_rank: number | null;
   top_firms: TopFirm[] | null;
   state_avg_income: number | null;
   adjacent_counties: AdjacentCounty[] | null;
@@ -217,6 +208,9 @@ export default function MarketReport() {
                 <p className="text-gray-400">Median Gross Rent</p>
                 <p className="text-2xl font-bold text-white">
                   ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.rent_rank)}
+                  </span>
                 </p>
               </div>
               <div>
