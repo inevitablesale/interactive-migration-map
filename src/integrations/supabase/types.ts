@@ -836,6 +836,7 @@ export type Database = {
           firm_density_rank: number | null
           firms_per_10k: number | null
           growth_rank: number | null
+          home_value_rank: number | null
           income_rank: number | null
           MOVEDIN2020: number | null
           MOVEDIN2021: number | null

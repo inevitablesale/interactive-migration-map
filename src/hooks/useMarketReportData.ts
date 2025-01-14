@@ -82,7 +82,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         rent_rank: data.rent_rank,
         density_rank: data.firm_density_rank,
         growth_rank: data.growth_rank,
-        top_firms: data.top_firms,
+        top_firms: data.top_firms || [],
         state_avg_income: null,
         adjacent_counties: null
       };
