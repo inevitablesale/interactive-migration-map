@@ -780,6 +780,24 @@ export type Database = {
         }
         Relationships: []
       }
+      state_fips_codes: {
+        Row: {
+          fips_code: string | null
+          postal_abbr: string | null
+          state: string | null
+        }
+        Insert: {
+          fips_code?: string | null
+          postal_abbr?: string | null
+          state?: string | null
+        }
+        Update: {
+          fips_code?: string | null
+          postal_abbr?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       state_density_metrics: {

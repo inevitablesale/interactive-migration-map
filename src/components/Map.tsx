@@ -86,6 +86,13 @@ const Map = () => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
+    // Use environment variable for Mapbox token
+    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+    if (!MAPBOX_TOKEN) {
+      console.error('Mapbox token not found in environment variables');
+      return;
+    }
+
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
     const mapInstance = new mapboxgl.Map({
