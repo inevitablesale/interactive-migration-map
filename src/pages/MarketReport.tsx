@@ -8,10 +8,14 @@ import { getMetricColor } from '@/utils/market-report/formatters';
 import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { useState } from "react";
 
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const firmsPerPage = 6;
   
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
   const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, state);
@@ -39,6 +43,11 @@ export default function MarketReport() {
       </div>
     );
   }
+
+  const totalPages = marketData?.top_firms ? Math.ceil(marketData.top_firms.length / firmsPerPage) : 0;
+  const startIndex = (currentPage - 1) * firmsPerPage;
+  const endIndex = startIndex + firmsPerPage;
+  const defaultLogoUrl = "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=200&h=200";
 
   return (
     <div className="min-h-screen bg-[#111111]">
@@ -69,7 +78,6 @@ export default function MarketReport() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          {/* Population Overview */}
           <MarketMetricsCard
             title="Population Overview"
             icon={Users}
@@ -166,17 +174,15 @@ export default function MarketReport() {
               <h2 className="text-lg text-white">Top Firms</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {marketData.top_firms.slice(0, 6).map((firm, index) => (
+              {marketData.top_firms.slice(startIndex, endIndex).map((firm, index) => (
                 <Card key={index} className="bg-black/40 backdrop-blur-md border-white/10 p-4">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-start gap-3">
-                      {firm.logoResolutionResult && (
-                        <img
-                          src={firm.logoResolutionResult}
-                          alt={firm.company_name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      )}
+                      <img
+                        src={firm.logoResolutionResult || defaultLogoUrl}
+                        alt={firm.company_name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
                       <div>
                         <h3 className="text-white font-medium">{firm.company_name}</h3>
                         <p className="text-gray-400 text-sm">{firm.primarySubtitle}</p>
@@ -218,6 +224,36 @@ export default function MarketReport() {
                 </Card>
               ))}
             </div>
+            {totalPages > 1 && (
+              <div className="mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </Card>
         )}
       </div>
