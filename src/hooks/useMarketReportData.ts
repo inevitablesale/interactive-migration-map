@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ComprehensiveMarketData } from "@/types/rankings";
+import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
 import { toast } from "sonner";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
@@ -52,6 +52,26 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Raw ranking data:', rankingData); // Debug log
 
+      // Ensure top_firms is properly transformed to match TopFirm interface
+      const transformedTopFirms: TopFirm[] = Array.isArray(rankingData.top_firms) 
+        ? rankingData.top_firms.map((firm: any) => ({
+            company_name: firm.company_name || '',
+            employee_count: firm.employee_count || 0,
+            follower_count: firm.follower_count || 0,
+            follower_ratio: firm.follower_ratio || 0,
+            logoResolutionResult: firm.logoResolutionResult,
+            originalCoverImage: firm.originalCoverImage,
+            primarySubtitle: firm.primarySubtitle,
+            employeeCountRangeLow: firm.employeeCountRangeLow,
+            employeeCountRangeHigh: firm.employeeCountRangeHigh,
+            foundedOn: firm.foundedOn,
+            specialities: firm.specialities,
+            websiteUrl: firm.websiteUrl,
+            Location: firm.Location,
+            Summary: firm.Summary
+          }))
+        : [];
+
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
         total_population: rankingData.B01001_001E,
@@ -81,7 +101,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         rent_rank: rankingData.rent_rank,
         density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
-        top_firms: rankingData.top_firms || [],
+        top_firms: transformedTopFirms,
       };
 
       console.log('Transformed market data:', transformedData); // Debug log
