@@ -1,7 +1,8 @@
 import React from 'react';
-import { Building2, TrendingUp, DollarSign } from 'lucide-react';
+import { Building2, TrendingUp, DollarSign, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getMetricColor } from '@/utils/market-report/formatters';
 import type { ComprehensiveMarketData } from '@/types/rankings';
 
@@ -10,22 +11,17 @@ interface AccountingIndustryCardProps {
 }
 
 export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ marketData }) => {
-  const getGrowthBadge = (value: number) => {
-    if (value > 5) return <Badge className="bg-green-500">High Growth</Badge>;
-    if (value > 0) return <Badge className="bg-blue-500">Growing</Badge>;
-    return <Badge className="bg-yellow-500">Stable</Badge>;
-  };
-
-  const getDensityBadge = (value: number) => {
-    if (value > 20) return <Badge className="bg-green-500">High Density</Badge>;
-    if (value > 10) return <Badge className="bg-blue-500">Moderate</Badge>;
-    return <Badge className="bg-yellow-500">Emerging</Badge>;
-  };
-
-  const getPayrollBadge = (value: number) => {
-    if (value > 80) return <Badge className="bg-green-500">Premium</Badge>;
-    if (value > 60) return <Badge className="bg-blue-500">Competitive</Badge>;
-    return <Badge className="bg-yellow-500">Standard</Badge>;
+  const getMetricBadge = (value: number, type: 'density' | 'growth' | 'payroll') => {
+    const thresholds = {
+      density: { high: 20, medium: 10 },
+      growth: { high: 5, medium: 0 },
+      payroll: { high: 80, medium: 60 }
+    };
+    
+    const t = thresholds[type];
+    if (value > t.high) return <Badge className="bg-emerald-500">High Performance</Badge>;
+    if (value > t.medium) return <Badge className="bg-blue-500">Strong</Badge>;
+    return <Badge className="bg-yellow-500">Average</Badge>;
   };
 
   return (
@@ -39,8 +35,20 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
       <CardContent className="space-y-4">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <p className="text-gray-400">Total Establishments</p>
-            {getDensityBadge(marketData.firms_per_10k_population || 0)}
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Total Establishments</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Number of accounting firms per 10,000 residents</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            {getMetricBadge(marketData.firms_per_10k_population || 0, 'density')}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
             {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'} per 10k residents
@@ -48,8 +56,20 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <p className="text-gray-400">Employment</p>
-            {getGrowthBadge(marketData.growth_rate_percentage || 0)}
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Employment</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Total employed population in accounting services</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            {getMetricBadge(marketData.growth_rate_percentage || 0, 'growth')}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.employed_population || 0, 'population')}`}>
             {marketData.employed_population?.toLocaleString() ?? 'N/A'}
@@ -57,8 +77,20 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <p className="text-gray-400">Annual Payroll</p>
-            {getPayrollBadge(marketData.avg_accountant_payroll || 0)}
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Annual Payroll</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Average annual payroll per accounting employee</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            {getMetricBadge(marketData.avg_accountant_payroll || 0, 'payroll')}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
             ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll * 1000).toLocaleString() : 'N/A'}

@@ -6,6 +6,7 @@ import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard"
 import { EducationDistributionCard } from "@/components/market-report/EducationDistributionCard";
 import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
 import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
+import { MarketRankingBadges } from "@/components/market-report/MarketRankingBadges";
 import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
@@ -96,6 +97,7 @@ export default function MarketReport() {
             {county}, {state}
           </h1>
           <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
+          <MarketRankingBadges marketData={marketData} />
         </div>
 
         <ColorScaleLegend />
