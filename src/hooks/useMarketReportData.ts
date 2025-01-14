@@ -55,7 +55,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .in('Company ID', rankingData.top_firms as number[]);
+        .in('Company ID', rankingData.top_firms || []);
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
@@ -79,36 +79,36 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.B01001_001E,
-        median_household_income: null,
-        median_gross_rent: null,
-        median_home_value: null,
-        employed_population: null,
-        private_sector_accountants: null,
-        public_sector_accountants: null,
-        firms_per_10k_population: rankingData.firms_per_10k,
-        growth_rate_percentage: rankingData.population_growth_rate,
-        market_saturation_index: null,
-        total_education_population: null,
-        bachelors_degree_holders: null,
-        masters_degree_holders: null,
-        doctorate_degree_holders: null,
-        avg_accountant_payroll: null,
-        public_to_private_ratio: null,
-        avg_commute_time: null,
-        commute_rank: null,
-        poverty_rate: null,
-        poverty_rank: null,
-        vacancy_rate: null,
-        vacancy_rank: null,
-        income_rank: null,
+        total_population: rankingData.population,
+        median_household_income: rankingData.median_household_income,
+        median_gross_rent: rankingData.median_gross_rent,
+        median_home_value: rankingData.median_home_value,
+        employed_population: rankingData.employed_population,
+        private_sector_accountants: rankingData.private_sector_accountants,
+        public_sector_accountants: rankingData.public_sector_accountants,
+        firms_per_10k_population: rankingData.firm_density,
+        growth_rate_percentage: rankingData.growth_rate,
+        market_saturation_index: rankingData.market_saturation,
+        total_education_population: rankingData.total_education_population,
+        bachelors_degree_holders: rankingData.bachelors_degree_holders,
+        masters_degree_holders: rankingData.masters_degree_holders,
+        doctorate_degree_holders: rankingData.doctorate_degree_holders,
+        avg_accountant_payroll: rankingData.PAYANN,
+        public_to_private_ratio: rankingData.public_to_private_ratio,
+        avg_commute_time: rankingData.avg_commute_time,
+        commute_rank: rankingData.commute_rank,
+        poverty_rate: rankingData.poverty_rate,
+        poverty_rank: rankingData.poverty_rank,
+        vacancy_rate: rankingData.vacancy_rate,
+        vacancy_rank: rankingData.vacancy_rank,
+        income_rank: rankingData.income_rank,
         population_rank: rankingData.population_rank,
-        rent_rank: null,
-        density_rank: rankingData.firm_density_rank,
+        rent_rank: rankingData.rent_rank,
+        density_rank: rankingData.density_rank,
         growth_rank: rankingData.growth_rank,
         top_firms: transformedFirms,
-        state_avg_income: null,
-        adjacent_counties: null
+        state_avg_income: rankingData.state_avg_income,
+        adjacent_counties: rankingData.adjacent_counties
       };
 
       return transformedData;
