@@ -31,7 +31,7 @@ export default function MarketReport() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-8">
+      <div className="min-h-screen bg-[#0B1120] p-8">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse text-white/80">Loading comprehensive market data...</div>
         </div>
@@ -41,7 +41,7 @@ export default function MarketReport() {
 
   if (!hasMarketData || !marketData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-8">
+      <div className="min-h-screen bg-[#0B1120] p-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl font-bold text-white mb-4">Market not found</h1>
           <Button onClick={() => navigate(-1)} variant="outline" className="text-white">
@@ -64,7 +64,7 @@ export default function MarketReport() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B1120] to-[#1a1c2a]">
       <div className="sticky top-0 z-10 backdrop-blur-xl bg-black/40 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
