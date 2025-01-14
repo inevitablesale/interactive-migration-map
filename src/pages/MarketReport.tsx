@@ -196,6 +196,7 @@ export default function MarketReport() {
 
   return (
     <div className="min-h-screen bg-[#222222] p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <Button onClick={() => navigate(-1)} variant="outline" className="text-white mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -207,7 +208,7 @@ export default function MarketReport() {
           <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
               <CardTitle className="flex items-center text-white">
@@ -258,42 +259,42 @@ export default function MarketReport() {
             </CardContent>
           </Card>
 
-        <Card className="bg-black/40 backdrop-blur-md border-white/10">
-          <CardHeader>
-            <CardTitle className="flex items-center text-white">
-              <TrendingUp className="w-5 h-5 mr-2" />
-              Market Dynamics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-gray-400">Firms per 10k Population</p>
-              <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
-                {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-400">Growth Rate</p>
-              <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
-                {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-400">Market Saturation Index</p>
-              <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
-                {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
-              </p>
-              <p className="text-sm text-gray-400">Accountants per Population</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Accountants per Firm</p>
-              <p className="text-2xl font-bold text-white">
-                {accountantsPerFirm}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="bg-black/40 backdrop-blur-md border-white/10">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <TrendingUp className="w-5 h-5 mr-2" />
+                Market Dynamics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-gray-400">Firms per 10k Population</p>
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
+                  {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400">Growth Rate</p>
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
+                  {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400">Market Saturation Index</p>
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
+                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
+                </p>
+                <p className="text-sm text-gray-400">Accountants per Population</p>
+              </div>
+              <div>
+                <p className="text-gray-400">Accountants per Firm</p>
+                <p className="text-2xl font-bold text-white">
+                  {accountantsPerFirm}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
