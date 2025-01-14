@@ -77,28 +77,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
     }
   }, [toast, mapLoaded]);
 
-  const handleStateClick = async (stateId: string) => {
-    try {
-      const { data: stateInfo, error } = await supabase
-        .from('state_data')
-        .select('*')
-        .eq('STATEFP', stateId)
-        .single();
-
-      if (error) throw error;
-
-      const serializableStateInfo = JSON.parse(JSON.stringify(stateInfo));
-      setSelectedState(serializableStateInfo);
-    } catch (error) {
-      console.error('Error fetching state data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch state details",
-        variant: "destructive",
-      });
-    }
-  };
-
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -122,18 +100,18 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         'top-right'
       );
 
-      const currentMap = map.current;
-
-      currentMap.on('style.load', () => {
+      map.current.on('style.load', () => {
         setMapLoaded(true);
         console.log('Map style loaded');
         
-        currentMap.addSource('states', {
+        if (!map.current) return;
+
+        map.current.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        currentMap.addLayer({
+        map.current.addLayer({
           'id': 'state-fills',
           'type': 'fill',
           'source': 'states',
@@ -153,7 +131,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }
         });
 
-        currentMap.addLayer({
+        map.current.addLayer({
           'id': 'state-borders',
           'type': 'line',
           'source': 'states',
@@ -164,51 +142,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }
         });
 
-        currentMap.addLayer({
-          'id': 'state-hover',
-          'type': 'fill',
-          'source': 'states',
-          'source-layer': 'tl_2020_us_state-52k5uw',
-          'paint': {
-            'fill-color': MAP_COLORS.highlight,
-            'fill-opacity': 0
-          }
-        });
-
         fetchStateData();
       });
 
-      let hoveredStateId: string | null = null;
-
-      currentMap.on('mousemove', 'state-fills', (e) => {
-        if (e.features && e.features.length > 0) {
-          if (hoveredStateId) {
-            currentMap.setPaintProperty('state-hover', 'fill-opacity', 0);
-          }
-          hoveredStateId = e.features[0].properties?.STATEFP;
-          currentMap.setPaintProperty('state-hover', 'fill-opacity', 0.3);
-          currentMap.setFilter('state-hover', ['==', ['get', 'STATEFP'], hoveredStateId]);
-        }
-      });
-
-      currentMap.on('mouseleave', 'state-fills', () => {
-        if (hoveredStateId) {
-          currentMap.setPaintProperty('state-hover', 'fill-opacity', 0);
-          hoveredStateId = null;
-        }
-      });
-
-      currentMap.on('click', 'state-fills', async (e) => {
-        if (e.features && e.features[0]) {
-          const stateId = e.features[0].properties?.STATEFP;
-          if (stateId) {
-            await handleStateClick(stateId);
-          }
-        }
-      });
-
       return () => {
-        currentMap?.remove();
+        map.current?.remove();
         map.current = null;
       };
     } catch (error) {
