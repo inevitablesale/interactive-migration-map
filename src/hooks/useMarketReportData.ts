@@ -56,22 +56,10 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         return null;
       }
 
-      // Get top firms data
-      const { data: firmsData, error: firmsError } = await supabase
-        .from('canary_firms_data')
-        .select('*')
-        .eq('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateFips));
-
-      if (firmsError) {
-        console.error('Error fetching firms data:', firmsError);
-        toast.error('Error fetching firms data');
-      }
-
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
         total_population: rankingData.population,
-        median_household_income: null, // This will come from a different view if needed
+        median_household_income: null,
         median_gross_rent: null,
         median_home_value: null,
         employed_population: null,
@@ -97,20 +85,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         rent_rank: null,
         density_rank: rankingData.density_rank,
         growth_rank: rankingData.growth_rank,
-        top_firms: firmsData?.map(firm => ({
-          company_name: firm['Company Name'] || '',
-          employee_count: firm.employeeCount || 0,
-          follower_count: firm.followerCount || 0,
-          follower_ratio: firm.followerCount / (firm.employeeCount || 1),
-          specialities: firm.specialities || undefined,
-          logoResolutionResult: firm.logoResolutionResult || undefined,
-          originalCoverImage: firm.originalCoverImage || undefined,
-          employeeCountRangeLow: firm.employeeCountRangeLow || undefined,
-          employeeCountRangeHigh: firm.employeeCountRangeHigh || undefined,
-          foundedOn: firm.foundedOn ? firm.foundedOn.toString() : undefined,
-          websiteUrl: firm.websiteUrl || undefined,
-          primarySubtitle: firm['Primary Subtitle'] || undefined
-        })) || [],
+        top_firms: [],
         state_avg_income: null,
         adjacent_counties: null
       };
