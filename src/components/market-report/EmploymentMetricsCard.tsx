@@ -48,7 +48,7 @@ export function EmploymentMetricsCard({ marketData }: EmploymentMetricsCardProps
 
           <div className="flex justify-between items-baseline">
             <span className="text-sm text-white/60">Public/Private Ratio</span>
-            <span className={`text-white font-medium ${getMetricColor(marketData.public_to_private_ratio || 0, 'ratio')}`}>
+            <span className={`text-white font-medium ${getMetricColor(marketData.public_to_private_ratio || 0, 'density')}`}>
               {marketData.public_to_private_ratio?.toFixed(2)}
             </span>
           </div>
