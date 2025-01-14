@@ -19,29 +19,31 @@ interface MarketMetricsCardProps {
 export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsCardProps) {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-3 text-2xl text-white">
-          <Icon className="w-6 h-6" />
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-3 text-3xl font-bold text-white">
+          <Icon className="w-7 h-7" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
+      <CardContent className="space-y-12">
         {metrics.map((metric, index) => (
-          <div key={index} className="space-y-1">
-            <div className="space-y-1">
-              <div className="flex flex-col">
-                <span className="text-gray-400 text-sm">{metric.label}</span>
-                {metric.sublabel && (
-                  <span className="text-gray-400 text-sm">{metric.sublabel}</span>
-                )}
+          <div key={index} className="space-y-6">
+            <div>
+              <div className="space-y-1 mb-3">
+                <h3 className="text-gray-400 text-lg">
+                  {metric.label}
+                  {metric.sublabel && (
+                    <span className="block">{metric.sublabel}</span>
+                  )}
+                </h3>
+                <p className={`text-6xl font-bold tracking-tight ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
+                  {metric.value || 'N/A'}
+                </p>
               </div>
-              <p className={`text-4xl font-bold tracking-tight ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
-                {metric.value || 'N/A'}
-              </p>
               {metric.rank && (
-                <div className="space-y-0.5">
-                  <p className="text-sm text-gray-400">Rank:</p>
-                  <p className="text-lg text-gray-300">{metric.rank.toLocaleString()}</p>
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-base">Rank:</p>
+                  <p className="text-2xl text-gray-300 font-semibold">{metric.rank.toLocaleString()}</p>
                 </div>
               )}
             </div>
