@@ -16,6 +16,13 @@ import {
   Building,
 } from "lucide-react";
 
+interface TopFirm {
+  company_name: string;
+  employee_count: number;
+  follower_count: number;
+  follower_ratio: number;
+}
+
 interface MarketData {
   total_population: number;
   median_household_income: number;
@@ -42,18 +49,9 @@ interface MarketData {
   income_rank: number;
   population_rank: number;
   rent_rank: number;
-  top_firms: Array<{
-    company_name: string;
-    employee_count: number;
-    follower_count: number;
-    follower_ratio: number;
-  }>;
+  top_firms: TopFirm[];
   state_avg_income: number;
-  adjacent_counties: Array<{
-    county_name: string;
-    population: number;
-    median_income: number;
-  }>;
+  adjacent_counties: any[];
 }
 
 const useStateFips = (stateAbbr: string | undefined) => {
@@ -97,7 +95,14 @@ export function MarketReport() {
         throw error;
       }
 
-      return data[0];
+      // Parse the JSON fields and ensure they match our expected types
+      const parsedData = {
+        ...data[0],
+        top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms : [],
+        adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties : []
+      };
+
+      return parsedData as MarketData;
     }
   });
 
