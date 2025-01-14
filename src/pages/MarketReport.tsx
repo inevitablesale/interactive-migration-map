@@ -1,12 +1,14 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Users, Building2, TrendingUp, GraduationCap, Briefcase, Car, DollarSign } from "lucide-react";
+import { Users, Building2, TrendingUp, GraduationCap, Briefcase, Car, DollarSign, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { ComprehensiveMarketData } from "@/types/rankings";
+import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
+import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
+import { formatCommuteTime, getMetricColor } from "@/utils/market-report/formatters";
 
 export default function MarketReport() {
   const { county, state } = useParams();
@@ -79,122 +81,6 @@ export default function MarketReport() {
     gcTime: 10 * 60 * 1000,
   });
 
-  const formatCommuteTime = (seconds: number | null) => {
-    if (!seconds) return 'N/A';
-    // Convert seconds to minutes
-    const minutesPerDay = Math.round(seconds / 60);
-    return `${minutesPerDay} minutes/day`;
-  };
-
-  const formatRank = (rank: number | null) => {
-    if (!rank) return '';
-    return `(Rank: ${rank.toLocaleString()})`;
-  };
-
-  const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation' | 'money' | 'population') => {
-    switch(type) {
-      case 'growth':
-        if (value >= 5) return 'text-emerald-400';
-        if (value >= 0) return 'text-yellow-400';
-        return 'text-red-400';
-      case 'density':
-        if (value >= 2) return 'text-blue-400';
-        if (value >= 1) return 'text-indigo-400';
-        return 'text-purple-400';
-      case 'saturation':
-        if (value <= 0.3) return 'text-teal-400';
-        if (value <= 0.5) return 'text-cyan-400';
-        return 'text-sky-400';
-      case 'money':
-        return 'text-green-400';
-      case 'population':
-        return 'text-violet-400';
-      default:
-        return 'text-white';
-    }
-  };
-
-  const calculateAccountantsPerFirm = (private_accountants: number, public_accountants: number, total_firms: number) => {
-    if (!total_firms) return 0;
-    return ((private_accountants + public_accountants) / total_firms).toFixed(1);
-  };
-
-  const ColorScaleLegend = () => (
-    <div className="bg-black/40 backdrop-blur-md border-white/10 p-4 rounded-lg mb-6">
-      <h3 className="text-white text-sm font-medium mb-3">Metric Color Scale</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
-          <div className="text-xs text-gray-400 mb-1">Population</div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-violet-400"></div>
-              <span className="text-xs text-white/60">High (&gt;1M)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-violet-300"></div>
-              <span className="text-xs text-white/60">Medium (500k-1M)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-violet-200"></div>
-              <span className="text-xs text-white/60">Low (&lt;500k)</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400 mb-1">Financial</div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-400"></div>
-              <span className="text-xs text-white/60">High (&gt;$75k)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-300"></div>
-              <span className="text-xs text-white/60">Medium ($50k-$75k)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-200"></div>
-              <span className="text-xs text-white/60">Low (&lt;$50k)</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400 mb-1">Growth</div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-              <span className="text-xs text-white/60">High growth (≥5%)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-              <span className="text-xs text-white/60">Stable (0-5%)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-400"></div>
-              <span className="text-xs text-white/60">Declining (&lt;0%)</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400 mb-1">Density</div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-              <span className="text-xs text-white/60">High (≥2)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
-              <span className="text-xs text-white/60">Medium (1-2)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-              <span className="text-xs text-white/60">Low (&lt;1)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
@@ -219,6 +105,56 @@ export default function MarketReport() {
     );
   }
 
+  const populationMetrics = [
+    {
+      label: "Total Population",
+      value: marketData.total_population?.toLocaleString(),
+      type: "population" as const,
+      rank: marketData.population_rank
+    },
+    {
+      label: "Median Household Income",
+      value: `$${marketData.median_household_income?.toLocaleString()}`,
+      type: "money" as const,
+      rank: marketData.income_rank
+    }
+  ];
+
+  const housingMetrics = [
+    {
+      label: "Median Gross Rent",
+      value: `$${marketData.median_gross_rent?.toLocaleString()}`,
+      type: "money" as const,
+      rank: marketData.rent_rank
+    },
+    {
+      label: "Vacancy Rate",
+      value: `${marketData.vacancy_rate?.toFixed(1)}%`,
+      type: "saturation" as const,
+      rank: marketData.vacancy_rank
+    }
+  ];
+
+  const marketDynamicsMetrics = [
+    {
+      label: "Firms per 10k Population",
+      value: marketData.firms_per_10k_population?.toFixed(1),
+      type: "density" as const,
+      rank: marketData.density_rank
+    },
+    {
+      label: "Growth Rate",
+      value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
+      type: "growth" as const,
+      rank: marketData.growth_rank
+    },
+    {
+      label: "Average Commute Time",
+      value: marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : null,
+      type: "saturation" as const
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-[#222222] p-8">
       <div className="max-w-7xl mx-auto">
@@ -236,98 +172,21 @@ export default function MarketReport() {
         <ColorScaleLegend />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-black/40 backdrop-blur-md border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Users className="w-5 h-5 mr-2" />
-                Population Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-gray-400">Total Population</p>
-                <div className="flex items-center justify-between">
-                  <p className={`text-2xl font-bold ${getMetricColor(marketData.total_population || 0, 'population')}`}>
-                    {marketData.total_population?.toLocaleString() ?? 'N/A'}
-                  </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.population_rank}</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-gray-400">Median Household Income</p>
-                <div className="flex items-center justify-between">
-                  <p className={`text-2xl font-bold ${getMetricColor(marketData.median_household_income || 0, 'money')}`}>
-                    ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
-                  </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.income_rank}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-black/40 backdrop-blur-md border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Building2 className="w-5 h-5 mr-2" />
-                Housing Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-gray-400">Median Gross Rent</p>
-                <div className="flex items-center justify-between">
-                  <p className={`text-2xl font-bold ${getMetricColor(marketData.median_gross_rent || 0, 'money')}`}>
-                    ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
-                  </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.rent_rank}</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-gray-400">Vacancy Rate</p>
-                <div className="flex items-center justify-between">
-                  <p className={`text-2xl font-bold ${getMetricColor(marketData.vacancy_rate || 0, 'saturation')}`}>
-                    {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
-                  </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.vacancy_rank}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-black/40 backdrop-blur-md border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                Market Dynamics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-gray-400">Firms per 10k Population</p>
-                <div className="flex items-center justify-between">
-                  <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
-                    {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
-                  </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.density_rank}</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-gray-400">Growth Rate</p>
-                <div className="flex items-center justify-between">
-                  <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
-                    {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
-                  </p>
-                  <span className="text-sm text-gray-400">Rank: {marketData.growth_rank}</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-gray-400">Average Commute Time</p>
-                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_commute_time || 0, 'saturation')}`}>
-                  {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <MarketMetricsCard
+            title="Population Overview"
+            icon={Users}
+            metrics={populationMetrics}
+          />
+          <MarketMetricsCard
+            title="Housing Metrics"
+            icon={Building2}
+            metrics={housingMetrics}
+          />
+          <MarketMetricsCard
+            title="Market Dynamics"
+            icon={TrendingUp}
+            metrics={marketDynamicsMetrics}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
