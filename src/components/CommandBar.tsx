@@ -90,6 +90,7 @@ export const CommandBar = () => {
                   onClick={() => handleFilterClick('opportunities')}
                 >
                   Opportunities
+                  <span className="ml-1 text-xs text-yellow-500">PRO</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent 
