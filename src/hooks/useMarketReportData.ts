@@ -115,18 +115,17 @@ export const useMarketReportData = (county: string | undefined, state: string | 
           : null,
         poverty_rank: null,
         vacancy_rate: vacancyRate,
-        vacancy_rank: null, // We'll need to implement ranking logic if needed
-        income_rank: null, // We'll need to implement ranking logic if needed
-        population_rank: null, // We'll need to implement ranking logic if needed
-        rent_rank: null, // We'll need to implement ranking logic if needed
-        density_rank: null, // We'll need to implement ranking logic if needed
-        growth_rank: null, // We'll need to implement ranking logic if needed
+        vacancy_rank: null,
+        income_rank: null,
+        population_rank: null,
+        rent_rank: null,
+        density_rank: null,
+        growth_rank: null,
         top_firms: topFirms,
         state_avg_income: null,
         adjacent_counties: null
       };
 
-      console.log('Market Data:', marketData);
       return marketData;
     },
     enabled: !!stateFips && !!county,
