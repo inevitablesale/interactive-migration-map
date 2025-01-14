@@ -155,6 +155,62 @@ export default function MarketReport() {
     return ((private_accountants + public_accountants) / total_firms).toFixed(1);
   };
 
+  const ColorScaleLegend = () => (
+    <div className="bg-black/40 backdrop-blur-md border-white/10 p-4 rounded-lg mb-6">
+      <h3 className="text-white text-sm font-medium mb-3">Metric Color Scale</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Population</div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-violet-400"></div>
+            <span className="text-xs text-white/60">Population metrics</span>
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Financial</div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            <span className="text-xs text-white/60">Money-related</span>
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Growth</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+              <span className="text-xs text-white/60">High growth (≥5%)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <span className="text-xs text-white/60">Stable (0-5%)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-400"></div>
+              <span className="text-xs text-white/60">Declining (&lt;0%)</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Density</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+              <span className="text-xs text-white/60">High (≥2)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
+              <span className="text-xs text-white/60">Medium (1-2)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-purple-400"></div>
+              <span className="text-xs text-white/60">Low (&lt;1)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
@@ -198,6 +254,8 @@ export default function MarketReport() {
           </h1>
           <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
         </div>
+
+        <ColorScaleLegend />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
@@ -267,9 +325,9 @@ export default function MarketReport() {
                 </p>
               </div>
               <div>
-                <p className="text-gray-400">Market Saturation Index</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
-                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
+                <p className="text-gray-400">Average Commute Time</p>
+                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_commute_time || 0, 'saturation')}`}>
+                  {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
                 </p>
               </div>
             </CardContent>
@@ -376,12 +434,6 @@ export default function MarketReport() {
                 <p className="text-gray-400">Poverty Rate</p>
                 <p className={`text-xl font-bold ${getMetricColor(marketData.poverty_rate || 0, 'saturation')}`}>
                   {marketData.poverty_rate?.toFixed(1) ?? 'N/A'}%
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400">Market Saturation Index</p>
-                <p className={`text-xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
-                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
                 </p>
               </div>
             </CardContent>
