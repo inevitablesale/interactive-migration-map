@@ -9,6 +9,7 @@ import { GrowthStrategyAnalysis } from "@/components/analytics/growth/GrowthStra
 import { OpportunityAnalysis } from "@/components/analytics/opportunities/OpportunityAnalysis";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
+import { ComparablesPanel } from "@/components/analytics/ComparablesPanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
@@ -137,6 +138,7 @@ const Analysis = () => {
             {/* Right Column */}
             <div className="space-y-8">
               <BuyerProfileManager />
+              <ComparablesPanel />
               <AlertsPanel />
             </div>
           </div>
