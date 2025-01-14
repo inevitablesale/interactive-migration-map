@@ -24,14 +24,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
-  // Calculate average payroll per firm using PAYANN / ESTAB
-  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.total_establishments && marketData.total_establishments > 0
-    ? marketData.avg_accountant_payroll * 1000 / marketData.total_establishments  // Multiply by 1000 since PAYANN is in thousands
+  // Calculate average payroll per firm using raw PAYANN value
+  const avgPayrollPerFirm = marketData.payann && marketData.total_establishments && marketData.total_establishments > 0
+    ? marketData.payann * 1000 / marketData.total_establishments  // Multiply by 1000 since PAYANN is in thousands
     : null;
 
-  // Calculate average salary per employee using PAYANN / EMP
-  const avgSalaryPerEmployee = marketData.avg_accountant_payroll && marketData.emp && marketData.emp > 0
-    ? marketData.avg_accountant_payroll * 1000 / marketData.emp  // Multiply by 1000 since PAYANN is in thousands
+  // Calculate average salary per employee using raw PAYANN value
+  const avgSalaryPerEmployee = marketData.payann && marketData.emp && marketData.emp > 0
+    ? marketData.payann * 1000 / marketData.emp  // Multiply by 1000 since PAYANN is in thousands
     : null;
 
   // Format currency with K/M/B suffixes
@@ -43,7 +43,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
 
   // Add console logs for debugging
   console.log('Market Data:', {
-    avg_accountant_payroll: marketData.avg_accountant_payroll,
+    payann: marketData.payann,
     total_establishments: marketData.total_establishments,
     emp: marketData.emp,
     avgPayrollPerFirm,

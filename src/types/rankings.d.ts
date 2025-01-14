@@ -16,6 +16,7 @@ export interface ComprehensiveMarketData {
   avg_accountant_payroll?: number;
   total_establishments?: number;
   emp?: number;
+  payann?: number;
   public_to_private_ratio?: number | null;
   vacancy_rate?: number;
   vacancy_rank?: number;

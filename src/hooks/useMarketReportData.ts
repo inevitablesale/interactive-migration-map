@@ -52,11 +52,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Raw ranking data:', rankingData); // Debug log
 
-      // Calculate average salary correctly
-      const avgSalary = rankingData.PAYANN && rankingData.EMP && rankingData.EMP > 0
-        ? (rankingData.PAYANN * 1000) / rankingData.EMP
-        : null;
-
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
         total_population: rankingData.B01001_001E,
@@ -73,7 +68,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         bachelors_degree_holders: rankingData.B15003_022E,
         masters_degree_holders: rankingData.B15003_023E,
         doctorate_degree_holders: rankingData.B15003_025E,
-        avg_accountant_payroll: avgSalary,
+        payann: rankingData.PAYANN,
         total_establishments: rankingData.ESTAB,
         emp: rankingData.EMP,
         public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
