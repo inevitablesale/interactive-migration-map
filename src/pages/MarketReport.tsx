@@ -38,34 +38,40 @@ export default function MarketReport() {
       
       console.log('Fetching data for:', { county, stateFips });
       
-      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-        p_county_name: county,
-        p_state_fp: stateFips
-      });
+      try {
+        const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
+          p_county_name: county,
+          p_state_fp: stateFips
+        });
 
-      if (error) {
-        console.error('Error fetching comprehensive market data:', error);
-        toast.error('Error fetching market data');
+        if (error) {
+          console.error('Error fetching comprehensive market data:', error);
+          toast.error('Error fetching market data');
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          toast.error('No data found for this location');
+          return null;
+        }
+
+        const marketData = data[0] as unknown as ComprehensiveMarketData;
+        
+        // Ensure top_firms and adjacent_counties are properly typed arrays
+        marketData.top_firms = Array.isArray(marketData.top_firms) 
+          ? marketData.top_firms 
+          : [];
+        
+        marketData.adjacent_counties = Array.isArray(marketData.adjacent_counties)
+          ? marketData.adjacent_counties
+          : [];
+
+        return marketData;
+      } catch (error) {
+        console.error('Error in market data query:', error);
+        toast.error('Failed to fetch market data');
         throw error;
       }
-
-      if (!data || data.length === 0) {
-        toast.error('No data found for this location');
-        return null;
-      }
-
-      const marketData = data[0] as unknown as ComprehensiveMarketData;
-      
-      // Ensure top_firms and adjacent_counties are properly typed arrays
-      marketData.top_firms = Array.isArray(marketData.top_firms) 
-        ? marketData.top_firms 
-        : [];
-      
-      marketData.adjacent_counties = Array.isArray(marketData.adjacent_counties)
-        ? marketData.adjacent_counties
-        : [];
-
-      return marketData;
     },
     enabled: !!stateFips,
     retry: 1,
