@@ -19,13 +19,17 @@ interface StateData {
   firmDensity?: number;
 }
 
+interface DensityMetric {
+  STATEFP: string;
+  density: number;
+}
+
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [stateData, setStateData] = useState<StateData[]>([]);
   const [activeState, setActiveState] = useState<StateData | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [currentStateIndex, setCurrentStateIndex] = useState(0);
 
   const getFirmDensityColor = useCallback((density: number) => {
     if (density >= 6.5) return MAP_COLORS.primary;     // Very high density
@@ -38,30 +42,44 @@ const Map = () => {
   const fetchStateData = async () => {
     try {
       console.log('Fetching state data...');
-      const { data: stateMetrics, error } = await supabase
+      // First, get density metrics
+      const { data: densityMetrics, error: densityError } = await supabase
         .from('state_density_metrics')
         .select('STATEFP, density')
         .not('STATEFP', 'is', null)
         .not('density', 'is', null);
 
-      if (error) {
-        console.error('Error fetching state data:', error);
+      if (densityError) {
+        console.error('Error fetching density metrics:', densityError);
         return;
       }
 
-      // Add state names to the data
-      const stateDataWithNames = await Promise.all(
-        stateMetrics.map(async (state) => {
+      // Then, get full state data
+      const { data: fullStateData, error: stateError } = await supabase
+        .from('state_data')
+        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
+        .in('STATEFP', densityMetrics.map(d => d.STATEFP));
+
+      if (stateError) {
+        console.error('Error fetching state data:', stateError);
+        return;
+      }
+
+      // Combine the data
+      const combinedData: StateData[] = await Promise.all(
+        fullStateData.map(async (state) => {
+          const densityMetric = densityMetrics.find(d => d.STATEFP === state.STATEFP);
           const stateName = await getStateName(state.STATEFP);
           return {
             ...state,
-            displayName: stateName
+            displayName: stateName,
+            firmDensity: densityMetric?.density || 0
           };
         })
       );
 
-      console.log('State data with names:', stateDataWithNames);
-      setStateData(stateDataWithNames);
+      console.log('Combined state data:', combinedData);
+      setStateData(combinedData);
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
