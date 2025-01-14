@@ -45,7 +45,20 @@ export function KeyInsightsPanel() {
                     <InfoIcon className="h-4 w-4 text-gray-600 hover:text-gray-500" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px]">
-                    <p className="text-sm">Growth rate is calculated as the percentage change in population moves from 2020 to 2022. It compares the total number of people who moved into the region in 2022 versus 2020 to identify trending growth areas.</p>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Growth Rate Calculation:</p>
+                      <div className="text-sm">
+                        <p>2022 Moves: {topGrowthRegion.total_movedin_2022.toLocaleString()}</p>
+                        <p>2020 Moves: {topGrowthRegion.total_movedin_2020.toLocaleString()}</p>
+                        <div className="mt-2 pt-2 border-t">
+                          <p>Formula: ((2022 - 2020) / 2020) × 100</p>
+                          <p className="mt-1">
+                            = (({topGrowthRegion.total_movedin_2022.toLocaleString()} - {topGrowthRegion.total_movedin_2020.toLocaleString()}) / {topGrowthRegion.total_movedin_2020.toLocaleString()}) × 100
+                          </p>
+                          <p className="mt-1">= {topGrowthRegion.growth_rate_percentage}%</p>
+                        </div>
+                      </div>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
