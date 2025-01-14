@@ -66,12 +66,7 @@ export default function MarketReport() {
           .eq('state', state)
           .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching state FIPS:', error);
-          toast.error('Error fetching state data');
-          throw error;
-        }
-
+        if (error) throw error;
         if (!data) {
           console.error('No FIPS code found for state:', state);
           toast.error(`No data found for state: ${state}`);
@@ -90,7 +85,7 @@ export default function MarketReport() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: marketData, isLoading } = useQuery<ComprehensiveMarketData | null>({
+  const { data: marketData, isLoading } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       if (!stateFips) return null;
@@ -98,10 +93,13 @@ export default function MarketReport() {
       console.log('Fetching comprehensive data for:', { county, stateFips });
       
       try {
-        const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-          p_county_name: county,
-          p_state_fp: stateFips
-        });
+        const { data, error } = await supabase.rpc(
+          'get_comprehensive_county_data',
+          {
+            p_county_name: county,
+            p_state_fp: stateFips
+          }
+        );
 
         if (error) {
           console.error('Error fetching comprehensive market data:', error);
@@ -115,20 +113,8 @@ export default function MarketReport() {
           return null;
         }
 
-        // Type cast the JSON response to our expected types
-        const parsedData = data[0];
-        const marketData: ComprehensiveMarketData = {
-          ...parsedData,
-          top_firms: Array.isArray(parsedData.top_firms) 
-            ? (parsedData.top_firms as unknown as TopFirm[])
-            : [],
-          adjacent_counties: Array.isArray(parsedData.adjacent_counties)
-            ? (parsedData.adjacent_counties as unknown as AdjacentCounty[])
-            : []
-        };
-
-        console.log('Received market data:', marketData);
-        return marketData;
+        // Return the first row directly without type casting
+        return data[0];
       } catch (err) {
         console.error('Error in marketData query:', err);
         toast.error('Error fetching market data');
