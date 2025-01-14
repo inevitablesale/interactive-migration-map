@@ -85,7 +85,7 @@ export default function MarketReport() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: marketData, isLoading } = useQuery({
+  const { data: marketData, isLoading } = useQuery<ComprehensiveMarketData>({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       if (!stateFips) return null;
@@ -113,8 +113,15 @@ export default function MarketReport() {
           return null;
         }
 
-        // Return the first row directly without type casting
-        return data[0];
+        // Ensure the data is properly typed
+        const marketData: ComprehensiveMarketData = {
+          ...data[0],
+          top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms : [],
+          adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties : []
+        };
+
+        console.log('Processed market data:', marketData);
+        return marketData;
       } catch (err) {
         console.error('Error in marketData query:', err);
         toast.error('Error fetching market data');
