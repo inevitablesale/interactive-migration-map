@@ -1,21 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { InteractiveToolsSection } from "@/components/InteractiveToolsSection";
 import { WelcomeSection } from "@/components/analytics/WelcomeSection";
 import { HeatmapSection } from "@/components/analytics/HeatmapSection";
-import { FeaturedInsights } from "@/components/analytics/FeaturedInsights";
+import { MarketEntryAnalysis } from "@/components/analytics/market-entry/MarketEntryAnalysis";
+import { GrowthStrategyAnalysis } from "@/components/analytics/growth/GrowthStrategyAnalysis";
+import { OpportunityAnalysis } from "@/components/analytics/opportunities/OpportunityAnalysis";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { BuyerProfileManager } from "@/components/analytics/BuyerProfileManager";
-import { MarketMetricsChart } from "@/components/analytics/visualizations/MarketMetricsChart";
-import { GrowthTrendChart } from "@/components/analytics/visualizations/GrowthTrendChart";
 import { ListingsPanel } from "@/components/analytics/ListingsPanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MarketMetrics } from "@/components/analytics/MarketMetrics";
-import { Rankings } from "@/components/analytics/rankings/Rankings";
 
 const Analysis = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,6 +50,35 @@ const Analysis = () => {
       return;
     }
     setSearchParams({ filter });
+  };
+
+  const renderAnalysisContent = () => {
+    switch (activeFilter) {
+      case 'market-entry':
+        return <MarketEntryAnalysis />;
+      case 'growth-strategy':
+        return isFreeTier ? (
+          <div className="text-center p-8">
+            <Lock className="w-8 h-8 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">Premium Feature</h3>
+            <p className="text-white/60">Upgrade to access growth strategy analysis.</p>
+          </div>
+        ) : (
+          <GrowthStrategyAnalysis />
+        );
+      case 'opportunities':
+        return isFreeTier ? (
+          <div className="text-center p-8">
+            <Lock className="w-8 h-8 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">Premium Feature</h3>
+            <p className="text-white/60">Upgrade to access opportunity analysis.</p>
+          </div>
+        ) : (
+          <OpportunityAnalysis />
+        );
+      default:
+        return <MarketEntryAnalysis />;
+    }
   };
 
   return (
@@ -107,22 +135,14 @@ const Analysis = () => {
             <div className="space-y-8">
               <MarketMetrics />
               <HeatmapSection activeFilter={activeFilter} />
-              <Rankings />
-              {!isFreeTier && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <MarketMetricsChart />
-                    <GrowthTrendChart />
-                  </div>
-                  <FeaturedInsights />
-                </>
-              )}
+              {renderAnalysisContent()}
             </div>
             
             {/* Right Column */}
             <div className="space-y-8">
               <BuyerProfileManager />
               <ListingsPanel />
+              <AlertsPanel />
             </div>
           </div>
         </div>

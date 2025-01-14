@@ -787,6 +787,17 @@ export type Database = {
           firm_density: number
         }[]
       }
+      get_growth_strategy_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          msa: string
+          msa_name: string
+          total_firms: number
+          avg_growth_rate: number
+          recent_migration: number
+          market_saturation: number
+        }[]
+      }
       get_growth_trend_metrics: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -795,6 +806,16 @@ export type Database = {
           historical_growth_rate: number
           firms_previous_year: number
           projected_firms: number
+        }[]
+      }
+      get_market_entry_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          statefp: string
+          total_firms: number
+          firm_density: number
+          market_saturation: number
+          avg_growth_rate: number
         }[]
       }
       get_market_opportunities: {
@@ -838,6 +859,17 @@ export type Database = {
           education_rate: number
           migration_trend: number
           median_income: number
+        }[]
+      }
+      get_opportunity_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          company_name: string
+          location: string
+          employee_count: number
+          revenue_per_employee: number
+          growth_rate: number
+          market_saturation: number
         }[]
       }
       get_service_distribution: {
