@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Building2, DollarSign, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export const FirmsForSalePanel = () => {
   const { data: firms, isLoading } = useQuery({
@@ -18,10 +19,10 @@ export const FirmsForSalePanel = () => {
   });
 
   return (
-    <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
+    <Card className="bg-[#0A0B1A] backdrop-blur-md border-white/10 p-6 rounded-xl">
       <div className="flex items-center gap-2 mb-6">
-        <Building2 className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-semibold text-white">Firms For Sale</h3>
+        <Building2 className="w-6 h-6 text-purple-400" />
+        <h3 className="text-2xl font-semibold text-white">Firms For Sale</h3>
       </div>
 
       <div className="space-y-4">
@@ -31,35 +32,58 @@ export const FirmsForSalePanel = () => {
           <div className="text-sm text-white/60">No firms currently listed for sale.</div>
         ) : (
           firms?.map((firm, index) => (
-            <div key={index} className="bg-white/5 p-4 rounded-lg">
-              <div className="flex justify-between items-start mb-2">
+            <div key={index} className="bg-[#141832] p-6 rounded-xl hover:bg-[#1A1F3D] transition-colors">
+              <div className="flex justify-between items-start mb-3">
                 <div>
-                  <div className="text-sm font-medium text-white">
+                  <div className="text-xl font-medium text-white mb-2">
                     {firm.City}, {firm.State}
                   </div>
-                  <div className="text-xs text-white/60">
-                    {firm.service_lines}
+                  <div className="text-sm text-white/60">
+                    {firm.service_lines || 'General Practice'}
                   </div>
                 </div>
-                <div className="flex items-center text-green-400 text-sm">
-                  <DollarSign className="w-3 h-3 mr-1" />
-                  {new Intl.NumberFormat('en-US', {
-                    notation: 'compact',
-                    maximumFractionDigits: 1,
-                  }).format(firm.asking_price)}
+                <div className="text-right">
+                  <div className="text-lg font-semibold text-green-400">
+                    ${firm.asking_price?.toLocaleString()}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-xs text-white/60">
-                <div className="flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  {firm.employee_count} employees
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-400" />
+                  <div>
+                    <div className="text-sm text-white/60">Employees</div>
+                    <div className="text-white font-medium">
+                      {firm.employee_count?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  Revenue: ${new Intl.NumberFormat('en-US', {
-                    notation: 'compact',
-                    maximumFractionDigits: 1,
-                  }).format(firm.annual_revenue)}
+
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-green-400" />
+                  <div>
+                    <div className="text-sm text-white/60">Revenue</div>
+                    <div className="text-white font-medium">
+                      ${firm.annual_revenue?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              <div className="flex gap-2 mt-4">
+                <Button 
+                  variant="secondary" 
+                  className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                >
+                  View Details
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                >
+                  Contact Seller
+                </Button>
               </div>
             </div>
           ))
