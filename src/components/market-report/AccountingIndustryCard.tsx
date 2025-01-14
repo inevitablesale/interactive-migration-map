@@ -105,7 +105,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
             )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
-            ${(marketData.avg_accountant_payroll || 0).toLocaleString()}
+            ${marketData.avg_accountant_payroll?.toLocaleString() ?? 'N/A'}
           </p>
         </div>
       </CardContent>
