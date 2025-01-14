@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStateName } from '@/utils/stateUtils';
 import { MAP_COLORS, STATE_COLORS } from '@/constants/colors';
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
-
 interface StateData {
   STATEFP: string;
   EMP: number | null;
@@ -66,7 +64,7 @@ const Map = () => {
       }
 
       // Combine the data
-      const combinedData: StateData[] = await Promise.all(
+      const combinedData = await Promise.all(
         fullStateData.map(async (state) => {
           const densityMetric = densityMetrics.find(d => d.STATEFP === state.STATEFP);
           const stateName = await getStateName(state.STATEFP);
@@ -90,7 +88,7 @@ const Map = () => {
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
-    map.current = new mapboxgl.Map({
+    const mapInstance = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       zoom: 3,
@@ -100,9 +98,11 @@ const Map = () => {
       antialias: true
     });
 
+    map.current = mapInstance;
+
     const isHeroSection = document.querySelector('.hero-section');
     if (!isHeroSection) {
-      map.current.addControl(
+      mapInstance.addControl(
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
@@ -110,12 +110,11 @@ const Map = () => {
       );
     }
 
-    map.current.on('style.load', () => {
-      if (!map.current) return;
+    mapInstance.on('style.load', () => {
       setMapLoaded(true);
 
       // Add atmosphere and fog effects
-      map.current.setFog({
+      mapInstance.setFog({
         'color': 'rgb(186, 210, 235)',
         'high-color': 'rgb(36, 92, 223)',
         'horizon-blend': 0.02,
@@ -205,35 +204,38 @@ const Map = () => {
 
     // Add smooth rotation animation
     let rotateCamera = true;
+    let animationFrameId: number;
+
     const rotateMap = () => {
-      if (!map.current || !rotateCamera) return;
+      if (!mapInstance || !rotateCamera) return;
       
-      const rotation = map.current.getBearing();
-      map.current.easeTo({
+      const rotation = mapInstance.getBearing();
+      mapInstance.easeTo({
         bearing: rotation + 0.5,
         duration: 100,
         easing: (t) => t
       });
-      requestAnimationFrame(rotateMap);
+      animationFrameId = requestAnimationFrame(rotateMap);
     };
 
-    map.current.on('mousedown', () => {
+    mapInstance.on('mousedown', () => {
       rotateCamera = false;
     });
 
-    map.current.on('mouseup', () => {
+    mapInstance.on('mouseup', () => {
       rotateCamera = true;
       rotateMap();
     });
 
     rotateMap();
 
+    // Cleanup function
     return () => {
-      rotateCamera = false;
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
+      cancelAnimationFrame(animationFrameId);
+      if (mapInstance) {
+        mapInstance.remove();
       }
+      map.current = null;
     };
   }, []);
 
