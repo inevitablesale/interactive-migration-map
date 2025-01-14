@@ -977,6 +977,20 @@ export type Database = {
           education_rate: number
         }[]
       }
+      get_weighted_market_opportunities: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          statefp: string
+          countyfp: string
+          countyname: string
+          state_name: string
+          total_score: number
+          migration_score: number
+          economic_score: number
+          market_score: number
+          details: Json
+        }[]
+      }
       refresh_state_density_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
