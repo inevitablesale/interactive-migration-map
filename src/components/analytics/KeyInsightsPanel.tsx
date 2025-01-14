@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
-import { TrendingUp, Users, Target, InfoIcon } from "lucide-react";
+import { TrendingUp, Users, Target, InfoIcon, ArrowUpRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface MarketGrowthMetric {
   county_name: string;
@@ -15,16 +16,36 @@ interface MarketGrowthMetric {
   total_moves: number;
 }
 
+interface TopGrowthRegion {
+  county_name: string;
+  state_name: string;
+  growth_rate: number;
+  firm_density: number;
+  total_firms: number;
+  total_population: number;
+}
+
 async function fetchMarketGrowthMetrics() {
   const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
   return data as MarketGrowthMetric[];
 }
 
+async function fetchTopGrowthRegions() {
+  const { data, error } = await supabase.rpc('get_top_growth_regions');
+  if (error) throw error;
+  return data as TopGrowthRegion[];
+}
+
 export function KeyInsightsPanel() {
   const { data: growthMetrics, isLoading } = useQuery({
     queryKey: ['marketGrowthMetrics'],
     queryFn: fetchMarketGrowthMetrics,
+  });
+
+  const { data: topRegions } = useQuery({
+    queryKey: ['topGrowthRegions'],
+    queryFn: fetchTopGrowthRegions,
   });
 
   const topGrowthRegion = growthMetrics?.[0];
@@ -63,6 +84,37 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span className="text-xs">View Top 10</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-black/95 border-white/10 text-white">
+                  <DialogHeader>
+                    <DialogTitle>Top 10 Growth Regions</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <div className="space-y-4">
+                      {topRegions?.map((region, index) => (
+                        <div key={`${region.county_name}-${region.state_name}`} className="flex items-center gap-4 p-3 rounded-lg bg-white/5">
+                          <span className="text-lg font-bold text-accent min-w-[2rem]">#{index + 1}</span>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{region.county_name}, {region.state_name}</h4>
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-1 mt-2 text-sm text-white/70">
+                              <p>Growth Rate: {region.growth_rate.toFixed(1)}%</p>
+                              <p>Firm Density: {region.firm_density.toFixed(1)}</p>
+                              <p>Total Firms: {region.total_firms.toLocaleString()}</p>
+                              <p>Population: {region.total_population.toLocaleString()}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </>
           ) : (
             "Analyzing regional data"
