@@ -117,7 +117,8 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
-    return `${minutes.toFixed(1)} minutes/day`;
+    const seconds = minutes * 60;
+    return `${seconds.toFixed(1)} seconds/day`;
   };
 
   const formatRank = (rank: number | null) => {
