@@ -18,7 +18,7 @@ interface StateMetrics {
   STATEFP: string;
   ESTAB: number;
   B01001_001E: number;
-  density?: number;
+  density: number;
 }
 
 const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geographicLevel }) => {
@@ -51,20 +51,22 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         return;
       }
 
-      // Calculate density and ensure data is serializable
+      // Calculate density and create serializable objects
       const statesWithDensity = stateMetrics.map(state => {
         const density = state.ESTAB && state.B01001_001E ? 
           (state.ESTAB / state.B01001_001E) * 10000 : 0;
         
         console.log(`State ${state.STATEFP} - ESTAB: ${state.ESTAB}, Population: ${state.B01001_001E}, Density: ${density}`);
         
-        // Create a plain object with only the data we need
-        return {
+        // Create a plain object with only serializable data
+        const serializedState: StateMetrics = {
           STATEFP: state.STATEFP,
           ESTAB: state.ESTAB,
           B01001_001E: state.B01001_001E,
           density
         };
+        
+        return serializedState;
       });
 
       console.log('Processed state data:', statesWithDensity);
