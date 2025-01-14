@@ -3,8 +3,10 @@ import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
+import { EnhancedAnalytics } from "@/components/analytics/EnhancedAnalytics";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { CountyRanking } from "@/types/analytics";
 
 const fetchCountyRankings = async () => {
   const { data, error } = await supabase.rpc('get_county_rankings');
@@ -28,7 +30,7 @@ export default function Analysis() {
     {
       label: "Firms Monitored",
       value: rankingsData 
-        ? `${(rankingsData.reduce((sum, r) => sum + r.total_firms, 0)).toLocaleString()}+`
+        ? `${(rankingsData.reduce((sum, r) => sum + Number(r.total_firms), 0)).toLocaleString()}+`
         : "Loading...",
       icon: Users,
     },
@@ -71,6 +73,7 @@ export default function Analysis() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
         <KeyInsightsPanel rankingsData={rankingsData} />
+        <EnhancedAnalytics />
         <MarketHighlights rankingsData={rankingsData} />
         <AlertsPanel />
         <ComparisonTool />
