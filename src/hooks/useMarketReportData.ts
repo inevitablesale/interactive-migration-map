@@ -63,7 +63,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         console.warn('No county provided, skipping market data fetch');
         return null;
       }
-      
+
       try {
         console.log('Making RPC call to get_comprehensive_county_data with params:', {
           p_county_name: county,
