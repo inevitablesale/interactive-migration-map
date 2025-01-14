@@ -27,9 +27,9 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
   // Calculate total number of accountants (private + public sector)
   const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
 
-  // Calculate average payroll per firm using PAYANN / ESTAB
-  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.firms_per_10k_population
-    ? Math.round(marketData.avg_accountant_payroll / marketData.firms_per_10k_population)
+  // Calculate average payroll per firm using PAYANN / ESTAB (total annual payroll divided by number of establishments)
+  const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.total_establishments
+    ? Math.round(marketData.avg_accountant_payroll / marketData.total_establishments)
     : null;
 
   // Calculate average salary per employee using PAYANN / total accountants

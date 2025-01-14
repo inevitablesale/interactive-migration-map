@@ -67,15 +67,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         masters_degree_holders: rankingData.B15003_023E,
         doctorate_degree_holders: rankingData.B15003_025E,
         avg_accountant_payroll: rankingData.PAYANN,
+        total_establishments: rankingData.ESTAB,
         public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
           ? rankingData.C24060_007E / rankingData.C24060_004E 
           : null,
-        avg_commute_time: rankingData.B08303_001E,
-        commute_rank: null,
-        poverty_rate: rankingData.B17001_002E && rankingData.B17001_001E 
-          ? (rankingData.B17001_002E / rankingData.B17001_001E) * 100 
-          : null,
-        poverty_rank: null,
         vacancy_rate: rankingData.vacancy_rate,
         vacancy_rank: rankingData.vacancy_rank,
         income_rank: rankingData.income_rank,
@@ -84,8 +79,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
         top_firms: rankingData.top_firms || [],
-        state_avg_income: null,
-        adjacent_counties: null
       };
 
       return transformedData;

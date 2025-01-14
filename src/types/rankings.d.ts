@@ -1,25 +1,29 @@
 export interface ComprehensiveMarketData {
   total_population?: number;
   median_household_income?: number;
-  income_rank?: number;
   median_gross_rent?: number;
-  rent_rank?: number;
-  vacancy_rate?: number;
-  vacancy_rank?: number;
-  firms_per_10k_population?: number;
-  density_rank?: number;
-  growth_rate_percentage?: number;
-  growth_rank?: number;
-  top_firms?: TopFirm[];
+  median_home_value?: number;
+  employed_population?: number;
   private_sector_accountants?: number;
   public_sector_accountants?: number;
-  public_to_private_ratio?: number;
-  avg_accountant_payroll?: number;
-  employed_population?: number;
+  firms_per_10k_population?: number;
+  growth_rate_percentage?: number;
+  market_saturation_index?: number;
   total_education_population?: number;
   bachelors_degree_holders?: number;
   masters_degree_holders?: number;
   doctorate_degree_holders?: number;
+  avg_accountant_payroll?: number;
+  public_to_private_ratio?: number;
+  total_establishments?: number;
+  income_rank?: number;
+  population_rank?: number;
+  rent_rank?: number;
+  vacancy_rate?: number;
+  vacancy_rank?: number;
+  density_rank?: number;
+  growth_rank?: number;
+  top_firms?: TopFirm[];
 }
 
 export interface TopFirm {
