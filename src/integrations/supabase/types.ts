@@ -802,42 +802,55 @@ export type Database = {
     Views: {
       county_rankings: {
         Row: {
-          avg_accountant_payroll: number | null
-          bachelors_holders: number | null
+          B01001_001E: number | null
+          B01002_001E: number | null
+          B08303_001E: number | null
+          B11001_001E: number | null
+          B11003_001E: number | null
+          B15003_001E: number | null
+          B15003_022E: number | null
+          B15003_023E: number | null
+          B15003_025E: number | null
+          B17001_001E: number | null
+          B17001_002E: number | null
+          B19013_001E: number | null
+          B23001_001E: number | null
+          B23025_004E: number | null
+          B23025_005E: number | null
+          B25001_001E: number | null
+          B25002_002E: number | null
+          B25002_003E: number | null
+          B25064_001E: number | null
+          B25077_001E: number | null
+          C24010_001E: number | null
+          C24010_012E: number | null
+          C24010_033E: number | null
+          C24010_034E: number | null
+          C24060_001E: number | null
+          C24060_004E: number | null
+          C24060_007E: number | null
           COUNTYFP: string | null
           COUNTYNAME: string | null
-          doctorate_holders: number | null
-          education_population: number | null
-          employed_population: number | null
+          EMP: number | null
+          ESTAB: number | null
           firm_density_rank: number | null
           firms_per_10k: number | null
           growth_rank: number | null
-          home_value_rank: number | null
           income_rank: number | null
-          masters_holders: number | null
-          median_gross_rent: number | null
-          median_home_value: number | null
-          median_household_income: number | null
+          MOVEDIN2020: number | null
           MOVEDIN2021: number | null
           MOVEDIN2022: number | null
-          occupied_units: number | null
+          PAYANN: number | null
+          PLACEFP: string | null
+          PLACENAME: string | null
+          PLACENS: string | null
           population_growth_rate: number | null
           population_rank: number | null
-          poverty_count: number | null
-          poverty_population: number | null
-          private_sector_accountants: number | null
-          public_private_ratio: number | null
-          public_sector_accountants: number | null
           rent_rank: number | null
           STATEFP: string | null
-          total_commute_time: number | null
-          total_employees: number | null
-          total_firms: number | null
-          total_payroll: number | null
-          total_population: number | null
+          top_firms: Json | null
           vacancy_rank: number | null
           vacancy_rate: number | null
-          vacant_units: number | null
         }
         Relationships: []
       }

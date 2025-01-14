@@ -122,33 +122,32 @@ export default function MarketReport() {
           <EmploymentMetricsCard marketData={marketData} />
         </div>
 
-        <Card className="bg-black/40 backdrop-blur-md border-white/10">
-          <CardHeader>
-            <CardTitle className="flex items-center text-white">
-              <DollarSign className="w-5 h-5 mr-2" />
-              Top Firms
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {marketData.top_firms?.slice(0, 5).map((firm, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <div>
-                  <p className="text-white font-medium">{firm.company_name}</p>
-                  <p className="text-sm text-gray-400">{firm.employee_count} employees</p>
+        {marketData.top_firms && marketData.top_firms.length > 0 && (
+          <Card className="bg-black/40 backdrop-blur-md border-white/10">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <DollarSign className="w-5 h-5 mr-2" />
+                Top Firms
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {marketData.top_firms.map((firm, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div>
+                    <p className="text-white font-medium">{firm.company_name}</p>
+                    <p className="text-sm text-gray-400">{firm.employee_count} employees</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-400">Follower Ratio</p>
+                    <p className={`text-white ${getMetricColor(firm.follower_ratio, 'density')}`}>
+                      {firm.follower_ratio.toFixed(1)}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-400">Follower Ratio</p>
-                  <p className={`text-white ${getMetricColor(firm.follower_ratio, 'density')}`}>
-                    {firm.follower_ratio.toFixed(1)}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {(!marketData.top_firms || marketData.top_firms.length === 0) && (
-              <p className="text-gray-400">No firm data available</p>
-            )}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
