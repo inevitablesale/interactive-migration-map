@@ -28,15 +28,7 @@ export function MarketOpportunities() {
         total_score: item.total_score,
         migration_score: item.migration_score,
         economic_score: item.economic_score,
-        market_score: item.market_score,
-        details: {
-          median_income: Number(item.details.median_income),
-          employment_rate: Number(item.details.employment_rate),
-          housing_value: Number(item.details.housing_value),
-          education_rate: Number(item.details.education_rate),
-          professional_services_rate: Number(item.details.professional_services_rate),
-          housing_occupancy: Number(item.details.housing_occupancy)
-        }
+        market_score: item.market_score
       }));
     }
   });
