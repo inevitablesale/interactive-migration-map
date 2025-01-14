@@ -77,29 +77,44 @@ export function MarketHighlights() {
   const [activeTab, setActiveTab] = useState("growth");
 
   return (
-    <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+    <Card className="p-6 bg-[#1A1F2C]/60 backdrop-blur-md border-[#6E59A5]/20">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="growth">Growth Leaders</TabsTrigger>
-          <TabsTrigger value="competitive">Competitive Insights</TabsTrigger>
-          <TabsTrigger value="service">Service Specialization</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 mb-6 bg-[#221F26]/60">
+          <TabsTrigger 
+            value="growth"
+            className="data-[state=active]:bg-[#9b87f5]/20 data-[state=active]:text-[#9b87f5]"
+          >
+            Growth Leaders
+          </TabsTrigger>
+          <TabsTrigger 
+            value="competitive"
+            className="data-[state=active]:bg-[#9b87f5]/20 data-[state=active]:text-[#9b87f5]"
+          >
+            Competitive Insights
+          </TabsTrigger>
+          <TabsTrigger 
+            value="service"
+            className="data-[state=active]:bg-[#9b87f5]/20 data-[state=active]:text-[#9b87f5]"
+          >
+            Service Specialization
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="growth">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Region</TableHead>
-                <TableHead>Growth Rate (YoY)</TableHead>
-                <TableHead>Avg Firms/10k</TableHead>
-                <TableHead>Avg Payroll</TableHead>
+              <TableRow className="border-[#6E59A5]/20">
+                <TableHead className="text-[#8E9196]">Region</TableHead>
+                <TableHead className="text-[#8E9196]">Growth Rate (YoY)</TableHead>
+                <TableHead className="text-[#8E9196]">Avg Firms/10k</TableHead>
+                <TableHead className="text-[#8E9196]">Avg Payroll</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {growthLeaders.map((item) => (
-                <TableRow key={item.region}>
-                  <TableCell>{item.region}</TableCell>
-                  <TableCell>{item.growthRate}</TableCell>
+                <TableRow key={item.region} className="border-[#6E59A5]/20">
+                  <TableCell className="text-[#F1F0FB]">{item.region}</TableCell>
+                  <TableCell className="text-[#9b87f5]">{item.growthRate}</TableCell>
                   <TableCell>{item.firmDensity}</TableCell>
                   <TableCell>{item.avgPayroll}</TableCell>
                 </TableRow>
