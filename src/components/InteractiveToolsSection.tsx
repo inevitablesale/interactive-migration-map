@@ -10,6 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { GeographicLevel } from "@/types/geography";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { Map, Building2 } from "lucide-react";
+import { ComparablesPanel } from "./analytics/ComparablesPanel";
 
 export const InteractiveToolsSection = () => {
   const [showComparison, setShowComparison] = useState(false);
@@ -32,81 +33,89 @@ export const InteractiveToolsSection = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
-      {/* Analysis Map Section */}
-      <div className="h-[calc(100vh-200px)] relative">
-        <div className="absolute top-4 left-4 z-10">
-          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-2">
-            <ToggleGroup
-              type="single"
-              value={geographicLevel}
-              onValueChange={(value: GeographicLevel) => setGeographicLevel(value)}
-              className="flex gap-1"
-            >
-              <ToggleGroupItem
-                value="state"
-                className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
+    <div className="flex flex-col gap-6">
+      {/* Map and Analysis Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-0">
+        {/* Analysis Map Section */}
+        <div className="h-[calc(100vh-200px)] relative">
+          <div className="absolute top-4 left-4 z-10">
+            <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-2">
+              <ToggleGroup
+                type="single"
+                value={geographicLevel}
+                onValueChange={(value: GeographicLevel) => setGeographicLevel(value)}
+                className="flex gap-1"
               >
-                <Map className="w-4 h-4" />
-                States
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="msa"
-                className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
-              >
-                <Building2 className="w-4 h-4" />
-                MSAs
-              </ToggleGroupItem>
-            </ToggleGroup>
+                <ToggleGroupItem
+                  value="state"
+                  className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
+                >
+                  <Map className="w-4 h-4" />
+                  States
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="msa"
+                  className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-blue-500/20 data-[state=on]:text-blue-400"
+                >
+                  <Building2 className="w-4 h-4" />
+                  MSAs
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
           </div>
+          
+          <AnalysisMap 
+            className="h-full" 
+            type="density" 
+            geographicLevel={geographicLevel}
+          />
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-transparent to-black/20" />
         </div>
-        
-        <AnalysisMap 
-          className="h-full" 
-          type="density" 
-          geographicLevel={geographicLevel}
-        />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-transparent to-black/20" />
+
+        {/* Analysis Tools Section */}
+        <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-200px)] overflow-y-auto">
+          <Tabs defaultValue={getActiveTab()} value={getActiveTab()} className="w-full">
+            <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-3 gap-4">
+              <TabsTrigger 
+                value="opportunities" 
+                className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
+              >
+                Find Opportunities
+              </TabsTrigger>
+              <TabsTrigger 
+                value="strategy"
+                className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
+              >
+                Build Strategy
+              </TabsTrigger>
+              <TabsTrigger 
+                value="enhanced"
+                className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
+              >
+                Enhanced Analytics
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="p-6 space-y-6">
+              <TabsContent value="opportunities" className="mt-0 space-y-6">
+                <MarketOpportunities />
+              </TabsContent>
+
+              <TabsContent value="strategy" className="mt-0 space-y-6">
+                <StrategyBuilder />
+              </TabsContent>
+
+              <TabsContent value="enhanced" className="mt-0 space-y-6">
+                <EnhancedAnalytics />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
       </div>
 
-      {/* Analysis Tools Section */}
-      <div className="bg-black/30 backdrop-blur-md border-l border-white/10 h-[calc(100vh-200px)] overflow-y-auto">
-        <Tabs defaultValue={getActiveTab()} value={getActiveTab()} className="w-full">
-          <TabsList className="w-full sticky top-0 z-10 bg-black/40 backdrop-blur-md p-6 grid grid-cols-3 gap-4">
-            <TabsTrigger 
-              value="opportunities" 
-              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
-            >
-              Find Opportunities
-            </TabsTrigger>
-            <TabsTrigger 
-              value="strategy"
-              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
-            >
-              Build Strategy
-            </TabsTrigger>
-            <TabsTrigger 
-              value="enhanced"
-              className="bg-white/5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg transition-all duration-200 px-4 py-2"
-            >
-              Enhanced Analytics
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="p-6 space-y-6">
-            <TabsContent value="opportunities" className="mt-0 space-y-6">
-              <MarketOpportunities />
-            </TabsContent>
-
-            <TabsContent value="strategy" className="mt-0 space-y-6">
-              <StrategyBuilder />
-            </TabsContent>
-
-            <TabsContent value="enhanced" className="mt-0 space-y-6">
-              <EnhancedAnalytics />
-            </TabsContent>
-          </div>
-        </Tabs>
+      {/* Market Comparables Section */}
+      <div className="px-6">
+        <ComparablesPanel />
       </div>
     </div>
   );
