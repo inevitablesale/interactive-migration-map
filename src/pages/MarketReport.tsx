@@ -202,7 +202,7 @@ export default function MarketReport() {
                             <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
                             <div className="flex items-center gap-2 text-gray-300 text-sm">
                               <MapPin className="w-4 h-4" />
-                              <span className="truncate">{firm["State Name"]}</span>
+                              <span className="truncate">{firm.Location || "Location not available"}</span>
                             </div>
                             {firm.primarySubtitle && (
                               <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
@@ -211,8 +211,15 @@ export default function MarketReport() {
                         </div>
                       </div>
                       <div className="p-4 space-y-4">
+                        {firm.Summary && (
+                          <div className="space-y-1">
+                            <p className="text-gray-400 text-sm">Summary</p>
+                            <p className="text-white text-sm line-clamp-3">{firm.Summary}</p>
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1 min-h-[60px]">
+                          <div className="space-y-1">
                             <div className="flex items-center text-gray-400 text-sm">
                               <Users2 className="w-4 h-4 mr-1" />
                               <span>Employees</span>
@@ -223,7 +230,7 @@ export default function MarketReport() {
                                 : firm.employee_count}
                             </p>
                           </div>
-                          <div className="space-y-1 min-h-[60px]">
+                          <div className="space-y-1">
                             <div className="flex items-center text-gray-400 text-sm">
                               <Users className="w-4 h-4 mr-1" />
                               <span>Followers</span>
@@ -232,7 +239,7 @@ export default function MarketReport() {
                           </div>
                         </div>
 
-                        <div className="space-y-1 min-h-[60px]">
+                        <div className="space-y-1">
                           <div className="flex items-center text-gray-400 text-sm">
                             <Briefcase className="w-4 h-4 mr-1" />
                             <span>Follower Ratio</span>
@@ -243,7 +250,7 @@ export default function MarketReport() {
                         </div>
 
                         {firm.foundedOn && (
-                          <div className="space-y-1 min-h-[60px]">
+                          <div className="space-y-1">
                             <div className="flex items-center text-gray-400 text-sm">
                               <Calendar className="w-4 h-4 mr-1" />
                               <span>Founded</span>
@@ -253,17 +260,17 @@ export default function MarketReport() {
                         )}
 
                         {firm.specialities && (
-                          <div className="space-y-1 min-h-[60px]">
+                          <div className="space-y-1">
                             <p className="text-gray-400 text-sm flex items-center">
                               <Star className="w-4 h-4 mr-1" />
-                              Specialization
+                              Specialities
                             </p>
                             <p className="text-white text-sm">{firm.specialities}</p>
                           </div>
                         )}
 
                         {firm.websiteUrl && (
-                          <div className="pt-2 border-t border-white/5 min-h-[40px]">
+                          <div className="pt-2 border-t border-white/5">
                             <a
                               href={firm.websiteUrl}
                               target="_blank"
