@@ -1,22 +1,21 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from 'lucide-react';
-import { getMetricColor } from '@/utils/market-report/formatters';
+import { LucideIcon } from "lucide-react";
+import { getMetricColor } from "@/utils/market-report/formatters";
 
-interface MetricProps {
+interface MarketMetric {
   label: string;
-  value: string | number | null;
-  type: 'growth' | 'density' | 'saturation' | 'money' | 'population';
-  rank?: number;
+  value: string | undefined;
+  type: 'population' | 'money' | 'density' | 'growth' | 'saturation';
+  rank?: number | null;
 }
 
 interface MarketMetricsCardProps {
   title: string;
   icon: LucideIcon;
-  metrics: MetricProps[];
+  metrics: MarketMetric[];
 }
 
-export const MarketMetricsCard: React.FC<MarketMetricsCardProps> = ({ title, icon: Icon, metrics }) => {
+export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsCardProps) {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader>
@@ -27,14 +26,19 @@ export const MarketMetricsCard: React.FC<MarketMetricsCardProps> = ({ title, ico
       </CardHeader>
       <CardContent className="space-y-4">
         {metrics.map((metric, index) => (
-          <div key={index}>
-            <p className="text-gray-400 h-12 flex items-center">{metric.label}</p>
+          <div key={index} className="space-y-1">
             <div className="flex items-center justify-between">
-              <p className={`text-2xl font-bold ${getMetricColor(Number(metric.value) || 0, metric.type)}`}>
-                {metric.value ?? 'N/A'}
+              <p className="text-gray-400">{metric.label}</p>
+            </div>
+            <div className="space-y-1">
+              <p className={`text-xl font-bold ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
+                {metric.value || 'N/A'}
               </p>
-              {metric.rank !== undefined && (
-                <span className="text-sm text-gray-400">Rank: {metric.rank}</span>
+              {metric.rank && (
+                <p className="text-sm text-gray-400">
+                  Rank:<br />
+                  {metric.rank.toLocaleString()}
+                </p>
               )}
             </div>
           </div>
@@ -42,4 +46,4 @@ export const MarketMetricsCard: React.FC<MarketMetricsCardProps> = ({ title, ico
       </CardContent>
     </Card>
   );
-};
+}
