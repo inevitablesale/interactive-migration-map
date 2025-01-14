@@ -284,13 +284,6 @@ export default function MarketReport() {
                 <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
                   {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
                 </p>
-                <p className="text-sm text-gray-400">Accountants per Population</p>
-              </div>
-              <div>
-                <p className="text-gray-400">Accountants per Firm</p>
-                <p className="text-2xl font-bold text-white">
-                  {accountantsPerFirm}
-                </p>
               </div>
             </CardContent>
           </Card>
