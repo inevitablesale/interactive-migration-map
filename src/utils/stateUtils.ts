@@ -8,7 +8,8 @@ export const getStateName = async (stateId: string): Promise<string> => {
       .from('state_mappings')
       .select('state_name')
       .eq('STATEFP', stateId.padStart(2, '0'))
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     console.log('state_mappings query result:', { data, error });
 
