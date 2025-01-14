@@ -70,6 +70,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         doctorate_degree_holders: rankingData.B15003_025E,
         avg_accountant_payroll: rankingData.PAYANN,
         total_establishments: rankingData.ESTAB,
+        emp: rankingData.EMP,
         public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
           ? rankingData.C24060_007E / rankingData.C24060_004E 
           : null,

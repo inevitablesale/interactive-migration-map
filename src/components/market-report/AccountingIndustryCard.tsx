@@ -24,17 +24,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
-  // Calculate total number of accountants (private + public sector)
-  const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
-
   // Calculate average payroll per firm using PAYANN / ESTAB
   const avgPayrollPerFirm = marketData.avg_accountant_payroll && marketData.total_establishments && marketData.total_establishments > 0
     ? marketData.avg_accountant_payroll * 1000 / marketData.total_establishments  // Multiply by 1000 since PAYANN is in thousands
     : null;
 
-  // Calculate average salary per employee using PAYANN / total accountants
-  const avgSalaryPerEmployee = marketData.avg_accountant_payroll && totalAccountants > 0
-    ? marketData.avg_accountant_payroll * 1000 / totalAccountants  // Multiply by 1000 since PAYANN is in thousands
+  // Calculate average salary per employee using PAYANN / EMP
+  const avgSalaryPerEmployee = marketData.avg_accountant_payroll && marketData.emp && marketData.emp > 0
+    ? marketData.avg_accountant_payroll * 1000 / marketData.emp  // Multiply by 1000 since PAYANN is in thousands
     : null;
 
   // Format currency with K/M/B suffixes
@@ -48,7 +45,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
   console.log('Market Data:', {
     avg_accountant_payroll: marketData.avg_accountant_payroll,
     total_establishments: marketData.total_establishments,
-    totalAccountants,
+    emp: marketData.emp,
     avgPayrollPerFirm,
     avgSalaryPerEmployee
   });
@@ -124,7 +121,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-sm">Total annual payroll divided by total number of accountants</p>
+                    <p className="text-sm">Total annual payroll divided by total number of employees</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

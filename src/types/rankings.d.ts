@@ -15,6 +15,7 @@ export interface ComprehensiveMarketData {
   doctorate_degree_holders?: number;
   avg_accountant_payroll?: number;
   total_establishments?: number;
+  emp?: number;
   public_to_private_ratio?: number;
   vacancy_rate?: number;
   vacancy_rank?: number;
