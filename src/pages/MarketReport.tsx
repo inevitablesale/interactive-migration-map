@@ -97,11 +97,9 @@ export default function MarketReport() {
         return null;
       }
 
-      // First cast to unknown, then to our interface to handle the JSON fields
       const rawData = data[0] as unknown;
       const typedData = rawData as ComprehensiveMarketData;
       
-      // Parse JSON fields if they exist
       if (typedData.top_firms) {
         typedData.top_firms = JSON.parse(JSON.stringify(typedData.top_firms));
       }
@@ -113,8 +111,8 @@ export default function MarketReport() {
     },
     enabled: !!stateFips,
     retry: 1,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (renamed from cacheTime)
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   const formatCommuteTime = (minutes: number | null) => {
@@ -124,7 +122,21 @@ export default function MarketReport() {
 
   const formatRank = (rank: number | null) => {
     if (!rank) return '';
-    return `(Rank: ${rank.toLocaleString()})`;
+    
+    let color;
+    if (rank <= 33) {
+      color = '#F2FCE2'; // Good ranking (green)
+    } else if (rank <= 66) {
+      color = '#FEF7CD'; // Average ranking (yellow)
+    } else {
+      color = '#ea384c'; // Poor ranking (red)
+    }
+    
+    return (
+      <span className="text-sm ml-2" style={{ color }}>
+        (Rank: {rank.toLocaleString()})
+      </span>
+    );
   };
 
   if (isLoading) {
@@ -165,7 +177,6 @@ export default function MarketReport() {
           <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
         </div>
 
-        {/* County Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
@@ -179,18 +190,14 @@ export default function MarketReport() {
                 <p className="text-gray-400">Total Population</p>
                 <p className="text-2xl font-bold text-white">
                   {marketData.total_population?.toLocaleString() ?? 'N/A'}
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.population_rank)}
-                  </span>
+                  {formatRank(marketData.population_rank)}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Median Household Income</p>
                 <p className="text-2xl font-bold text-green-400">
                   ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.income_rank)}
-                  </span>
+                  {formatRank(marketData.income_rank)}
                 </p>
               </div>
             </CardContent>
@@ -208,18 +215,14 @@ export default function MarketReport() {
                 <p className="text-gray-400">Median Gross Rent</p>
                 <p className="text-2xl font-bold text-white">
                   ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.rent_rank)}
-                  </span>
+                  {formatRank(marketData.rent_rank)}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Vacancy Rate</p>
                 <p className="text-2xl font-bold text-white">
                   {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.vacancy_rank)}
-                  </span>
+                  {formatRank(marketData.vacancy_rank)}
                 </p>
               </div>
             </CardContent>
@@ -237,25 +240,20 @@ export default function MarketReport() {
                 <p className="text-gray-400">Firms per 10k Population</p>
                 <p className="text-2xl font-bold text-white">
                   {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.firms_density_rank)}
-                  </span>
+                  {formatRank(marketData.firms_density_rank)}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Growth Rate</p>
                 <p className={`text-xl font-bold ${marketData.growth_rate_percentage && marketData.growth_rate_percentage < 0 ? 'text-red-500' : 'text-white'}`}>
                   {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.growth_rank)}
-                  </span>
+                  {formatRank(marketData.growth_rank)}
                 </p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Workforce Analysis */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
@@ -322,7 +320,6 @@ export default function MarketReport() {
           </Card>
         </div>
 
-        {/* Economic Indicators & Top Firms */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
