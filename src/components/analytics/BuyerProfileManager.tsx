@@ -33,30 +33,7 @@ export const BuyerProfileManager = () => {
   }
 
   if (!profile) {
-    return (
-      <div className="p-8 text-center">
-        <h3 className="text-lg font-semibold mb-4">No Buyer Profile</h3>
-        <p className="text-gray-500 mb-6">
-          Create a buyer profile to get personalized insights and recommendations.
-        </p>
-        <Dialog open={showForm} onOpenChange={setShowForm}>
-          <DialogTrigger asChild>
-            <Button>Create Buyer Profile</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create Buyer Profile</DialogTitle>
-            </DialogHeader>
-            <BuyerProfileForm
-              onSuccess={() => {
-                setShowForm(false);
-                refetch();
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-    );
+    return null;
   }
 
   return (
