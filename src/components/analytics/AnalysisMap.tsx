@@ -16,8 +16,6 @@ interface AnalysisMapProps {
 
 interface StateMetrics {
   STATEFP: string;
-  ESTAB: number;
-  B01001_001E: number;
   density: number;
 }
 
@@ -37,7 +35,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
       console.log('Fetching state data from materialized view...');
       const { data: stateMetrics, error } = await supabase
         .from('state_density_metrics')
-        .select('STATEFP, ESTAB, B01001_001E, density')
+        .select('STATEFP, density')
         .not('STATEFP', 'is', null)
         .not('density', 'is', null);
 
@@ -51,7 +49,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         return;
       }
 
-      console.log('Processed state data:', stateMetrics);
+      console.log('Received pre-calculated state data:', stateMetrics);
       setStateData(stateMetrics);
       setDataLoaded(true);
 
