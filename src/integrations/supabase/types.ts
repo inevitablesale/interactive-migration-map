@@ -906,6 +906,7 @@ export type Database = {
           total_movedin_2022: number
           total_movedin_2021: number
           total_movedin_2020: number
+          total_moves: number
         }[]
       }
       get_market_opportunities: {
