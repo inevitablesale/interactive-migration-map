@@ -53,6 +53,11 @@ interface ComprehensiveMarketData {
   adjacent_counties: AdjacentCounty[] | null;
 }
 
+const calculateAccountantsPerFirm = (private_accountants: number, public_accountants: number, total_firms: number) => {
+  if (total_firms === 0) return 0;
+  return ((private_accountants + public_accountants) / total_firms).toFixed(2);
+};
+
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
