@@ -91,23 +91,39 @@ export function KeyInsightsPanel() {
                     <span className="text-xs">View Top 10</span>
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white">
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
                   <DialogHeader>
-                    <DialogTitle>Top 10 Growth Regions</DialogTitle>
+                    <DialogTitle className="text-xl font-bold mb-4">Top 10 Growth Regions</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
+                        <div>Rank</div>
+                        <div className="col-span-2">Region</div>
+                        <div>Growth Rate</div>
+                        <div>Firm Density</div>
+                        <div>Population</div>
+                      </div>
                       {topRegions?.map((region, index) => (
-                        <div key={`${region.county_name}-${region.state_name}`} className="flex items-center gap-4 p-3 rounded-lg bg-white/5">
-                          <span className="text-lg font-bold text-accent min-w-[2rem]">#{index + 1}</span>
-                          <div className="flex-1">
-                            <h4 className="font-medium">{region.county_name}, {region.state_name}</h4>
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-1 mt-2 text-sm text-white/70">
-                              <p>Growth Rate: {region.growth_rate.toFixed(1)}%</p>
-                              <p>Firm Density: {region.firm_density.toFixed(1)}</p>
-                              <p>Total Firms: {region.total_firms.toLocaleString()}</p>
-                              <p>Population: {region.total_population.toLocaleString()}</p>
-                            </div>
+                        <div 
+                          key={`${region.county_name}-${region.state_name}`} 
+                          className="grid grid-cols-6 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                        >
+                          <div className="flex items-center">
+                            <span className="text-lg font-bold text-accent">#{index + 1}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="font-medium">{region.county_name}</p>
+                            <p className="text-sm text-white/60">{region.state_name}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-green-400">+{region.growth_rate.toFixed(1)}%</span>
+                          </div>
+                          <div className="flex items-center">
+                            {region.firm_density.toFixed(1)}
+                          </div>
+                          <div className="flex items-center">
+                            {region.total_population.toLocaleString()}
                           </div>
                         </div>
                       ))}
