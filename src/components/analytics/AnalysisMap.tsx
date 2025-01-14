@@ -27,6 +27,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
   const [selectedState, setSelectedState] = useState<StateMetrics | null>(null);
   const [stateData, setStateData] = useState<StateMetrics[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
@@ -51,34 +52,46 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         return;
       }
 
-      // Create serializable state metrics
+      // Create serializable state metrics with proper type conversion
       const statesWithDensity: StateMetrics[] = stateMetrics.map(state => ({
         STATEFP: state.STATEFP,
-        ESTAB: Number(state.ESTAB),
-        B01001_001E: Number(state.B01001_001E),
+        ESTAB: Number(state.ESTAB) || 0,
+        B01001_001E: Number(state.B01001_001E) || 0,
         density: state.ESTAB && state.B01001_001E ? 
           (Number(state.ESTAB) / Number(state.B01001_001E)) * 10000 : 0
       }));
 
       console.log('Processed state data:', statesWithDensity);
       setStateData(statesWithDensity);
+      setDataLoaded(true);
 
+      // Only update map if it's loaded
       if (map.current && mapLoaded) {
-        map.current.setPaintProperty('state-fills', 'fill-color', [
-          'interpolate',
-          ['linear'],
-          ['coalesce', ['get', 'density'], 0],
-          2.5, '#FA0098',  // Minimum density observed
-          3.5, '#94EC0E',  // Low-medium density
-          4.5, '#FFF903',  // Medium density
-          5.5, '#00FFE0',  // Medium-high density
-          6.5, '#037CFE'   // Maximum density observed
-        ]);
+        updateMapData(statesWithDensity);
       }
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
   }, [toast, mapLoaded]);
+
+  const updateMapData = useCallback((data: StateMetrics[]) => {
+    if (!map.current || !mapLoaded) return;
+
+    try {
+      map.current.setPaintProperty('state-fills', 'fill-color', [
+        'interpolate',
+        ['linear'],
+        ['coalesce', ['get', 'density'], 0],
+        2.5, '#FA0098',
+        3.5, '#94EC0E',
+        4.5, '#FFF903',
+        5.5, '#00FFE0',
+        6.5, '#037CFE'
+      ]);
+    } catch (error) {
+      console.error('Error updating map data:', error);
+    }
+  }, [mapLoaded]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -120,16 +133,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'fill-color': [
-              'interpolate',
-              ['linear'],
-              ['coalesce', ['get', 'density'], 0],
-              2.5, '#FA0098',  // Minimum density observed
-              3.5, '#94EC0E',  // Low-medium density
-              4.5, '#FFF903',  // Medium density
-              5.5, '#00FFE0',  // Medium-high density
-              6.5, '#037CFE'   // Maximum density observed
-            ],
+            'fill-color': MAP_COLORS.inactive,
             'fill-opacity': 0.8
           }
         });
@@ -145,6 +149,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
           }
         });
 
+        // Fetch data after map is loaded
         fetchStateData();
       });
 
@@ -161,6 +166,13 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
       });
     }
   }, [fetchStateData, toast]);
+
+  // Update map when both map and data are ready
+  useEffect(() => {
+    if (mapLoaded && dataLoaded && stateData.length > 0) {
+      updateMapData(stateData);
+    }
+  }, [mapLoaded, dataLoaded, stateData, updateMapData]);
 
   return (
     <React.Fragment>
@@ -190,7 +202,7 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-              <span className="text-white text-xs">Very Low (&lt;2.5)</span>
+              <span className="text-white text-xs">&lt;2.5</span>
             </div>
           </div>
         </div>
