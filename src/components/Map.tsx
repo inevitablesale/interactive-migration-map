@@ -35,6 +35,38 @@ const Map = () => {
     return MAP_COLORS.active;                          // Lower density
   }, []);
 
+  const fetchStateData = async () => {
+    try {
+      console.log('Fetching state data...');
+      const { data: stateMetrics, error } = await supabase
+        .from('state_density_metrics')
+        .select('STATEFP, density')
+        .not('STATEFP', 'is', null)
+        .not('density', 'is', null);
+
+      if (error) {
+        console.error('Error fetching state data:', error);
+        return;
+      }
+
+      // Add state names to the data
+      const stateDataWithNames = await Promise.all(
+        stateMetrics.map(async (state) => {
+          const stateName = await getStateName(state.STATEFP);
+          return {
+            ...state,
+            displayName: stateName
+          };
+        })
+      );
+
+      console.log('State data with names:', stateDataWithNames);
+      setStateData(stateDataWithNames);
+    } catch (error) {
+      console.error('Error in fetchStateData:', error);
+    }
+  };
+
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -132,6 +164,24 @@ const Map = () => {
         }
       });
 
+      // Add click handler to show state names
+      map.current.on('click', 'state-base', async (e) => {
+        if (e.features && e.features[0]) {
+          const stateId = e.features[0].properties.STATEFP;
+          const stateName = await getStateName(stateId);
+          console.log(`Clicked state: ${stateName} (FIPS: ${stateId})`);
+          
+          // Update active state with name
+          const stateInfo = stateData.find(s => s.STATEFP === stateId);
+          if (stateInfo) {
+            setActiveState({
+              ...stateInfo,
+              displayName: stateName
+            });
+          }
+        }
+      });
+
       fetchStateData();
     });
 
@@ -191,6 +241,18 @@ const Map = () => {
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/60 via-transparent to-black/40" />
+      
+      {/* Display active state name */}
+      {activeState && (
+        <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-lg p-4 rounded-xl border border-white/10">
+          <h3 className="text-white text-lg font-medium">{activeState.displayName}</h3>
+          {activeState.firmDensity && (
+            <p className="text-white/80 text-sm">
+              Firm Density: {activeState.firmDensity.toFixed(2)}
+            </p>
+          )}
+        </div>
+      )}
       
       {/* Legend with updated styling */}
       <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-lg p-4 rounded-xl border border-white/10">
