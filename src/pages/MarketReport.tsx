@@ -28,6 +28,8 @@ export default function MarketReport() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  console.log('Market Report Component - Market Data:', marketData); // Debug log
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
@@ -53,62 +55,20 @@ export default function MarketReport() {
     );
   }
 
-  const populationMetrics = [
-    {
-      label: "Total Population",
-      value: marketData.total_population?.toLocaleString(),
-      type: "population" as const,
-      rank: marketData.population_rank
-    },
-    {
-      label: "Median Household",
-      sublabel: "Income",
-      value: `$${marketData.median_household_income?.toLocaleString()}`,
-      type: "money" as const,
-      rank: marketData.income_rank
-    }
-  ];
-
-  const housingMetrics = [
-    {
-      label: "Median Gross Rent",
-      value: `$${marketData.median_gross_rent?.toLocaleString()}`,
-      type: "money" as const,
-      rank: marketData.rent_rank
-    },
-    {
-      label: "Vacancy Rate",
-      value: `${marketData.vacancy_rate?.toFixed(1)}%`,
-      type: "saturation" as const,
-      rank: marketData.vacancy_rank
-    }
-  ];
-
-  const marketDynamicsMetrics = [
-    {
-      label: "Firms per 10k",
-      sublabel: "Population",
-      value: marketData.firms_per_10k_population?.toFixed(1),
-      type: "density" as const,
-      rank: marketData.density_rank
-    },
-    {
-      label: "Growth Rate",
-      value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
-      type: "growth" as const,
-      rank: marketData.growth_rank
-    }
-  ];
-
-  const filteredFirms = marketData.top_firms?.filter(firm => 
-    firm.company_name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredFirms = marketData.top_firms?.filter(firm => {
+    console.log('Filtering firm:', firm); // Debug log for each firm
+    return firm.company_name.toLowerCase().includes(searchTerm.toLowerCase());
+  }) || [];
   
+  console.log('Filtered firms:', filteredFirms); // Debug log
+
   const totalPages = Math.ceil(filteredFirms.length / FIRMS_PER_PAGE);
   const paginatedFirms = filteredFirms.slice(
     (currentPage - 1) * FIRMS_PER_PAGE,
     currentPage * FIRMS_PER_PAGE
   );
+
+  console.log('Paginated firms:', paginatedFirms); // Debug log
 
   return (
     <div className="min-h-screen bg-[#222222]">
@@ -139,17 +99,58 @@ export default function MarketReport() {
               <MarketMetricsCard
                 title="Population Overview"
                 icon={Users}
-                metrics={populationMetrics}
+                metrics={[
+                  {
+                    label: "Total Population",
+                    value: marketData.total_population?.toLocaleString(),
+                    type: "population" as const,
+                    rank: marketData.population_rank
+                  },
+                  {
+                    label: "Median Household",
+                    sublabel: "Income",
+                    value: `$${marketData.median_household_income?.toLocaleString()}`,
+                    type: "money" as const,
+                    rank: marketData.income_rank
+                  }
+                ]}
               />
               <MarketMetricsCard
                 title="Housing Metrics"
                 icon={Building2}
-                metrics={housingMetrics}
+                metrics={[
+                  {
+                    label: "Median Gross Rent",
+                    value: `$${marketData.median_gross_rent?.toLocaleString()}`,
+                    type: "money" as const,
+                    rank: marketData.rent_rank
+                  },
+                  {
+                    label: "Vacancy Rate",
+                    value: `${marketData.vacancy_rate?.toFixed(1)}%`,
+                    type: "saturation" as const,
+                    rank: marketData.vacancy_rank
+                  }
+                ]}
               />
               <MarketMetricsCard
                 title="Market Dynamics"
                 icon={TrendingUp}
-                metrics={marketDynamicsMetrics}
+                metrics={[
+                  {
+                    label: "Firms per 10k",
+                    sublabel: "Population",
+                    value: marketData.firms_per_10k_population?.toFixed(1),
+                    type: "density" as const,
+                    rank: marketData.density_rank
+                  },
+                  {
+                    label: "Growth Rate",
+                    value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
+                    type: "growth" as const,
+                    rank: marketData.growth_rank
+                  }
+                ]}
               />
             </div>
 

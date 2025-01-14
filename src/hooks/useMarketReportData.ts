@@ -31,6 +31,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
+      console.log('Found state FIPS:', stateData.fips_code); // Debug log
+
       // Then, get the county data using the FIPS code
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
@@ -52,25 +54,40 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Raw ranking data:', rankingData); // Debug log
 
-      // Ensure top_firms is properly transformed to match TopFirm interface
-      const transformedTopFirms: TopFirm[] = Array.isArray(rankingData.top_firms) 
-        ? rankingData.top_firms.map((firm: any) => ({
-            company_name: firm.company_name || '',
-            employee_count: firm.employee_count || 0,
-            follower_count: firm.follower_count || 0,
-            follower_ratio: firm.follower_ratio || 0,
-            logoResolutionResult: firm.logoResolutionResult,
-            originalCoverImage: firm.originalCoverImage,
-            primarySubtitle: firm.primarySubtitle,
-            employeeCountRangeLow: firm.employeeCountRangeLow,
-            employeeCountRangeHigh: firm.employeeCountRangeHigh,
-            foundedOn: firm.foundedOn,
-            specialities: firm.specialities,
-            websiteUrl: firm.websiteUrl,
-            Location: firm.Location,
-            Summary: firm.Summary
-          }))
-        : [];
+      // Get firms data from canary_firms_data
+      const { data: firmsData, error: firmsError } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .eq('COUNTYNAME', county)
+        .eq('STATEFP', stateData.fips_code);
+
+      if (firmsError) {
+        console.error('Error fetching firms data:', firmsError);
+        toast.error('Error fetching firms data');
+        throw firmsError;
+      }
+
+      console.log('Raw firms data:', firmsData); // Debug log
+
+      // Transform firms data to match TopFirm interface
+      const transformedTopFirms: TopFirm[] = firmsData ? firmsData.map((firm: any) => ({
+        company_name: firm['Company Name'] || '',
+        employee_count: firm.employeeCount || 0,
+        follower_count: firm.followerCount || 0,
+        follower_ratio: firm.followerCount && firm.employeeCount ? firm.followerCount / firm.employeeCount : 0,
+        logoResolutionResult: firm.logoResolutionResult,
+        originalCoverImage: firm.originalCoverImage,
+        primarySubtitle: firm['Primary Subtitle'],
+        employeeCountRangeLow: firm.employeeCountRangeLow,
+        employeeCountRangeHigh: firm.employeeCountRangeHigh,
+        foundedOn: firm.foundedOn?.toString(),
+        specialities: firm.specialities,
+        websiteUrl: firm.websiteUrl,
+        Location: firm.Location,
+        Summary: firm.Summary
+      })) : [];
+
+      console.log('Transformed top firms:', transformedTopFirms); // Debug log
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
@@ -104,7 +121,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         top_firms: transformedTopFirms,
       };
 
-      console.log('Transformed market data:', transformedData); // Debug log
+      console.log('Final transformed market data:', transformedData); // Debug log
 
       return transformedData;
     },
@@ -112,6 +129,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
+  console.log('Market data available:', hasMarketData, 'Top firms count:', marketData?.top_firms?.length); // Debug log
 
   return { marketData, isLoading, hasMarketData };
 };
