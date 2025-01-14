@@ -21,8 +21,22 @@ export function MarketOpportunities() {
       if (error) throw error;
 
       return data.map(item => ({
-        ...item,
-        details: item.details as WeightedMarketOpportunity['details']
+        statefp: item.statefp,
+        countyfp: item.countyfp,
+        countyname: item.countyname,
+        state_name: item.state_name,
+        total_score: item.total_score,
+        migration_score: item.migration_score,
+        economic_score: item.economic_score,
+        market_score: item.market_score,
+        details: {
+          median_income: item.details.median_income,
+          employment_rate: item.details.employment_rate,
+          housing_value: item.details.housing_value,
+          education_rate: item.details.education_rate,
+          professional_services_rate: item.details.professional_services_rate,
+          housing_occupancy: item.details.housing_occupancy
+        }
       }));
     }
   });
