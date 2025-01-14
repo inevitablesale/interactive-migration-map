@@ -21,11 +21,11 @@ export const useMarketReportData = (county?: string, state?: string) => {
           return null;
         }
 
-        // Get comprehensive county data
+        // Get comprehensive county data with correct parameter names
         const { data: countyData, error: countyError } = await supabase
           .rpc('get_comprehensive_county_data', {
-            p_county: county,
-            p_state_fips: stateFips.fips_code
+            p_county_name: county,
+            p_state_fp: stateFips.fips_code
           });
 
         if (countyError) {
