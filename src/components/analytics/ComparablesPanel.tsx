@@ -4,8 +4,21 @@ import { TrendingUp, Users, Building2, ArrowUpRight, ArrowDownRight } from "luci
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { getStateName } from "@/utils/stateUtils";
+
+interface StateRanking {
+  statefp: string;
+  firmDensity: number;
+  comparedToNational: {
+    density: number;
+    growth: number;
+  };
+}
 
 export function ComparablesPanel() {
+  const [stateRankings, setStateRankings] = useState<(StateRanking & { displayName: string })[]>([]);
+
   const { data: rankings } = useQuery({
     queryKey: ['stateRankings'],
     queryFn: async () => {
@@ -28,24 +41,38 @@ export function ComparablesPanel() {
           (state.ESTAB / state.B01001_001E) * 10000 : 0;
         const nationalDensity = nationalData.ESTAB && nationalData.B01001_001E ? 
           (nationalData.ESTAB / nationalData.B01001_001E) * 10000 : 0;
-        
-        const growthRate = state.MOVEDIN2022 && state.MOVEDIN2021 ?
-          ((state.MOVEDIN2022 - state.MOVEDIN2021) / state.MOVEDIN2021) * 100 : 0;
-        const nationalGrowthRate = nationalData.MOVEDIN2022 && nationalData.MOVEDIN2021 ?
-          ((nationalData.MOVEDIN2022 - nationalData.MOVEDIN2021) / nationalData.MOVEDIN2021) * 100 : 0;
 
         return {
           statefp: state.STATEFP,
           firmDensity,
-          growthRate,
           comparedToNational: {
             density: firmDensity / nationalDensity,
-            growth: growthRate / nationalGrowthRate
+            growth: 1 // Placeholder since we don't have growth data in these tables
           }
         };
       });
     }
   });
+
+  useEffect(() => {
+    const fetchStateNames = async () => {
+      if (!rankings) return;
+      
+      const rankingsWithNames = await Promise.all(
+        rankings.map(async (ranking) => {
+          const stateName = await getStateName(ranking.statefp);
+          return {
+            ...ranking,
+            displayName: stateName
+          };
+        })
+      );
+      
+      setStateRankings(rankingsWithNames);
+    };
+
+    fetchStateNames();
+  }, [rankings]);
 
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
@@ -54,14 +81,14 @@ export function ComparablesPanel() {
       </div>
       <ScrollArea className="h-[400px]">
         <div className="p-4 space-y-4">
-          {rankings?.map((state) => (
+          {stateRankings?.map((state) => (
             <div
               key={state.statefp}
               className="bg-white/5 rounded-lg p-4 space-y-3 hover:bg-white/10 transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-medium text-white">State {state.statefp}</h4>
+                  <h4 className="font-medium text-white">{state.displayName}</h4>
                 </div>
               </div>
               
@@ -84,28 +111,6 @@ export function ComparablesPanel() {
                         <ArrowDownRight className="w-4 h-4" />
                       }
                       {Math.abs((state.comparedToNational.density - 1) * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-white/60">Growth Rate</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-white">
-                      {state.growthRate.toFixed(1)}%
-                    </span>
-                    <div className={cn(
-                      "flex items-center gap-1 text-sm",
-                      state.comparedToNational.growth > 1 ? "text-green-400" : "text-red-400"
-                    )}>
-                      {state.comparedToNational.growth > 1 ? 
-                        <ArrowUpRight className="w-4 h-4" /> : 
-                        <ArrowDownRight className="w-4 h-4" />
-                      }
-                      {Math.abs((state.comparedToNational.growth - 1) * 100).toFixed(1)}%
                     </div>
                   </div>
                 </div>
