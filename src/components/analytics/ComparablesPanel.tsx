@@ -60,7 +60,9 @@ export function ComparablesPanel() {
       
       const rankingsWithNames = await Promise.all(
         rankings.map(async (ranking) => {
-          const stateName = await getStateName(ranking.statefp);
+          // Ensure the state FIPS code is padded with a leading zero if needed
+          const paddedStateFp = ranking.statefp.padStart(2, '0');
+          const stateName = await getStateName(paddedStateFp);
           return {
             ...ranking,
             displayName: stateName
