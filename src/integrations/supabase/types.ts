@@ -881,15 +881,6 @@ export type Database = {
           income_rank: number
           population_rank: number
           rent_rank: number
-          firms_density_rank: number
-          growth_rank: number
-          bachelors_rank: number
-          masters_rank: number
-          doctorate_rank: number
-          employment_rank: number
-          salary_rank: number
-          sector_ratio_rank: number
-          saturation_rank: number
           top_firms: Json
           state_avg_income: number
           adjacent_counties: Json
