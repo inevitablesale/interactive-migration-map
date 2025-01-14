@@ -18,19 +18,24 @@ export default function MarketReport() {
   const { data: stateFips } = useQuery({
     queryKey: ['stateFips', state],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_fips_codes')
-        .select('fips_code')
-        .eq('state', state)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('state_fips_codes')
+          .select('fips_code')
+          .eq('state', state)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching state FIPS:', error);
-        toast.error('Error fetching state data');
+        if (error) {
+          console.error('Error fetching state FIPS:', error);
+          toast.error('Error fetching state data');
+          throw error;
+        }
+
+        return data?.fips_code;
+      } catch (error) {
+        console.error('Error in stateFips query:', error);
         throw error;
       }
-
-      return data?.fips_code;
     },
   });
 
@@ -42,10 +47,13 @@ export default function MarketReport() {
       console.log('Fetching data for:', { county, stateFips });
       
       try {
-        const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-          p_county_name: county,
-          p_state_fp: stateFips
-        });
+        const { data: rawData, error } = await supabase.rpc(
+          'get_comprehensive_county_data',
+          {
+            p_county_name: county,
+            p_state_fp: stateFips
+          }
+        );
 
         if (error) {
           console.error('Error fetching comprehensive market data:', error);
@@ -53,23 +61,20 @@ export default function MarketReport() {
           throw error;
         }
 
-        if (!data || data.length === 0) {
+        if (!rawData || rawData.length === 0) {
           toast.error('No data found for this location');
           return null;
         }
 
-        const marketData = data[0] as unknown as ComprehensiveMarketData;
+        // Ensure we're working with the first result and proper typing
+        const marketData = rawData[0] as unknown as ComprehensiveMarketData;
         
-        // Ensure top_firms and adjacent_counties are properly typed arrays
-        marketData.top_firms = Array.isArray(marketData.top_firms) 
-          ? marketData.top_firms 
-          : [];
-        
-        marketData.adjacent_counties = Array.isArray(marketData.adjacent_counties)
-          ? marketData.adjacent_counties
-          : [];
-
-        return marketData;
+        // Ensure arrays are properly initialized
+        return {
+          ...marketData,
+          top_firms: Array.isArray(marketData.top_firms) ? marketData.top_firms : [],
+          adjacent_counties: Array.isArray(marketData.adjacent_counties) ? marketData.adjacent_counties : []
+        };
       } catch (error) {
         console.error('Error in market data query:', error);
         toast.error('Failed to fetch market data');
@@ -327,4 +332,3 @@ export default function MarketReport() {
     </div>
   );
 }
-
