@@ -37,7 +37,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('statefp', stateData.fips_code)
+        .eq('STATEFP', stateData.fips_code)
         .maybeSingle();
 
       if (rankingError) {
@@ -55,11 +55,27 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .in('Company ID', rankingData.top_firms);
+        .in('Company ID', rankingData.top_firms as number[]);
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
       }
+
+      // Transform firms data to match the TopFirm type
+      const transformedFirms = (firmsData || []).map(firm => ({
+        company_name: firm['Company Name'] || '',
+        employee_count: firm.employeeCount || 0,
+        follower_count: firm.followerCount || 0,
+        follower_ratio: firm.followerCount && firm.employeeCount ? firm.followerCount / firm.employeeCount : 0,
+        logoResolutionResult: firm.logoResolutionResult,
+        originalCoverImage: firm.originalCoverImage,
+        primarySubtitle: firm['Primary Subtitle'],
+        employeeCountRangeLow: firm.employeeCountRangeLow,
+        employeeCountRangeHigh: firm.employeeCountRangeHigh,
+        foundedOn: firm.foundedOn?.toString(),
+        specialities: firm.specialities,
+        websiteUrl: firm.websiteUrl
+      }));
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
@@ -90,7 +106,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         rent_rank: null,
         density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
-        top_firms: firmsData || [],
+        top_firms: transformedFirms,
         state_avg_income: null,
         adjacent_counties: null
       };
