@@ -46,6 +46,8 @@ interface ComprehensiveMarketData {
   income_rank: number | null;
   population_rank: number | null;
   rent_rank: number | null;
+  density_rank: number | null;
+  growth_rank: number | null;
   top_firms: TopFirm[] | null;
   state_avg_income: number | null;
   adjacent_counties: AdjacentCounty[] | null;
