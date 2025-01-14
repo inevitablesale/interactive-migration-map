@@ -1,50 +1,51 @@
-import { Bell, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { AlertForm } from "./AlertForm";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const WelcomeSection = () => {
   const [showAlertForm, setShowAlertForm] = useState(false);
-  const [, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const handleViewOpportunities = () => {
-    setSearchParams({ filter: 'opportunities' });
+    navigate('/opportunities');
   };
 
   return (
     <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              Welcome! Ready to discover your next acquisition opportunity?
-            </h1>
-            <p className="text-blue-100/80">
-              Explore growth regions and high-potential firms tailored to your needs
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4">
+      <div className="container mx-auto py-12">
+        <div className="max-w-2xl">
+          <h1 className="text-3xl font-bold text-white mb-4">
+            Find Your Next Opportunity
+          </h1>
+          <p className="text-lg text-white/60 mb-8">
+            Discover and analyze potential acquisition targets with our
+            data-driven insights and market analysis tools.
+          </p>
+          <div className="flex gap-4">
             <Dialog open={showAlertForm} onOpenChange={setShowAlertForm}>
-              <Button 
-                variant="outline" 
-                className="bg-white/5 border-white/10 hover:bg-white/10"
+              <Button
+                variant="outline"
+                className="border-white/10 hover:bg-white/5"
                 onClick={() => setShowAlertForm(true)}
               >
-                <Bell className="w-4 h-4 mr-2" />
-                Set Up Alerts
+                Create Alert
               </Button>
-              <DialogContent className="bg-gray-900 border-white/10 text-white">
+              <DialogContent className="bg-black/90 border-white/10">
                 <DialogHeader>
-                  <DialogTitle>Create New Alert</DialogTitle>
+                  <DialogTitle className="text-white">Create Alert</DialogTitle>
+                  <DialogDescription className="text-white/60">
+                    Set up alerts to get notified about new opportunities that
+                    match your criteria.
+                  </DialogDescription>
                 </DialogHeader>
                 <AlertForm onSuccess={() => setShowAlertForm(false)} />
               </DialogContent>
@@ -58,29 +59,7 @@ export const WelcomeSection = () => {
             </Button>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <Card className="bg-white/5 border-white/10 p-4">
-            <div className="text-sm text-blue-100/60">Active Alerts</div>
-            <div className="text-2xl font-bold text-white">5</div>
-          </Card>
-          
-          <Card className="bg-white/5 border-white/10 p-4">
-            <div className="text-sm text-blue-100/60">New Opportunities</div>
-            <div className="text-2xl font-bold text-white">12</div>
-          </Card>
-          
-          <Card className="bg-white/5 border-white/10 p-4">
-            <div className="text-sm text-blue-100/60">Growth Regions</div>
-            <div className="text-2xl font-bold text-white">8</div>
-          </Card>
-          
-          <Card className="bg-white/5 border-white/10 p-4">
-            <div className="text-sm text-blue-100/60">High-Potential Firms</div>
-            <div className="text-2xl font-bold text-white">24</div>
-          </Card>
-        </div>
       </div>
     </div>
   );
-};
+}
