@@ -117,7 +117,6 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
-    // If the original value was in seconds, we would divide by 60 first
     const actualMinutes = minutes / 60;
     return `${actualMinutes.toFixed(1)} minutes/day`;
   };
