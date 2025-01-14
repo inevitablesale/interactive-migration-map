@@ -16,7 +16,7 @@ export interface ComprehensiveMarketData {
   avg_accountant_payroll?: number;
   total_establishments?: number;
   emp?: number;
-  public_to_private_ratio?: number;
+  public_to_private_ratio?: number | null;
   vacancy_rate?: number;
   vacancy_rank?: number;
   income_rank?: number;
@@ -40,4 +40,5 @@ export interface TopFirm {
   foundedOn?: string;
   specialities?: string;
   websiteUrl?: string;
+  "State Name"?: string;
 }
