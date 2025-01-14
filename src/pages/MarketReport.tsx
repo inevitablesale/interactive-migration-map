@@ -161,16 +161,36 @@ export default function MarketReport() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <div className="text-xs text-gray-400 mb-1">Population</div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-violet-400"></div>
-            <span className="text-xs text-white/60">Population metrics</span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-400"></div>
+              <span className="text-xs text-white/60">High (&gt;1M)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-300"></div>
+              <span className="text-xs text-white/60">Medium (500k-1M)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-200"></div>
+              <span className="text-xs text-white/60">Low (&lt;500k)</span>
+            </div>
           </div>
         </div>
         <div>
           <div className="text-xs text-gray-400 mb-1">Financial</div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-400"></div>
-            <span className="text-xs text-white/60">Money-related</span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+              <span className="text-xs text-white/60">High (&gt;$75k)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-300"></div>
+              <span className="text-xs text-white/60">Medium ($50k-$75k)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-200"></div>
+              <span className="text-xs text-white/60">Low (&lt;$50k)</span>
+            </div>
           </div>
         </div>
         <div>
@@ -268,15 +288,21 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Total Population</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.total_population || 0, 'population')}`}>
-                  {marketData.total_population?.toLocaleString() ?? 'N/A'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className={`text-2xl font-bold ${getMetricColor(marketData.total_population || 0, 'population')}`}>
+                    {marketData.total_population?.toLocaleString() ?? 'N/A'}
+                  </p>
+                  <span className="text-sm text-gray-400">Rank: {marketData.population_rank}</span>
+                </div>
               </div>
               <div>
                 <p className="text-gray-400">Median Household Income</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.median_household_income || 0, 'money')}`}>
-                  ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className={`text-2xl font-bold ${getMetricColor(marketData.median_household_income || 0, 'money')}`}>
+                    ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
+                  </p>
+                  <span className="text-sm text-gray-400">Rank: {marketData.income_rank}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -291,15 +317,21 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Median Gross Rent</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.median_gross_rent || 0, 'money')}`}>
-                  ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className={`text-2xl font-bold ${getMetricColor(marketData.median_gross_rent || 0, 'money')}`}>
+                    ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
+                  </p>
+                  <span className="text-sm text-gray-400">Rank: {marketData.rent_rank}</span>
+                </div>
               </div>
               <div>
                 <p className="text-gray-400">Vacancy Rate</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.vacancy_rate || 0, 'saturation')}`}>
-                  {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className={`text-2xl font-bold ${getMetricColor(marketData.vacancy_rate || 0, 'saturation')}`}>
+                    {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
+                  </p>
+                  <span className="text-sm text-gray-400">Rank: {marketData.vacancy_rank}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -314,15 +346,21 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Firms per 10k Population</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
-                  {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
+                    {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
+                  </p>
+                  <span className="text-sm text-gray-400">Rank: {marketData.density_rank}</span>
+                </div>
               </div>
               <div>
                 <p className="text-gray-400">Growth Rate</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
-                  {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
+                    {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
+                  </p>
+                  <span className="text-sm text-gray-400">Rank: {marketData.growth_rank}</span>
+                </div>
               </div>
               <div>
                 <p className="text-gray-400">Average Commute Time</p>
