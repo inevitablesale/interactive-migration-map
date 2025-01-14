@@ -1,9 +1,25 @@
-import { Card } from "@/components/ui/card";
-import { TrendingUp, Users, Target, InfoIcon, ArrowUpRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { TrendingUp, Users, Target, InfoIcon, ArrowUpRight } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
+
+// Format number to millions with proper handling of small numbers
+const formatPopulation = (value: number) => {
+  if (value < 1000) {
+    return value.toString();
+  }
+  if (value < 1000000) {
+    return `${(value / 1000).toFixed(1)}K`;
+  }
+  return `${(value / 1000000).toFixed(1)}M`;
+};
+
+// Format density with proper decimal places
+const formatDensity = (value: number) => {
+  return value.toFixed(1);
+};
 
 interface MarketGrowthMetric {
   county_name: string;
@@ -94,7 +110,7 @@ export function KeyInsightsPanel() {
                 </DialogTrigger>
                 <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold mb-4">Top 10 Growth Regions</DialogTitle>
+                    <DialogTitle className="text-xl font-bold mb-4">Top Growth Regions</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
                     <div className="grid grid-cols-1 gap-4">
@@ -143,13 +159,13 @@ export function KeyInsightsPanel() {
     {
       title: "Competitive Market",
       value: topCompetitiveMarket 
-        ? `${topCompetitiveMarket.county_name}, ${topCompetitiveMarket.establishments_per_1000_population.toFixed(1)} firms/1k pop`
+        ? `${topCompetitiveMarket.county_name}, ${formatDensity(topCompetitiveMarket.establishments_per_1000_population)} firms/1k pop`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topCompetitiveMarket ? (
             <>
-              {`${topCompetitiveMarket.total_establishments.toLocaleString()} establishments, ${(topCompetitiveMarket.total_population / 1000000).toFixed(1)}M population`}
+              {`${topCompetitiveMarket.total_establishments.toLocaleString()} establishments, ${formatPopulation(topCompetitiveMarket.total_population)} population`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -161,7 +177,7 @@ export function KeyInsightsPanel() {
                       <div className="text-sm text-gray-300">
                         <p>Total Establishments: {topCompetitiveMarket.total_establishments.toLocaleString()}</p>
                         <p>Population: {topCompetitiveMarket.total_population.toLocaleString()}</p>
-                        <p>Density: {topCompetitiveMarket.establishments_per_1000_population.toFixed(1)} firms per 1,000 residents</p>
+                        <p>Density: {formatDensity(topCompetitiveMarket.establishments_per_1000_population)} firms per 1,000 residents</p>
                       </div>
                     </div>
                   </TooltipContent>
@@ -202,7 +218,7 @@ export function KeyInsightsPanel() {
                             {market.total_establishments.toLocaleString()}
                           </div>
                           <div className="flex items-center">
-                            {market.establishments_per_1000_population.toFixed(1)} per 1k
+                            {formatDensity(market.establishments_per_1000_population)} per 1k
                           </div>
                         </div>
                       ))}
