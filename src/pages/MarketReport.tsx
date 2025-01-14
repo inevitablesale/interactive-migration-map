@@ -7,37 +7,37 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 interface ComprehensiveMarketData {
-  total_population: number;
-  median_household_income: number;
-  median_gross_rent: number;
-  median_home_value: number;
-  employed_population: number;
-  private_sector_accountants: number;
-  public_sector_accountants: number;
-  firms_per_10k_population: number;
-  growth_rate_percentage: number;
-  market_saturation_index: number;
-  total_education_population: number;
-  bachelors_degree_holders: number;
-  masters_degree_holders: number;
-  doctorate_degree_holders: number;
-  avg_accountant_payroll: number;
-  public_to_private_ratio: number;
-  avg_commute_time: number;
-  poverty_rate: number;
-  vacancy_rate: number;
+  total_population: number | null;
+  median_household_income: number | null;
+  median_gross_rent: number | null;
+  median_home_value: number | null;
+  employed_population: number | null;
+  private_sector_accountants: number | null;
+  public_sector_accountants: number | null;
+  firms_per_10k_population: number | null;
+  growth_rate_percentage: number | null;
+  market_saturation_index: number | null;
+  total_education_population: number | null;
+  bachelors_degree_holders: number | null;
+  masters_degree_holders: number | null;
+  doctorate_degree_holders: number | null;
+  avg_accountant_payroll: number | null;
+  public_to_private_ratio: number | null;
+  avg_commute_time: number | null;
+  poverty_rate: number | null;
+  vacancy_rate: number | null;
   top_firms: Array<{
     company_name: string;
     employee_count: number;
     follower_count: number;
     follower_ratio: number;
-  }>;
-  state_avg_income: number;
+  }> | null;
+  state_avg_income: number | null;
   adjacent_counties: Array<{
     county_name: string;
     population: number;
     median_income: number;
-  }>;
+  }> | null;
 }
 
 export default function MarketReport() {
@@ -56,11 +56,6 @@ export default function MarketReport() {
       if (error) {
         console.error('Error fetching comprehensive market data:', error);
         throw error;
-      }
-
-      if (!data) {
-        console.log('No market data found for:', { county, state });
-        return null;
       }
 
       return data as ComprehensiveMarketData;
@@ -117,11 +112,15 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Total Population</p>
-                <p className="text-2xl font-bold text-white">{marketData.total_population.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-white">
+                  {marketData.total_population?.toLocaleString() ?? 'N/A'}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Median Household Income</p>
-                <p className="text-2xl font-bold text-green-400">${marketData.median_household_income.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-green-400">
+                  ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -136,11 +135,15 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Median Gross Rent</p>
-                <p className="text-2xl font-bold text-white">${marketData.median_gross_rent.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-white">
+                  ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Vacancy Rate</p>
-                <p className="text-2xl font-bold text-white">{marketData.vacancy_rate.toFixed(1)}%</p>
+                <p className="text-2xl font-bold text-white">
+                  {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -155,12 +158,16 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Firms per 10k Population</p>
-                <p className="text-2xl font-bold text-white">{marketData.firms_per_10k_population.toFixed(1)}</p>
+                <p className="text-2xl font-bold text-white">
+                  {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Growth Rate</p>
                 <p className="text-2xl font-bold text-green-400">
-                  {marketData.growth_rate_percentage > 0 ? '+' : ''}{marketData.growth_rate_percentage.toFixed(1)}%
+                  {marketData.growth_rate_percentage ? 
+                    `${marketData.growth_rate_percentage > 0 ? '+' : ''}${marketData.growth_rate_percentage.toFixed(1)}%` 
+                    : 'N/A'}
                 </p>
               </div>
             </CardContent>
@@ -180,19 +187,25 @@ export default function MarketReport() {
               <div>
                 <p className="text-gray-400">Bachelor's Degree Holders</p>
                 <p className="text-xl font-bold text-white">
-                  {((marketData.bachelors_degree_holders / marketData.total_education_population) * 100).toFixed(1)}%
+                  {marketData.total_education_population && marketData.bachelors_degree_holders
+                    ? ((marketData.bachelors_degree_holders / marketData.total_education_population) * 100).toFixed(1)
+                    : 'N/A'}%
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Master's Degree Holders</p>
                 <p className="text-xl font-bold text-white">
-                  {((marketData.masters_degree_holders / marketData.total_education_population) * 100).toFixed(1)}%
+                  {marketData.total_education_population && marketData.masters_degree_holders
+                    ? ((marketData.masters_degree_holders / marketData.total_education_population) * 100).toFixed(1)
+                    : 'N/A'}%
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Doctorate Degree Holders</p>
                 <p className="text-xl font-bold text-white">
-                  {((marketData.doctorate_degree_holders / marketData.total_education_population) * 100).toFixed(1)}%
+                  {marketData.total_education_population && marketData.doctorate_degree_holders
+                    ? ((marketData.doctorate_degree_holders / marketData.total_education_population) * 100).toFixed(1)
+                    : 'N/A'}%
                 </p>
               </div>
             </CardContent>
@@ -208,15 +221,21 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Employed Population</p>
-                <p className="text-xl font-bold text-white">{marketData.employed_population.toLocaleString()}</p>
+                <p className="text-xl font-bold text-white">
+                  {marketData.employed_population?.toLocaleString() ?? 'N/A'}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Average Accountant Payroll</p>
-                <p className="text-xl font-bold text-green-400">${marketData.avg_accountant_payroll.toLocaleString()}</p>
+                <p className="text-xl font-bold text-green-400">
+                  ${marketData.avg_accountant_payroll?.toLocaleString() ?? 'N/A'}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Public/Private Sector Ratio</p>
-                <p className="text-xl font-bold text-white">{marketData.public_to_private_ratio.toFixed(2)}</p>
+                <p className="text-xl font-bold text-white">
+                  {marketData.public_to_private_ratio?.toFixed(2) ?? 'N/A'}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -234,15 +253,21 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Average Commute Time</p>
-                <p className="text-xl font-bold text-white">{marketData.avg_commute_time} minutes</p>
+                <p className="text-xl font-bold text-white">
+                  {marketData.avg_commute_time ? `${marketData.avg_commute_time} minutes` : 'N/A'}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Poverty Rate</p>
-                <p className="text-xl font-bold text-white">{marketData.poverty_rate.toFixed(1)}%</p>
+                <p className="text-xl font-bold text-white">
+                  {marketData.poverty_rate?.toFixed(1) ?? 'N/A'}%
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Market Saturation Index</p>
-                <p className="text-xl font-bold text-white">{marketData.market_saturation_index.toFixed(3)}</p>
+                <p className="text-xl font-bold text-white">
+                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -267,6 +292,9 @@ export default function MarketReport() {
                   </div>
                 </div>
               ))}
+              {(!marketData.top_firms || marketData.top_firms.length === 0) && (
+                <p className="text-gray-400">No firm data available</p>
+              )}
             </CardContent>
           </Card>
         </div>

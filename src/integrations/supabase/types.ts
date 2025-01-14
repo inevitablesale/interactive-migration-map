@@ -850,6 +850,36 @@ export type Database = {
           establishments_per_1000_population: number
         }[]
       }
+      get_comprehensive_county_data: {
+        Args: {
+          p_county_name: string
+          p_state_fp: string
+        }
+        Returns: {
+          total_population: number
+          median_household_income: number
+          median_gross_rent: number
+          median_home_value: number
+          employed_population: number
+          private_sector_accountants: number
+          public_sector_accountants: number
+          firms_per_10k_population: number
+          growth_rate_percentage: number
+          market_saturation_index: number
+          total_education_population: number
+          bachelors_degree_holders: number
+          masters_degree_holders: number
+          doctorate_degree_holders: number
+          avg_accountant_payroll: number
+          public_to_private_ratio: number
+          avg_commute_time: number
+          poverty_rate: number
+          vacancy_rate: number
+          top_firms: Json
+          state_avg_income: number
+          adjacent_counties: Json
+        }[]
+      }
       get_county_rankings: {
         Args: Record<PropertyKey, never>
         Returns: {
