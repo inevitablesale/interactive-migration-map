@@ -149,24 +149,28 @@ export default function Opportunities() {
       <div className="container mx-auto py-8">
         {/* Filters */}
         <Card className="bg-black/40 backdrop-blur-sm border-white/10 p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-6">
             <Filter className="w-5 h-5 text-white/60" />
             <h2 className="text-lg font-semibold text-white">Filters</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm text-white/60">State</label>
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-white/80">State</label>
               <Select
                 onValueChange={handleStateChange}
                 value={filters.state}
               >
-                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                <SelectTrigger className="h-12 bg-black/60 border-white/10 text-white ring-offset-black">
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-black/95 border-white/10 text-white">
                   {states?.map((state) => (
-                    <SelectItem key={state} value={state}>
+                    <SelectItem 
+                      key={state} 
+                      value={state}
+                      className="hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                    >
                       {state}
                     </SelectItem>
                   ))}
@@ -174,8 +178,8 @@ export default function Opportunities() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-white/60">Employee Count Range</label>
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-white/80">Employee Count Range</label>
               <Slider
                 defaultValue={[0, 100]}
                 max={100}
@@ -190,10 +194,10 @@ export default function Opportunities() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-white/60">Specialization</label>
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-white/80">Specialization</label>
               <Input
-                className="bg-white/5 border-white/10 text-white"
+                className="h-12 bg-black/60 border-white/10 text-white placeholder:text-white/40"
                 placeholder="Enter specialization"
                 onChange={(e) => setFilters(prev => ({ ...prev, specialization: e.target.value }))}
               />
