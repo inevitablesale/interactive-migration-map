@@ -63,21 +63,64 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
       // Update map layer with new data if map is loaded
       if (map.current && mapLoaded) {
+        // Create a GeoJSON source with the state data
+        const statesData = {
+          type: 'FeatureCollection',
+          features: statesWithDensity.map((state: any) => ({
+            type: 'Feature',
+            properties: {
+              firmDensity: state.firmDensity,
+              stateName: state.region,
+              totalFirms: state.total_firms,
+              population: state.population
+            },
+            geometry: state.geometry
+          }))
+        };
+
+        // Update the source data
+        if (map.current.getSource('states')) {
+          (map.current.getSource('states') as mapboxgl.GeoJSONSource).setData(statesData);
+        }
+
+        // Update the layer paint properties
         map.current.setPaintProperty('state-base', 'fill-extrusion-color', [
           'interpolate',
           ['linear'],
           ['get', 'firmDensity'],
-          0, '#FA0098',  // Low density - pink
-          20, '#94EC0E', // Low-medium density - green
-          40, '#FFF903', // Medium density - yellow
-          60, '#00FFE0', // Good density - cyan
-          80, '#037CFE'  // High density - blue
+          0, '#FA0098',  // Very Low (0-20) - Pink
+          20, '#94EC0E', // Low (20-40) - Light Green
+          40, '#FFF903', // Medium (40-60) - Yellow
+          60, '#00FFE0', // High (60-80) - Cyan
+          80, '#037CFE'  // Very High (80+) - Blue
         ]);
       }
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
   }, [type, toast, mapLoaded]);
+
+  const handleStateClick = async (stateId: string) => {
+    try {
+      const { data: stateInfo, error } = await supabase
+        .from('state_data')
+        .select('*')
+        .eq('STATEFP', stateId)
+        .single();
+
+      if (error) throw error;
+
+      setSelectedState(stateInfo);
+      setShowReportPanel(true);
+    } catch (error) {
+      console.error('Error fetching state data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch state details",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -127,11 +170,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
                 'interpolate',
                 ['linear'],
                 ['get', 'firmDensity'],
-                0, '#FA0098',  // Low density - pink
-                20, '#94EC0E', // Low-medium density - green
-                40, '#FFF903', // Medium density - yellow
-                60, '#00FFE0', // Good density - cyan
-                80, '#037CFE'  // High density - blue
+                0, '#FA0098',  // Very Low (0-20) - Pink
+                20, '#94EC0E', // Low (20-40) - Light Green
+                40, '#FFF903', // Medium (40-60) - Yellow
+                60, '#00FFE0', // High (60-80) - Cyan
+                80, '#037CFE'  // Very High (80+) - Blue
               ],
               'fill-extrusion-height': 20000,
               'fill-extrusion-opacity': 0.8
@@ -182,8 +225,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         if (e.features && e.features[0]) {
           const stateId = e.features[0].properties?.STATEFP;
           if (stateId) {
-            await updateAnalysisTable(stateId);
-            setShowReportPanel(true);
+            await handleStateClick(stateId);
           }
         }
       });
