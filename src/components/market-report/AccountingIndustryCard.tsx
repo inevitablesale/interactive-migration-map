@@ -99,13 +99,13 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
               </TooltipProvider>
             </div>
             {marketData.avg_accountant_payroll && (
-              <Badge className={`${getMetricBadge(marketData.avg_accountant_payroll * 1000, 'payroll').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(marketData.avg_accountant_payroll * 1000, 'payroll').label}
+              <Badge className={`${getMetricBadge(marketData.avg_accountant_payroll, 'payroll').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(marketData.avg_accountant_payroll, 'payroll').label}
               </Badge>
             )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll * 1000 || 0, 'money')}`}>
-            ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll * 1000).toLocaleString() : 'N/A'}
+          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
+            ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll).toLocaleString() : 'N/A'}
           </p>
         </div>
       </CardContent>
