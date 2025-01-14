@@ -17,7 +17,7 @@ export const useMarketReportData = (county: string | undefined, stateFips: strin
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
         .select('*')
-        .eq('countyname', county)
+        .eq('COUNTYNAME', county)
         .eq('statefp', stateFips)
         .maybeSingle();
 
@@ -59,7 +59,7 @@ export const useMarketReportData = (county: string | undefined, stateFips: strin
         income_rank: null,
         population_rank: null,
         rent_rank: null,
-        density_rank: rankingData.density_rank,
+        density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
         top_firms: [],
         state_avg_income: null,
