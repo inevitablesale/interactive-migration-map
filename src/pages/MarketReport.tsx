@@ -46,9 +46,9 @@ interface ComprehensiveMarketData {
   income_rank: number | null;
   population_rank: number | null;
   rent_rank: number | null;
-  top_firms: TopFirm[] | null;
+  top_firms: TopFirm[];
   state_avg_income: number | null;
-  adjacent_counties: AdjacentCounty[] | null;
+  adjacent_counties: AdjacentCounty[];
 }
 
 export default function MarketReport() {
@@ -115,11 +115,16 @@ export default function MarketReport() {
           return null;
         }
 
-        // Ensure proper typing of the response
+        // Type cast the JSON response to our expected types
+        const parsedData = data[0];
         const marketData: ComprehensiveMarketData = {
-          ...data[0],
-          top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms as TopFirm[] : [],
-          adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties as AdjacentCounty[] : []
+          ...parsedData,
+          top_firms: Array.isArray(parsedData.top_firms) 
+            ? (parsedData.top_firms as unknown as TopFirm[])
+            : [],
+          adjacent_counties: Array.isArray(parsedData.adjacent_counties)
+            ? (parsedData.adjacent_counties as unknown as AdjacentCounty[])
+            : []
         };
 
         console.log('Received market data:', marketData);
@@ -418,5 +423,4 @@ export default function MarketReport() {
         </div>
       </div>
     </div>
-  );
 }
