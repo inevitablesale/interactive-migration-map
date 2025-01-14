@@ -29,13 +29,31 @@ export function useMarketReportData(county?: string, state?: string) {
         if (!countyData) throw new Error("County not found");
 
         // Get firms in this county
-        const { data: firms, error: firmsError } = await supabase
+        const { data: firmsData, error: firmsError } = await supabase
           .from("canary_firms_data")
           .select("*")
           .eq("STATEFP", Number(stateFips.fips_code))
           .eq("COUNTYFP", countyData.COUNTYFP);
 
         if (firmsError) throw firmsError;
+
+        // Map the firms data to match our TopFirm type
+        const firms = firmsData?.map(firm => ({
+          company_name: firm["Company Name"] || "",
+          employee_count: firm.employeeCount || 0,
+          follower_count: firm.followerCount || 0,
+          follower_ratio: firm.followerCount && firm.employeeCount ? firm.followerCount / firm.employeeCount : 0,
+          logoResolutionResult: firm.logoResolutionResult,
+          originalCoverImage: firm.originalCoverImage,
+          primarySubtitle: firm["Primary Subtitle"],
+          employeeCountRangeLow: firm.employeeCountRangeLow,
+          employeeCountRangeHigh: firm.employeeCountRangeHigh,
+          foundedOn: firm.foundedOn?.toString(),
+          specialities: firm.specialities,
+          websiteUrl: firm.websiteUrl,
+          Location: firm.Location,
+          Summary: firm.Summary
+        }));
 
         // Calculate additional metrics
         const totalEducationPopulation = countyData.B15003_001E || 0;
