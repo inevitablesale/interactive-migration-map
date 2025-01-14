@@ -53,26 +53,26 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       // Transform the data to match ComprehensiveMarketData type
       const marketData: ComprehensiveMarketData = {
-        total_population: data.total_population,
-        median_household_income: data.median_household_income,
-        median_gross_rent: data.median_gross_rent,
-        median_home_value: data.median_home_value,
-        employed_population: data.employed_population,
-        private_sector_accountants: data.private_sector_accountants,
-        public_sector_accountants: data.public_sector_accountants,
+        total_population: data.B01001_001E,
+        median_household_income: data.B19013_001E,
+        median_gross_rent: data.B25064_001E,
+        median_home_value: data.B25077_001E,
+        employed_population: data.B23025_004E,
+        private_sector_accountants: data.C24060_004E,
+        public_sector_accountants: data.C24060_007E,
         firms_per_10k_population: data.firms_per_10k,
         growth_rate_percentage: data.population_growth_rate,
         market_saturation_index: null,
-        total_education_population: data.education_population,
-        bachelors_degree_holders: data.bachelors_holders,
-        masters_degree_holders: data.masters_holders,
-        doctorate_degree_holders: data.doctorate_holders,
-        avg_accountant_payroll: data.avg_accountant_payroll,
-        public_to_private_ratio: data.public_private_ratio,
-        avg_commute_time: data.total_commute_time ? data.total_commute_time / (12 * 20) : null,
+        total_education_population: data.B15003_001E,
+        bachelors_degree_holders: data.B15003_022E,
+        masters_degree_holders: data.B15003_023E,
+        doctorate_degree_holders: data.B15003_025E,
+        avg_accountant_payroll: data.PAYANN,
+        public_to_private_ratio: data.C24060_007E / (data.C24060_004E || 1),
+        avg_commute_time: data.B08303_001E ? data.B08303_001E / (12 * 20) : null,
         commute_rank: null,
-        poverty_rate: data.poverty_count && data.poverty_population 
-          ? (data.poverty_count / data.poverty_population) * 100 
+        poverty_rate: data.B17001_002E && data.B17001_001E 
+          ? (data.B17001_002E / data.B17001_001E) * 100 
           : null,
         poverty_rank: null,
         vacancy_rate: data.vacancy_rate,
@@ -82,7 +82,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         rent_rank: data.rent_rank,
         density_rank: data.firm_density_rank,
         growth_rank: data.growth_rank,
-        top_firms: null,
+        top_firms: data.top_firms,
         state_avg_income: null,
         adjacent_counties: null
       };
