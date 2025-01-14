@@ -60,19 +60,24 @@ export default function MarketReport() {
   const { data: stateFips } = useQuery({
     queryKey: ['stateFips', state],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_fips_codes')
-        .select('fips_code')
-        .eq('state', state)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('state_fips_codes')
+          .select('fips_code')
+          .eq('state', state)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching state FIPS:', error);
-        toast.error('Error fetching state data');
-        throw error;
+        if (error) {
+          console.error('Error fetching state FIPS:', error);
+          toast.error('Error fetching state data');
+          throw error;
+        }
+
+        return data?.fips_code;
+      } catch (err) {
+        console.error('Error in stateFips query:', err);
+        throw err;
       }
-
-      return data?.fips_code;
     },
   });
 
@@ -83,66 +88,72 @@ export default function MarketReport() {
       
       console.log('Fetching data for:', { county, stateFips });
       
-      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-        p_county_name: county,
-        p_state_fp: stateFips
-      });
+      try {
+        const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
+          p_county_name: county,
+          p_state_fp: stateFips
+        });
 
-      if (error) {
-        console.error('Error fetching comprehensive market data:', error);
-        toast.error('Error fetching market data');
-        throw error;
+        if (error) {
+          console.error('Error fetching comprehensive market data:', error);
+          toast.error('Error fetching market data');
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          console.log('No data found for:', { county, stateFips });
+          toast.error('No data found for this location');
+          return null;
+        }
+
+        // Transform the data with explicit typing
+        const transformedData: ComprehensiveMarketData = {
+          total_population: data[0].total_population,
+          median_household_income: data[0].median_household_income,
+          median_gross_rent: data[0].median_gross_rent,
+          median_home_value: data[0].median_home_value,
+          employed_population: data[0].employed_population,
+          private_sector_accountants: data[0].private_sector_accountants,
+          public_sector_accountants: data[0].public_sector_accountants,
+          firms_per_10k_population: data[0].firms_per_10k_population,
+          growth_rate_percentage: data[0].growth_rate_percentage,
+          market_saturation_index: data[0].market_saturation_index,
+          total_education_population: data[0].total_education_population,
+          bachelors_degree_holders: data[0].bachelors_degree_holders,
+          masters_degree_holders: data[0].masters_degree_holders,
+          doctorate_degree_holders: data[0].doctorate_degree_holders,
+          avg_accountant_payroll: data[0].avg_accountant_payroll,
+          public_to_private_ratio: data[0].public_to_private_ratio,
+          avg_commute_time: data[0].avg_commute_time,
+          commute_rank: data[0].commute_rank,
+          poverty_rate: data[0].poverty_rate,
+          poverty_rank: data[0].poverty_rank,
+          vacancy_rate: data[0].vacancy_rate,
+          vacancy_rank: data[0].vacancy_rank,
+          income_rank: data[0].income_rank,
+          population_rank: data[0].population_rank,
+          rent_rank: data[0].rent_rank,
+          density_rank: data[0].density_rank,
+          growth_rank: data[0].growth_rank,
+          top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms.map((firm: any) => ({
+            company_name: firm.company_name,
+            employee_count: firm.employee_count,
+            follower_count: firm.follower_count,
+            follower_ratio: firm.follower_ratio
+          })) : [],
+          state_avg_income: data[0].state_avg_income,
+          adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties.map((county: any) => ({
+            county_name: county.county_name,
+            population: county.population,
+            median_income: county.median_income
+          })) : []
+        };
+
+        return transformedData;
+      } catch (err) {
+        console.error('Error in marketData query:', err);
+        throw err;
       }
-
-      if (!data || data.length === 0) {
-        toast.error('No data found for this location');
-        return null;
-      }
-
-      // Transform the data without using spread operator
-      const transformedData: ComprehensiveMarketData = {
-        total_population: data[0].total_population,
-        median_household_income: data[0].median_household_income,
-        median_gross_rent: data[0].median_gross_rent,
-        median_home_value: data[0].median_home_value,
-        employed_population: data[0].employed_population,
-        private_sector_accountants: data[0].private_sector_accountants,
-        public_sector_accountants: data[0].public_sector_accountants,
-        firms_per_10k_population: data[0].firms_per_10k_population,
-        growth_rate_percentage: data[0].growth_rate_percentage,
-        market_saturation_index: data[0].market_saturation_index,
-        total_education_population: data[0].total_education_population,
-        bachelors_degree_holders: data[0].bachelors_degree_holders,
-        masters_degree_holders: data[0].masters_degree_holders,
-        doctorate_degree_holders: data[0].doctorate_degree_holders,
-        avg_accountant_payroll: data[0].avg_accountant_payroll,
-        public_to_private_ratio: data[0].public_to_private_ratio,
-        avg_commute_time: data[0].avg_commute_time,
-        commute_rank: data[0].commute_rank,
-        poverty_rate: data[0].poverty_rate,
-        poverty_rank: data[0].poverty_rank,
-        vacancy_rate: data[0].vacancy_rate,
-        vacancy_rank: data[0].vacancy_rank,
-        income_rank: data[0].income_rank,
-        population_rank: data[0].population_rank,
-        rent_rank: data[0].rent_rank,
-        density_rank: data[0].density_rank,
-        growth_rank: data[0].growth_rank,
-        top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms.map((firm: any) => ({
-          company_name: firm.company_name,
-          employee_count: firm.employee_count,
-          follower_count: firm.follower_count,
-          follower_ratio: firm.follower_ratio
-        })) : [],
-        state_avg_income: data[0].state_avg_income,
-        adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties.map((county: any) => ({
-          county_name: county.county_name,
-          population: county.population,
-          median_income: county.median_income
-        })) : []
-      };
-
-      return transformedData;
     },
     enabled: !!stateFips,
     retry: 1,
