@@ -243,12 +243,18 @@ export default function MarketReport() {
                 <p className="text-gray-400">Firms per 10k Population</p>
                 <p className="text-2xl font-bold text-white">
                   {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.firms_density_rank)}
+                  </span>
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Growth Rate</p>
                 <p className={`text-xl font-bold ${marketData.growth_rate_percentage && marketData.growth_rate_percentage < 0 ? 'text-red-500' : 'text-white'}`}>
                   {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
+                  <span className="text-sm ml-2 text-gray-400">
+                    {formatRank(marketData.growth_rank)}
+                  </span>
                 </p>
               </div>
             </CardContent>
@@ -389,4 +395,3 @@ export default function MarketReport() {
     </div>
   );
 }
-
