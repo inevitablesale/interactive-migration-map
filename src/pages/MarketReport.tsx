@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid } from "lucide-react";
+import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
@@ -156,67 +156,88 @@ export default function MarketReport() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {marketData.top_firms.map((firm, index) => (
-                  <Card key={index} className="bg-black/20 border-white/5">
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src={firm.logoResolutionResult || firm.originalCoverImage || DEFAULT_IMAGE}
-                            alt={`${firm.company_name} logo`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-white font-medium truncate">{firm.company_name}</h3>
+                  <Card key={index} className="bg-black/20 border-white/5 overflow-hidden group hover:border-white/20 transition-all duration-200">
+                    <CardContent className="p-0">
+                      <div className="relative h-32 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 z-10"></div>
+                        <img
+                          src={firm.logoResolutionResult || firm.originalCoverImage || DEFAULT_IMAGE}
+                          alt={`${firm.company_name} cover`}
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                          <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
                           {firm.primarySubtitle && (
-                            <p className="text-sm text-gray-400 truncate">{firm.primarySubtitle}</p>
+                            <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
                           )}
-                          <div className="mt-2 space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-400">Employees</span>
-                              <span className="text-sm text-white">
-                                {firm.employeeCountRangeLow && firm.employeeCountRangeHigh
-                                  ? `${firm.employeeCountRangeLow}-${firm.employeeCountRangeHigh}`
-                                  : firm.employee_count}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-400">Followers</span>
-                              <span className="text-sm text-white">{firm.follower_count.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-400">Follower Ratio</span>
-                              <span className={`text-sm ${getMetricColor(firm.follower_ratio, 'density')}`}>
-                                {firm.follower_ratio.toFixed(1)}
-                              </span>
-                            </div>
-                            {firm.foundedOn && (
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-400">Founded</span>
-                                <span className="text-sm text-white">{firm.foundedOn}</span>
-                              </div>
-                            )}
-                          </div>
                         </div>
                       </div>
-                      {firm.specialities && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-400">Specialization</p>
-                          <p className="text-sm text-white mt-1">{firm.specialities}</p>
+                      <div className="p-4 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center text-gray-400 text-sm">
+                              <Users2 className="w-4 h-4 mr-1" />
+                              <span>Employees</span>
+                            </div>
+                            <p className="text-white font-medium">
+                              {firm.employeeCountRangeLow && firm.employeeCountRangeHigh
+                                ? `${firm.employeeCountRangeLow}-${firm.employeeCountRangeHigh}`
+                                : firm.employee_count}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center text-gray-400 text-sm">
+                              <Users className="w-4 h-4 mr-1" />
+                              <span>Followers</span>
+                            </div>
+                            <p className="text-white font-medium">{firm.follower_count.toLocaleString()}</p>
+                          </div>
                         </div>
-                      )}
-                      {firm.websiteUrl && (
-                        <div className="mt-4">
-                          <a
-                            href={firm.websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-400 hover:text-blue-300 truncate block"
-                          >
-                            {firm.websiteUrl}
-                          </a>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center text-gray-400 text-sm">
+                            <Briefcase className="w-4 h-4 mr-1" />
+                            <span>Follower Ratio</span>
+                          </div>
+                          <p className={`font-medium ${getMetricColor(firm.follower_ratio, 'density')}`}>
+                            {firm.follower_ratio.toFixed(1)}
+                          </p>
                         </div>
-                      )}
+
+                        {firm.foundedOn && (
+                          <div className="space-y-1">
+                            <div className="flex items-center text-gray-400 text-sm">
+                              <Calendar className="w-4 h-4 mr-1" />
+                              <span>Founded</span>
+                            </div>
+                            <p className="text-white font-medium">{firm.foundedOn}</p>
+                          </div>
+                        )}
+
+                        {firm.specialities && (
+                          <div className="space-y-1">
+                            <p className="text-gray-400 text-sm flex items-center">
+                              <Star className="w-4 h-4 mr-1" />
+                              Specialization
+                            </p>
+                            <p className="text-white text-sm">{firm.specialities}</p>
+                          </div>
+                        )}
+
+                        {firm.websiteUrl && (
+                          <div className="pt-2 border-t border-white/5">
+                            <a
+                              href={firm.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center text-blue-400 hover:text-blue-300 text-sm group"
+                            >
+                              <Globe className="w-4 h-4 mr-1" />
+                              <span className="truncate">{firm.websiteUrl}</span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
