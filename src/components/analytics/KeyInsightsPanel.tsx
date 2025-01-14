@@ -105,7 +105,7 @@ export function KeyInsightsPanel() {
                 <DialogTrigger asChild>
                   <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
                     <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Top 10</span>
+                    <span className="text-xs">View Top Regions</span>
                   </button>
                 </DialogTrigger>
                 <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
@@ -114,22 +114,21 @@ export function KeyInsightsPanel() {
                   </DialogHeader>
                   <div className="mt-4">
                     <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
+                      <div className="grid grid-cols-4 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
                         <div>Rank</div>
-                        <div className="col-span-2">Region</div>
+                        <div>Region</div>
                         <div>Growth Rate</div>
                         <div>Total Moves</div>
-                        <div>Move %</div>
                       </div>
                       {growthMetrics?.map((region, index) => (
                         <div 
                           key={`${region.county_name}-${region.state}-${index}`}
-                          className="grid grid-cols-6 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                         >
                           <div className="flex items-center">
                             <span className="text-lg font-bold text-accent">#{index + 1}</span>
                           </div>
-                          <div className="col-span-2">
+                          <div>
                             <p className="font-medium">{region.county_name}</p>
                             <p className="text-sm text-white/60">{region.state}</p>
                           </div>
@@ -138,9 +137,6 @@ export function KeyInsightsPanel() {
                           </div>
                           <div className="flex items-center">
                             {region.total_moves.toLocaleString()}
-                          </div>
-                          <div className="flex items-center">
-                            {region.growth_rate_percentage.toFixed(1)}%
                           </div>
                         </div>
                       ))}
@@ -212,7 +208,7 @@ export function KeyInsightsPanel() {
                           </div>
                           <div>
                             <p className="font-medium">{market.county_name}</p>
-                            <p className="text-sm text-white/60">{market.state_fp}</p>
+                            <p className="text-sm text-white/60">State {market.state_fp}</p>
                           </div>
                           <div className="flex items-center">
                             {market.total_establishments.toLocaleString()}
