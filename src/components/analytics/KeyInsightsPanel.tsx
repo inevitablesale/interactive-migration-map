@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, Users2, Home, GraduationCap } from "lucide-react";
+import { 
+  TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
+  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins
+} from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
@@ -15,7 +18,6 @@ const formatPopulation = (value: number) => {
   return `${(value / 1000000).toFixed(1)}M`;
 };
 
-// Format density with proper decimal places
 const formatDensity = (value: number) => {
   return value.toFixed(1);
 };
@@ -116,6 +118,33 @@ export function KeyInsightsPanel() {
     queryKey: ['educationAgeAnalysis'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_education_age_analysis');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: futureSaturationData } = useQuery({
+    queryKey: ['futureSaturationRisk'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_future_saturation_risk');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: emergingTalentData } = useQuery({
+    queryKey: ['emergingTalentMarkets'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_emerging_talent_markets');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: affordableTalentData } = useQuery({
+    queryKey: ['affordableTalentHubs'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_affordable_talent_hubs');
       if (error) throw error;
       return data;
     }
@@ -627,11 +656,225 @@ export function KeyInsightsPanel() {
     },
   ];
 
+  const newInsights = [
+    {
+      title: "Future Saturation Risk",
+      value: futureSaturationData?.[0] ? 
+        `${futureSaturationData[0].projected_firm_density.toFixed(1)} per 10k` : 
+        "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {futureSaturationData?.[0] ? (
+            <>
+              {`${futureSaturationData[0].county_name}, ${(futureSaturationData[0].firm_growth_rate).toFixed(1)}% growth`}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <div className="space-y-2 p-1">
+                      <p className="text-sm font-medium text-white">Saturation Details:</p>
+                      <div className="text-sm text-gray-300">
+                        <p>Current Density: {futureSaturationData[0].current_firm_density.toFixed(1)} per 10k</p>
+                        <p>Population Growth: {(futureSaturationData[0].population_growth_rate * 100).toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span className="text-xs">View Projections</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Future Market Saturation Analysis</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-4">
+                    {futureSaturationData?.map((region, index) => (
+                      <div key={index} className="bg-white/5 p-4 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-medium">{region.county_name}</h4>
+                            <p className="text-sm text-gray-400">
+                              Current Density: {region.current_firm_density.toFixed(1)} per 10k
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">
+                              {region.projected_firm_density.toFixed(1)} per 10k
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              Growth: {(region.firm_growth_rate * 100).toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data..."
+          )}
+        </div>
+      ),
+      icon: ChartBarIcon,
+    },
+    {
+      title: "Emerging Talent Markets",
+      value: emergingTalentData?.[0] ? 
+        `${emergingTalentData[0].education_rate_percent.toFixed(1)}%` : 
+        "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {emergingTalentData?.[0] ? (
+            <>
+              {`${emergingTalentData[0].county_name}, ${emergingTalentData[0].total_educated.toLocaleString()} educated professionals`}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <div className="space-y-2 p-1">
+                      <p className="text-sm font-medium text-white">Education Details:</p>
+                      <div className="text-sm text-gray-300">
+                        <p>Education Rate: {emergingTalentData[0].education_rate_percent.toFixed(1)}%</p>
+                        <p>Growth Rate: {emergingTalentData[0].growth_rate.toFixed(1)}%</p>
+                        <p>Median Age: {emergingTalentData[0].median_age}</p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span className="text-xs">View Markets</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Emerging Talent Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-4">
+                    {emergingTalentData?.map((market, index) => (
+                      <div key={index} className="bg-white/5 p-4 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-medium">{market.county_name}</h4>
+                            <p className="text-sm text-gray-400">
+                              {market.total_educated.toLocaleString()} educated professionals
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">
+                              {market.education_rate_percent.toFixed(1)}%
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              Growth: {market.growth_rate.toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing talent data..."
+          )}
+        </div>
+      ),
+      icon: BookOpen,
+    },
+    {
+      title: "Affordable Talent Hubs",
+      value: affordableTalentData?.[0] ? 
+        `$${affordableTalentData[0].median_rent.toLocaleString()}` : 
+        "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {affordableTalentData?.[0] ? (
+            <>
+              {`${affordableTalentData[0].county_name}, ${affordableTalentData[0].accountant_density.toFixed(1)} accountants per 10k`}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <div className="space-y-2 p-1">
+                      <p className="text-sm font-medium text-white">Hub Details:</p>
+                      <div className="text-sm text-gray-300">
+                        <p>Median Rent: ${affordableTalentData[0].median_rent.toLocaleString()}</p>
+                        <p>Vacancy Rate: {affordableTalentData[0].vacancy_rate.toFixed(1)}%</p>
+                        <p>Affordability Score: {affordableTalentData[0].affordability_score.toFixed(1)}</p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
+                    <ArrowUpRight className="h-4 w-4" />
+                    <span className="text-xs">View Hubs</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Affordable Talent Hubs</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-4">
+                    {affordableTalentData?.map((hub, index) => (
+                      <div key={index} className="bg-white/5 p-4 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-medium">{hub.county_name}</h4>
+                            <p className="text-sm text-gray-400">
+                              {hub.accountant_density.toFixed(1)} accountants per 10k
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold">
+                              ${hub.median_rent.toLocaleString()}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              Score: {hub.affordability_score.toFixed(1)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing hub data..."
+          )}
+        </div>
+      ),
+      icon: Coins,
+    },
+  ];
+
+  const allInsights = [...insights, ...newInsights];
+
   return (
     <section className="space-y-6">
       <h2 className="text-3xl font-bold">Market Insights at a Glance</h2>
       <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {insights.map((insight) => (
+        {allInsights.map((insight) => (
           <Card
             key={insight.title}
             className="p-6 bg-black/40 backdrop-blur-md border-white/10"

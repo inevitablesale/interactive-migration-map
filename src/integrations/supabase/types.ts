@@ -818,6 +818,16 @@ export type Database = {
       }
     }
     Functions: {
+      get_affordable_talent_hubs: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          median_rent: number
+          accountant_density: number
+          vacancy_rate: number
+          affordability_score: number
+        }[]
+      }
       get_competitive_analysis: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -866,6 +876,16 @@ export type Database = {
           firm_count: number
         }[]
       }
+      get_emerging_talent_markets: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          education_rate_percent: number
+          total_educated: number
+          education_growth_rate: number
+          median_age: number
+        }[]
+      }
       get_employee_rent_analysis: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -905,6 +925,16 @@ export type Database = {
           employee_count: number
           follower_count: number
           followers_per_employee: number
+        }[]
+      }
+      get_future_saturation_risk: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          current_firm_density: number
+          projected_firm_density: number
+          firm_growth_rate: number
+          population_growth_rate: number
         }[]
       }
       get_growth_strategy_analysis: {
