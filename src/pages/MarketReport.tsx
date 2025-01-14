@@ -141,6 +141,30 @@ export default function MarketReport() {
     );
   };
 
+  const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation') => {
+    switch(type) {
+      case 'growth':
+        if (value >= 5) return 'text-green-400';
+        if (value >= 0) return 'text-yellow-400';
+        return 'text-red-400';
+      case 'density':
+        if (value >= 2) return 'text-green-400';
+        if (value >= 1) return 'text-yellow-400';
+        return 'text-red-400';
+      case 'saturation':
+        if (value <= 0.3) return 'text-green-400';
+        if (value <= 0.5) return 'text-yellow-400';
+        return 'text-red-400';
+      default:
+        return 'text-white';
+    }
+  };
+
+  const calculateAccountantsPerFirm = (private_accountants: number, public_accountants: number, total_firms: number) => {
+    if (!total_firms) return 0;
+    return ((private_accountants + public_accountants) / total_firms).toFixed(1);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
@@ -165,9 +189,14 @@ export default function MarketReport() {
     );
   }
 
+  const accountantsPerFirm = calculateAccountantsPerFirm(
+    marketData.private_sector_accountants || 0,
+    marketData.public_sector_accountants || 0,
+    marketData.firms_per_10k_population ? (marketData.firms_per_10k_population * marketData.total_population / 10000) : 0
+  );
+
   return (
     <div className="min-h-screen bg-[#222222] p-8">
-      <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <Button onClick={() => navigate(-1)} variant="outline" className="text-white mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -179,7 +208,7 @@ export default function MarketReport() {
           <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
               <CardTitle className="flex items-center text-white">
@@ -230,31 +259,42 @@ export default function MarketReport() {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 backdrop-blur-md border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                Market Dynamics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-gray-400">Firms per 10k Population</p>
-                <p className="text-2xl font-bold text-white">
-                  {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
-                  {formatRank(marketData.firms_density_rank)}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400">Growth Rate</p>
-                <p className={`text-xl font-bold ${marketData.growth_rate_percentage && marketData.growth_rate_percentage < 0 ? 'text-red-500' : 'text-white'}`}>
-                  {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
-                  {formatRank(marketData.growth_rank)}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="bg-black/40 backdrop-blur-md border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center text-white">
+              <TrendingUp className="w-5 h-5 mr-2" />
+              Market Dynamics
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-gray-400">Firms per 10k Population</p>
+              <p className={`text-2xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
+                {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-400">Growth Rate</p>
+              <p className={`text-2xl font-bold ${getMetricColor(marketData.growth_rate_percentage || 0, 'growth')}`}>
+                {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-400">Market Saturation Index</p>
+              <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
+                {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
+              </p>
+              <p className="text-sm text-gray-400">Accountants per Population</p>
+            </div>
+            <div>
+              <p className="text-gray-400">Accountants per Firm</p>
+              <p className="text-2xl font-bold text-white">
+                {accountantsPerFirm}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
