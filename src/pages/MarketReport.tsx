@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase, Star, Search } from "lucide-react";
+import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase, Star, Search, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
@@ -95,7 +95,6 @@ export default function MarketReport() {
     }
   ];
 
-  // Filter and paginate firms
   const filteredFirms = marketData.top_firms?.filter(firm => 
     firm.company_name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
@@ -129,10 +128,8 @@ export default function MarketReport() {
       <div className="max-w-7xl mx-auto p-8">
         <ColorScaleLegend />
 
-        {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 space-y-6">
-            {/* Key Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <MarketMetricsCard
                 title="Population Overview"
@@ -151,18 +148,15 @@ export default function MarketReport() {
               />
             </div>
 
-            {/* Industry Analysis */}
             <AccountingIndustryCard marketData={marketData} />
           </div>
 
-          {/* Right Column */}
           <div className="space-y-6">
             <EducationDistributionCard marketData={marketData} />
             <EmploymentMetricsCard marketData={marketData} />
           </div>
         </div>
 
-        {/* Top Firms Section */}
         {marketData.top_firms && marketData.top_firms.length > 0 && (
           <Card className="bg-black/40 backdrop-blur-md border-white/10">
             <CardHeader>
@@ -197,11 +191,11 @@ export default function MarketReport() {
                           alt={`${firm.company_name} cover`}
                           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 z-20 space-y-1">
                           <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
                           <div className="flex items-center gap-2 text-gray-300 text-sm">
                             <MapPin className="w-4 h-4" />
-                            <span className="truncate">{firm.Location || firm.State}</span>
+                            <span className="truncate">{firm.Location || firm["State Name"]}</span>
                           </div>
                           {firm.primarySubtitle && (
                             <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
@@ -210,7 +204,7 @@ export default function MarketReport() {
                       </div>
                       <div className="p-4 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
+                          <div className="space-y-1 min-h-[60px]">
                             <div className="flex items-center text-gray-400 text-sm">
                               <Users2 className="w-4 h-4 mr-1" />
                               <span>Employees</span>
@@ -221,7 +215,7 @@ export default function MarketReport() {
                                 : firm.employee_count}
                             </p>
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-1 min-h-[60px]">
                             <div className="flex items-center text-gray-400 text-sm">
                               <Users className="w-4 h-4 mr-1" />
                               <span>Followers</span>
@@ -230,7 +224,7 @@ export default function MarketReport() {
                           </div>
                         </div>
 
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-h-[60px]">
                           <div className="flex items-center text-gray-400 text-sm">
                             <Briefcase className="w-4 h-4 mr-1" />
                             <span>Follower Ratio</span>
@@ -241,7 +235,7 @@ export default function MarketReport() {
                         </div>
 
                         {firm.foundedOn && (
-                          <div className="space-y-1">
+                          <div className="space-y-1 min-h-[60px]">
                             <div className="flex items-center text-gray-400 text-sm">
                               <Calendar className="w-4 h-4 mr-1" />
                               <span>Founded</span>
@@ -251,7 +245,7 @@ export default function MarketReport() {
                         )}
 
                         {firm.specialities && (
-                          <div className="space-y-1">
+                          <div className="space-y-1 min-h-[60px]">
                             <p className="text-gray-400 text-sm flex items-center">
                               <Star className="w-4 h-4 mr-1" />
                               Specialization
@@ -261,7 +255,7 @@ export default function MarketReport() {
                         )}
 
                         {firm.websiteUrl && (
-                          <div className="pt-2 border-t border-white/5">
+                          <div className="pt-2 border-t border-white/5 min-h-[40px]">
                             <a
                               href={firm.websiteUrl}
                               target="_blank"
