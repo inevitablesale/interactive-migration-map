@@ -71,12 +71,17 @@ const Map = () => {
       
       setActiveState(stateWithName);
       
+      // Create a simplified event payload with only necessary data
       const eventData = {
-        ...state,
+        STATEFP: state.STATEFP,
         displayName: stateName,
-        firmDensity: state.firmDensity
+        firmDensity: state.firmDensity,
+        EMP: state.EMP,
+        PAYANN: state.PAYANN,
+        ESTAB: state.ESTAB
       };
       
+      // Ensure the data is cloneable by stringifying and parsing
       const event = new CustomEvent('stateChanged', { 
         detail: JSON.parse(JSON.stringify(eventData))
       });
@@ -158,6 +163,7 @@ const Map = () => {
           (state.ESTAB / state.B01001_001E) * 10000 : 0
       }));
 
+      // Ensure the data is cloneable
       const serializedData = JSON.parse(JSON.stringify(statesWithDensity));
       setStateData(serializedData);
 
