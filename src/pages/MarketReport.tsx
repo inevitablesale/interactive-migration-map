@@ -168,28 +168,52 @@ export default function MarketReport() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {marketData.top_firms.slice(0, 6).map((firm, index) => (
                 <Card key={index} className="bg-black/40 backdrop-blur-md border-white/10 p-4">
-                  <div className="flex items-start gap-3">
-                    {firm.logoResolutionResult && (
-                      <img
-                        src={firm.logoResolutionResult}
-                        alt={firm.company_name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    )}
-                    <div>
-                      <h3 className="text-white font-medium">{firm.company_name}</h3>
-                      <p className="text-gray-400 text-sm">{firm.primarySubtitle}</p>
-                      <div className="flex items-center gap-4 mt-2">
-                        <div>
-                          <p className="text-xs text-gray-500">Employees</p>
-                          <p className="text-white">{firm.employee_count.toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Followers</p>
-                          <p className="text-white">{firm.follower_count.toLocaleString()}</p>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start gap-3">
+                      {firm.logoResolutionResult && (
+                        <img
+                          src={firm.logoResolutionResult}
+                          alt={firm.company_name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      )}
+                      <div>
+                        <h3 className="text-white font-medium">{firm.company_name}</h3>
+                        <p className="text-gray-400 text-sm">{firm.primarySubtitle}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <div>
+                            <p className="text-xs text-gray-500">Employees</p>
+                            <p className="text-white">{firm.employee_count.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Followers</p>
+                            <p className="text-white">{firm.follower_count.toLocaleString()}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
+                    {(firm.Location || firm.Summary || firm.specialities) && (
+                      <div className="border-t border-white/10 pt-3 mt-2">
+                        {firm.Location && (
+                          <div className="mb-2">
+                            <p className="text-xs text-gray-500">Location</p>
+                            <p className="text-gray-300 text-sm">{firm.Location}</p>
+                          </div>
+                        )}
+                        {firm.Summary && (
+                          <div className="mb-2">
+                            <p className="text-xs text-gray-500">Summary</p>
+                            <p className="text-gray-300 text-sm line-clamp-2">{firm.Summary}</p>
+                          </div>
+                        )}
+                        {firm.specialities && (
+                          <div>
+                            <p className="text-xs text-gray-500">Specialties</p>
+                            <p className="text-gray-300 text-sm line-clamp-2">{firm.specialities}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}

@@ -38,7 +38,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateData.fips_code)) // Convert string to number
+        .eq('STATEFP', stateData.fips_code) // Use string FIPS code directly
         .maybeSingle();
 
       if (rankingError) {
@@ -59,7 +59,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .from('canary_firms_data')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateData.fips_code)); // Convert string to number
+        .eq('STATEFP', stateData.fips_code); // Convert string to number
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
