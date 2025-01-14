@@ -28,7 +28,7 @@ export const MarketMetricsCard: React.FC<MarketMetricsCardProps> = ({ title, ico
       <CardContent className="space-y-4">
         {metrics.map((metric, index) => (
           <div key={index}>
-            <p className="text-gray-400">{metric.label}</p>
+            <p className="text-gray-400 h-12 flex items-center">{metric.label}</p>
             <div className="flex items-center justify-between">
               <p className={`text-2xl font-bold ${getMetricColor(Number(metric.value) || 0, metric.type)}`}>
                 {metric.value ?? 'N/A'}
