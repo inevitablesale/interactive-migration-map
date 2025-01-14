@@ -34,7 +34,7 @@ export const useMarketReportData = (county: string | undefined, stateFips: strin
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.B01001_001E,
+        total_population: rankingData.population,
         median_household_income: null,
         median_gross_rent: null,
         median_home_value: null,
@@ -42,7 +42,7 @@ export const useMarketReportData = (county: string | undefined, stateFips: strin
         private_sector_accountants: null,
         public_sector_accountants: null,
         firms_per_10k_population: rankingData.firms_per_10k,
-        growth_rate_percentage: rankingData.population_growth_rate,
+        growth_rate_percentage: rankingData.growth_rate,
         market_saturation_index: null,
         total_education_population: null,
         bachelors_degree_holders: null,

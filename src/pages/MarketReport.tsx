@@ -19,33 +19,9 @@ const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f
 const FIRMS_PER_PAGE = 6;
 
 export default function MarketReport() {
-  const { county, state } = useParams();
+  const { county, state: stateFips } = useParams();
   const navigate = useNavigate();
-  const [stateFips, setStateFips] = useState<string | undefined>();
   
-  useEffect(() => {
-    const getStateFips = async () => {
-      if (!state) return;
-      
-      const { data, error } = await supabase
-        .from('state_fips_codes')
-        .select('fips_code')
-        .eq('state', state)
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error fetching state FIPS:', error);
-        return;
-      }
-      
-      setStateFips(data?.fips_code);
-    };
-    
-    getStateFips();
-  }, [state]);
-
-  console.log('Current params:', { county, stateFips }); // Debug log
-
   // Format county name to ensure it ends with "County" if it doesn't already
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
   console.log('Formatted county name:', formattedCounty); // Debug log
@@ -155,7 +131,7 @@ export default function MarketReport() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white">
-                {county}, {state}
+                {county}, {stateFips}
               </h1>
               <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
             </div>
