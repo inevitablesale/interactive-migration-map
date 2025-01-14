@@ -6,43 +6,19 @@ import { toast } from "sonner";
 export const useMarketReportData = (county: string | undefined, state: string | undefined) => {
   console.log('useMarketReportData called with:', { county, state }); // Debug log
 
-  // Query for state FIPS code
-  const { data: stateFips } = useQuery({
-    queryKey: ['stateFips', state],
-    queryFn: async () => {
-      if (!state) return null;
-
-      const { data, error } = await supabase
-        .from('state_fips_codes')
-        .select('fips_code')
-        .eq('state', state)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching state FIPS:', error);
-        toast.error('Error fetching state data');
-        throw error;
-      }
-
-      console.log('State FIPS found:', data?.fips_code); // Debug log
-      return data?.fips_code;
-    },
-    enabled: !!state,
-  });
-
   // Query for market data using county_rankings view
   const { data: marketData, isLoading, error } = useQuery({
-    queryKey: ['comprehensiveMarketData', county, stateFips],
+    queryKey: ['comprehensiveMarketData', county, state],
     queryFn: async () => {
-      if (!stateFips || !county) return null;
+      if (!state || !county) return null;
 
-      console.log('Fetching market data for:', { county, stateFips }); // Debug log
+      console.log('Fetching market data for:', { county, state }); // Debug log
 
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
         .select('*')
         .eq('countyname', county)
-        .eq('statefp', stateFips)
+        .eq('statefp', state)
         .maybeSingle();
 
       if (rankingError) {
@@ -52,13 +28,13 @@ export const useMarketReportData = (county: string | undefined, state: string | 
       }
 
       if (!rankingData) {
-        console.log('No county data found for:', { county, stateFips }); // Debug log
+        console.log('No county data found for:', { county, state }); // Debug log
         return null;
       }
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.population,
+        total_population: rankingData.total_population,
         median_household_income: null,
         median_gross_rent: null,
         median_home_value: null,
@@ -92,7 +68,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
 
       return transformedData;
     },
-    enabled: !!stateFips && !!county,
+    enabled: !!state && !!county,
   });
 
   const hasMarketData = !!marketData;
