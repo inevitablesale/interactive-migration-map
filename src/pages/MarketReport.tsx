@@ -46,9 +46,9 @@ interface ComprehensiveMarketData {
   income_rank: number | null;
   population_rank: number | null;
   rent_rank: number | null;
-  top_firms: TopFirm[];
+  top_firms: TopFirm[] | null;
   state_avg_income: number | null;
-  adjacent_counties: AdjacentCounty[];
+  adjacent_counties: AdjacentCounty[] | null;
 }
 
 export default function MarketReport() {
@@ -58,89 +58,56 @@ export default function MarketReport() {
   const { data: stateFips } = useQuery({
     queryKey: ['stateFips', state],
     queryFn: async () => {
-      try {
-        console.log('Fetching FIPS code for state:', state);
-        const { data, error } = await supabase
-          .from('state_fips_codes')
-          .select('fips_code')
-          .eq('state', state)
-          .maybeSingle();
+      const { data, error } = await supabase
+        .from('state_fips_codes')
+        .select('fips_code')
+        .eq('state', state)
+        .single();
 
-        if (error) throw error;
-        if (!data) {
-          console.error('No FIPS code found for state:', state);
-          toast.error(`No data found for state: ${state}`);
-          return null;
-        }
-
-        console.log('Found FIPS code:', data.fips_code);
-        return data.fips_code;
-      } catch (err) {
-        console.error('Error in stateFips query:', err);
+      if (error) {
+        console.error('Error fetching state FIPS:', error);
         toast.error('Error fetching state data');
-        throw err;
+        throw error;
       }
+
+      return data.fips_code;
     },
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
   });
 
-  const { data: marketData, isLoading } = useQuery<ComprehensiveMarketData>({
+  const { data: marketData, isLoading } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       if (!stateFips) return null;
       
-      console.log('Fetching comprehensive data for:', { county, stateFips });
+      console.log('Fetching data for:', { county, stateFips });
       
-      try {
-        const { data, error } = await supabase.rpc(
-          'get_comprehensive_county_data',
-          {
-            p_county_name: county,
-            p_state_fp: stateFips
-          }
-        );
+      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
+        p_county_name: county,
+        p_state_fp: stateFips
+      });
 
-        if (error) {
-          console.error('Error fetching comprehensive market data:', error);
-          toast.error('Error fetching market data');
-          throw error;
-        }
-
-        if (!data || data.length === 0) {
-          console.error('No data found for:', { county, stateFips });
-          toast.error('No data found for this location');
-          return null;
-        }
-
-        // Parse and validate the JSON data
-        const rawData = data[0];
-        const marketData: ComprehensiveMarketData = {
-          ...rawData,
-          top_firms: Array.isArray(rawData.top_firms) 
-            ? rawData.top_firms.map((firm: any) => ({
-                company_name: firm.company_name || '',
-                employee_count: Number(firm.employee_count) || 0,
-                follower_count: Number(firm.follower_count) || 0,
-                follower_ratio: Number(firm.follower_ratio) || 0
-              }))
-            : [],
-          adjacent_counties: Array.isArray(rawData.adjacent_counties)
-            ? rawData.adjacent_counties.map((county: any) => ({
-                county_name: county.county_name || '',
-                population: Number(county.population) || 0,
-                median_income: Number(county.median_income) || 0
-              }))
-            : []
-        };
-
-        console.log('Processed market data:', marketData);
-        return marketData;
-      } catch (err) {
-        console.error('Error in marketData query:', err);
+      if (error) {
+        console.error('Error fetching comprehensive market data:', error);
         toast.error('Error fetching market data');
-        throw err;
+        throw error;
       }
+
+      if (!data || data.length === 0) {
+        toast.error('No data found for this location');
+        return null;
+      }
+
+      const rawData = data[0] as unknown;
+      const typedData = rawData as ComprehensiveMarketData;
+      
+      if (typedData.top_firms) {
+        typedData.top_firms = JSON.parse(JSON.stringify(typedData.top_firms));
+      }
+      if (typedData.adjacent_counties) {
+        typedData.adjacent_counties = JSON.parse(JSON.stringify(typedData.adjacent_counties));
+      }
+
+      return typedData;
     },
     enabled: !!stateFips,
     retry: 1,
@@ -156,8 +123,18 @@ export default function MarketReport() {
 
   const formatRank = (rank: number | null) => {
     if (!rank) return '';
+    
+    let color;
+    if (rank <= 33) {
+      color = '#22c55e'; // Good ranking (green)
+    } else if (rank <= 66) {
+      color = '#eab308'; // Average ranking (yellow)
+    } else {
+      color = '#ef4444'; // Poor ranking (red)
+    }
+    
     return (
-      <span className="text-sm ml-2 text-gray-400">
+      <span className="text-sm ml-2" style={{ color }}>
         (Rank: {rank.toLocaleString()})
       </span>
     );
@@ -302,6 +279,12 @@ export default function MarketReport() {
                   {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
                 </p>
               </div>
+              <div>
+                <p className="text-gray-400">Market Saturation Index</p>
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
+                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -397,6 +380,12 @@ export default function MarketReport() {
                   <span className="text-sm ml-2 text-gray-400">
                     {formatRank(marketData.poverty_rank)}
                   </span>
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400">Market Saturation Index</p>
+                <p className="text-xl font-bold text-white">
+                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
                 </p>
               </div>
             </CardContent>
