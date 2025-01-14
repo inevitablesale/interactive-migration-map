@@ -65,11 +65,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           'interpolate',
           ['linear'],
           ['coalesce', ['get', 'density'], 0],
-          0, '#FA0098',
-          20, '#94EC0E',
-          40, '#FFF903',
-          60, '#00FFE0',
-          80, '#037CFE'
+          2.5, '#FA0098',  // Minimum density observed
+          3.5, '#94EC0E',  // Low-medium density
+          4.5, '#FFF903',  // Medium density
+          5.5, '#00FFE0',  // Medium-high density
+          6.5, '#037CFE'   // Maximum density observed
         ]);
       }
     } catch (error) {
@@ -121,11 +121,11 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
               'interpolate',
               ['linear'],
               ['coalesce', ['get', 'density'], 0],
-              0, '#FA0098',
-              20, '#94EC0E',
-              40, '#FFF903',
-              60, '#00FFE0',
-              80, '#037CFE'
+              2.5, '#FA0098',  // Minimum density observed
+              3.5, '#94EC0E',  // Low-medium density
+              4.5, '#FFF903',  // Medium density
+              5.5, '#00FFE0',  // Medium-high density
+              6.5, '#037CFE'   // Maximum density observed
             ],
             'fill-opacity': 0.8
           }
@@ -170,23 +170,23 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded" style={{ backgroundColor: '#037CFE' }} />
-            <span className="text-white text-xs">Very High (80+)</span>
+            <span className="text-white text-xs">Very High (5.5+)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded" style={{ backgroundColor: '#00FFE0' }} />
-            <span className="text-white text-xs">High (60-80)</span>
+            <span className="text-white text-xs">High (4.5-5.5)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFF903' }} />
-            <span className="text-white text-xs">Medium (40-60)</span>
+            <span className="text-white text-xs">Medium (3.5-4.5)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded" style={{ backgroundColor: '#94EC0E' }} />
-            <span className="text-white text-xs">Low (20-40)</span>
+            <span className="text-white text-xs">Low (2.5-3.5)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-            <span className="text-white text-xs">Very Low (0-20)</span>
+            <span className="text-white text-xs">Very Low (<2.5)</span>
           </div>
         </div>
       </div>
