@@ -27,9 +27,6 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
   // Calculate total number of accountants (private + public sector)
   const totalAccountants = (marketData.private_sector_accountants || 0) + (marketData.public_sector_accountants || 0);
 
-  // Calculate average payroll per firm using PAYANN directly
-  const avgPayrollPerFirm = marketData.avg_accountant_payroll || 0;
-
   // Calculate average salary per employee using PAYANN / total accountants
   const avgSalaryPerEmployee = marketData.avg_accountant_payroll && totalAccountants > 0
     ? Math.round(marketData.avg_accountant_payroll / totalAccountants)
@@ -92,14 +89,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {avgPayrollPerFirm && (
-              <Badge className={`${getMetricBadge(avgPayrollPerFirm, 'payroll').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(avgPayrollPerFirm, 'payroll').label}
+            {marketData.avg_accountant_payroll && (
+              <Badge className={`${getMetricBadge(marketData.avg_accountant_payroll, 'payroll').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(marketData.avg_accountant_payroll, 'payroll').label}
               </Badge>
             )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(avgPayrollPerFirm || 0, 'money')}`}>
-            {avgPayrollPerFirm ? formatCurrency(avgPayrollPerFirm) : 'N/A'}
+          <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
+            {marketData.avg_accountant_payroll ? formatCurrency(marketData.avg_accountant_payroll) : 'N/A'}
           </p>
         </div>
 
