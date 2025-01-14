@@ -44,7 +44,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateFips)
-        .maybeSingle();
+        .single(); // Use single() instead of maybeSingle() to get exactly one row
 
       if (countyError) {
         console.error('Error fetching market data:', countyError);
@@ -65,7 +65,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         .from('canary_firms_data')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateFips))
+        .eq('STATEFP', stateFips)
         .order('followerCount', { ascending: false });
 
       if (firmsError) {
