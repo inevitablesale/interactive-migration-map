@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GripHorizontal, X, Lock, TrendingUp, Users, Building2 } from "lucide-react";
+import { GripHorizontal, X, Lock, TrendingUp, Users, Building2, DollarSign, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ interface StateData {
   state_name?: string;
   growth_rate?: number;
   firm_density?: number;
+  employment_rate?: number;
 }
 
 const fetchStateData = async (stateFp: string) => {
@@ -45,12 +46,17 @@ const fetchStateData = async (stateFp: string) => {
 
   if (trendsError) throw trendsError;
 
+  // Calculate employment rate
+  const employmentRate = metrics.B23025_004E && metrics.EMP ? 
+    (metrics.EMP / metrics.B23025_004E) * 100 : null;
+
   return {
     ...metrics,
     state_name: stateData.state,
     growth_rate: trends.growth_rate,
     firm_density: metrics.ESTAB && metrics.B23025_004E ? 
-      (metrics.ESTAB / metrics.B23025_004E) * 10000 : 0
+      (metrics.ESTAB / metrics.B23025_004E) * 10000 : 0,
+    employment_rate: employmentRate
   };
 };
 
@@ -64,6 +70,11 @@ const formatNumber = (value: string | number | null) => {
 const formatPercentage = (value: number | null) => {
   if (value === null) return 'N/A';
   return `${value.toFixed(1)}%`;
+};
+
+const formatCurrency = (value: number | null) => {
+  if (value === null) return 'N/A';
+  return `$${new Intl.NumberFormat('en-US').format(value)}`;
 };
 
 export function ComparisonTool() {
@@ -143,7 +154,12 @@ export function ComparisonTool() {
               (value) => value ? formatNumber(value.toFixed(2)) : 'N/A')}
             {renderMetricComparison('growth_rate', 'Growth Rate', <TrendingUp className="h-4 w-4" />, 
               (value) => formatPercentage(value))}
-            {renderMetricComparison('ESTAB', 'Total Firms', <Users className="h-4 w-4" />)}
+            {renderMetricComparison('B19013_001E', 'Median Income', <DollarSign className="h-4 w-4" />,
+              formatCurrency)}
+            {renderMetricComparison('employment_rate', 'Employment Rate', <Users className="h-4 w-4" />,
+              formatPercentage)}
+            {renderMetricComparison('B25077_001E', 'Median Home Value', <Home className="h-4 w-4" />,
+              formatCurrency)}
           </div>
         ) : (
           <div className="space-y-2">
