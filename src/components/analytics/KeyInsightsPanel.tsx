@@ -36,23 +36,23 @@ export function KeyInsightsPanel() {
         ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
         : "Loading...",
       insight: (
-        <div className="flex items-center gap-2 text-sm text-gray-700">
+        <div className="flex items-center gap-2 text-sm text-gray-400">
           {topGrowthRegion ? (
             <>
               {`${topGrowthRegion.growth_rate_percentage}% of national moves, ${topGrowthRegion.total_moves.toLocaleString()} total moves`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-600 hover:text-gray-500" />
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-[300px]">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Move-in Distribution:</p>
-                      <div className="text-sm">
+                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <div className="space-y-2 p-1">
+                      <p className="text-sm font-medium text-white">Move-in Distribution:</p>
+                      <div className="text-sm text-gray-300">
                         <p>2022: {topGrowthRegion.total_movedin_2022.toLocaleString()}</p>
                         <p>2021: {topGrowthRegion.total_movedin_2021.toLocaleString()}</p>
                         <p>2020: {topGrowthRegion.total_movedin_2020.toLocaleString()}</p>
-                        <div className="mt-2 pt-2 border-t">
+                        <div className="mt-2 pt-2 border-t border-white/10">
                           <p>Total Moves: {topGrowthRegion.total_moves.toLocaleString()}</p>
                           <p className="mt-1">
                             Represents {topGrowthRegion.growth_rate_percentage}% of all national moves
@@ -96,10 +96,10 @@ export function KeyInsightsPanel() {
           >
             <div className="flex items-center gap-3 mb-4">
               <insight.icon className="w-5 h-5 text-yellow-400" />
-              <h3 className="font-semibold text-lg">{insight.title}</h3>
+              <h3 className="font-semibold text-lg text-white">{insight.title}</h3>
             </div>
-            <p className="text-2xl font-bold mb-2">{insight.value}</p>
-            <div className="text-sm text-gray-700">{insight.insight}</div>
+            <p className="text-2xl font-bold text-white mb-2">{insight.value}</p>
+            <div className="text-sm text-gray-400">{insight.insight}</div>
           </Card>
         ))}
       </div>
