@@ -45,34 +45,7 @@ export default function Opportunities() {
   const [filters, setFilters] = useState<FirmFilters>({});
   const [employeeRange, setEmployeeRange] = useState([0, 100]);
 
-  const { data: firms } = useQuery({
-    queryKey: ['opportunities', filters],
-    queryFn: async () => {
-      const query = supabase
-        .from('canary_firms_data')
-        .select('*')
-        .order('employeeCount', { ascending: false });
-
-      if (filters.state) {
-        query.eq('State Name', filters.state);
-      }
-      if (filters.employeeMin) {
-        query.gte('employeeCount', filters.employeeMin);
-      }
-      if (filters.employeeMax) {
-        query.lte('employeeCount', filters.employeeMax);
-      }
-      if (filters.specialization) {
-        query.ilike('specialities', `%${filters.specialization}%`);
-      }
-
-      const { data, error } = await query.limit(10);
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
+  // Query to fetch states
   const { data: states } = useQuery({
     queryKey: ['states'],
     queryFn: async () => {
@@ -82,9 +55,49 @@ export default function Opportunities() {
         .not('State Name', 'is', null)
         .order('State Name');
       
-      if (error) throw error;
-      return [...new Set(data.map(d => d['State Name']))];
+      if (error) {
+        console.error('Error fetching states:', error);
+        throw error;
+      }
+      
+      // Get unique state names
+      const uniqueStates = [...new Set(data.map(d => d['State Name']))];
+      return uniqueStates;
     }
+  });
+
+  // Query to fetch firms based on filters
+  const { data: firms, isLoading } = useQuery({
+    queryKey: ['opportunities', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('canary_firms_data')
+        .select('*')
+        .order('employeeCount', { ascending: false });
+
+      if (filters.state) {
+        query = query.eq('State Name', filters.state);
+      }
+      if (filters.employeeMin) {
+        query = query.gte('employeeCount', filters.employeeMin);
+      }
+      if (filters.employeeMax) {
+        query = query.lte('employeeCount', filters.employeeMax);
+      }
+      if (filters.specialization) {
+        query = query.ilike('specialities', `%${filters.specialization}%`);
+      }
+
+      const { data, error } = await query.limit(10);
+      
+      if (error) {
+        console.error('Error fetching firms:', error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: true // Always fetch initial data
   });
 
   const getRandomPlaceholder = () => {
@@ -114,6 +127,13 @@ export default function Opportunities() {
     }));
   };
 
+  const handleStateChange = (value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      state: value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -138,7 +158,8 @@ export default function Opportunities() {
             <div className="space-y-2">
               <label className="text-sm text-white/60">State</label>
               <Select
-                onValueChange={(value) => setFilters(prev => ({ ...prev, state: value }))}
+                onValueChange={handleStateChange}
+                value={filters.state}
               >
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
                   <SelectValue placeholder="Select state" />
@@ -179,6 +200,20 @@ export default function Opportunities() {
             </div>
           </div>
         </Card>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-8">
+            <p className="text-white/60">Loading opportunities...</p>
+          </div>
+        )}
+
+        {/* No Results State */}
+        {!isLoading && firms?.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-white/60">No firms found matching your criteria.</p>
+          </div>
+        )}
 
         {/* Firm Listings */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
