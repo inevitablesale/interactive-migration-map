@@ -3,37 +3,38 @@ import { TrendingUp, Users, Target } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface TopGrowthRegion {
+interface MarketGrowthMetric {
   county_name: string;
-  state_name: string;
-  growth_rate: number;
-  firm_density: number;
-  total_firms: number;
-  total_population: number;
+  state: string;
+  growth_rate_percentage: number;
+  population_growth: number;
+  total_movedin_2022: number;
+  total_movedin_2021: number;
+  total_movedin_2020: number;
 }
 
-async function fetchTopGrowthRegions() {
-  const { data, error } = await supabase.rpc('get_top_growth_regions');
+async function fetchMarketGrowthMetrics() {
+  const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
-  return data as TopGrowthRegion[];
+  return data as MarketGrowthMetric[];
 }
 
 export function KeyInsightsPanel() {
-  const { data: topRegions, isLoading } = useQuery({
-    queryKey: ['topGrowthRegions'],
-    queryFn: fetchTopGrowthRegions,
+  const { data: growthMetrics, isLoading } = useQuery({
+    queryKey: ['marketGrowthMetrics'],
+    queryFn: fetchMarketGrowthMetrics,
   });
 
-  const topRegion = topRegions?.[0];
+  const topGrowthRegion = growthMetrics?.[0];
 
   const insights = [
     {
       title: "Top Growth Region",
-      value: topRegion 
-        ? `${topRegion.county_name}, ${topRegion.growth_rate}%`
+      value: topGrowthRegion 
+        ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
         : "Loading...",
-      insight: topRegion
-        ? `${topRegion.total_firms} firms, ${(topRegion.firm_density).toFixed(1)} per 10k residents`
+      insight: topGrowthRegion
+        ? `${topGrowthRegion.growth_rate_percentage}% growth, ${topGrowthRegion.population_growth.toLocaleString()} new residents`
         : "Analyzing regional data",
       icon: TrendingUp,
     },

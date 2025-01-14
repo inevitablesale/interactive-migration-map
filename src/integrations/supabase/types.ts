@@ -896,6 +896,18 @@ export type Database = {
           avg_growth_rate: number
         }[]
       }
+      get_market_growth_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state: string
+          population_growth: number
+          growth_rate_percentage: number
+          total_movedin_2022: number
+          total_movedin_2021: number
+          total_movedin_2020: number
+        }[]
+      }
       get_market_opportunities: {
         Args: Record<PropertyKey, never>
         Returns: {
