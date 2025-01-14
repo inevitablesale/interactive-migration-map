@@ -7,13 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 interface MarketGrowthMetric {
   county_name: string;
-  state: string;
-  growth_rate_percentage: number;
-  population_growth: number;
-  total_movedin_2022: number;
-  total_movedin_2021: number;
-  total_movedin_2020: number;
-  total_moves: number;
+  state_name: string;
+  growth_rate: number;
+  firm_density: number;
+  total_firms: number;
+  total_population: number;
 }
 
 interface TopGrowthRegion {
@@ -99,16 +97,9 @@ export function KeyInsightsPanel() {
                   </DialogHeader>
                   <div className="mt-4">
                     <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
-                        <div>Rank</div>
-                        <div className="col-span-2">Region</div>
-                        <div>Growth Rate</div>
-                        <div>Firm Density</div>
-                        <div>Population</div>
-                      </div>
                       {topRegions?.map((region, index) => (
                         <div 
-                          key={`${region.county_name}-${region.state_name}`} 
+                          key={`${region.county_name}-${region.state_name}-${index}`}
                           className="grid grid-cols-6 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                         >
                           <div className="flex items-center">
