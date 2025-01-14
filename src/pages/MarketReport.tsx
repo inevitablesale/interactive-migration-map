@@ -134,19 +134,49 @@ export default function MarketReport() {
                 Top Firms
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               {marketData.top_firms.map((firm, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div>
-                    <p className="text-white font-medium">{firm.company_name}</p>
-                    <p className="text-sm text-gray-400">{firm.employee_count} employees</p>
+                <div key={index} className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-white font-medium">{firm.company_name}</p>
+                      <p className="text-sm text-gray-400">{firm.employee_count} employees</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-400">Follower Ratio</p>
+                      <p className={`text-white ${getMetricColor(firm.follower_ratio, 'density')}`}>
+                        {firm.follower_ratio.toFixed(1)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-400">Follower Ratio</p>
-                    <p className={`text-white ${getMetricColor(firm.follower_ratio, 'density')}`}>
-                      {firm.follower_ratio.toFixed(1)}
-                    </p>
+
+                  {/* New Metrics */}
+                  <div className="grid grid-cols-3 gap-4 pt-2">
+                    {firm.specialization && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400">Specialization</p>
+                        <p className="text-sm text-white">{firm.specialization}</p>
+                      </div>
+                    )}
+                    
+                    {firm.clientele && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400">Clientele</p>
+                        <p className="text-sm text-white">{firm.clientele}</p>
+                      </div>
+                    )}
+                    
+                    {firm.industry_focus && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400">Industry Focus</p>
+                        <p className="text-sm text-white line-clamp-2">{firm.industry_focus}</p>
+                      </div>
+                    )}
                   </div>
+
+                  {index < marketData.top_firms.length - 1 && (
+                    <div className="border-t border-white/10 pt-4" />
+                  )}
                 </div>
               ))}
             </CardContent>

@@ -3,6 +3,9 @@ export interface TopFirm {
   employee_count: number;
   follower_count: number;
   follower_ratio: number;
+  specialization?: string;
+  clientele?: string;
+  industry_focus?: string;
 }
 
 export interface ComprehensiveMarketData {
