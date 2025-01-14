@@ -26,7 +26,7 @@ export function ComparablesPanel() {
         .from('state_data')
         .select('*')
         .order('ESTAB', { ascending: false })
-        .limit(5); // Explicitly limit to 5 results
+        .limit(5);
 
       if (stateError) throw stateError;
 
@@ -48,10 +48,10 @@ export function ComparablesPanel() {
           firmDensity,
           comparedToNational: {
             density: firmDensity / nationalDensity,
-            growth: 1 // Placeholder since we don't have growth data in these tables
+            growth: 1
           }
         };
-      }).slice(0, 5); // Ensure we only return 5 items
+      });
     }
   });
 
@@ -63,6 +63,7 @@ export function ComparablesPanel() {
         rankings.map(async (ranking) => {
           const paddedStateFp = ranking.statefp.padStart(2, '0');
           const stateName = await getStateName(paddedStateFp);
+          console.log('Fetched state name:', stateName, 'for FIPS:', paddedStateFp);
           return {
             ...ranking,
             displayName: stateName
@@ -70,7 +71,7 @@ export function ComparablesPanel() {
         })
       );
       
-      setStateRankings(rankingsWithNames.slice(0, 5)); // Ensure we only set 5 items
+      setStateRankings(rankingsWithNames);
     };
 
     fetchStateNames();
@@ -83,7 +84,7 @@ export function ComparablesPanel() {
       </div>
       <ScrollArea className="h-[400px]">
         <div className="p-4 space-y-4">
-          {stateRankings?.slice(0, 5).map((state, index) => (
+          {stateRankings?.map((state, index) => (
             <div
               key={state.statefp}
               className="bg-white/5 rounded-lg p-4 space-y-3 hover:bg-white/10 transition-colors"
