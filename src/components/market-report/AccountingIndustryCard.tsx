@@ -24,6 +24,20 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
+  // Format currency with K/M/B suffixes
+  const formatCurrency = (value: number): string => {
+    if (value >= 1000000000) {
+      return `$${(value / 1000000000).toFixed(1)}B`;
+    }
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    }
+    if (value >= 1000) {
+      return `$${(value / 1000).toFixed(1)}K`;
+    }
+    return `$${value.toLocaleString()}`;
+  };
+
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader>
@@ -105,7 +119,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
             )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
-            ${marketData.avg_accountant_payroll?.toLocaleString() ?? 'N/A'}
+            {marketData.avg_accountant_payroll ? formatCurrency(marketData.avg_accountant_payroll) : 'N/A'}
           </p>
         </div>
       </CardContent>
