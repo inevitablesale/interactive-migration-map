@@ -6,7 +6,6 @@ import { ArrowLeft, Users, Building2, TrendingUp, GraduationCap, Briefcase, Calc
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Json } from "@/integrations/supabase/types";
 
 interface TopFirm {
   company_name: string;
@@ -84,7 +83,7 @@ export default function MarketReport() {
       
       console.log('Fetching data for:', { county, stateFips });
       
-      const { data: responseData, error } = await supabase.rpc('get_comprehensive_county_data', {
+      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
         p_county_name: county,
         p_state_fp: stateFips
       });
@@ -95,22 +94,22 @@ export default function MarketReport() {
         throw error;
       }
 
-      if (!responseData || responseData.length === 0) {
+      if (!data || data.length === 0) {
         toast.error('No data found for this location');
         return null;
       }
 
-      const rawData = responseData[0];
+      const rawData = data[0] as unknown;
+      const typedData = rawData as ComprehensiveMarketData;
       
-      // Safely cast the JSON fields to their respective types
-      const topFirms = rawData.top_firms as unknown as TopFirm[];
-      const adjacentCounties = rawData.adjacent_counties as unknown as AdjacentCounty[];
+      if (typedData.top_firms) {
+        typedData.top_firms = JSON.parse(JSON.stringify(typedData.top_firms));
+      }
+      if (typedData.adjacent_counties) {
+        typedData.adjacent_counties = JSON.parse(JSON.stringify(typedData.adjacent_counties));
+      }
 
-      return {
-        ...rawData,
-        top_firms: topFirms,
-        adjacent_counties: adjacentCounties
-      } as ComprehensiveMarketData;
+      return typedData;
     },
     enabled: !!stateFips,
     retry: 1,
@@ -120,6 +119,7 @@ export default function MarketReport() {
 
   const formatCommuteTime = (seconds: number | null) => {
     if (!seconds) return 'N/A';
+    // Convert seconds to minutes
     const minutesPerDay = Math.round(seconds / 60);
     return `${minutesPerDay} minutes/day`;
   };
