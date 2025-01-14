@@ -115,10 +115,11 @@ export default function MarketReport() {
     gcTime: 10 * 60 * 1000,
   });
 
-  const formatCommuteTime = (minutes: number | null) => {
-    if (!minutes) return 'N/A';
-    const actualMinutes = minutes / 60;
-    return `${actualMinutes.toFixed(1)} minutes/day`;
+  const formatCommuteTime = (seconds: number | null) => {
+    if (!seconds) return 'N/A';
+    // Convert seconds to minutes
+    const minutesPerDay = Math.round(seconds / 60);
+    return `${minutesPerDay} minutes/day`;
   };
 
   const formatRank = (rank: number | null) => {
