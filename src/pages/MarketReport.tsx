@@ -123,18 +123,8 @@ export default function MarketReport() {
 
   const formatRank = (rank: number | null) => {
     if (!rank) return '';
-    
-    let color;
-    if (rank <= 33) {
-      color = '#22c55e'; // Good ranking (green)
-    } else if (rank <= 66) {
-      color = '#eab308'; // Average ranking (yellow)
-    } else {
-      color = '#ef4444'; // Poor ranking (red)
-    }
-    
     return (
-      <span className="text-sm ml-2" style={{ color }}>
+      <span className="text-sm ml-2 text-gray-400">
         (Rank: {rank.toLocaleString()})
       </span>
     );
@@ -279,12 +269,6 @@ export default function MarketReport() {
                   {marketData.growth_rate_percentage?.toFixed(1) ?? 'N/A'}%
                 </p>
               </div>
-              <div>
-                <p className="text-gray-400">Market Saturation Index</p>
-                <p className={`text-2xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
-                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -380,12 +364,6 @@ export default function MarketReport() {
                   <span className="text-sm ml-2 text-gray-400">
                     {formatRank(marketData.poverty_rank)}
                   </span>
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400">Market Saturation Index</p>
-                <p className="text-xl font-bold text-white">
-                  {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
                 </p>
               </div>
             </CardContent>
