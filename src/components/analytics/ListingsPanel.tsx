@@ -41,7 +41,7 @@ export const ListingsPanel = () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .limit(3); // Changed from 5 to 3
+        .limit(3);
       
       if (error) throw error;
       return data;
@@ -95,7 +95,7 @@ export const ListingsPanel = () => {
                   </h3>
                   <div className="flex items-center gap-2 text-white/60 text-sm">
                     <MapPin className="w-4 h-4" />
-                    <span>{listing["State Name"]}</span>
+                    <span>{listing.Location || listing["State Name"]}</span>
                   </div>
                 </div>
 
