@@ -460,3 +460,4 @@ export default function MarketReport() {
       </div>
     </div>
   );
+}
