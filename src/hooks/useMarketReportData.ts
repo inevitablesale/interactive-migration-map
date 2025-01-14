@@ -80,6 +80,16 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         primarySubtitle: firm['Primary Subtitle'] || undefined
       }));
 
+      // Calculate growth rate from move-in data
+      const growthRate = countyData.MOVEDIN2022 && countyData.MOVEDIN2021
+        ? ((countyData.MOVEDIN2022 - countyData.MOVEDIN2021) / countyData.MOVEDIN2021) * 100
+        : 0;
+
+      // Calculate vacancy rate
+      const vacancyRate = countyData.B25002_003E && countyData.B25002_002E
+        ? (countyData.B25002_003E / (countyData.B25002_002E + countyData.B25002_003E)) * 100
+        : 0;
+
       // Transform the data to match ComprehensiveMarketData type
       const marketData: ComprehensiveMarketData = {
         total_population: countyData.B01001_001E,
@@ -90,7 +100,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         private_sector_accountants: countyData.C24060_004E,
         public_sector_accountants: countyData.C24060_007E,
         firms_per_10k_population: countyData.ESTAB ? (countyData.ESTAB / countyData.B01001_001E) * 10000 : null,
-        growth_rate_percentage: countyData.population_growth_rate,
+        growth_rate_percentage: growthRate,
         market_saturation_index: null,
         total_education_population: countyData.B15003_001E,
         bachelors_degree_holders: countyData.B15003_022E,
@@ -104,13 +114,13 @@ export const useMarketReportData = (county: string | undefined, state: string | 
           ? (countyData.B17001_002E / countyData.B17001_001E) * 100 
           : null,
         poverty_rank: null,
-        vacancy_rate: countyData.vacancy_rate,
-        vacancy_rank: countyData.vacancy_rank,
-        income_rank: countyData.income_rank,
-        population_rank: countyData.population_rank,
-        rent_rank: countyData.rent_rank,
-        density_rank: countyData.firm_density_rank,
-        growth_rank: countyData.growth_rank,
+        vacancy_rate: vacancyRate,
+        vacancy_rank: null, // We'll need to implement ranking logic if needed
+        income_rank: null, // We'll need to implement ranking logic if needed
+        population_rank: null, // We'll need to implement ranking logic if needed
+        rent_rank: null, // We'll need to implement ranking logic if needed
+        density_rank: null, // We'll need to implement ranking logic if needed
+        growth_rank: null, // We'll need to implement ranking logic if needed
         top_firms: topFirms,
         state_avg_income: null,
         adjacent_counties: null
