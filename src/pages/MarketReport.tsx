@@ -90,35 +90,28 @@ export default function MarketReport() {
       
       console.log('Fetching data for:', { county, stateFips });
       
-      try {
-        const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
-          p_county_name: county,
-          p_state_fp: stateFips
-        });
+      const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
+        p_county_name: county,
+        p_state_fp: stateFips
+      });
 
-        if (error) {
-          console.error('Error fetching comprehensive market data:', error);
-          toast.error('Error fetching market data');
-          throw error;
-        }
-
-        if (!data || data.length === 0) {
-          toast.error('No data found for this location');
-          return null;
-        }
-
-        // Type assertion to ensure the response matches our interface
-        const typedData = data[0] as unknown as ComprehensiveMarketData;
-        console.log('Received market data:', typedData);
-        return typedData;
-      } catch (error) {
-        console.error('Error in market data query:', error);
-        toast.error('Failed to load market data');
+      if (error) {
+        console.error('Error fetching comprehensive market data:', error);
+        toast.error('Error fetching market data');
         throw error;
       }
+
+      if (!data || data.length === 0) {
+        toast.error('No data found for this location');
+        return null;
+      }
+
+      return data[0] as ComprehensiveMarketData;
     },
     enabled: !!stateFips,
     retry: 1,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const formatCommuteTime = (minutes: number | null) => {
