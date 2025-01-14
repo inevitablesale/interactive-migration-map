@@ -23,6 +23,12 @@ interface TopFirm {
   follower_ratio: number;
 }
 
+interface AdjacentCounty {
+  county_name: string;
+  population: number;
+  median_income: number;
+}
+
 interface MarketData {
   total_population: number;
   median_household_income: number;
@@ -51,7 +57,7 @@ interface MarketData {
   rent_rank: number;
   top_firms: TopFirm[];
   state_avg_income: number;
-  adjacent_counties: any[];
+  adjacent_counties: AdjacentCounty[];
 }
 
 const useStateFips = (stateAbbr: string | undefined) => {
@@ -76,7 +82,7 @@ export function MarketReport() {
   const { toast } = useToast();
   const stateFips = useStateFips(state);
 
-  const { data: marketData, isLoading } = useQuery<MarketData>({
+  const { data: marketData, isLoading } = useQuery({
     queryKey: ['marketData', county, stateFips.data],
     enabled: !!county && !!stateFips.data,
     queryFn: async () => {
@@ -95,14 +101,32 @@ export function MarketReport() {
         throw error;
       }
 
-      // Parse the JSON fields and ensure they match our expected types
-      const parsedData = {
-        ...data[0],
-        top_firms: Array.isArray(data[0].top_firms) ? data[0].top_firms : [],
-        adjacent_counties: Array.isArray(data[0].adjacent_counties) ? data[0].adjacent_counties : []
+      if (!data || data.length === 0) {
+        throw new Error('No data found');
+      }
+
+      // Parse and validate the JSON fields
+      const rawData = data[0];
+      const parsedData: MarketData = {
+        ...rawData,
+        top_firms: Array.isArray(rawData.top_firms) 
+          ? rawData.top_firms.map((firm: any) => ({
+              company_name: firm.company_name || '',
+              employee_count: firm.employee_count || 0,
+              follower_count: firm.follower_count || 0,
+              follower_ratio: firm.follower_ratio || 0
+            }))
+          : [],
+        adjacent_counties: Array.isArray(rawData.adjacent_counties)
+          ? rawData.adjacent_counties.map((county: any) => ({
+              county_name: county.county_name || '',
+              population: county.population || 0,
+              median_income: county.median_income || 0
+            }))
+          : []
       };
 
-      return parsedData as MarketData;
+      return parsedData;
     }
   });
 
