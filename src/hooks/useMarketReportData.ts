@@ -69,14 +69,14 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         employee_count: firm.employeeCount || 0,
         follower_count: firm.followerCount || 0,
         follower_ratio: firm.followerCount / (firm.employeeCount || 1),
-        specialities: firm.specialities,
-        logoResolutionResult: firm.logoResolutionResult,
-        originalCoverImage: firm.originalCoverImage,
-        employeeCountRangeLow: firm.employeeCountRangeLow,
-        employeeCountRangeHigh: firm.employeeCountRangeHigh,
-        foundedOn: firm.foundedOn,
-        websiteUrl: firm.websiteUrl,
-        primarySubtitle: firm['Primary Subtitle']
+        specialities: firm.specialities || undefined,
+        logoResolutionResult: firm.logoResolutionResult || undefined,
+        originalCoverImage: firm.originalCoverImage || undefined,
+        employeeCountRangeLow: firm.employeeCountRangeLow || undefined,
+        employeeCountRangeHigh: firm.employeeCountRangeHigh || undefined,
+        foundedOn: firm.foundedOn ? firm.foundedOn.toString() : undefined,
+        websiteUrl: firm.websiteUrl || undefined,
+        primarySubtitle: firm['Primary Subtitle'] || undefined
       }));
 
       // Transform the data to match ComprehensiveMarketData type
