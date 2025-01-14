@@ -44,13 +44,33 @@ export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
 
-  const { data: marketData, isLoading } = useQuery({
-    queryKey: ['comprehensiveMarketData', county, state],
+  const { data: stateFips } = useQuery({
+    queryKey: ['stateFips', state],
     queryFn: async () => {
-      console.log('Fetching data for:', { county, state });
+      const { data, error } = await supabase
+        .from('state_fips_codes')
+        .select('fips_code')
+        .eq('state', state)
+        .single();
+
+      if (error) {
+        console.error('Error fetching state FIPS:', error);
+        throw error;
+      }
+
+      return data.fips_code;
+    },
+  });
+
+  const { data: marketData, isLoading } = useQuery({
+    queryKey: ['comprehensiveMarketData', county, stateFips],
+    queryFn: async () => {
+      if (!stateFips) return null;
+      
+      console.log('Fetching data for:', { county, stateFips });
       const { data, error } = await supabase.rpc('get_comprehensive_county_data', {
         p_county_name: county,
-        p_state_fp: state
+        p_state_fp: stateFips
       });
       
       if (error) {
@@ -59,9 +79,9 @@ export default function MarketReport() {
       }
 
       console.log('Received market data:', data);
-      // Since the function returns an array with one row, we take the first element
       return data[0] as ComprehensiveMarketData;
     },
+    enabled: !!stateFips,
   });
 
   if (isLoading) {
