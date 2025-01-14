@@ -117,8 +117,9 @@ export default function MarketReport() {
 
   const formatCommuteTime = (minutes: number | null) => {
     if (!minutes) return 'N/A';
-    const seconds = minutes * 60;
-    return `${seconds.toFixed(1)} seconds/day`;
+    // If the original value was in seconds, we would divide by 60 first
+    const actualMinutes = minutes / 60;
+    return `${actualMinutes.toFixed(1)} minutes/day`;
   };
 
   const formatRank = (rank: number | null) => {
@@ -126,11 +127,11 @@ export default function MarketReport() {
     
     let color;
     if (rank <= 33) {
-      color = '#F2FCE2'; // Good ranking (green)
+      color = '#22c55e'; // Good ranking (green)
     } else if (rank <= 66) {
-      color = '#FEF7CD'; // Average ranking (yellow)
+      color = '#eab308'; // Average ranking (yellow)
     } else {
-      color = '#ea384c'; // Poor ranking (red)
+      color = '#ef4444'; // Poor ranking (red)
     }
     
     return (
