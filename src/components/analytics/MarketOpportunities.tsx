@@ -9,25 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-interface WeightedMarketOpportunity {
-  statefp: string;
-  countyfp: string;
-  countyname: string;
-  state_name: string;
-  total_score: number;
-  migration_score: number;
-  economic_score: number;
-  market_score: number;
-  details: {
-    median_income: number;
-    employment_rate: number;
-    housing_value: number;
-    education_rate: number;
-    professional_services_rate: number;
-    housing_occupancy: number;
-  };
-}
+import { WeightedMarketOpportunity } from "@/types/analytics";
 
 export function MarketOpportunities() {
   const { data: opportunities } = useQuery<WeightedMarketOpportunity[]>({
@@ -37,7 +19,11 @@ export function MarketOpportunities() {
         .rpc('get_weighted_market_opportunities');
       
       if (error) throw error;
-      return data;
+
+      return data.map(item => ({
+        ...item,
+        details: item.details as WeightedMarketOpportunity['details']
+      }));
     }
   });
 

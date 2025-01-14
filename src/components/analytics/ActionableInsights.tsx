@@ -16,9 +16,8 @@ export function ActionableInsights() {
         throw error;
       }
 
-      // Transform the data to match the ServiceDistribution type
       return data.map(item => ({
-        STATEFP: item.statefp,
+        statefp: item.STATEFP,
         specialities: item.specialities,
         specialty_count: item.specialty_count,
         specialty_percentage: item.specialty_percentage
@@ -48,7 +47,7 @@ export function ActionableInsights() {
           
           <div className="space-y-4">
             {serviceDistribution?.map((service, index) => (
-              <div key={`${service.STATEFP}-${service.specialities}-${index}`} className="bg-black/20 rounded-lg p-4">
+              <div key={`${service.statefp}-${service.specialities}-${index}`} className="bg-black/20 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-white font-medium">{service.specialities}</div>
                   <div className="text-sm text-white/60">{Math.round(service.specialty_percentage)}% Coverage</div>

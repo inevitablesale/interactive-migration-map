@@ -40,3 +40,24 @@ export interface MarketOpportunityScore {
   business_density_score: number;
   service_coverage_score: number;
 }
+
+export interface WeightedMarketOpportunityDetails {
+  median_income: number;
+  employment_rate: number;
+  housing_value: number;
+  education_rate: number;
+  professional_services_rate: number;
+  housing_occupancy: number;
+}
+
+export interface WeightedMarketOpportunity {
+  statefp: string;
+  countyfp: string;
+  countyname: string;
+  state_name: string;
+  total_score: number;
+  migration_score: number;
+  economic_score: number;
+  market_score: number;
+  details: WeightedMarketOpportunityDetails;
+}
