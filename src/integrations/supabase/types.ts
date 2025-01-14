@@ -856,6 +856,27 @@ export type Database = {
           state_growth_avg: number
         }[]
       }
+      get_education_age_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_fp: string
+          median_age: number
+          masters_degree_percent: number
+          firm_count: number
+        }[]
+      }
+      get_employee_rent_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_fp: string
+          median_gross_rent: number
+          total_population: number
+          total_employees: number
+          employees_per_1k_population: number
+        }[]
+      }
       get_enhanced_market_scores: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -875,6 +896,15 @@ export type Database = {
           total_firms: number
           population: number
           firm_density: number
+        }[]
+      }
+      get_follower_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          company_name: string
+          employee_count: number
+          follower_count: number
+          followers_per_employee: number
         }[]
       }
       get_growth_strategy_analysis: {
@@ -1024,6 +1054,16 @@ export type Database = {
           recent_movers: number
           market_status: string
           opportunity_status: string
+        }[]
+      }
+      get_vacancy_analysis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_fp: string
+          vacant_to_occupied_ratio: number
+          firm_count: number
+          firms_per_10k_population: number
         }[]
       }
       refresh_state_density_metrics: {
