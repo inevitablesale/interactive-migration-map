@@ -7,6 +7,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const formatPopulation = (value: number) => {
   if (value < 1000) {
@@ -88,6 +89,7 @@ async function fetchUnderservedRegions() {
 }
 
 export function KeyInsightsPanel() {
+  const navigate = useNavigate();
   const { data: growthMetrics } = useQuery({
     queryKey: ['marketGrowthMetrics'],
     queryFn: fetchMarketGrowthMetrics,
@@ -226,7 +228,10 @@ export function KeyInsightsPanel() {
                       {growthMetrics?.map((region, index) => (
                         <div 
                           key={`${region.county_name}-${region.state}-${index}`}
-                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                          onClick={() => {
+                            navigate(`/market-report/${encodeURIComponent(region.county_name)}/${encodeURIComponent(region.state)}`);
+                          }}
                         >
                           <div className="flex items-center">
                             <span className="text-lg font-bold text-accent">#{index + 1}</span>
