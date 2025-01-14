@@ -1,12 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, ArrowLeft, Brain, GraduationCap } from "lucide-react";
+import { Users, Building2, TrendingUp, ArrowLeft, Brain, GraduationCap, ChartBar, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
 import { getMetricColor } from '@/utils/market-report/formatters';
-
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d';
+import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
+import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
+import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
 
 export default function MarketReport() {
   const { county, state } = useParams();
@@ -56,215 +57,145 @@ export default function MarketReport() {
             <Badge variant="secondary" className="bg-orange-600/20 text-orange-400 hover:bg-orange-600/30">
               Developing Market
             </Badge>
-            <Badge variant="secondary" className="bg-orange-600/20 text-orange-400 hover:bg-orange-600/30">
-              Emerging Talent
-            </Badge>
             <Badge variant="secondary" className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30">
               Moderate Growth
             </Badge>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mb-6 text-sm text-gray-400">
-          <span>Metric Scale:</span>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-            <span>High</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-            <span>Strong</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-            <span>Average</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-            <span>Below Avg</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-400"></div>
-            <span>Low</span>
-          </div>
+        {/* Accounting Industry Metrics */}
+        <div className="mb-6">
+          <AccountingIndustryCard marketData={marketData} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
           {/* Population Overview */}
-          <Card className="bg-[#1A1A1A] border-gray-800">
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="w-5 h-5 text-gray-400" />
-                <h2 className="text-lg text-white">Population Overview</h2>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">Total Population</p>
-                  <p className="text-4xl font-bold text-indigo-400">
-                    {marketData.total_population?.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Rank: {marketData.population_rank}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">Median Household Income</p>
-                  <p className="text-2xl font-bold text-green-400">
-                    ${marketData.median_household_income?.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Rank: {marketData.income_rank}</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <MarketMetricsCard
+            title="Population Overview"
+            icon={Users}
+            metrics={[
+              {
+                label: "Total Population",
+                value: marketData.total_population?.toLocaleString(),
+                type: 'population',
+                rank: marketData.population_rank
+              },
+              {
+                label: "Median Household Income",
+                value: `$${marketData.median_household_income?.toLocaleString()}`,
+                type: 'money',
+                rank: marketData.income_rank
+              }
+            ]}
+          />
 
           {/* Housing Metrics */}
-          <Card className="bg-[#1A1A1A] border-gray-800">
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Building2 className="w-5 h-5 text-gray-400" />
-                <h2 className="text-lg text-white">Housing Metrics</h2>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">Median Gross Rent</p>
-                  <p className="text-4xl font-bold text-green-400">
-                    ${marketData.median_gross_rent?.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Rank: {marketData.rent_rank}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">Vacancy Rate</p>
-                  <p className="text-2xl font-bold text-blue-400">
-                    {marketData.vacancy_rate?.toFixed(1)}%
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Rank: {marketData.vacancy_rank}</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <MarketMetricsCard
+            title="Housing Metrics"
+            icon={Building2}
+            metrics={[
+              {
+                label: "Median Gross Rent",
+                value: `$${marketData.median_gross_rent?.toLocaleString()}`,
+                type: 'money',
+                rank: marketData.rent_rank
+              },
+              {
+                label: "Vacancy Rate",
+                value: `${marketData.vacancy_rate?.toFixed(1)}%`,
+                type: 'saturation',
+                rank: marketData.vacancy_rank
+              }
+            ]}
+          />
 
           {/* Market Dynamics */}
-          <Card className="bg-[#1A1A1A] border-gray-800">
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-gray-400" />
-                <h2 className="text-lg text-white">Market Dynamics</h2>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">Firms per 10k Population</p>
-                  <p className="text-4xl font-bold text-blue-400">
-                    {marketData.firms_per_10k_population?.toFixed(1)}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Rank: {marketData.density_rank}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm mb-1">Growth Rate</p>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {marketData.growth_rate_percentage?.toFixed(1)}%
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Rank: {marketData.growth_rank}</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <MarketMetricsCard
+            title="Market Dynamics"
+            icon={TrendingUp}
+            metrics={[
+              {
+                label: "Firms per 10k Population",
+                value: marketData.firms_per_10k_population?.toFixed(1),
+                type: 'density',
+                rank: marketData.density_rank
+              },
+              {
+                label: "Growth Rate",
+                value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
+                type: 'growth',
+                rank: marketData.growth_rank
+              }
+            ]}
+          />
 
           {/* Education Distribution */}
-          <Card className="bg-[#1A1A1A] border-gray-800">
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <GraduationCap className="w-5 h-5 text-gray-400" />
-                <h2 className="text-lg text-white">Education Distribution</h2>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-gray-400">Bachelor's Degree</span>
-                  <span className="text-white font-medium">20.5%</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="text-gray-400">Master's Degree</span>
-                  <span className="text-white font-medium">8.2%</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="text-gray-400">Doctorate Degree</span>
-                  <span className="text-white font-medium">1.4%</span>
-                </div>
-                <div className="flex justify-between items-baseline mt-4">
-                  <span className="text-gray-400">Total Population</span>
-                  <span className="text-white font-medium">2,995,908</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <MarketMetricsCard
+            title="Education Distribution"
+            icon={GraduationCap}
+            metrics={[
+              {
+                label: "Bachelor's Degree",
+                value: `${((marketData.bachelors_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
+                type: 'density'
+              },
+              {
+                label: "Master's Degree",
+                value: `${((marketData.masters_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
+                type: 'density'
+              },
+              {
+                label: "Doctorate Degree",
+                value: `${((marketData.doctorate_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
+                type: 'density'
+              }
+            ]}
+          />
         </div>
 
-        {/* Accounting Industry Metrics */}
-        <Card className="bg-[#1A1A1A] border-gray-800 mb-6">
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Brain className="w-5 h-5 text-gray-400" />
-              <h2 className="text-lg text-white">Accounting Industry Metrics</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-gray-400">Total Establishments</p>
-                  <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-400">
-                    Average
-                  </Badge>
-                </div>
-                <p className="text-2xl font-bold text-blue-400">
-                  4.2 per 10k residents
-                </p>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-gray-400">Average Annual Payroll per Firm</p>
-                  <Badge variant="secondary" className="bg-emerald-600/20 text-emerald-400">
-                    High Performance
-                  </Badge>
-                </div>
-                <p className="text-2xl font-bold text-green-400">$832.5K</p>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-gray-400">Average Salary per Employee</p>
-                  <Badge variant="secondary" className="bg-blue-600/20 text-blue-400">
-                    Strong
-                  </Badge>
-                </div>
-                <p className="text-2xl font-bold text-green-400">$75.9K</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
         {/* Employment Distribution */}
-        <Card className="bg-[#1A1A1A] border-gray-800">
-          <div className="p-6">
+        <div className="mb-6">
+          <EmploymentMetricsCard marketData={marketData} />
+        </div>
+
+        {/* Top Firms Section */}
+        {marketData.top_firms && marketData.top_firms.length > 0 && (
+          <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-6">
-              <Users className="w-5 h-5 text-gray-400" />
-              <h2 className="text-lg text-white">Employment Distribution</h2>
+              <ChartBar className="w-5 h-5 text-gray-400" />
+              <h2 className="text-lg text-white">Top Firms</h2>
             </div>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-baseline">
-                <span className="text-gray-400">Private Sector Accountants</span>
-                <span className="text-white font-medium">472,800</span>
-              </div>
-              <div className="flex justify-between items-baseline">
-                <span className="text-gray-400">Public Sector Accountants</span>
-                <span className="text-white font-medium">1,670,049</span>
-              </div>
-              <div className="flex justify-between items-baseline">
-                <span className="text-gray-400">Public/Private Ratio</span>
-                <span className="text-blue-400 font-medium">3.53</span>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {marketData.top_firms.slice(0, 6).map((firm, index) => (
+                <Card key={index} className="bg-white/5 border-white/10 p-4">
+                  <div className="flex items-start gap-3">
+                    {firm.logoResolutionResult && (
+                      <img
+                        src={firm.logoResolutionResult}
+                        alt={firm.company_name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    )}
+                    <div>
+                      <h3 className="text-white font-medium">{firm.company_name}</h3>
+                      <p className="text-gray-400 text-sm">{firm.primarySubtitle}</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <div>
+                          <p className="text-xs text-gray-500">Employees</p>
+                          <p className="text-white">{firm.employee_count.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Followers</p>
+                          <p className="text-white">{firm.follower_count.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
       </div>
     </div>
   );
