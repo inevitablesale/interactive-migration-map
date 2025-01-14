@@ -62,19 +62,32 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
     }
   }, [toast, mapLoaded]);
 
+  const getDensityColor = (density: number): string => {
+    if (density >= 6.5) return MAP_COLORS.primary;      // Very high density
+    if (density >= 5.5) return MAP_COLORS.secondary;    // High density
+    if (density >= 4.5) return MAP_COLORS.accent;       // Medium-high density
+    if (density >= 3.5) return MAP_COLORS.highlight;    // Medium density
+    return MAP_COLORS.active;                           // Lower density
+  };
+
   const updateMapData = useCallback((data: StateMetrics[]) => {
     if (!map.current || !mapLoaded) return;
 
     try {
+      // Create a map of STATEFP to density for easier lookup
+      const densityMap = Object.fromEntries(
+        data.map(state => [state.STATEFP, state.density])
+      );
+
+      // Update the fill color based on density
       map.current.setPaintProperty('state-fills', 'fill-color', [
-        'interpolate',
-        ['linear'],
-        ['coalesce', ['get', 'density'], 0],
-        2.5, '#FA0098',
-        3.5, '#94EC0E',
-        4.5, '#FFF903',
-        5.5, '#00FFE0',
-        6.5, '#037CFE'
+        'match',
+        ['get', 'STATEFP'],
+        ...data.flatMap(state => [
+          state.STATEFP,
+          getDensityColor(state.density)
+        ]),
+        MAP_COLORS.inactive // Default color for states not in our dataset
       ]);
     } catch (error) {
       console.error('Error updating map data:', error);
@@ -173,24 +186,24 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
           <h3 className="text-white text-sm font-medium mb-2">Firm Density</h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#037CFE' }} />
-              <span className="text-white text-xs">Very High (5.5+)</span>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: MAP_COLORS.primary }} />
+              <span className="text-white text-xs">Very High (6.5+)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#00FFE0' }} />
-              <span className="text-white text-xs">High (4.5-5.5)</span>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: MAP_COLORS.secondary }} />
+              <span className="text-white text-xs">High (5.5-6.5)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFF903' }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: MAP_COLORS.accent }} />
+              <span className="text-white text-xs">Medium-High (4.5-5.5)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: MAP_COLORS.highlight }} />
               <span className="text-white text-xs">Medium (3.5-4.5)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#94EC0E' }} />
-              <span className="text-white text-xs">Low (2.5-3.5)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FA0098' }} />
-              <span className="text-white text-xs">&lt;2.5</span>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: MAP_COLORS.active }} />
+              <span className="text-white text-xs">Lower (&lt;3.5)</span>
             </div>
           </div>
         </div>
