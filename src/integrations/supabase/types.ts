@@ -782,7 +782,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      state_density_metrics: {
+        Row: {
+          B01001_001E: number | null
+          density: number | null
+          ESTAB: number | null
+          STATEFP: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_competitive_analysis: {
@@ -943,6 +951,10 @@ export type Database = {
           avg_payroll_per_firm: number
           education_rate: number
         }[]
+      }
+      refresh_state_density_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

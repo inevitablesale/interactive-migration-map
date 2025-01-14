@@ -34,13 +34,12 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
 
   const fetchStateData = useCallback(async () => {
     try {
-      console.log('Fetching state data...');
+      console.log('Fetching state data from materialized view...');
       const { data: stateMetrics, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, ESTAB, B01001_001E')
+        .from('state_density_metrics')
+        .select('STATEFP, ESTAB, B01001_001E, density')
         .not('STATEFP', 'is', null)
-        .not('ESTAB', 'is', null)
-        .not('B01001_001E', 'is', null);
+        .not('density', 'is', null);
 
       if (error) {
         console.error('Error fetching state data:', error);
@@ -52,22 +51,13 @@ const AnalysisMap: React.FC<AnalysisMapProps> = ({ className, data, type, geogra
         return;
       }
 
-      // Create serializable state metrics with proper type conversion
-      const statesWithDensity: StateMetrics[] = stateMetrics.map(state => ({
-        STATEFP: state.STATEFP,
-        ESTAB: Number(state.ESTAB) || 0,
-        B01001_001E: Number(state.B01001_001E) || 0,
-        density: state.ESTAB && state.B01001_001E ? 
-          (Number(state.ESTAB) / Number(state.B01001_001E)) * 10000 : 0
-      }));
-
-      console.log('Processed state data:', statesWithDensity);
-      setStateData(statesWithDensity);
+      console.log('Processed state data:', stateMetrics);
+      setStateData(stateMetrics);
       setDataLoaded(true);
 
       // Only update map if it's loaded
       if (map.current && mapLoaded) {
-        updateMapData(statesWithDensity);
+        updateMapData(stateMetrics);
       }
     } catch (error) {
       console.error('Error in fetchStateData:', error);
