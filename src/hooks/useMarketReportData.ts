@@ -67,7 +67,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         bachelors_degree_holders: data.bachelors_holders,
         masters_degree_holders: data.masters_holders,
         doctorate_degree_holders: data.doctorate_holders,
-        avg_accountant_payroll: null,
+        avg_accountant_payroll: data.avg_accountant_payroll,
         public_to_private_ratio: data.public_private_ratio,
         avg_commute_time: data.total_commute_time ? data.total_commute_time / (12 * 20) : null,
         commute_rank: null,
