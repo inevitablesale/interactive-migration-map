@@ -77,12 +77,12 @@ const useStateFips = (stateAbbr: string | undefined) => {
   });
 };
 
-export function MarketReport() {
+function MarketReport() {
   const { county, state } = useParams();
   const { toast } = useToast();
   const stateFips = useStateFips(state);
 
-  const { data: marketData, isLoading } = useQuery({
+  const { data: marketData, isLoading } = useQuery<MarketData>({
     queryKey: ['marketData', county, stateFips.data],
     enabled: !!county && !!stateFips.data,
     queryFn: async () => {
@@ -318,3 +318,5 @@ export function MarketReport() {
     </div>
   );
 }
+
+export default MarketReport;
