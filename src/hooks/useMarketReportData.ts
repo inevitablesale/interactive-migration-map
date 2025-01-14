@@ -56,7 +56,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         .from('canary_firms_data')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', stateFips)
+        .eq('STATEFP', parseInt(stateFips))
         .order('followerCount', { ascending: false })
         .limit(6);
 

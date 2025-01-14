@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase } from "lucide-react";
+import { Users, Building2, TrendingUp, DollarSign, ArrowLeft, LayoutGrid, Globe, Users2, Calendar, Briefcase, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ColorScaleLegend } from "@/components/market-report/ColorScaleLegend";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
@@ -249,3 +249,4 @@ export default function MarketReport() {
     </div>
   );
 }
+
