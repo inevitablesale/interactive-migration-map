@@ -10,9 +10,11 @@ import {
 import { useState } from "react";
 import { AlertForm } from "./AlertForm";
 import { useNavigate } from "react-router-dom";
+import { BuyerProfileForm } from "./BuyerProfileForm";
 
 export const WelcomeSection = () => {
   const [showAlertForm, setShowAlertForm] = useState(false);
+  const [showProfileForm, setShowProfileForm] = useState(false);
   const navigate = useNavigate();
 
   const handleViewOpportunities = () => {
@@ -30,7 +32,7 @@ export const WelcomeSection = () => {
             Discover and analyze potential acquisition targets with our
             data-driven insights and market analysis tools.
           </p>
-          <div className="flex justify-between items-center gap-8">
+          <div className="flex flex-wrap items-center gap-4">
             <Dialog open={showAlertForm} onOpenChange={setShowAlertForm}>
               <Button
                 variant="outline"
@@ -50,6 +52,26 @@ export const WelcomeSection = () => {
                 <AlertForm onSuccess={() => setShowAlertForm(false)} />
               </DialogContent>
             </Dialog>
+
+            <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+              <Button
+                variant="outline"
+                className="border-white/10 hover:bg-white/5"
+                onClick={() => setShowProfileForm(true)}
+              >
+                Create Buyer Profile
+              </Button>
+              <DialogContent className="bg-black/90 border-white/10">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Create Buyer Profile</DialogTitle>
+                  <DialogDescription className="text-white/60">
+                    Set up your buyer profile to get personalized recommendations.
+                  </DialogDescription>
+                </DialogHeader>
+                <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+              </DialogContent>
+            </Dialog>
+
             <Button 
               className="bg-blue-500 hover:bg-blue-600"
               onClick={handleViewOpportunities}

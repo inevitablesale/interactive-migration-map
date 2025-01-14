@@ -633,6 +633,51 @@ export type Database = {
         }
         Relationships: []
       }
+      sold_firms_data: {
+        Row: {
+          annual_revenue: number | null
+          asking_price: number | null
+          city: string | null
+          clientele: string | null
+          county: number | null
+          employee_count: number | null
+          fips: number | null
+          latitude: number | null
+          longitude: number | null
+          msa: number | null
+          service_lines: string | null
+          state: string | null
+        }
+        Insert: {
+          annual_revenue?: number | null
+          asking_price?: number | null
+          city?: string | null
+          clientele?: string | null
+          county?: number | null
+          employee_count?: number | null
+          fips?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          msa?: number | null
+          service_lines?: string | null
+          state?: string | null
+        }
+        Update: {
+          annual_revenue?: number | null
+          asking_price?: number | null
+          city?: string | null
+          clientele?: string | null
+          county?: number | null
+          employee_count?: number | null
+          fips?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          msa?: number | null
+          service_lines?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
       state_data: {
         Row: {
           B01001_001E: number | null
