@@ -123,37 +123,27 @@ export default function MarketReport() {
 
   const formatRank = (rank: number | null) => {
     if (!rank) return '';
-    
-    let color;
-    if (rank <= 33) {
-      color = '#22c55e'; // Good ranking (green)
-    } else if (rank <= 66) {
-      color = '#eab308'; // Average ranking (yellow)
-    } else {
-      color = '#ef4444'; // Poor ranking (red)
-    }
-    
-    return (
-      <span className="text-sm ml-2" style={{ color }}>
-        (Rank: {rank.toLocaleString()})
-      </span>
-    );
+    return `(Rank: ${rank.toLocaleString()})`;
   };
 
-  const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation') => {
+  const getMetricColor = (value: number, type: 'growth' | 'density' | 'saturation' | 'money' | 'population') => {
     switch(type) {
       case 'growth':
-        if (value >= 5) return 'text-green-400';
+        if (value >= 5) return 'text-emerald-400';
         if (value >= 0) return 'text-yellow-400';
         return 'text-red-400';
       case 'density':
-        if (value >= 2) return 'text-green-400';
-        if (value >= 1) return 'text-yellow-400';
-        return 'text-red-400';
+        if (value >= 2) return 'text-blue-400';
+        if (value >= 1) return 'text-indigo-400';
+        return 'text-purple-400';
       case 'saturation':
-        if (value <= 0.3) return 'text-green-400';
-        if (value <= 0.5) return 'text-yellow-400';
-        return 'text-red-400';
+        if (value <= 0.3) return 'text-teal-400';
+        if (value <= 0.5) return 'text-cyan-400';
+        return 'text-sky-400';
+      case 'money':
+        return 'text-green-400';
+      case 'population':
+        return 'text-violet-400';
       default:
         return 'text-white';
     }
@@ -219,16 +209,14 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Total Population</p>
-                <p className="text-2xl font-bold text-white">
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.total_population || 0, 'population')}`}>
                   {marketData.total_population?.toLocaleString() ?? 'N/A'}
-                  {formatRank(marketData.population_rank)}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Median Household Income</p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.median_household_income || 0, 'money')}`}>
                   ${marketData.median_household_income?.toLocaleString() ?? 'N/A'}
-                  {formatRank(marketData.income_rank)}
                 </p>
               </div>
             </CardContent>
@@ -244,16 +232,14 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Median Gross Rent</p>
-                <p className="text-2xl font-bold text-white">
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.median_gross_rent || 0, 'money')}`}>
                   ${marketData.median_gross_rent?.toLocaleString() ?? 'N/A'}
-                  {formatRank(marketData.rent_rank)}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Vacancy Rate</p>
-                <p className="text-2xl font-bold text-white">
+                <p className={`text-2xl font-bold ${getMetricColor(marketData.vacancy_rate || 0, 'saturation')}`}>
                   {marketData.vacancy_rate?.toFixed(1) ?? 'N/A'}%
-                  {formatRank(marketData.vacancy_rank)}
                 </p>
               </div>
             </CardContent>
@@ -300,7 +286,12 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Bachelor's Degree Holders</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(
+                  marketData.total_education_population && marketData.bachelors_degree_holders
+                    ? (marketData.bachelors_degree_holders / marketData.total_education_population) * 100
+                    : 0,
+                  'density'
+                )}`}>
                   {marketData.total_education_population && marketData.bachelors_degree_holders
                     ? ((marketData.bachelors_degree_holders / marketData.total_education_population) * 100).toFixed(1)
                     : 'N/A'}%
@@ -308,7 +299,12 @@ export default function MarketReport() {
               </div>
               <div>
                 <p className="text-gray-400">Master's Degree Holders</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(
+                  marketData.total_education_population && marketData.masters_degree_holders
+                    ? (marketData.masters_degree_holders / marketData.total_education_population) * 100
+                    : 0,
+                  'density'
+                )}`}>
                   {marketData.total_education_population && marketData.masters_degree_holders
                     ? ((marketData.masters_degree_holders / marketData.total_education_population) * 100).toFixed(1)
                     : 'N/A'}%
@@ -316,7 +312,12 @@ export default function MarketReport() {
               </div>
               <div>
                 <p className="text-gray-400">Doctorate Degree Holders</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(
+                  marketData.total_education_population && marketData.doctorate_degree_holders
+                    ? (marketData.doctorate_degree_holders / marketData.total_education_population) * 100
+                    : 0,
+                  'density'
+                )}`}>
                   {marketData.total_education_population && marketData.doctorate_degree_holders
                     ? ((marketData.doctorate_degree_holders / marketData.total_education_population) * 100).toFixed(1)
                     : 'N/A'}%
@@ -335,19 +336,19 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Employed Population</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(marketData.employed_population || 0, 'population')}`}>
                   {marketData.employed_population?.toLocaleString() ?? 'N/A'}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Average Accountant Salary</p>
-                <p className="text-xl font-bold text-green-400">
+                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_accountant_payroll || 0, 'money')}`}>
                   ${marketData.avg_accountant_payroll ? Math.round(marketData.avg_accountant_payroll * 1000).toLocaleString() : 'N/A'}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Public/Private Sector Ratio</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(marketData.public_to_private_ratio || 0, 'density')}`}>
                   {marketData.public_to_private_ratio?.toFixed(2) ?? 'N/A'}
                 </p>
               </div>
@@ -366,25 +367,19 @@ export default function MarketReport() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-gray-400">Average Commute Time</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(marketData.avg_commute_time || 0, 'saturation')}`}>
                   {marketData.avg_commute_time ? formatCommuteTime(marketData.avg_commute_time) : 'N/A'}
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.commute_rank)}
-                  </span>
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Poverty Rate</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(marketData.poverty_rate || 0, 'saturation')}`}>
                   {marketData.poverty_rate?.toFixed(1) ?? 'N/A'}%
-                  <span className="text-sm ml-2 text-gray-400">
-                    {formatRank(marketData.poverty_rank)}
-                  </span>
                 </p>
               </div>
               <div>
                 <p className="text-gray-400">Market Saturation Index</p>
-                <p className="text-xl font-bold text-white">
+                <p className={`text-xl font-bold ${getMetricColor(marketData.market_saturation_index || 0, 'saturation')}`}>
                   {marketData.market_saturation_index?.toFixed(3) ?? 'N/A'}
                 </p>
               </div>
@@ -407,7 +402,9 @@ export default function MarketReport() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-400">Follower Ratio</p>
-                    <p className="text-white">{firm.follower_ratio.toFixed(1)}</p>
+                    <p className={`text-white ${getMetricColor(firm.follower_ratio, 'density')}`}>
+                      {firm.follower_ratio.toFixed(1)}
+                    </p>
                   </div>
                 </div>
               ))}
