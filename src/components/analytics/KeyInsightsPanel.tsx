@@ -53,6 +53,22 @@ interface UnderservedRegionMetric {
   opportunity_status: string;
 }
 
+interface EmergingTalentMarket {
+  county_name: string;
+  education_rate_percent: number;
+  total_educated: number;
+  education_growth_rate: number;
+  median_age: number;
+}
+
+interface FutureSaturationRisk {
+  county_name: string;
+  current_firm_density: number;
+  projected_firm_density: number;
+  firm_growth_rate: number;
+  population_growth_rate: number;
+}
+
 async function fetchMarketGrowthMetrics() {
   const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
@@ -128,7 +144,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_future_saturation_risk');
       if (error) throw error;
-      return data;
+      return data as FutureSaturationRisk[];
     }
   });
 
@@ -137,7 +153,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      return data;
+      return data as EmergingTalentMarket[];
     }
   });
 
@@ -660,13 +676,13 @@ export function KeyInsightsPanel() {
     {
       title: "Future Saturation Risk",
       value: futureSaturationData?.[0] ? 
-        `${futureSaturationData[0].projected_firm_density.toFixed(1)} per 10k` : 
+        `${futureSaturationData[0].projected_firm_density?.toFixed(1) || '0'} per 10k` : 
         "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {futureSaturationData?.[0] ? (
             <>
-              {`${futureSaturationData[0].county_name}, ${(futureSaturationData[0].firm_growth_rate).toFixed(1)}% growth`}
+              {`${futureSaturationData[0].county_name}, ${(futureSaturationData[0].firm_growth_rate || 0).toFixed(1)}% growth`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -676,8 +692,8 @@ export function KeyInsightsPanel() {
                     <div className="space-y-2 p-1">
                       <p className="text-sm font-medium text-white">Saturation Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Current Density: {futureSaturationData[0].current_firm_density.toFixed(1)} per 10k</p>
-                        <p>Population Growth: {(futureSaturationData[0].population_growth_rate * 100).toFixed(1)}%</p>
+                        <p>Current Density: {futureSaturationData[0].current_firm_density?.toFixed(1) || '0'} per 10k</p>
+                        <p>Population Growth: {(futureSaturationData[0].population_growth_rate || 0).toFixed(1)}%</p>
                       </div>
                     </div>
                   </TooltipContent>
@@ -701,15 +717,15 @@ export function KeyInsightsPanel() {
                           <div>
                             <h4 className="font-medium">{region.county_name}</h4>
                             <p className="text-sm text-gray-400">
-                              Current Density: {region.current_firm_density.toFixed(1)} per 10k
+                              Current Density: {region.current_firm_density?.toFixed(1) || '0'} per 10k
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-semibold">
-                              {region.projected_firm_density.toFixed(1)} per 10k
+                              {region.projected_firm_density?.toFixed(1) || '0'} per 10k
                             </p>
                             <p className="text-sm text-gray-400">
-                              Growth: {(region.firm_growth_rate * 100).toFixed(1)}%
+                              Growth: {(region.firm_growth_rate || 0).toFixed(1)}%
                             </p>
                           </div>
                         </div>
@@ -729,13 +745,13 @@ export function KeyInsightsPanel() {
     {
       title: "Emerging Talent Markets",
       value: emergingTalentData?.[0] ? 
-        `${emergingTalentData[0].education_rate_percent.toFixed(1)}%` : 
+        `${emergingTalentData[0].education_rate_percent?.toFixed(1)}%` : 
         "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {emergingTalentData?.[0] ? (
             <>
-              {`${emergingTalentData[0].county_name}, ${emergingTalentData[0].total_educated.toLocaleString()} educated professionals`}
+              {`${emergingTalentData[0].county_name}, ${emergingTalentData[0].total_educated?.toLocaleString()} educated professionals`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -745,8 +761,8 @@ export function KeyInsightsPanel() {
                     <div className="space-y-2 p-1">
                       <p className="text-sm font-medium text-white">Education Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Education Rate: {emergingTalentData[0].education_rate_percent.toFixed(1)}%</p>
-                        <p>Growth Rate: {emergingTalentData[0].growth_rate.toFixed(1)}%</p>
+                        <p>Education Rate: {emergingTalentData[0].education_rate_percent?.toFixed(1)}%</p>
+                        <p>Growth Rate: {emergingTalentData[0].education_growth_rate?.toFixed(1)}%</p>
                         <p>Median Age: {emergingTalentData[0].median_age}</p>
                       </div>
                     </div>
@@ -771,15 +787,15 @@ export function KeyInsightsPanel() {
                           <div>
                             <h4 className="font-medium">{market.county_name}</h4>
                             <p className="text-sm text-gray-400">
-                              {market.total_educated.toLocaleString()} educated professionals
+                              {market.total_educated?.toLocaleString()} educated professionals
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-semibold">
-                              {market.education_rate_percent.toFixed(1)}%
+                              {market.education_rate_percent?.toFixed(1)}%
                             </p>
                             <p className="text-sm text-gray-400">
-                              Growth: {market.growth_rate.toFixed(1)}%
+                              Growth: {market.education_growth_rate?.toFixed(1)}%
                             </p>
                           </div>
                         </div>
