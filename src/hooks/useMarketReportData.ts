@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { ComprehensiveMarketData } from "@/types/rankings";
+import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, state: string | undefined) => {
   // Query for state FIPS code
@@ -51,6 +51,35 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         return null;
       }
 
+      // Fetch top firms data
+      const { data: firmsData, error: firmsError } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .eq('COUNTYNAME', county)
+        .eq('STATEFP', stateFips)
+        .order('followerCount', { ascending: false })
+        .limit(6);
+
+      if (firmsError) {
+        console.error('Error fetching firms data:', firmsError);
+        toast.error('Error fetching firms data');
+      }
+
+      const topFirms: TopFirm[] = (firmsData || []).map(firm => ({
+        company_name: firm['Company Name'] || '',
+        employee_count: firm.employeeCount || 0,
+        follower_count: firm.followerCount || 0,
+        follower_ratio: firm.followerCount / (firm.employeeCount || 1),
+        specialities: firm.specialities,
+        logoResolutionResult: firm.logoResolutionResult,
+        originalCoverImage: firm.originalCoverImage,
+        employeeCountRangeLow: firm.employeeCountRangeLow,
+        employeeCountRangeHigh: firm.employeeCountRangeHigh,
+        foundedOn: firm.foundedOn,
+        websiteUrl: firm.websiteUrl,
+        primarySubtitle: firm['Primary Subtitle']
+      }));
+
       // Transform the data to match ComprehensiveMarketData type
       const marketData: ComprehensiveMarketData = {
         total_population: data.B01001_001E,
@@ -82,7 +111,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
         rent_rank: data.rent_rank,
         density_rank: data.firm_density_rank,
         growth_rank: data.growth_rank,
-        top_firms: data.top_firms || [],
+        top_firms: topFirms,
         state_avg_income: null,
         adjacent_counties: null
       };

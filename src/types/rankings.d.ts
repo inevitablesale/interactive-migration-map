@@ -6,6 +6,11 @@ export interface TopFirm {
   specialities?: string;
   logoResolutionResult?: string;
   originalCoverImage?: string;
+  employeeCountRangeLow?: number;
+  employeeCountRangeHigh?: number;
+  foundedOn?: number;
+  websiteUrl?: string;
+  primarySubtitle?: string;
 }
 
 export interface ComprehensiveMarketData {

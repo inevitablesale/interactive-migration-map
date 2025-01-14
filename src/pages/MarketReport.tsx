@@ -168,12 +168,34 @@ export default function MarketReport() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-white font-medium truncate">{firm.company_name}</h3>
-                          <p className="text-sm text-gray-400">{firm.employee_count} employees</p>
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-400">Follower Ratio</p>
-                            <p className={`text-sm ${getMetricColor(firm.follower_ratio, 'density')}`}>
-                              {firm.follower_ratio.toFixed(1)}
-                            </p>
+                          {firm.primarySubtitle && (
+                            <p className="text-sm text-gray-400 truncate">{firm.primarySubtitle}</p>
+                          )}
+                          <div className="mt-2 space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-400">Employees</span>
+                              <span className="text-sm text-white">
+                                {firm.employeeCountRangeLow && firm.employeeCountRangeHigh
+                                  ? `${firm.employeeCountRangeLow}-${firm.employeeCountRangeHigh}`
+                                  : firm.employee_count}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-400">Followers</span>
+                              <span className="text-sm text-white">{firm.follower_count.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-400">Follower Ratio</span>
+                              <span className={`text-sm ${getMetricColor(firm.follower_ratio, 'density')}`}>
+                                {firm.follower_ratio.toFixed(1)}
+                              </span>
+                            </div>
+                            {firm.foundedOn && (
+                              <div className="flex justify-between">
+                                <span className="text-sm text-gray-400">Founded</span>
+                                <span className="text-sm text-white">{firm.foundedOn}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -181,6 +203,18 @@ export default function MarketReport() {
                         <div className="mt-4">
                           <p className="text-xs text-gray-400">Specialization</p>
                           <p className="text-sm text-white mt-1">{firm.specialities}</p>
+                        </div>
+                      )}
+                      {firm.websiteUrl && (
+                        <div className="mt-4">
+                          <a
+                            href={firm.websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-400 hover:text-blue-300 truncate block"
+                          >
+                            {firm.websiteUrl}
+                          </a>
                         </div>
                       )}
                     </CardContent>
