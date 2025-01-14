@@ -1,45 +1,38 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Map as MapIcon, Building2 } from 'lucide-react';
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { useMapInitialization } from '@/hooks/useMapInitialization';
-import { useMapLayers } from '@/hooks/useMapLayers';
-import { useMSAData } from '@/hooks/useMSAData';
-import { MAP_COLORS } from '@/constants/colors';
 import { supabase } from "@/integrations/supabase/client";
 import { MapReportPanel } from './MapReportPanel';
-import { getDensityColor, formatNumber } from '@/utils/heatmapUtils';
-import { GeographicLevel } from "@/types/geography";
-import { getStateName } from '@/utils/stateUtils';
+import { MAP_COLORS } from '@/constants/colors';
 
 interface AnalysisMapProps {
   className?: string;
   data?: any[];
   type: 'density' | 'growth';
-  geographicLevel: GeographicLevel;
+  geographicLevel: 'state' | 'county' | 'msa';
 }
 
 const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [selectedState, setSelectedState] = useState<any | null>(null);
-  const [hoveredState, setHoveredState] = useState<any | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [showReportPanel, setShowReportPanel] = useState(false);
   const [stateData, setStateData] = useState<any[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const activeFilter = searchParams.get('filter');
-  const { fetchMSAData } = useMSAData();
 
   const fetchStateData = useCallback(async () => {
     try {
       console.log('Fetching state data...');
       const { data: stateMetrics, error } = await supabase
-        .rpc(type === 'density' ? 'get_firm_density_metrics' : 'get_growth_trend_metrics');
+        .from('state_data')
+        .select('STATEFP, ESTAB, B01001_001E')
+        .not('STATEFP', 'is', null)
+        .not('ESTAB', 'is', null)
+        .not('B01001_001E', 'is', null);
 
       if (error) {
         console.error('Error fetching state data:', error);
@@ -51,39 +44,38 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         return;
       }
 
-      // Ensure data is serializable by converting to plain objects
-      const statesWithDensity = stateMetrics.map((state: any) => ({
-        ...JSON.parse(JSON.stringify({
-          ...state,
-          firmDensity: state.total_firms && state.population ? 
-            (state.total_firms / state.population) * 10000 : 0
-        }))
-      }));
+      // Calculate density and ensure data is serializable
+      const statesWithDensity = stateMetrics.map(state => {
+        const density = state.ESTAB && state.B01001_001E ? 
+          (state.ESTAB / state.B01001_001E) * 10000 : 0;
+        
+        console.log(`State ${state.STATEFP} - ESTAB: ${state.ESTAB}, Population: ${state.B01001_001E}, Density: ${density}`);
+        
+        return {
+          ...JSON.parse(JSON.stringify(state)),
+          density
+        };
+      });
 
-      console.log('Received state data with density:', statesWithDensity);
+      console.log('Processed state data:', statesWithDensity);
       setStateData(statesWithDensity);
 
       if (map.current && mapLoaded) {
         map.current.setPaintProperty('state-fills', 'fill-color', [
-          'case',
-          ['has', 'density'],
-          [
-            'interpolate',
-            ['linear'],
-            ['coalesce', ['get', 'density'], 0],
-            0, '#FA0098',
-            20, '#94EC0E',
-            40, '#FFF903',
-            60, '#00FFE0',
-            80, '#037CFE'
-          ],
-          '#FA0098'
+          'interpolate',
+          ['linear'],
+          ['coalesce', ['get', 'density'], 0],
+          0, '#FA0098',
+          20, '#94EC0E',
+          40, '#FFF903',
+          60, '#00FFE0',
+          80, '#037CFE'
         ]);
       }
     } catch (error) {
       console.error('Error in fetchStateData:', error);
     }
-  }, [type, toast, mapLoaded]);
+  }, [toast, mapLoaded]);
 
   const handleStateClick = async (stateId: string) => {
     try {
@@ -95,10 +87,8 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
 
       if (error) throw error;
 
-      // Ensure the state info is serializable
       const serializableStateInfo = JSON.parse(JSON.stringify(stateInfo));
       setSelectedState(serializableStateInfo);
-      setShowReportPanel(true);
     } catch (error) {
       console.error('Error fetching state data:', error);
       toast({
@@ -138,25 +128,31 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
         setMapLoaded(true);
         console.log('Map style loaded');
         
-        // Add source for state fills
         currentMap.addSource('states', {
           type: 'vector',
           url: 'mapbox://inevitablesale.9fnr921z'
         });
 
-        // Add the state fills layer
         currentMap.addLayer({
           'id': 'state-fills',
           'type': 'fill',
           'source': 'states',
           'source-layer': 'tl_2020_us_state-52k5uw',
           'paint': {
-            'fill-color': '#FA0098',  // Default color
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['coalesce', ['get', 'density'], 0],
+              0, '#FA0098',
+              20, '#94EC0E',
+              40, '#FFF903',
+              60, '#00FFE0',
+              80, '#037CFE'
+            ],
             'fill-opacity': 0.8
           }
         });
 
-        // Add the state borders layer
         currentMap.addLayer({
           'id': 'state-borders',
           'type': 'line',
@@ -168,7 +164,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           }
         });
 
-        // Add hover effect layer
         currentMap.addLayer({
           'id': 'state-hover',
           'type': 'fill',
@@ -230,12 +225,6 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
     <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 to-transparent" />
-      {showReportPanel && selectedState && (
-        <MapReportPanel
-          selectedState={selectedState}
-          onClose={() => setShowReportPanel(false)}
-        />
-      )}
       
       {/* Legend */}
       <div className="absolute bottom-4 right-4 bg-black/60 p-4 rounded-lg">
