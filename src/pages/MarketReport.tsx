@@ -99,13 +99,29 @@ export default function MarketReport() {
         return null;
       }
 
-      // Parse the JSON fields and ensure proper typing
       const rawData = data[0];
-      return {
+      
+      // Transform the data to ensure proper typing
+      const transformedData: ComprehensiveMarketData = {
         ...rawData,
-        top_firms: Array.isArray(rawData.top_firms) ? rawData.top_firms : [],
-        adjacent_counties: Array.isArray(rawData.adjacent_counties) ? rawData.adjacent_counties : []
-      } as ComprehensiveMarketData;
+        top_firms: Array.isArray(rawData.top_firms) 
+          ? rawData.top_firms.map((firm: any) => ({
+              company_name: firm.company_name,
+              employee_count: firm.employee_count,
+              follower_count: firm.follower_count,
+              follower_ratio: firm.follower_ratio
+            }))
+          : [],
+        adjacent_counties: Array.isArray(rawData.adjacent_counties)
+          ? rawData.adjacent_counties.map((county: any) => ({
+              county_name: county.county_name,
+              population: county.population,
+              median_income: county.median_income
+            }))
+          : []
+      };
+
+      return transformedData;
     },
     enabled: !!stateFips,
     retry: 1,
