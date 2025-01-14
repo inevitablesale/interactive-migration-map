@@ -3,46 +3,26 @@ import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
-import { EnhancedAnalytics } from "@/components/analytics/EnhancedAnalytics";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { CountyRanking } from "@/types/analytics";
 
-const fetchCountyRankings = async () => {
-  const { data, error } = await supabase.rpc('get_county_rankings');
-  if (error) throw error;
-  return data;
-};
+const stats = [
+  {
+    label: "Regions Analyzed",
+    value: "545",
+    icon: ChartBar,
+  },
+  {
+    label: "Firms Monitored",
+    value: "10,000+",
+    icon: Users,
+  },
+  {
+    label: "Avg Growth Rate (YoY)",
+    value: "12.5%",
+    icon: TrendingUp,
+  },
+];
 
 export default function Analysis() {
-  const { data: rankingsData } = useQuery({
-    queryKey: ['countyRankings'],
-    queryFn: fetchCountyRankings,
-  });
-
-  // Calculate summary stats from rankings data
-  const stats = [
-    {
-      label: "Regions Analyzed",
-      value: rankingsData ? rankingsData.length.toString() : "Loading...",
-      icon: ChartBar,
-    },
-    {
-      label: "Firms Monitored",
-      value: rankingsData 
-        ? `${(rankingsData.reduce((sum, r) => sum + Number(r.total_firms), 0)).toLocaleString()}+`
-        : "Loading...",
-      icon: Users,
-    },
-    {
-      label: "Avg Growth Rate (YoY)",
-      value: rankingsData 
-        ? `${(rankingsData.reduce((sum, r) => sum + (r.growth_rate || 0), 0) / rankingsData.length).toFixed(1)}%`
-        : "Loading...",
-      icon: TrendingUp,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-[#222222]">
       {/* Hero Section */}
@@ -72,9 +52,8 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        <KeyInsightsPanel rankingsData={rankingsData} />
-        <EnhancedAnalytics />
-        <MarketHighlights rankingsData={rankingsData} />
+        <KeyInsightsPanel />
+        <MarketHighlights />
         <AlertsPanel />
         <ComparisonTool />
       </div>

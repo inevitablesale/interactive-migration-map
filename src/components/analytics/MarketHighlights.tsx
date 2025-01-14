@@ -9,51 +9,72 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { CountyRanking } from "@/types/analytics";
 
-interface MarketHighlightsProps {
-  rankingsData?: CountyRanking[];
-}
+const growthLeaders = [
+  {
+    region: "Jefferson County",
+    growthRate: "+25%",
+    firmDensity: "5.5",
+    avgPayroll: "$1.8M",
+  },
+  {
+    region: "Helena, MT",
+    growthRate: "+22%",
+    firmDensity: "4.3",
+    avgPayroll: "$1.4M",
+  },
+  {
+    region: "Kalispell, MT",
+    growthRate: "+19%",
+    firmDensity: "3.8",
+    avgPayroll: "$1.2M",
+  },
+];
 
-export function MarketHighlights({ rankingsData }: MarketHighlightsProps) {
+const competitiveInsights = [
+  {
+    region: "Florida",
+    firmDensity: "6.5/10k",
+    growthRate: "+12%",
+    stability: "High",
+  },
+  {
+    region: "Tennessee",
+    firmDensity: "5.9/10k",
+    growthRate: "+10%",
+    stability: "Medium",
+  },
+  {
+    region: "California",
+    firmDensity: "4.3/10k",
+    growthRate: "+8%",
+    stability: "High",
+  },
+];
+
+const serviceSpecialization = [
+  {
+    region: "Nebraska",
+    service: "Tax Advisory",
+    firmDensity: "3.5",
+    growthRate: "+15%",
+  },
+  {
+    region: "Colorado",
+    service: "Bookkeeping Services",
+    firmDensity: "5.7",
+    growthRate: "+20%",
+  },
+  {
+    region: "Washington",
+    service: "Payroll Management",
+    firmDensity: "4.8",
+    growthRate: "+18%",
+  },
+];
+
+export function MarketHighlights() {
   const [activeTab, setActiveTab] = useState("growth");
-
-  // Process rankings data
-  const growthLeaders = rankingsData 
-    ? [...rankingsData]
-        .sort((a, b) => (b.growth_rate || 0) - (a.growth_rate || 0))
-        .slice(0, 3)
-        .map(region => ({
-          region: region.countyname,
-          growthRate: `+${region.growth_rate?.toFixed(1)}%`,
-          firmDensity: region.firm_density.toFixed(1),
-          avgPayroll: `$${((region.total_firms || 0) * 1000).toLocaleString()}`,
-        }))
-    : [];
-
-  const competitiveInsights = rankingsData
-    ? [...rankingsData]
-        .sort((a, b) => b.firm_density - a.firm_density)
-        .slice(0, 3)
-        .map(region => ({
-          region: region.countyname,
-          firmDensity: `${region.firm_density.toFixed(1)}/10k`,
-          growthRate: `+${region.growth_rate?.toFixed(1)}%`,
-          stability: region.growth_rate && region.growth_rate > 10 ? "High" : "Medium",
-        }))
-    : [];
-
-  const serviceSpecialization = rankingsData
-    ? [...rankingsData]
-        .sort((a, b) => b.total_firms - a.total_firms)
-        .slice(0, 3)
-        .map(region => ({
-          region: region.countyname,
-          service: "Professional Services",
-          firmDensity: region.firm_density.toFixed(1),
-          growthRate: `+${region.growth_rate?.toFixed(1)}%`,
-        }))
-    : [];
 
   return (
     <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">

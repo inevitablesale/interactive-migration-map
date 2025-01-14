@@ -1,15 +1,7 @@
-export interface CountyRanking {
-  statefp: string;
-  countyfp: string;
-  countyname: text;
-  total_firms: bigint;
-  population: integer;
-  firm_density: double;
-  growth_rate: double;
-  density_rank: bigint;
-  growth_rank: bigint;
-  state_density_avg: double;
-  state_growth_avg: double;
+export interface BuyerProfile {
+  id: string;
+  user_id: string;
+  subscription_tier: 'free' | 'paid';
 }
 
 export interface EnhancedMarketScore {
