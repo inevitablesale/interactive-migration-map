@@ -191,15 +191,17 @@ export default function MarketReport() {
                           alt={`${firm.company_name} cover`}
                           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-200"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 p-4 z-20 space-y-1">
-                          <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
-                          <div className="flex items-center gap-2 text-gray-300 text-sm">
-                            <MapPin className="w-4 h-4" />
-                            <span className="truncate">{firm.Location || firm["State Name"]}</span>
+                        <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                          <div className="space-y-1">
+                            <h3 className="text-white font-medium truncate text-lg">{firm.company_name}</h3>
+                            <div className="flex items-center gap-2 text-gray-300 text-sm">
+                              <MapPin className="w-4 h-4" />
+                              <span className="truncate">{firm["State Name"]}</span>
+                            </div>
+                            {firm.primarySubtitle && (
+                              <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
+                            )}
                           </div>
-                          {firm.primarySubtitle && (
-                            <p className="text-sm text-gray-300 truncate">{firm.primarySubtitle}</p>
-                          )}
                         </div>
                       </div>
                       <div className="p-4 space-y-4">
