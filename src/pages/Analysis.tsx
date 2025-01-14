@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
+import { MarketMetrics } from "@/components/analytics/MarketMetrics";
 import { Rankings } from "@/components/analytics/rankings/Rankings";
 
 const Analysis = () => {
@@ -56,6 +56,7 @@ const Analysis = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
       <div className="w-full">
+        {/* Navigation */}
         <div className="bg-black/40 backdrop-blur-md border-b border-white/10">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-8 px-6">
@@ -104,6 +105,7 @@ const Analysis = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8">
             {/* Left Column */}
             <div className="space-y-8">
+              <MarketMetrics />
               <HeatmapSection activeFilter={activeFilter} />
               <Rankings />
               {!isFreeTier && (

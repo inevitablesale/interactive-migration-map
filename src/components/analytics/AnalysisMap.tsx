@@ -162,7 +162,7 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
           });
         }
 
-        // Add map layers
+        // Add base layer
         if (!currentMap.getLayer('state-base')) {
           currentMap.addLayer({
             'id': 'state-base',
@@ -173,6 +173,22 @@ const AnalysisMap = ({ className, data, type, geographicLevel }: AnalysisMapProp
               'fill-extrusion-color': MAP_COLORS.inactive,
               'fill-extrusion-height': 10000,
               'fill-extrusion-opacity': 0.6
+            }
+          });
+        }
+
+        // Add hover layer
+        if (!currentMap.getLayer('state-hover')) {
+          currentMap.addLayer({
+            'id': 'state-hover',
+            'type': 'fill-extrusion',
+            'source': 'states',
+            'source-layer': 'tl_2020_us_state-52k5uw',
+            'paint': {
+              'fill-extrusion-color': MAP_COLORS.highlight,
+              'fill-extrusion-height': 20000,
+              'fill-extrusion-opacity': 0,
+              'fill-extrusion-base': 10000
             }
           });
         }
