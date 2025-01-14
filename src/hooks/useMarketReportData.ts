@@ -49,7 +49,7 @@ export const useMarketReportData = (county: string | undefined, state: string | 
   });
 
   // Query for market data
-  const { data: marketData, isLoading } = useQuery({
+  const { data: marketData, isLoading, error } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateFips],
     queryFn: async () => {
       console.log('Market data query starting with params:', { county, stateFips });
@@ -157,11 +157,13 @@ export const useMarketReportData = (county: string | undefined, state: string | 
     gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 
+  const hasMarketData = !!marketData;
   console.log('useMarketReportData hook returning:', {
-    hasMarketData: !!marketData,
+    hasMarketData,
     isLoading,
+    error,
     stateFipsAvailable: !!stateFips
   });
 
-  return { marketData, isLoading };
+  return { marketData, isLoading, hasMarketData };
 };

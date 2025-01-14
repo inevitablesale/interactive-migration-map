@@ -12,7 +12,15 @@ import { useMarketReportData } from "@/hooks/useMarketReportData";
 export default function MarketReport() {
   const { county, state } = useParams();
   const navigate = useNavigate();
-  const { marketData, isLoading } = useMarketReportData(county, state);
+  const { marketData, isLoading, hasMarketData } = useMarketReportData(county, state);
+
+  console.log('MarketReport rendering with:', {
+    county,
+    state,
+    isLoading,
+    hasMarketData,
+    hasMarketDataObject: !!marketData
+  });
 
   if (isLoading) {
     return (
@@ -24,7 +32,8 @@ export default function MarketReport() {
     );
   }
 
-  if (!marketData) {
+  if (!hasMarketData || !marketData) {
+    console.log('No market data available:', { hasMarketData, marketData });
     return (
       <div className="min-h-screen bg-[#222222] p-8">
         <div className="max-w-7xl mx-auto">
