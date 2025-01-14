@@ -28,7 +28,7 @@ export function useMarketReportData(county?: string, state?: string) {
         if (countyError) throw countyError;
         if (!countyData) throw new Error("County not found");
 
-        // Get firms in this county
+        // Get firms in this county - Convert STATEFP to number for comparison
         const { data: firmsData, error: firmsError } = await supabase
           .from("canary_firms_data")
           .select("*")
