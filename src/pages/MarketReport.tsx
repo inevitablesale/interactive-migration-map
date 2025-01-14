@@ -11,32 +11,23 @@ import { MarketRankingBadges } from "@/components/market-report/MarketRankingBad
 import { getMetricColor } from '@/utils/market-report/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketReportData } from "@/hooks/useMarketReportData";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { supabase } from "@/integrations/supabase/client";
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d';
 const FIRMS_PER_PAGE = 6;
 
 export default function MarketReport() {
-  const { county, state: stateFips } = useParams();
+  const { county, state } = useParams();
   const navigate = useNavigate();
   
   // Format county name to ensure it ends with "County" if it doesn't already
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
   console.log('Formatted county name:', formattedCounty); // Debug log
 
-  const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, stateFips);
+  const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, state);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  console.log('Market data status:', { isLoading, hasMarketData }); // Debug log
-  if (marketData) {
-    console.log('Market data received:', { 
-      population: marketData.total_population,
-      firms: marketData.firms_per_10k_population
-    }); // Debug log
-  }
 
   if (isLoading) {
     return (
@@ -131,7 +122,7 @@ export default function MarketReport() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white">
-                {county}, {stateFips}
+                {county}, {state}
               </h1>
               <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
             </div>

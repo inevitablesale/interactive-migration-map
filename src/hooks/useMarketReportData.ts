@@ -3,22 +3,41 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ComprehensiveMarketData } from "@/types/rankings";
 import { toast } from "sonner";
 
-export const useMarketReportData = (county: string | undefined, stateFips: string | undefined) => {
-  console.log('useMarketReportData called with:', { county, stateFips }); // Debug log
+export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
+  console.log('useMarketReportData called with:', { county, stateName }); // Debug log
 
   // Query for market data using county_rankings view
   const { data: marketData, isLoading, error } = useQuery({
-    queryKey: ['comprehensiveMarketData', county, stateFips],
+    queryKey: ['comprehensiveMarketData', county, stateName],
     queryFn: async () => {
-      if (!stateFips || !county) return null;
+      if (!stateName || !county) return null;
 
-      console.log('Fetching market data for:', { county, stateFips }); // Debug log
+      console.log('Fetching market data for:', { county, stateName }); // Debug log
 
+      // First, get the state FIPS code
+      const { data: stateData, error: stateError } = await supabase
+        .from('state_fips_codes')
+        .select('fips_code')
+        .eq('state', stateName)
+        .maybeSingle();
+
+      if (stateError) {
+        console.error('Error fetching state FIPS:', stateError);
+        toast.error('Error fetching state data');
+        throw stateError;
+      }
+
+      if (!stateData?.fips_code) {
+        console.log('No state FIPS found for:', stateName);
+        return null;
+      }
+
+      // Then, get the county data using the FIPS code
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('statefp', stateFips)
+        .eq('statefp', stateData.fips_code)
         .maybeSingle();
 
       if (rankingError) {
@@ -28,13 +47,28 @@ export const useMarketReportData = (county: string | undefined, stateFips: strin
       }
 
       if (!rankingData) {
-        console.log('No county data found for:', { county, stateFips }); // Debug log
+        console.log('No county data found for:', { county, stateName }); // Debug log
         return null;
+      }
+
+      // Get the top firms data
+      let topFirms = [];
+      if (rankingData.top_firms) {
+        const { data: firmsData, error: firmsError } = await supabase
+          .from('canary_firms_data')
+          .select('*')
+          .in('Company ID', rankingData.top_firms);
+
+        if (firmsError) {
+          console.error('Error fetching firms data:', firmsError);
+        } else {
+          topFirms = firmsData || [];
+        }
       }
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.population,
+        total_population: rankingData.B01001_001E,
         median_household_income: null,
         median_gross_rent: null,
         median_home_value: null,
@@ -57,18 +91,18 @@ export const useMarketReportData = (county: string | undefined, stateFips: strin
         vacancy_rate: null,
         vacancy_rank: null,
         income_rank: null,
-        population_rank: null,
+        population_rank: rankingData.population_rank,
         rent_rank: null,
-        density_rank: rankingData.firm_density_rank,
+        density_rank: rankingData.density_rank,
         growth_rank: rankingData.growth_rank,
-        top_firms: [],
+        top_firms: topFirms,
         state_avg_income: null,
         adjacent_counties: null
       };
 
       return transformedData;
     },
-    enabled: !!stateFips && !!county,
+    enabled: !!stateName && !!county,
   });
 
   const hasMarketData = !!marketData;
