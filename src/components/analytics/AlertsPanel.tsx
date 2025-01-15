@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Settings, Plus, Trash2 } from "lucide-react";
+import { Bell, Settings, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertForm } from "./AlertForm";
@@ -50,25 +50,6 @@ export const AlertsPanel = () => {
     fetchAlerts();
   }, []);
 
-  const deleteAlert = async (id: string) => {
-    try {
-      const { error } = await supabase.from("alerts").delete().eq("id", id);
-      if (error) throw error;
-
-      setAlerts(alerts.filter((alert) => alert.id !== id));
-      toast({
-        title: "Alert deleted",
-        description: "The alert has been removed successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete alert. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
       <div className="flex items-center justify-between mb-6">
@@ -100,34 +81,6 @@ export const AlertsPanel = () => {
       </div>
 
       <div className="space-y-4">
-        {loading ? (
-          <div className="text-sm text-blue-100/60">Loading alerts...</div>
-        ) : alerts.length === 0 ? (
-          <div className="text-sm text-blue-100/60">No alerts set.</div>
-        ) : (
-          alerts.map((alert) => (
-            <div key={alert.id} className="bg-white/5 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-white">
-                  {alert.title}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-white/10"
-                  onClick={() => deleteAlert(alert.id)}
-                >
-                  <Trash2 className="w-4 h-4 text-white" />
-                </Button>
-              </div>
-              <p className="text-sm text-blue-100/60">
-                {alert.region} · {alert.employee_count_min}-{alert.employee_count_max} employees
-                · {alert.frequency} updates
-              </p>
-            </div>
-          ))
-        )}
-
         <Button
           className="w-full bg-white/5 hover:bg-white/10 border-white/10"
           onClick={() => setShowForm(true)}
