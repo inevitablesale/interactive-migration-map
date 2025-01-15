@@ -227,7 +227,8 @@ export default function StateMarketReport() {
             <p className="text-2xl font-bold text-white">
               {stateRankings?.growth_rate ? 
                 `${stateRankings.growth_rate.toFixed(1)}%` : 
-                ((stateData.MOVEDIN2022 ?? 0) - (stateData.MOVEDIN2021 ?? 0)) / (stateData.MOVEDIN2021 || 1) * 100}%
+                `${(((stateData.MOVEDIN2022 ?? 0) - (stateData.MOVEDIN2021 ?? 0)) / (stateData.MOVEDIN2021 || 1) * 100).toFixed(1)}%`
+              }
             </p>
           </Card>
         </div>
