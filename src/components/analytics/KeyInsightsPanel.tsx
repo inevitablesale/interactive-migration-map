@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
-  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins
+  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
+  DollarSign, Briefcase, LineChart, Building
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -27,6 +28,8 @@ interface CompetitiveMarketMetric {
   followerCount: number;
   COUNTYNAME: string;
   STATEFP: number;
+  revenue_per_employee?: number;
+  market_saturation?: number;
 }
 
 interface UnderservedRegionMetric {
@@ -38,6 +41,7 @@ interface UnderservedRegionMetric {
   recent_movers: number;
   market_status: string;
   opportunity_status: string;
+  median_income?: number;
 }
 
 interface EmergingTalentMarket {
@@ -46,6 +50,7 @@ interface EmergingTalentMarket {
   total_educated: number;
   education_growth_rate: number;
   median_age: number;
+  private_to_public_ratio?: number;
 }
 
 interface FutureSaturationRisk {
@@ -54,68 +59,78 @@ interface FutureSaturationRisk {
   projected_firm_density: number;
   firm_growth_rate: number;
   population_growth_rate: number;
+  median_income?: number;
 }
 
-async function fetchMarketGrowthMetrics() {
-  const { data, error } = await supabase.rpc('get_market_growth_metrics');
-  if (error) throw error;
-  return data as MarketGrowthMetric[];
-}
-
-async function fetchCompetitiveMarketMetrics() {
-  const { data, error } = await supabase
-    .from('canary_firms_data')
-    .select('*')
-    .order('employeeCount', { ascending: false })
-    .limit(5);
-  
-  if (error) throw error;
-  return data as CompetitiveMarketMetric[];
-}
-
-async function fetchUnderservedRegions() {
-  const { data, error } = await supabase.rpc('get_underserved_regions');
-  if (error) throw error;
-  return data as UnderservedRegionMetric[];
-}
-
-async function fetchEmergingTalentMarkets() {
-  const { data, error } = await supabase.rpc('get_emerging_talent_markets');
-  if (error) throw error;
-  return data as EmergingTalentMarket[];
-}
-
-async function fetchFutureSaturationRisk() {
-  const { data, error } = await supabase.rpc('get_future_saturation_risk');
-  if (error) throw error;
-  return data as FutureSaturationRisk[];
+interface ValueMetric {
+  county_name: string;
+  median_income: number;
+  median_home_value: number;
+  total_firms: number;
+  avg_revenue: number;
+  growth_potential: number;
 }
 
 export function KeyInsightsPanel() {
   const navigate = useNavigate();
+
   const { data: marketGrowthMetrics } = useQuery({
     queryKey: ['marketGrowthMetrics'],
-    queryFn: fetchMarketGrowthMetrics,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_market_growth_metrics');
+      if (error) throw error;
+      return data as MarketGrowthMetric[];
+    },
   });
 
   const { data: competitiveMarkets } = useQuery({
     queryKey: ['competitiveMarkets'],
-    queryFn: fetchCompetitiveMarketMetrics,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .order('employeeCount', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data as CompetitiveMarketMetric[];
+    },
   });
 
   const { data: underservedRegions } = useQuery({
     queryKey: ['underservedRegions'],
-    queryFn: fetchUnderservedRegions,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_underserved_regions');
+      if (error) throw error;
+      return data as UnderservedRegionMetric[];
+    },
   });
 
   const { data: emergingTalentData } = useQuery({
     queryKey: ['emergingTalentMarkets'],
-    queryFn: fetchEmergingTalentMarkets,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_emerging_talent_markets');
+      if (error) throw error;
+      return data as EmergingTalentMarket[];
+    },
   });
 
   const { data: futureSaturationData } = useQuery({
     queryKey: ['futureSaturationRisk'],
-    queryFn: fetchFutureSaturationRisk,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_future_saturation_risk');
+      if (error) throw error;
+      return data as FutureSaturationRisk[];
+    },
+  });
+
+  const { data: valueMetrics } = useQuery({
+    queryKey: ['valueMetrics'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_value_metrics');
+      if (error) throw error;
+      return data as ValueMetric[];
+    },
   });
 
   const topGrowthMetric = marketGrowthMetrics?.[0];
@@ -123,10 +138,55 @@ export function KeyInsightsPanel() {
   const topUnderservedRegion = underservedRegions?.[0];
   const topEmergingTalentMarket = emergingTalentData?.[0];
   const topFutureSaturationRisk = futureSaturationData?.[0];
+  const topValueMetric = valueMetrics?.[0];
 
   const insights = [
     {
-      title: "Top Growth Region",
+      title: "High-Value Markets",
+      value: topValueMetric 
+        ? `${topValueMetric.county_name}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {topValueMetric ? (
+            <>
+              {`$${(topValueMetric.avg_revenue / 1000).toFixed(1)}K avg revenue, ${topValueMetric.growth_potential.toFixed(1)}% growth potential`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">High-Value Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {valueMetrics?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => navigate(`/market-report/${market.county_name}`)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
+                        <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data"
+          )}
+        </div>
+      ),
+      icon: DollarSign,
+    },
+    {
+      title: "Market Growth Leaders",
       value: topGrowthMetric 
         ? `${topGrowthMetric.county_name}, ${topGrowthMetric.state}`
         : "Loading...",
@@ -143,7 +203,7 @@ export function KeyInsightsPanel() {
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 border-white/10">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Top Growth Regions</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-white">Market Growth Leaders</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {marketGrowthMetrics?.slice(0, 5).map((region, index) => (
@@ -169,7 +229,50 @@ export function KeyInsightsPanel() {
       icon: TrendingUp,
     },
     {
-      title: "Competitive Market",
+      title: "Talent Availability",
+      value: topEmergingTalentMarket 
+        ? `${topEmergingTalentMarket.county_name}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {topEmergingTalentMarket ? (
+            <>
+              {`${topEmergingTalentMarket.education_rate_percent.toFixed(1)}% education rate, ${topEmergingTalentMarket.total_educated.toLocaleString()} educated professionals`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Talent Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {emergingTalentData?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing talent data..."
+          )}
+        </div>
+      ),
+      icon: GraduationCap,
+    },
+    {
+      title: "Market Competition",
       value: topCompetitiveMarket 
         ? `${topCompetitiveMarket.COUNTYNAME}, ${topCompetitiveMarket["State Name"]}`
         : "Loading...",
@@ -186,7 +289,7 @@ export function KeyInsightsPanel() {
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 border-white/10">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Top Competitive Markets</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-white">Market Competition</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {competitiveMarkets?.slice(0, 5).map((market, index) => (
@@ -198,6 +301,7 @@ export function KeyInsightsPanel() {
                         <h3 className="text-lg font-semibold text-white">{market.COUNTYNAME}, {market["State Name"]}</h3>
                         <p className="text-sm text-gray-300">Employees: {market.employeeCount.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Followers: {market.followerCount.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Market Saturation: {(market.market_saturation || 0).toFixed(1)}%</p>
                       </div>
                     ))}
                   </div>
@@ -212,9 +316,9 @@ export function KeyInsightsPanel() {
       icon: Users,
     },
     {
-      title: "Underserved Region",
+      title: "Growth Opportunities",
       value: topUnderservedRegion 
-        ? `${topUnderservedRegion.state_name}, ${topUnderservedRegion.firms_per_10k_population} firms/10k`
+        ? `${topUnderservedRegion.county_name}, ${topUnderservedRegion.state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -229,7 +333,7 @@ export function KeyInsightsPanel() {
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 border-white/10">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Underserved Regions</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-white">Growth Opportunities</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {underservedRegions?.slice(0, 5).map((region, index) => (
@@ -256,58 +360,15 @@ export function KeyInsightsPanel() {
       icon: Target,
     },
     {
-      title: "Emerging Talent Markets",
-      value: topEmergingTalentMarket 
-        ? `${topEmergingTalentMarket.county_name}, ${topEmergingTalentMarket.total_educated.toLocaleString()} educated professionals`
-        : "Loading...",
-      insight: (
-        <div className="flex items-center gap-2 text-sm text-white/80">
-          {topEmergingTalentMarket ? (
-            <>
-              {`${topEmergingTalentMarket.education_rate_percent.toFixed(1)}% education rate`}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
-                    View Details <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Emerging Talent Markets</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    {emergingTalentData?.slice(0, 5).map((market, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                      >
-                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
-                        <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
-                        <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
-                        <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            "Analyzing talent data..."
-          )}
-        </div>
-      ),
-      icon: BookOpen,
-    },
-    {
-      title: "Future Saturation Risk",
+      title: "Market Saturation Risk",
       value: topFutureSaturationRisk 
-        ? `${topFutureSaturationRisk.projected_firm_density?.toFixed(1) || '0'} per 10k`
+        ? `${topFutureSaturationRisk.county_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topFutureSaturationRisk ? (
             <>
-              {`${topFutureSaturationRisk.county_name}, ${(topFutureSaturationRisk.firm_growth_rate || 0).toFixed(1)}% growth`}
+              {`Current: ${topFutureSaturationRisk.current_firm_density.toFixed(1)} firms/10k, Projected: ${topFutureSaturationRisk.projected_firm_density.toFixed(1)} firms/10k`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -316,7 +377,7 @@ export function KeyInsightsPanel() {
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 border-white/10">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Future Saturation Risk Analysis</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {futureSaturationData?.slice(0, 5).map((region, index) => (
@@ -346,7 +407,7 @@ export function KeyInsightsPanel() {
   return (
     <section className="space-y-6">
       <h2 className="text-3xl font-bold">Market Insights at a Glance</h2>
-      <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
         {insights.map((insight) => (
           <Card
             key={insight.title}
