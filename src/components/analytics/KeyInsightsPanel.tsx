@@ -70,6 +70,20 @@ interface FutureSaturationRisk {
   population_growth_rate: number;
 }
 
+interface CountyRanking {
+  statefp: string;
+  countyfp: string;
+  countyname: string;
+  total_firms: number;
+  population: number;
+  firm_density: number;
+  growth_rate: number;
+  density_rank: number;
+  growth_rank: number;
+  state_density_avg: number;
+  state_growth_avg: number;
+}
+
 async function fetchMarketGrowthMetrics() {
   const { data, error } = await supabase.rpc('get_market_growth_metrics');
   if (error) throw error;
@@ -88,8 +102,23 @@ async function fetchUnderservedRegions() {
   return data as UnderservedRegionMetric[];
 }
 
+async function fetchCountyRankings() {
+  const { data, error } = await supabase
+    .from('county_rankings')
+    .select('*')
+    .order('growth_rate', { ascending: false })
+    .limit(10);
+  if (error) throw error;
+  return data as CountyRanking[];
+}
+
 export function KeyInsightsPanel() {
   const navigate = useNavigate();
+  const { data: countyRankings } = useQuery({
+    queryKey: ['countyRankings'],
+    queryFn: fetchCountyRankings,
+  });
+
   const { data: growthMetrics } = useQuery({
     queryKey: ['marketGrowthMetrics'],
     queryFn: fetchMarketGrowthMetrics,
@@ -168,21 +197,21 @@ export function KeyInsightsPanel() {
     }
   });
 
-  const topGrowthRegion = growthMetrics?.[0];
+  const topGrowthCounty = countyRankings?.[0];
   const topCompetitiveMarket = competitiveMetrics?.[0];
   const topUnderservedRegion = underservedMetrics?.[0];
 
   const insights = [
     {
       title: "Top Growth Region",
-      value: topGrowthRegion 
-        ? `${topGrowthRegion.county_name}, ${topGrowthRegion.state}`
+      value: topGrowthCounty 
+        ? `${topGrowthCounty.countyname}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topGrowthRegion ? (
+          {topGrowthCounty ? (
             <>
-              {`${topGrowthRegion.growth_rate_percentage.toFixed(1)}% of national moves, ${topGrowthRegion.total_moves.toLocaleString()} total moves`}
+              {`${(topGrowthCounty.growth_rate * 100).toFixed(1)}% growth rate, ${topGrowthCounty.total_firms.toLocaleString()} firms`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -190,17 +219,11 @@ export function KeyInsightsPanel() {
                   </TooltipTrigger>
                   <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
                     <div className="space-y-2 p-1">
-                      <p className="text-sm font-medium text-white">Move-in Distribution:</p>
+                      <p className="text-sm font-medium text-white">Region Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>2022: {topGrowthRegion.total_movedin_2022.toLocaleString()}</p>
-                        <p>2021: {topGrowthRegion.total_movedin_2021.toLocaleString()}</p>
-                        <p>2020: {topGrowthRegion.total_movedin_2020.toLocaleString()}</p>
-                        <div className="mt-2 pt-2 border-t border-white/10">
-                          <p>Total Moves: {topGrowthRegion.total_moves.toLocaleString()}</p>
-                          <p className="mt-1">
-                            Represents {topGrowthRegion.growth_rate_percentage.toFixed(1)}% of all national moves
-                          </p>
-                        </div>
+                        <p>Population: {topGrowthCounty.population.toLocaleString()}</p>
+                        <p>Firm Density: {topGrowthCounty.firm_density.toFixed(2)} per capita</p>
+                        <p>Growth Rank: #{topGrowthCounty.growth_rank}</p>
                       </div>
                     </div>
                   </TooltipContent>
@@ -223,28 +246,28 @@ export function KeyInsightsPanel() {
                         <div>Rank</div>
                         <div>Region</div>
                         <div>Growth Rate</div>
-                        <div>Total Moves</div>
+                        <div>Total Firms</div>
                       </div>
-                      {growthMetrics?.map((region, index) => (
+                      {countyRankings?.map((county, index) => (
                         <div 
-                          key={`${region.county_name}-${region.state}-${index}`}
+                          key={`${county.countyname}-${county.statefp}-${index}`}
                           className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                           onClick={() => {
-                            navigate(`/market-report/${encodeURIComponent(region.county_name)}/${encodeURIComponent(region.state)}`);
+                            navigate(`/market-report/${encodeURIComponent(county.countyname)}/${encodeURIComponent(county.statefp)}`);
                           }}
                         >
                           <div className="flex items-center">
                             <span className="text-lg font-bold text-accent">#{index + 1}</span>
                           </div>
                           <div>
-                            <p className="font-medium">{region.county_name}</p>
-                            <p className="text-sm text-white/60">{region.state}</p>
+                            <p className="font-medium">{county.countyname}</p>
+                            <p className="text-sm text-white/60">State {county.statefp}</p>
                           </div>
                           <div className="flex items-center">
-                            <span className="text-green-400">+{region.growth_rate_percentage.toFixed(1)}%</span>
+                            <span className="text-green-400">+{(county.growth_rate * 100).toFixed(1)}%</span>
                           </div>
                           <div className="flex items-center">
-                            {region.total_moves.toLocaleString()}
+                            {county.total_firms.toLocaleString()}
                           </div>
                         </div>
                       ))}
