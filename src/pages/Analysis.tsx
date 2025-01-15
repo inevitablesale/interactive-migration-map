@@ -17,19 +17,23 @@ async function fetchStats() {
     .from('canary_firms_data')
     .select('*', { count: 'exact', head: true });
 
-  // Calculate average growth rate from canary firms data
-  const { data: firmsData } = await supabase
-    .from('canary_firms_data')
-    .select('employeeCount, followerCount')
-    .not('employeeCount', 'is', null)
-    .not('followerCount', 'is', null);
+  // Calculate average growth rate using combined moved in values
+  const { data: growthData } = await supabase
+    .from('county_data')
+    .select('MOVEDIN2022, MOVEDIN2021, MOVEDIN2020')
+    .not('MOVEDIN2022', 'is', null)
+    .not('MOVEDIN2021', 'is', null)
+    .not('MOVEDIN2020', 'is', null);
 
   let avgGrowthRate = 0;
-  if (firmsData && firmsData.length > 0) {
-    const growthRates = firmsData.map(firm => {
-      // Using follower to employee ratio as a growth indicator
-      const growthRate = ((firm.followerCount - firm.employeeCount) / firm.employeeCount) * 100;
-      return growthRate;
+  if (growthData && growthData.length > 0) {
+    const growthRates = growthData.map(county => {
+      const total2022 = county.MOVEDIN2022;
+      const total2021 = county.MOVEDIN2021;
+      const total2020 = county.MOVEDIN2020;
+      const combinedGrowth = ((total2022 + total2021 + total2020) / 3);
+      const yearlyGrowth = ((combinedGrowth - total2020) / total2020) * 100;
+      return yearlyGrowth;
     });
     
     avgGrowthRate = growthRates.reduce((acc, rate) => acc + rate, 0) / growthRates.length;
