@@ -17,16 +17,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 export function MarketSimilarityAnalysis() {
-  const { data: marketAnalysis } = useQuery<MarketSimilarityAnalysis[]>({
+  const { data: marketAnalysis, error } = useQuery<MarketSimilarityAnalysis[]>({
     queryKey: ['marketSimilarityAnalysis'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_similarity_analysis');
-      if (error) throw error;
-      return data;
-    }
+      if (error) {
+        console.error('Error fetching market similarity analysis:', error);
+        toast.error('Failed to load market analysis data');
+        throw error;
+      }
+      return data || [];
+    },
+    retry: 1
   });
+
+  if (error) {
+    console.error('Query error:', error);
+    return null;
+  }
 
   if (!marketAnalysis?.length) return null;
 
