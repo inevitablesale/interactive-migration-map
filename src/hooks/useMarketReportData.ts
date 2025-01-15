@@ -56,6 +56,7 @@ export const useMarketReportData = (countyName: string, state: string) => {
         doctorate_degree_holders: countyData?.doctorate_holders || 0,
         payann: stateData?.PAYANN || 0,
         emp: stateData?.EMP || 0,
+        public_to_private_ratio: 0,
         density_rank: countyData?.firm_density_rank || 0,
         top_firms: firms?.map(firm => ({
           company_name: firm["Company Name"],
