@@ -34,12 +34,14 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       console.log('Found state FIPS:', stateData.STATEFP);
 
       // Then, get the county data using the FIPS code - simplified query
-      const { data: countyData, error: countyError } = await supabase
-        .from('county_data')
-        .select('*')
-        .eq('STATEFP', stateData.STATEFP)
-        .eq('COUNTYNAME', county)
-        .single();
+     // Then, get the county data using the FIPS code
+const { data: countyData, error: countyError } = await supabase
+  .from('county_data') // Replace this with 'county_rankings'
+  .select('*')
+  .eq('COUNTYNAME', county)
+  .eq('STATEFP', stateData.STATEFP)
+  .maybeSingle();
+
 
       if (countyError) {
         console.error('Error fetching county data:', countyError);
