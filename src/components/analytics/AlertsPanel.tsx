@@ -102,10 +102,6 @@ export const AlertsPanel = () => {
       <div className="space-y-4">
         {loading ? (
           <div className="text-sm text-blue-100/60">Loading alerts...</div>
-        ) : alerts.length === 0 ? (
-          <div className="text-sm text-blue-100/60">
-            No alerts set. Create one to get notified about opportunities.
-          </div>
         ) : (
           alerts.map((alert) => (
             <div key={alert.id} className="bg-white/5 p-4 rounded-lg">

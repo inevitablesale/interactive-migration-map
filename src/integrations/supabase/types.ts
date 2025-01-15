@@ -745,6 +745,9 @@ export type Database = {
           C24060_007E: number | null
           EMP: number | null
           ESTAB: number | null
+          MOVEDIN2020: number | null
+          MOVEDIN2021: number | null
+          MOVEDIN2022: number | null
           PAYANN: number | null
           STATEFP: string
         }
@@ -778,6 +781,9 @@ export type Database = {
           C24060_007E?: number | null
           EMP?: number | null
           ESTAB?: number | null
+          MOVEDIN2020?: number | null
+          MOVEDIN2021?: number | null
+          MOVEDIN2022?: number | null
           PAYANN?: number | null
           STATEFP: string
         }
@@ -811,6 +817,9 @@ export type Database = {
           C24060_007E?: number | null
           EMP?: number | null
           ESTAB?: number | null
+          MOVEDIN2020?: number | null
+          MOVEDIN2021?: number | null
+          MOVEDIN2022?: number | null
           PAYANN?: number | null
           STATEFP?: string
         }
