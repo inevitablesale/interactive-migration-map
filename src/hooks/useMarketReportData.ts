@@ -13,12 +13,12 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
-      // First, get the state FIPS code
+      // First, get the state FIPS code using the postal abbreviation
       console.log('3. Fetching state FIPS code for:', stateName);
       const { data: stateData, error: stateError } = await supabase
         .from('state_fips_codes')
         .select('fips_code')
-        .ilike('state', stateName)
+        .eq('state', stateName)
         .maybeSingle();
 
       if (stateError) {
