@@ -21,37 +21,15 @@ async function fetchStats() {
     .from('canary_firms_data')
     .select('*', { count: 'exact', head: true });
 
-  // Calculate average growth rate using combined moved in values
-  const { data: growthData } = await supabase
-    .from('county_data')
-    .select('MOVEDIN2022, MOVEDIN2021, MOVEDIN2020')
-    .not('MOVEDIN2022', 'is', null)
-    .not('MOVEDIN2021', 'is', null)
-    .not('MOVEDIN2020', 'is', null);
-
-  let avgGrowthRate = 0;
-  if (growthData && growthData.length > 0) {
-    const growthRates = growthData.map(county => {
-      const total2022 = county.MOVEDIN2022 || 0;
-      const total2021 = county.MOVEDIN2021 || 0;
-      const total2020 = county.MOVEDIN2020 || 0;
-      
-      // Calculate year-over-year growth rates
-      const growth2021 = ((total2021 - total2020) / total2020) * 100;
-      const growth2022 = ((total2022 - total2021) / total2021) * 100;
-      
-      // Return average of the two year-over-year rates
-      return (growth2021 + growth2022) / 2;
-    });
-    
-    // Calculate the average growth rate across all counties
-    avgGrowthRate = growthRates.reduce((acc, rate) => acc + rate, 0) / growthRates.length;
-  }
+  // Get count of cities tracked
+  const { count: citiesCount } = await supabase
+    .from('region_data')
+    .select('*', { count: 'exact', head: true });
 
   return {
     regionsCount: regionsCount || 0,
     firmsCount: firmsCount || 0,
-    avgGrowthRate: avgGrowthRate || 0
+    citiesCount: citiesCount || 0
   };
 }
 
@@ -74,8 +52,8 @@ export default function Analysis() {
       icon: Users,
     },
     {
-      label: "Avg Growth Rate (YoY)",
-      value: stats ? `${stats.avgGrowthRate.toFixed(1)}%` : "Loading...",
+      label: "Cities Tracked",
+      value: stats ? stats.citiesCount.toLocaleString() : "Loading...",
       icon: TrendingUp,
     },
   ];
