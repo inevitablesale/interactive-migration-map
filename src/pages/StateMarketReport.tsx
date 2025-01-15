@@ -27,6 +27,16 @@ export default function StateMarketReport() {
     }
   });
 
+  // Get state rankings
+  const { data: stateRankings } = useQuery({
+    queryKey: ['stateRankings'],
+    queryFn: async () => {
+      const { data: rankings } = await supabase.rpc('get_state_rankings');
+      return rankings?.find(r => r.statefp === state);
+    },
+    enabled: !!state
+  });
+
   // First get state abbreviation
   const { data: stateAbbr } = useQuery({
     queryKey: ['stateAbbr', state],
@@ -99,9 +109,22 @@ export default function StateMarketReport() {
   }, [state]);
 
   const handleCountyClick = (countyName: string) => {
-    // Ensure county name includes "County" suffix if not present
     const formattedCounty = countyName.endsWith(" County") ? countyName : `${countyName} County`;
     navigate(`/market-report/${formattedCounty}/${stateName}`);
+  };
+
+  // Calculate combined national rank
+  const calculateNationalRank = () => {
+    if (!stateRankings) return null;
+    
+    // Average of density, growth, and market saturation ranks
+    const avgRank = Math.round(
+      (stateRankings.national_density_rank + 
+       stateRankings.national_growth_rank + 
+       stateRankings.market_saturation_rank) / 3
+    );
+    
+    return avgRank;
   };
 
   if (isLoading) {
@@ -128,6 +151,8 @@ export default function StateMarketReport() {
     );
   }
 
+  const nationalRank = calculateNationalRank();
+
   return (
     <div className="min-h-screen bg-[#111111]">
       <div className="max-w-7xl mx-auto p-6">
@@ -138,7 +163,14 @@ export default function StateMarketReport() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white">{stateName}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-4xl font-bold text-white">{stateName}</h1>
+              {nationalRank && (
+                <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">
+                  National Rank: #{nationalRank}
+                </Badge>
+              )}
+            </div>
             <p className="text-gray-400 mt-2">State Market Analysis</p>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
