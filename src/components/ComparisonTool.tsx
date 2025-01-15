@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GripHorizontal, X, Lock, TrendingUp, Users, Building2, DollarSign, GraduationCap, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { GripHorizontal, X, Lock, TrendingUp, Users, Building2, DollarSign, GraduationCap, ArrowUpRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { ComparisonCharts } from "./comparison/ComparisonCharts";
+import { ScenarioModeling } from "./comparison/ScenarioModeling";
 
 interface StateData {
   STATEFP: string;
@@ -70,6 +72,7 @@ const calculateGrowth = (current: number | null, previous: number | null) => {
 export function ComparisonTool() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [scenarioData, setScenarioData] = useState<any[]>([]);
   const { toast } = useToast();
 
   const { data: statesList } = useQuery({
@@ -98,15 +101,47 @@ export function ComparisonTool() {
     
     if (selectedStates.includes(value)) {
       setSelectedStates(prev => prev.filter(state => state !== value));
+      setScenarioData([]);
     } else {
       setSelectedStates(prev => [...prev, value]);
     }
   };
 
+  const handleExport = () => {
+    const data = scenarioData.length ? scenarioData : stateData;
+    if (!data) return;
+
+    const formattedData = data.map(state => ({
+      State: statesList?.find(s => s.fips_code === state.STATEFP)?.state,
+      Employment: state.EMP,
+      'Annual Payroll': state.PAYANN,
+      Establishments: state.ESTAB,
+      'Median Income': state.B19013_001E,
+      'Labor Force': state.B23025_004E,
+    }));
+
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      Object.keys(formattedData[0]).join(",") + "\n" +
+      formattedData.map(row => Object.values(row).join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "state_comparison.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Export Complete",
+      description: "Your comparison data has been exported to CSV",
+    });
+  };
+
   const renderMetricComparison = (metric: keyof StateData, label: string, icon: React.ReactNode, formatFn = formatNumber, suffix = '') => {
     if (!stateData?.length) return null;
-
-    const values = stateData.map(state => state[metric]);
+    const data = scenarioData.length ? scenarioData : stateData;
+    const values = data.map(state => state[metric]);
     const max = Math.max(...values.filter(v => v !== null) as number[]);
     
     return (
@@ -116,7 +151,7 @@ export function ComparisonTool() {
           <span className="text-sm font-medium">{label}</span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {stateData.map((state, index) => {
+          {data.map((state, index) => {
             const value = state[metric];
             const isHighest = value === max;
             
@@ -160,20 +195,32 @@ export function ComparisonTool() {
   }
 
   return (
-    <div className="fixed right-4 top-20 w-96 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 shadow-xl animate-fade-in">
+    <div className="fixed right-4 top-20 w-[800px] bg-black/60 backdrop-blur-md rounded-lg border border-white/10 shadow-xl animate-fade-in">
       <div className="flex items-center justify-between p-3 border-b border-white/10">
         <h3 className="text-sm font-medium text-white">Compare States</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsVisible(false)}
-          className="text-white/60 hover:text-white"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {stateData && stateData.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExport}
+              className="text-white/60 hover:text-white"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsVisible(false)}
+            className="text-white/60 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
       
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-6">
         <div className="space-y-2">
           <label className="text-sm text-white/60">Select States to Compare</label>
           <Select onValueChange={handleStateSelect}>
@@ -211,17 +258,34 @@ export function ComparisonTool() {
 
         {stateData && stateData.length > 0 ? (
           <div className="space-y-6">
-            {renderMetricComparison('EMP', 'Employment', <Users className="h-4 w-4" />)}
-            {renderMetricComparison('PAYANN', 'Annual Payroll', <DollarSign className="h-4 w-4" />, formatCurrency)}
-            {renderMetricComparison('ESTAB', 'Establishments', <Building2 className="h-4 w-4" />)}
-            {renderMetricComparison('B19013_001E', 'Median Income', <TrendingUp className="h-4 w-4" />, formatCurrency)}
-            {renderMetricComparison('B23025_004E', 'Labor Force', <Users className="h-4 w-4" />)}
-            {renderMetricComparison(
-              'B25077_001E', 
-              'Housing Affordability', 
-              <GraduationCap className="h-4 w-4" />,
-              (value) => formatCurrency(value as number)
-            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-6">
+                {renderMetricComparison('EMP', 'Employment', <Users className="h-4 w-4" />)}
+                {renderMetricComparison('PAYANN', 'Annual Payroll', <DollarSign className="h-4 w-4" />, formatCurrency)}
+                {renderMetricComparison('ESTAB', 'Establishments', <Building2 className="h-4 w-4" />)}
+              </div>
+              <div className="space-y-6">
+                {renderMetricComparison('B19013_001E', 'Median Income', <TrendingUp className="h-4 w-4" />, formatCurrency)}
+                {renderMetricComparison('B23025_004E', 'Labor Force', <Users className="h-4 w-4" />)}
+                {renderMetricComparison(
+                  'B25077_001E', 
+                  'Housing Affordability', 
+                  <GraduationCap className="h-4 w-4" />,
+                  (value) => formatCurrency(value as number)
+                )}
+              </div>
+            </div>
+
+            <ComparisonCharts 
+              stateData={scenarioData.length ? scenarioData : stateData} 
+              statesList={statesList || []} 
+            />
+
+            <ScenarioModeling 
+              stateData={stateData} 
+              statesList={statesList || []} 
+              onUpdateScenario={setScenarioData}
+            />
           </div>
         ) : (
           <div className="space-y-2">
