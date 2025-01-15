@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, Building2, TrendingUp, ArrowLeft, Brain, GraduationCap, ChartBar, DollarSign } from "lucide-react";
+import { Users, Building2, TrendingUp, ArrowLeft, GraduationCap, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -121,7 +121,7 @@ export default function MarketReport() {
                 label: "Firms per 10k Population",
                 value: marketData.firms_per_10k_population?.toFixed(1),
                 type: 'density',
-                rank: marketData.density_rank
+                rank: marketData.growth_rank
               },
               {
                 label: "Growth Rate",

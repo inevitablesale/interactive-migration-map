@@ -70,13 +70,12 @@ export interface ComprehensiveMarketData {
   payann: number | null;
   total_establishments: number | null;
   emp: number | null;
-  public_to_private_ratio: number | null;
+  avgSalaryPerEmployee: number | null;
   vacancy_rate: number | null;
   vacancy_rank: number | null;
   income_rank: number | null;
   population_rank: number | null;
   rent_rank: number | null;
-  density_rank: number | null;
   growth_rank: number | null;
   top_firms: TopFirm[] | null;
 }
