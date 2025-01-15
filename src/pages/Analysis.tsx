@@ -16,19 +16,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { GeminiInsights } from "@/components/analytics/GeminiInsights";
 
 async function fetchStats() {
-  // Get total regions analyzed from county_rankings view
   const { count: regionsCount } = await supabase
     .from('county_rankings')
     .select('*', { count: 'exact', head: true });
 
-  // Get total firms monitored
   const { count: firmsCount } = await supabase
     .from('canary_firms_data')
     .select('*', { count: 'exact', head: true });
 
-  // Get count of cities tracked
   const { count: citiesCount } = await supabase
     .from('region_data')
     .select('*', { count: 'exact', head: true });
@@ -90,7 +88,6 @@ export default function Analysis() {
   };
 
   const handleApplyFilters = () => {
-    // Validate filters
     const numericFields = {
       employeeCountMin: 'Minimum Employee Count',
       employeeCountMax: 'Maximum Employee Count',
@@ -129,7 +126,6 @@ export default function Analysis() {
 
   return (
     <div className="min-h-screen bg-[#222222]">
-      {/* Hero Section */}
       <section className="relative py-20 px-4 bg-black/40">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
@@ -154,9 +150,7 @@ export default function Analysis() {
         </div>
       </section>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        {/* Analysis Filters */}
         <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
           <h2 className="text-xl font-semibold text-white mb-4">Analysis Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -255,8 +249,16 @@ export default function Analysis() {
             </p>
           </div>
         </div>
+
+        <GeminiInsights marketData={{
+          filters: analysisFilters,
+          stateData,
+          scenarioData
+        }} />
+        
         <KeyInsightsPanel />
         <MarketSimilarityAnalysis filters={analysisFilters} />
+        
         {stateData && statesList && (
           <ScenarioModeling 
             stateData={stateData}
