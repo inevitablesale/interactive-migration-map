@@ -230,6 +230,12 @@ export function KeyInsightsPanel() {
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
+                        {market.rank && (
+                          <div className="text-right mt-2">
+                            <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                            <p className="text-2xl text-white/90 font-medium">{market.rank.toLocaleString()}</p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
