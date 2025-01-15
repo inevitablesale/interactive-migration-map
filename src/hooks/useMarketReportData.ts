@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
-  console.log('1. useMarketReportData called with:', { county, stateName }); // Debug log
+  console.log('1. useMarketReportData called with:', { county, stateName });
 
   const { data: marketData, isLoading, error } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateName],
@@ -13,9 +13,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
-      console.log('3. Fetching state FIPS code for:', stateName); // Debug log
-
       // First, get the state FIPS code
+      console.log('3. Fetching state FIPS code for:', stateName);
       const { data: stateData, error: stateError } = await supabase
         .from('state_fips_codes')
         .select('fips_code')
@@ -32,7 +31,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
-      console.log('6. Found state FIPS:', stateData.fips_code); // Debug log
+      console.log('6. Found state FIPS:', stateData.fips_code);
 
       // Get county data
       console.log('7. Fetching county data for:', { county, stateFips: stateData.fips_code });
@@ -58,7 +57,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       // Get rankings data using the function
       console.log('11. Fetching rankings data');
       const { data: rankingsData, error: rankingsError } = await supabase
-        .rpc('get_county_rankings', {})
+        .rpc('get_county_rankings')
         .eq('statefp', stateData.fips_code)
         .eq('countyname', county)
         .maybeSingle();
@@ -85,13 +84,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('16. Retrieved firms data:', firmsData);
 
-      // Calculate vacancy rate
-      const vacancyRate = countyData.B25002_003E && countyData.B25002_002E
-        ? (countyData.B25002_003E / countyData.B25002_002E) * 100
-        : null;
-
-      console.log('17. Calculated vacancy rate:', vacancyRate);
-
       // Transform firms data
       const transformedTopFirms = firmsData ? firmsData.map((firm: any) => ({
         company_name: firm['Company Name'] || '',
@@ -110,7 +102,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         Summary: firm.Summary
       })) : [];
 
-      console.log('18. Transformed firms data. Count:', transformedTopFirms.length);
+      console.log('17. Transformed firms data. Count:', transformedTopFirms.length);
 
       // Transform the data
       const transformedData: ComprehensiveMarketData = {
@@ -134,7 +126,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
           ? countyData.C24060_007E / countyData.C24060_004E 
           : null,
-        vacancy_rate: vacancyRate,
+        vacancy_rate: null,
         vacancy_rank: null,
         income_rank: null,
         population_rank: null,
@@ -144,7 +136,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         top_firms: transformedTopFirms,
       };
 
-      console.log('19. Final transformed data:', {
+      console.log('18. Final transformed data:', {
         population: transformedData.total_population,
         income: transformedData.median_household_income,
         rent: transformedData.median_gross_rent,
@@ -163,7 +155,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         establishments: transformedData.total_establishments,
         emp: transformedData.emp,
         publicPrivateRatio: transformedData.public_to_private_ratio,
-        vacancyRate: transformedData.vacancy_rate,
         densityRank: transformedData.density_rank,
         growthRank: transformedData.growth_rank,
         firmsCount: transformedData.top_firms?.length
@@ -175,7 +166,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('20. Query complete:', { 
+  console.log('19. Query complete:', { 
     hasData: hasMarketData, 
     isLoading, 
     hasError: !!error,
