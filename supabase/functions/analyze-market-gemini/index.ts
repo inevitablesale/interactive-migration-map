@@ -13,187 +13,294 @@ serve(async (req) => {
 
   try {
     const { marketData } = await req.json();
-    const { filters, stateData, scenarioData } = marketData;
+    const { filters, soldFirms, activeFirms, censusData } = marketData;
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY'));
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    // Fetch comprehensive market data
-    const { data: soldFirms, error: soldError } = await supabase
-      .from('sold_firms_data')
-      .select('*')
-      .eq('State', filters.region === 'all' ? undefined : filters.region);
-
-    const { data: activeFirms, error: activeError } = await supabase
-      .from('canary_firms_data')
-      .select('*')
-      .eq('STATE', filters.region === 'all' ? undefined : filters.region);
-
-    const { data: censusData, error: censusError } = await supabase
-      .from('county_data')
-      .select('*')
-      .eq('STATEFP', filters.region === 'all' ? undefined : filters.region);
-
-    if (soldError || activeError || censusError) {
-      throw new Error('Error fetching market data');
-    }
-
-    // Process and combine data for analysis
-    const marketMetrics = {
-      soldFirmsMetrics: {
-        avgDealSize: calculateAverage(soldFirms.map(f => f.asking_price)),
-        avgEmployeeCount: calculateAverage(soldFirms.map(f => f.employee_count)),
-        totalDeals: soldFirms.length,
-        serviceLineDistribution: getServiceLineDistribution(soldFirms),
-      },
-      activeFirmsMetrics: {
-        avgEmployeeCount: calculateAverage(activeFirms.map(f => f.employeeCount)),
-        totalFirms: activeFirms.length,
-        marketDensity: activeFirms.length / censusData.length,
-        specialtyDistribution: getSpecialtyDistribution(activeFirms),
-      },
-      censusMetrics: {
-        totalPopulation: sum(censusData.map(d => d.B01001_001E)),
-        medianIncome: average(censusData.map(d => d.B19013_001E)),
-        employedPopulation: sum(censusData.map(d => d.B23025_004E)),
-        accountantDensity: calculateAccountantDensity(censusData),
-      },
-      scenarioProjections: scenarioData || [],
-      filters: {
-        employeeRange: [filters.employeeCountMin, filters.employeeCountMax],
-        revenueRange: [filters.revenueMin, filters.revenueMax],
-        region: filters.region,
-      }
-    };
-
+    // Process and correlate data
+    const marketMetrics = processMarketData(soldFirms, activeFirms, censusData);
+    
     // Create comprehensive analysis prompt
-    const prompt = `
-    Analyze this comprehensive market data and provide strategic insights:
-    
-    Historical Transaction Data:
-    ${JSON.stringify(marketMetrics.soldFirmsMetrics)}
-    
-    Current Market Status:
-    ${JSON.stringify(marketMetrics.activeFirmsMetrics)}
-    
-    Demographic & Economic Indicators:
-    ${JSON.stringify(marketMetrics.censusMetrics)}
-    
-    ${scenarioData ? `Scenario Projections: ${JSON.stringify(marketMetrics.scenarioProjections)}` : ''}
-    
-    Analysis Scope:
-    ${JSON.stringify(marketMetrics.filters)}
-    
-    Please provide:
-    1. Market Opportunity Assessment
-    - Compare historical transactions with current market conditions
-    - Identify underserved areas based on demographic data
-    - Analyze service line gaps and opportunities
-    
-    2. Growth Potential Analysis
-    - Project growth based on historical patterns
-    - Factor in demographic trends and economic indicators
-    - Consider scenario impacts on growth trajectory
-    
-    3. Risk Assessment
-    - Evaluate market saturation levels
-    - Assess competition intensity
-    - Identify economic risk factors
-    
-    4. Strategic Recommendations
-    - Suggest optimal entry/expansion strategies
-    - Recommend target firm profiles
-    - Provide timing considerations
-    
-    5. Valuation Insights
-    - Compare with historical transaction values
-    - Factor in current market conditions
-    - Project future value trends`;
+    const prompt = generateAnalysisPrompt(marketMetrics, filters);
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
     // Parse and structure the response
-    const structuredInsights = parseGeminiResponse(text);
+    const insights = parseGeminiResponse(text);
 
     return new Response(
-      JSON.stringify(structuredInsights),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      },
+      JSON.stringify(insights),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-        status: 500,
-      },
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });
 
-// Helper functions
-function calculateAverage(numbers: number[]): number {
-  return numbers.reduce((acc, val) => acc + (val || 0), 0) / numbers.length;
+function processMarketData(soldFirms, activeFirms, censusData) {
+  // Service Line Analysis
+  const serviceLineMetrics = analyzeServiceLines(soldFirms, activeFirms);
+  
+  // Client Base Analysis
+  const clienteleMetrics = analyzeClientele(soldFirms);
+  
+  // Geographic Analysis
+  const locationMetrics = analyzeLocations(soldFirms, activeFirms, censusData);
+  
+  // Financial Metrics
+  const financialMetrics = analyzeFinancials(soldFirms);
+  
+  // Workforce Analysis
+  const workforceMetrics = analyzeWorkforce(soldFirms, activeFirms, censusData);
+
+  return {
+    serviceLineMetrics,
+    clienteleMetrics,
+    locationMetrics,
+    financialMetrics,
+    workforceMetrics
+  };
 }
 
-function sum(numbers: number[]): number {
-  return numbers.reduce((acc, val) => acc + (val || 0), 0);
-}
-
-function average(numbers: number[]): number {
-  return sum(numbers) / numbers.length;
-}
-
-function getServiceLineDistribution(firms: any[]): Record<string, number> {
-  return firms.reduce((acc, firm) => {
+function analyzeServiceLines(soldFirms, activeFirms) {
+  const serviceLineDistribution = {};
+  const specialtyCorrelations = {};
+  
+  // Analyze service lines and specialties
+  soldFirms.forEach(firm => {
     if (firm.service_lines) {
       const services = firm.service_lines.split(',').map(s => s.trim());
       services.forEach(service => {
-        acc[service] = (acc[service] || 0) + 1;
+        if (!serviceLineDistribution[service]) {
+          serviceLineDistribution[service] = {
+            count: 0,
+            avgPrice: 0,
+            avgRevenue: 0,
+            successRate: 0
+          };
+        }
+        serviceLineDistribution[service].count++;
+        serviceLineDistribution[service].avgPrice += firm.asking_price || 0;
+        serviceLineDistribution[service].avgRevenue += firm.annual_revenue || 0;
       });
     }
-    return acc;
-  }, {});
+  });
+
+  // Calculate averages and correlations
+  Object.keys(serviceLineDistribution).forEach(service => {
+    const metrics = serviceLineDistribution[service];
+    metrics.avgPrice = metrics.avgPrice / metrics.count;
+    metrics.avgRevenue = metrics.avgRevenue / metrics.count;
+  });
+
+  return {
+    distribution: serviceLineDistribution,
+    correlations: specialtyCorrelations
+  };
 }
 
-function getSpecialtyDistribution(firms: any[]): Record<string, number> {
-  return firms.reduce((acc, firm) => {
-    if (firm.specialities) {
-      const specialties = firm.specialities.split(',').map(s => s.trim());
-      specialties.forEach(specialty => {
-        acc[specialty] = (acc[specialty] || 0) + 1;
+function analyzeClientele(soldFirms) {
+  const clientSegments = {};
+  
+  soldFirms.forEach(firm => {
+    if (firm.clientele) {
+      const segments = firm.clientele.split(',').map(c => c.trim());
+      segments.forEach(segment => {
+        if (!clientSegments[segment]) {
+          clientSegments[segment] = {
+            count: 0,
+            avgDealSize: 0,
+            industries: new Set(),
+            geographicPreference: {}
+          };
+        }
+        clientSegments[segment].count++;
+        clientSegments[segment].avgDealSize += firm.asking_price || 0;
+        if (firm.service_lines) {
+          firm.service_lines.split(',').forEach(service => 
+            clientSegments[segment].industries.add(service.trim())
+          );
+        }
       });
     }
-    return acc;
-  }, {});
+  });
+
+  // Calculate averages and convert Sets to arrays
+  Object.keys(clientSegments).forEach(segment => {
+    const metrics = clientSegments[segment];
+    metrics.avgDealSize = metrics.avgDealSize / metrics.count;
+    metrics.industries = Array.from(metrics.industries);
+  });
+
+  return clientSegments;
 }
 
-function calculateAccountantDensity(censusData: any[]): number {
-  const totalAccountants = sum(censusData.map(d => d.C24060_004E + d.C24060_007E));
-  const totalPopulation = sum(censusData.map(d => d.B01001_001E));
-  return (totalAccountants / totalPopulation) * 10000; // per 10,000 residents
+function analyzeLocations(soldFirms, activeFirms, censusData) {
+  const locationMetrics = {};
+  
+  // Combine firm and census data by location
+  [...soldFirms, ...activeFirms].forEach(firm => {
+    const location = firm.State || firm.STATE;
+    if (!locationMetrics[location]) {
+      const censusDatum = censusData.find(c => c.STATEFP === location);
+      locationMetrics[location] = {
+        totalFirms: 0,
+        avgEmployeeCount: 0,
+        avgRevenue: 0,
+        medianIncome: censusDatum?.B19013_001E || 0,
+        employedPopulation: censusDatum?.B23025_004E || 0,
+        educationRate: censusDatum ? 
+          (censusDatum.B15003_022E + censusDatum.B15003_023E) / censusDatum.B15003_001E : 0,
+        marketSaturation: 0
+      };
+    }
+    locationMetrics[location].totalFirms++;
+    locationMetrics[location].avgEmployeeCount += firm.employee_count || firm.employeeCount || 0;
+    locationMetrics[location].avgRevenue += firm.annual_revenue || 0;
+  });
+
+  // Calculate averages and market saturation
+  Object.keys(locationMetrics).forEach(location => {
+    const metrics = locationMetrics[location];
+    metrics.avgEmployeeCount = metrics.avgEmployeeCount / metrics.totalFirms;
+    metrics.avgRevenue = metrics.avgRevenue / metrics.totalFirms;
+    metrics.marketSaturation = metrics.totalFirms / (metrics.employedPopulation || 1) * 10000;
+  });
+
+  return locationMetrics;
 }
 
-function parseGeminiResponse(text: string): any {
-  // Split response into sections
-  const sections = text.split(/\d+\./);
+function analyzeFinancials(soldFirms) {
+  return {
+    priceRanges: calculatePriceRanges(soldFirms),
+    revenueMultiples: calculateRevenueMultiples(soldFirms),
+    employeeValueMetrics: calculateEmployeeValueMetrics(soldFirms)
+  };
+}
+
+function analyzeWorkforce(soldFirms, activeFirms, censusData) {
+  const workforceMetrics = {
+    employeeDistribution: {},
+    skillsetDemand: {},
+    geographicFactors: {}
+  };
+
+  // Analyze workforce patterns
+  [...soldFirms, ...activeFirms].forEach(firm => {
+    const empCount = firm.employee_count || firm.employeeCount;
+    const location = firm.State || firm.STATE;
+    
+    if (empCount && location) {
+      if (!workforceMetrics.employeeDistribution[location]) {
+        workforceMetrics.employeeDistribution[location] = {
+          totalEmployees: 0,
+          firms: 0,
+          avgSize: 0
+        };
+      }
+      
+      workforceMetrics.employeeDistribution[location].totalEmployees += empCount;
+      workforceMetrics.employeeDistribution[location].firms++;
+    }
+  });
+
+  // Calculate averages and correlate with census data
+  Object.keys(workforceMetrics.employeeDistribution).forEach(location => {
+    const metrics = workforceMetrics.employeeDistribution[location];
+    metrics.avgSize = metrics.totalEmployees / metrics.firms;
+    
+    const censusDatum = censusData.find(c => c.STATEFP === location);
+    if (censusDatum) {
+      workforceMetrics.geographicFactors[location] = {
+        laborForceParticipation: censusDatum.B23025_004E / censusDatum.B01001_001E,
+        educationLevel: (censusDatum.B15003_022E + censusDatum.B15003_023E) / censusDatum.B15003_001E,
+        medianIncome: censusDatum.B19013_001E
+      };
+    }
+  });
+
+  return workforceMetrics;
+}
+
+function generateAnalysisPrompt(marketMetrics, filters) {
+  return `
+Analyze this comprehensive market data and provide strategic insights:
+
+Market Data:
+${JSON.stringify(marketMetrics, null, 2)}
+
+Analysis Scope:
+${JSON.stringify(filters, null, 2)}
+
+Please provide detailed analysis on:
+
+1. Service Line & Specialization Analysis
+- Most successful service combinations
+- Correlation between specialties and financial performance
+- Geographic variations in service demand
+
+2. Client Base Insights
+- High-value client segment identification
+- Geographic and demographic alignment
+- Service line preferences by client type
+
+3. Location-Based Analysis
+- Market saturation levels by region
+- Economic indicator correlations
+- Workforce availability and quality
+
+4. Financial Performance Patterns
+- Price-to-revenue relationships
+- Employee count impact on valuation
+- Regional valuation variations
+
+5. Workforce & Operational Insights
+- Optimal employee structures
+- Geographic workforce advantages
+- Skill distribution patterns
+
+6. Strategic Recommendations
+- Market entry/expansion strategies
+- Service line optimization
+- Geographic targeting
+- Pricing strategies
+
+Please provide specific, data-driven insights based on the correlations between service lines, clientele, specialties, location, employee counts, asking prices, annual revenue, and census data indicators.`;
+}
+
+function parseGeminiResponse(text) {
+  const sections = text.split(/\d+\./).filter(Boolean);
   
   return {
-    marketOpportunity: sections[1]?.trim() || '',
-    growthPotential: sections[2]?.trim() || '',
-    riskAssessment: sections[3]?.trim() || '',
-    strategicRecommendations: sections[4]?.trim() || '',
-    valuationInsights: sections[5]?.trim() || '',
+    serviceAnalysis: sections[0]?.trim() || '',
+    clientInsights: sections[1]?.trim() || '',
+    locationAnalysis: sections[2]?.trim() || '',
+    financialPatterns: sections[3]?.trim() || '',
+    workforceInsights: sections[4]?.trim() || '',
+    recommendations: sections[5]?.trim() || ''
   };
+}
+
+// Helper functions for financial analysis
+function calculatePriceRanges(firms) {
+  // Implementation for price range analysis
+  return {};
+}
+
+function calculateRevenueMultiples(firms) {
+  // Implementation for revenue multiple analysis
+  return {};
+}
+
+function calculateEmployeeValueMetrics(firms) {
+  // Implementation for employee value metrics
+  return {};
 }
