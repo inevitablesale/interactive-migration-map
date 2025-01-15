@@ -33,7 +33,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('6. Found state FIPS:', stateFips.STATEFP);
 
-      // Get data from county_rankings materialized view
+      // Get data from county_data view
       console.log('7. Fetching county rankings data for:', { county, stateFips: stateFips.STATEFP });
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
@@ -124,6 +124,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       return transformedData;
     },
     enabled: !!stateName && !!county,
+    staleTime: Infinity, // Data will never go stale
+    cacheTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 
   const hasMarketData = !!marketData;
