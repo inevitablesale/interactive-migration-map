@@ -151,82 +151,6 @@ export function KeyInsightsPanel() {
     queryFn: fetchMarketGrowthMetrics,
   });
 
-  const { data: competitiveMetrics } = useQuery({
-    queryKey: ['competitiveMarketMetrics'],
-    queryFn: fetchCompetitiveMarketMetrics,
-  });
-
-  const { data: underservedMetrics } = useQuery({
-    queryKey: ['underservedRegions'],
-    queryFn: fetchUnderservedRegions,
-  });
-
-  const { data: employeeRentData } = useQuery({
-    queryKey: ['employeeRentAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_employee_rent_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: followerData } = useQuery({
-    queryKey: ['followerAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_follower_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: vacancyData } = useQuery({
-    queryKey: ['vacancyAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_vacancy_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: educationData } = useQuery({
-    queryKey: ['educationAgeAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_education_age_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: futureSaturationData } = useQuery({
-    queryKey: ['futureSaturationRisk'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_future_saturation_risk');
-      if (error) throw error;
-      return data as FutureSaturationRisk[];
-    }
-  });
-
-  const { data: emergingTalentData } = useQuery({
-    queryKey: ['emergingTalentMarkets'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_emerging_talent_markets');
-      if (error) throw error;
-      return data as EmergingTalentMarket[];
-    }
-  });
-
-  const { data: affordableTalentData } = useQuery({
-    queryKey: ['affordableTalentHubs'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_affordable_talent_hubs');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const topCompetitiveMarket = competitiveMetrics?.[0];
-  const topUnderservedRegion = underservedMetrics?.[0];
-
   const insights = [
     {
       title: "Top Growth Region",
@@ -237,7 +161,28 @@ export function KeyInsightsPanel() {
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthCounty ? (
             <>
-              {`${((topGrowthCounty.population_growth_rate || 0) * 100).toFixed(1)}% growth rate, ${((topGrowthCounty.top_firms || []).length || 0).toLocaleString()} firms (avg. ${averageGrowthRate.toFixed(1)} employees)`}
+              {`${((topGrowthCounty.growth_rate || 0) * 100).toFixed(1)}% growth rate, ${((topGrowthCounty.top_firms || []).length || 0).toLocaleString()} firms (avg. ${averageGrowthRate.toFixed(1)} employees)`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Top 5 <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Top Growth Regions</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {growthMetrics?.slice(0, 5).map((region, index) => (
+                      <div key={index} className="p-4 bg-black/40 rounded-lg">
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state}</h3>
+                        <p className="text-sm text-gray-300">Growth Rate: {region.growth_rate_percentage.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Moves: {region.total_moves.toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
