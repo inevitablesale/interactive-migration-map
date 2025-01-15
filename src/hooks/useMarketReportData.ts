@@ -17,7 +17,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: stateData, error: stateError } = await supabase
         .from('state_fips_codes')
         .select('fips_code')
-        .eq('state', stateName)
+        .ilike('state', stateName)
         .maybeSingle();
 
       if (stateError) {
@@ -35,10 +35,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Then, get the county data using the FIPS code
       const { data: rankingData, error: rankingError } = await supabase
-        .from('county_rankings')
+        .from('county_data')
         .select('*')
-        .eq('COUNTYNAME', county)
-        .eq('STATEFP', stateData.fips_code.toString()) // Cast to string for comparison
+        .ilike('COUNTYNAME', county)
+        .eq('STATEFP', stateData.fips_code)
         .maybeSingle();
 
       if (rankingError) {
@@ -58,8 +58,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateData.fips_code)); // Convert string to number for comparison
+        .ilike('COUNTYNAME', county)
+        .eq('STATEFP', parseInt(stateData.fips_code));
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
@@ -87,8 +87,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         Summary: firm.Summary
       })) : [];
 
-      console.log('Transformed top firms:', transformedTopFirms); // Debug log
-
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
         total_population: rankingData.B01001_001E,
@@ -111,12 +109,13 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
           ? rankingData.C24060_007E / rankingData.C24060_004E 
           : null,
-        vacancy_rate: rankingData.vacancy_rate,
-        vacancy_rank: rankingData.vacancy_rank,
+        vacancy_rate: rankingData.B25002_003E && rankingData.B25002_002E
+          ? (rankingData.B25002_003E / rankingData.B25002_002E) * 100
+          : null,
         income_rank: rankingData.income_rank,
         population_rank: rankingData.population_rank,
         rent_rank: rankingData.rent_rank,
-        density_rank: rankingData.firm_density_rank,
+        density_rank: rankingData.density_rank,
         growth_rank: rankingData.growth_rank,
         top_firms: transformedTopFirms,
       };
