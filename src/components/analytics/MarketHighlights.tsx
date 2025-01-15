@@ -10,77 +10,51 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-
-// State abbreviation to full name mapping
-const stateMap: { [key: string]: string } = {
-  'AL': 'Alabama',
-  'AK': 'Alaska',
-  'AZ': 'Arizona',
-  'AR': 'Arkansas',
-  'CA': 'California',
-  'CO': 'Colorado',
-  'CT': 'Connecticut',
-  'DE': 'Delaware',
-  'FL': 'Florida',
-  'GA': 'Georgia',
-  'HI': 'Hawaii',
-  'ID': 'Idaho',
-  'IL': 'Illinois',
-  'IN': 'Indiana',
-  'IA': 'Iowa',
-  'KS': 'Kansas',
-  'KY': 'Kentucky',
-  'LA': 'Louisiana',
-  'ME': 'Maine',
-  'MD': 'Maryland',
-  'MA': 'Massachusetts',
-  'MI': 'Michigan',
-  'MN': 'Minnesota',
-  'MS': 'Mississippi',
-  'MO': 'Missouri',
-  'MT': 'Montana',
-  'NE': 'Nebraska',
-  'NV': 'Nevada',
-  'NH': 'New Hampshire',
-  'NJ': 'New Jersey',
-  'NM': 'New Mexico',
-  'NY': 'New York',
-  'NC': 'North Carolina',
-  'ND': 'North Dakota',
-  'OH': 'Ohio',
-  'OK': 'Oklahoma',
-  'OR': 'Oregon',
-  'PA': 'Pennsylvania',
-  'RI': 'Rhode Island',
-  'SC': 'South Carolina',
-  'SD': 'South Dakota',
-  'TN': 'Tennessee',
-  'TX': 'Texas',
-  'UT': 'Utah',
-  'VT': 'Vermont',
-  'VA': 'Virginia',
-  'WA': 'Washington',
-  'WV': 'West Virginia',
-  'WI': 'Wisconsin',
-  'WY': 'Wyoming'
-};
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function MarketHighlights() {
   const navigate = useNavigate();
 
+  // Fetch available counties from county_rankings
+  const { data: availableCounties } = useQuery({
+    queryKey: ['availableCounties'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('county_rankings')
+        .select('COUNTYNAME, STATEFP')
+        .order('COUNTYNAME');
+      
+      if (error) {
+        console.error('Error fetching available counties:', error);
+        throw error;
+      }
+      return data;
+    }
+  });
+
   const handleRowClick = (region: string) => {
     try {
+      // Only proceed if we have the county data
+      const countyName = region.split(",")[0].trim();
+      const stateAbbr = region.split(",")[1].trim();
+      
+      const countyExists = availableCounties?.some(
+        county => county.COUNTYNAME === (countyName.endsWith(" County") ? countyName : `${countyName} County`)
+      );
+
+      if (!countyExists) {
+        toast.error("Market report not available for this region");
+        return;
+      }
+
       if (region.includes(",")) {
-        // For format like "Helena, MT"
         const [city, stateAbbr] = region.split(",").map(s => s.trim());
         const stateName = stateMap[stateAbbr] || stateAbbr;
-        // Helena is in Lewis and Clark County
-        navigate(`/market-report/Lewis%20and%20Clark%20County/${stateName}`);
+        navigate(`/market-report/${city}/${stateName}`);
       } else if (region.includes("County")) {
-        // For format like "Jefferson County"
         navigate(`/market-report/${encodeURIComponent(region)}/${stateMap['MT']}`);
       } else {
-        // For single state names, convert if it's an abbreviation
         const stateName = stateMap[region] || region;
         navigate(`/state-market-report/${stateName}`);
       }
@@ -110,20 +84,24 @@ export function MarketHighlights() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Helena, MT")}>
-                <TableCell className="font-medium">Helena, MT</TableCell>
-                <TableCell>8.2%</TableCell>
-                <TableCell>12.3</TableCell>
-                <TableCell>245</TableCell>
-                <TableCell>85,000</TableCell>
-              </TableRow>
-              <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Jefferson County")}>
-                <TableCell className="font-medium">Jefferson County</TableCell>
-                <TableCell>7.5%</TableCell>
-                <TableCell>10.8</TableCell>
-                <TableCell>180</TableCell>
-                <TableCell>65,000</TableCell>
-              </TableRow>
+              {availableCounties?.some(county => county.COUNTYNAME === "Helena County") && (
+                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Helena, MT")}>
+                  <TableCell className="font-medium">Helena, MT</TableCell>
+                  <TableCell>8.2%</TableCell>
+                  <TableCell>12.3</TableCell>
+                  <TableCell>245</TableCell>
+                  <TableCell>85,000</TableCell>
+                </TableRow>
+              )}
+              {availableCounties?.some(county => county.COUNTYNAME === "Jefferson County") && (
+                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Jefferson County")}>
+                  <TableCell className="font-medium">Jefferson County</TableCell>
+                  <TableCell>7.5%</TableCell>
+                  <TableCell>10.8</TableCell>
+                  <TableCell>180</TableCell>
+                  <TableCell>65,000</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TabsContent>
@@ -139,20 +117,24 @@ export function MarketHighlights() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Gallatin County")}>
-                <TableCell className="font-medium">Gallatin County</TableCell>
-                <TableCell>5.2</TableCell>
-                <TableCell>12,500</TableCell>
-                <TableCell>Underserved</TableCell>
-                <TableCell>High</TableCell>
-              </TableRow>
-              <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Missoula County")}>
-                <TableCell className="font-medium">Missoula County</TableCell>
-                <TableCell>6.8</TableCell>
-                <TableCell>8,900</TableCell>
-                <TableCell>Growing</TableCell>
-                <TableCell>Medium</TableCell>
-              </TableRow>
+              {availableCounties?.some(county => county.COUNTYNAME === "Gallatin County") && (
+                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Gallatin County")}>
+                  <TableCell className="font-medium">Gallatin County</TableCell>
+                  <TableCell>5.2</TableCell>
+                  <TableCell>12,500</TableCell>
+                  <TableCell>Underserved</TableCell>
+                  <TableCell>High</TableCell>
+                </TableRow>
+              )}
+              {availableCounties?.some(county => county.COUNTYNAME === "Missoula County") && (
+                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Missoula County")}>
+                  <TableCell className="font-medium">Missoula County</TableCell>
+                  <TableCell>6.8</TableCell>
+                  <TableCell>8,900</TableCell>
+                  <TableCell>Growing</TableCell>
+                  <TableCell>Medium</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TabsContent>
@@ -168,20 +150,24 @@ export function MarketHighlights() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Lewis and Clark County")}>
-                <TableCell className="font-medium">Lewis and Clark County</TableCell>
-                <TableCell>$1,200</TableCell>
-                <TableCell>8.5</TableCell>
-                <TableCell>4.2%</TableCell>
-                <TableCell>85</TableCell>
-              </TableRow>
-              <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Flathead County")}>
-                <TableCell className="font-medium">Flathead County</TableCell>
-                <TableCell>$1,350</TableCell>
-                <TableCell>7.2</TableCell>
-                <TableCell>3.8%</TableCell>
-                <TableCell>82</TableCell>
-              </TableRow>
+              {availableCounties?.some(county => county.COUNTYNAME === "Lewis and Clark County") && (
+                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Lewis and Clark County")}>
+                  <TableCell className="font-medium">Lewis and Clark County</TableCell>
+                  <TableCell>$1,200</TableCell>
+                  <TableCell>8.5</TableCell>
+                  <TableCell>4.2%</TableCell>
+                  <TableCell>85</TableCell>
+                </TableRow>
+              )}
+              {availableCounties?.some(county => county.COUNTYNAME === "Flathead County") && (
+                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Flathead County")}>
+                  <TableCell className="font-medium">Flathead County</TableCell>
+                  <TableCell>$1,350</TableCell>
+                  <TableCell>7.2</TableCell>
+                  <TableCell>3.8%</TableCell>
+                  <TableCell>82</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TabsContent>
