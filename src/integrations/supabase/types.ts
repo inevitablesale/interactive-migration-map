@@ -847,18 +847,38 @@ export type Database = {
     Views: {
       county_rankings: {
         Row: {
+          bachelors_degree_holders: number | null
+          calculated_firm_density: number | null
+          calculated_growth_rate: number | null
+          calculated_market_saturation: number | null
           COUNTYFP: string | null
           COUNTYNAME: string | null
           density_rank: number | null
-          firm_density: number | null
+          doctorate_degree_holders: number | null
+          emp: number | null
+          employed_population: number | null
           growth_rank: number | null
-          growth_rate: number | null
-          market_saturation: number | null
+          income_rank: number | null
+          masters_degree_holders: number | null
+          median_gross_rent: number | null
+          median_home_value: number | null
+          median_household_income: number | null
+          payann: number | null
           population: number | null
+          population_rank: number | null
+          private_sector_accountants: number | null
+          public_sector_accountants: number | null
+          public_to_private_ratio: number | null
+          rent_rank: number | null
           state_density_avg: number | null
           state_growth_avg: number | null
+          state_name: string | null
           STATEFP: string | null
+          total_education_population: number | null
+          total_establishments: number | null
           total_firms: number | null
+          vacancy_rank: number | null
+          vacancy_rate: number | null
         }
         Relationships: []
       }
