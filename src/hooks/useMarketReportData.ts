@@ -53,7 +53,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
-        .maybeSingle();
+        .single();
 
       if (rankingError) {
         console.error('Error fetching ranking data:', rankingError);
