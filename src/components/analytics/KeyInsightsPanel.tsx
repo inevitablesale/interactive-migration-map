@@ -80,7 +80,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_growth_metrics');
       if (error) throw error;
-      return data as MarketGrowthMetric[];
+      return data;
     },
   });
 
@@ -89,12 +89,12 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('*')
+        .select('DISTINCT ON (COUNTYNAME, "State Name") *')
         .order('employeeCount', { ascending: false })
         .limit(5);
       
       if (error) throw error;
-      return data as CompetitiveMarketMetric[];
+      return data;
     },
   });
 
@@ -103,7 +103,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_underserved_regions');
       if (error) throw error;
-      return data as UnderservedRegionMetric[];
+      return data;
     },
   });
 
@@ -112,7 +112,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      return data as EmergingTalentMarket[];
+      return data;
     },
   });
 
@@ -121,7 +121,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_future_saturation_risk');
       if (error) throw error;
-      return data as FutureSaturationRisk[];
+      return data;
     },
   });
 
@@ -130,7 +130,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('state_data')
-        .select('*')
+        .select('DISTINCT ON (STATEFP) *')
         .limit(2);
       if (error) throw error;
       return data;
@@ -150,6 +150,9 @@ export function KeyInsightsPanel() {
     if (!countyRankings) return [];
     
     return countyRankings
+      .filter((county, index, self) => 
+        index === self.findIndex(c => c.countyname === county.countyname)
+      )
       .filter(county => county.total_firms > 0)
       .map(county => ({
         county_name: county.countyname,
