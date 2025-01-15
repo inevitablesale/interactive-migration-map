@@ -133,6 +133,14 @@ export function KeyInsightsPanel() {
     queryFn: fetchCountyRankings,
   });
 
+  const { data: growthMetrics } = useQuery({
+    queryKey: ['marketGrowthMetrics'],
+    queryFn: fetchMarketGrowthMetrics,
+  });
+
+  // Get the top growth metric
+  const topGrowthMetric = growthMetrics?.[0];
+  
   const topGrowthCounty = countyRankings?.[0];
   const topFirmIds = topGrowthCounty?.top_firms?.map(firm => firm['Company ID']) || [];
 
@@ -146,98 +154,17 @@ export function KeyInsightsPanel() {
     ? topFirmsData.reduce((acc, firm) => acc + (firm.employeeCount || 0), 0) / topFirmsData.length
     : 0;
 
-  const { data: growthMetrics } = useQuery({
-    queryKey: ['marketGrowthMetrics'],
-    queryFn: fetchMarketGrowthMetrics,
-  });
-
-  const { data: competitiveMetrics } = useQuery({
-    queryKey: ['competitiveMarketMetrics'],
-    queryFn: fetchCompetitiveMarketMetrics,
-  });
-
-  const { data: underservedMetrics } = useQuery({
-    queryKey: ['underservedRegions'],
-    queryFn: fetchUnderservedRegions,
-  });
-
-  const { data: employeeRentData } = useQuery({
-    queryKey: ['employeeRentAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_employee_rent_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: followerData } = useQuery({
-    queryKey: ['followerAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_follower_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: vacancyData } = useQuery({
-    queryKey: ['vacancyAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_vacancy_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: educationData } = useQuery({
-    queryKey: ['educationAgeAnalysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_education_age_analysis');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: futureSaturationData } = useQuery({
-    queryKey: ['futureSaturationRisk'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_future_saturation_risk');
-      if (error) throw error;
-      return data as FutureSaturationRisk[];
-    }
-  });
-
-  const { data: emergingTalentData } = useQuery({
-    queryKey: ['emergingTalentMarkets'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_emerging_talent_markets');
-      if (error) throw error;
-      return data as EmergingTalentMarket[];
-    }
-  });
-
-  const { data: affordableTalentData } = useQuery({
-    queryKey: ['affordableTalentHubs'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_affordable_talent_hubs');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const topCompetitiveMarket = competitiveMetrics?.[0];
-  const topUnderservedRegion = underservedMetrics?.[0];
-
   const insights = [
     {
       title: "Top Growth Region",
-      value: topGrowthCounty 
-        ? `${topGrowthCounty.COUNTYNAME || 'N/A'}`
+      value: topGrowthMetric 
+        ? `${topGrowthMetric.county_name}, ${topGrowthMetric.state}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topGrowthCounty ? (
+          {topGrowthMetric ? (
             <>
-              {`${((topGrowthCounty.growth_rate || 0) * 100).toFixed(1)}% growth rate, ${((topGrowthCounty.top_firms || []).length || 0).toLocaleString()} firms (avg. ${averageGrowthRate.toFixed(1)} employees)`}
+              {`${topGrowthMetric.growth_rate_percentage.toFixed(1)}% growth rate, ${(topGrowthCounty?.top_firms?.length || 0)} firms (avg. ${averageGrowthRate.toFixed(1)} employees)`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -272,9 +199,9 @@ export function KeyInsightsPanel() {
                     <div className="space-y-2 p-1">
                       <p className="text-sm font-medium text-white">Region Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Population: {(topGrowthCounty.B01001_001E || 0).toLocaleString()}</p>
-                        <p>Firm Density: {(topGrowthCounty.firms_per_10k || 0).toFixed(2)} per 10k residents</p>
-                        <p>Growth Rank: #{topGrowthCounty.growth_rank || 'N/A'}</p>
+                        <p>Population: {(topGrowthCounty?.B01001_001E || 0).toLocaleString()}</p>
+                        <p>Total Moves: {topGrowthMetric.total_moves.toLocaleString()}</p>
+                        <p>Growth Rank: #{topGrowthCounty?.growth_rank || 'N/A'}</p>
                       </div>
                     </div>
                   </TooltipContent>
