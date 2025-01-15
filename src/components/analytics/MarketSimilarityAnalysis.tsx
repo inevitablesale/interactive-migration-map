@@ -35,11 +35,7 @@ export function MarketSimilarityAnalysis({ filters }: Props) {
     queryKey: ['marketSimilarityAnalysis', filters],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_similarity_analysis', {
-        p_employee_min: filters.employeeCountMin ? parseInt(filters.employeeCountMin) : null,
-        p_employee_max: filters.employeeCountMax ? parseInt(filters.employeeCountMax) : null,
-        p_revenue_min: filters.revenueMin ? parseInt(filters.revenueMin.replace(/\D/g, '')) : null,
-        p_revenue_max: filters.revenueMax ? parseInt(filters.revenueMax.replace(/\D/g, '')) : null,
-        p_region: filters.region === 'all' ? null : filters.region
+        p_state_fp: filters.region === 'all' ? null : filters.region
       });
 
       if (error) {
