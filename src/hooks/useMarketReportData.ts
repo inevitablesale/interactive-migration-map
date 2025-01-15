@@ -33,36 +33,36 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('6. Found state FIPS:', stateFips.STATEFP);
 
-      // Fetch data from county_rankings
+      // Fetch the county FIPS code
       console.log('7. Fetching county rankings data for:', { county, stateFips: stateFips.STATEFP });
-      const { data: countyData, error: countyError } = await supabase
+      const { data: countyFipsData, error: countyFipsError } = await supabase
         .from('county_rankings')
-        .select('*')
+        .select('COUNTYFP')
         .eq('STATEFP', stateFips.STATEFP)
         .eq('COUNTYNAME', county)
         .maybeSingle();
 
-      if (countyError) {
-        console.error('8. Error fetching county data:', countyError.message);
-        throw new Error('Error fetching county data');
+      if (countyFipsError) {
+        console.error('8. Error fetching county FIPS data:', countyFipsError.message);
+        throw new Error('Error fetching county FIPS data');
       }
 
-      if (!countyData) {
-        console.error('9. No county data found for:', { county, stateName });
+      if (!countyFipsData) {
+        console.error('9. No county FIPS found for:', { county, stateName });
         return null;
       }
 
-      console.log('10. Retrieved county data:', countyData);
+      console.log('10. Found county FIPS:', countyFipsData.COUNTYFP);
 
       // Fetch top firms data
-      console.log('11. Fetching top firms data for:', { county, stateName });
+      console.log('11. Fetching top firms data for:', { stateFips: stateFips.STATEFP, countyFips: countyFipsData.COUNTYFP });
       const { data: topFirms, error: firmsError } = await supabase
         .from('canary_firms_data')
-        .select('Company Name, employeeCount, followerCount, COUNTYNAME, State Name')
-        .eq('COUNTYNAME', county)
-        .eq('State Name', stateName)
+        .select('*') // Fetch all columns
+        .eq('STATEFP', stateFips.STATEFP)
+        .eq('COUNTYFP', countyFipsData.COUNTYFP)
         .order('employeeCount', { ascending: false, nullsLast: true })
-        .limit(5);
+        .limit(5); // Limit to top 5 firms
 
       if (firmsError) {
         console.error('12. Error fetching top firms:', firmsError.message);
@@ -73,31 +73,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Construct the final data object
       const transformedData: ComprehensiveMarketData = {
-        total_population: countyData.population || null,
-        median_household_income: countyData.median_household_income || null,
-        median_gross_rent: countyData.median_gross_rent || null,
-        median_home_value: countyData.median_home_value || null,
-        employed_population: countyData.employed_population || null,
-        private_sector_accountants: countyData.private_sector_accountants || null,
-        public_sector_accountants: countyData.public_sector_accountants || null,
-        firms_per_10k_population: countyData.calculated_firm_density || null,
-        growth_rate_percentage: countyData.calculated_growth_rate ? countyData.calculated_growth_rate * 100 : null,
-        market_saturation_index: countyData.market_saturation || null,
-        total_education_population: countyData.total_education_population || null,
-        bachelors_degree_holders: countyData.bachelors_degree_holders || null,
-        masters_degree_holders: countyData.masters_degree_holders || null,
-        doctorate_degree_holders: countyData.doctorate_degree_holders || null,
-        payann: countyData.payann || null,
-        total_establishments: countyData.total_establishments || null,
-        emp: countyData.emp || null,
-        public_to_private_ratio: countyData.public_to_private_ratio || null,
-        vacancy_rate: countyData.vacancy_rate || null,
-        vacancy_rank: countyData.vacancy_rank || null,
-        income_rank: countyData.income_rank || null,
-        population_rank: countyData.population_rank || null,
-        rent_rank: countyData.rent_rank || null,
-        density_rank: countyData.density_rank || null,
-        growth_rank: countyData.growth_rank || null,
         top_firms: topFirms || [], // Include fetched top firms
       };
 
