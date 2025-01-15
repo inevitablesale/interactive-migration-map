@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,189 +10,173 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const growthLeaders = [
-  {
-    region: "Jefferson County",
-    growthRate: "+25%",
-    firmDensity: "5.5",
-    avgPayroll: "$1.8M",
-  },
-  {
-    region: "Helena, MT",
-    growthRate: "+22%",
-    firmDensity: "4.3",
-    avgPayroll: "$1.4M",
-  },
-  {
-    region: "Kalispell, MT",
-    growthRate: "+19%",
-    firmDensity: "3.8",
-    avgPayroll: "$1.2M",
-  },
-];
-
-const competitiveInsights = [
-  {
-    region: "Florida",
-    firmDensity: "6.5/10k",
-    growthRate: "+12%",
-    stability: "High",
-  },
-  {
-    region: "Tennessee",
-    firmDensity: "5.9/10k",
-    growthRate: "+10%",
-    stability: "Medium",
-  },
-  {
-    region: "California",
-    firmDensity: "4.3/10k",
-    growthRate: "+8%",
-    stability: "High",
-  },
-];
-
-const serviceSpecialization = [
-  {
-    region: "Nebraska",
-    service: "Tax Advisory",
-    firmDensity: "3.5",
-    growthRate: "+15%",
-  },
-  {
-    region: "Colorado",
-    service: "Bookkeeping Services",
-    firmDensity: "5.7",
-    growthRate: "+20%",
-  },
-  {
-    region: "Washington",
-    service: "Payroll Management",
-    firmDensity: "4.8",
-    growthRate: "+18%",
-  },
-];
+// State abbreviation to full name mapping
+const stateMap: { [key: string]: string } = {
+  'AL': 'Alabama',
+  'AK': 'Alaska',
+  'AZ': 'Arizona',
+  'AR': 'Arkansas',
+  'CA': 'California',
+  'CO': 'Colorado',
+  'CT': 'Connecticut',
+  'DE': 'Delaware',
+  'FL': 'Florida',
+  'GA': 'Georgia',
+  'HI': 'Hawaii',
+  'ID': 'Idaho',
+  'IL': 'Illinois',
+  'IN': 'Indiana',
+  'IA': 'Iowa',
+  'KS': 'Kansas',
+  'KY': 'Kentucky',
+  'LA': 'Louisiana',
+  'ME': 'Maine',
+  'MD': 'Maryland',
+  'MA': 'Massachusetts',
+  'MI': 'Michigan',
+  'MN': 'Minnesota',
+  'MS': 'Mississippi',
+  'MO': 'Missouri',
+  'MT': 'Montana',
+  'NE': 'Nebraska',
+  'NV': 'Nevada',
+  'NH': 'New Hampshire',
+  'NJ': 'New Jersey',
+  'NM': 'New Mexico',
+  'NY': 'New York',
+  'NC': 'North Carolina',
+  'ND': 'North Dakota',
+  'OH': 'Ohio',
+  'OK': 'Oklahoma',
+  'OR': 'Oregon',
+  'PA': 'Pennsylvania',
+  'RI': 'Rhode Island',
+  'SC': 'South Carolina',
+  'SD': 'South Dakota',
+  'TN': 'Tennessee',
+  'TX': 'Texas',
+  'UT': 'Utah',
+  'VT': 'Vermont',
+  'VA': 'Virginia',
+  'WA': 'Washington',
+  'WV': 'West Virginia',
+  'WI': 'Wisconsin',
+  'WY': 'Wyoming'
+};
 
 export function MarketHighlights() {
-  const [activeTab, setActiveTab] = useState("growth");
   const navigate = useNavigate();
 
   const handleRowClick = (region: string) => {
     if (region.includes(",")) {
       // For format like "Helena, MT"
-      const [county, state] = region.split(",").map(s => s.trim());
-      navigate(`/market-report/${county}%20County/${state}`);
+      const [county, stateAbbr] = region.split(",").map(s => s.trim());
+      const stateName = stateMap[stateAbbr] || stateAbbr;
+      navigate(`/market-report/${county}%20County/${stateName}`);
     } else if (region.includes("County")) {
       // For format like "Jefferson County"
       const [county, _] = region.split(" County");
-      navigate(`/market-report/${county}%20County/MT`);
+      // Since we know we're dealing with Montana from the context
+      navigate(`/market-report/${county}%20County/${stateMap['MT']}`);
     } else {
-      // For single state names
-      navigate(`/state-market-report/${region}`);
+      // For single state names, convert if it's an abbreviation
+      const stateName = stateMap[region] || region;
+      navigate(`/state-market-report/${stateName}`);
     }
   };
 
   return (
-    <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 mb-6 bg-black/60">
-          <TabsTrigger 
-            value="growth"
-            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
-          >
-            Growth Leaders
-          </TabsTrigger>
-          <TabsTrigger 
-            value="competitive"
-            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
-          >
-            Competitive Insights
-          </TabsTrigger>
-          <TabsTrigger 
-            value="service"
-            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
-          >
-            Service Specialization
-          </TabsTrigger>
+    <Card className="col-span-3">
+      <Tabs defaultValue="growth" className="p-6">
+        <TabsList className="mb-4">
+          <TabsTrigger value="growth">Growth Markets</TabsTrigger>
+          <TabsTrigger value="underserved">Underserved Markets</TabsTrigger>
+          <TabsTrigger value="affordable">Affordable Talent Hubs</TabsTrigger>
         </TabsList>
-
         <TabsContent value="growth">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="text-white/60">Region</TableHead>
-                <TableHead className="text-white/60">Growth Rate (YoY)</TableHead>
-                <TableHead className="text-white/60">Avg Firms/10k</TableHead>
-                <TableHead className="text-white/60">Avg Payroll</TableHead>
+              <TableRow>
+                <TableHead>Region</TableHead>
+                <TableHead>Growth Rate</TableHead>
+                <TableHead>Firm Density</TableHead>
+                <TableHead>Total Firms</TableHead>
+                <TableHead>Population</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {growthLeaders.map((item) => (
-                <TableRow 
-                  key={item.region} 
-                  className="border-white/10 cursor-pointer hover:bg-white/5"
-                  onClick={() => handleRowClick(item.region)}
-                >
-                  <TableCell className="text-white">{item.region}</TableCell>
-                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
-                  <TableCell className="text-white/80">{item.firmDensity}</TableCell>
-                  <TableCell className="text-white/80">{item.avgPayroll}</TableCell>
-                </TableRow>
-              ))}
+              <TableRow className="cursor-pointer" onClick={() => handleRowClick("Helena, MT")}>
+                <TableCell>Helena, MT</TableCell>
+                <TableCell>8.2%</TableCell>
+                <TableCell>12.3</TableCell>
+                <TableCell>245</TableCell>
+                <TableCell>85,000</TableCell>
+              </TableRow>
+              <TableRow className="cursor-pointer" onClick={() => handleRowClick("Jefferson County")}>
+                <TableCell>Jefferson County</TableCell>
+                <TableCell>7.5%</TableCell>
+                <TableCell>10.8</TableCell>
+                <TableCell>180</TableCell>
+                <TableCell>65,000</TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TabsContent>
-
-        <TabsContent value="competitive">
+        <TabsContent value="underserved">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="text-white/60">Region</TableHead>
-                <TableHead className="text-white/60">Firm Density</TableHead>
-                <TableHead className="text-white/60">Avg Growth Rate</TableHead>
-                <TableHead className="text-white/60">Economic Stability</TableHead>
+              <TableRow>
+                <TableHead>Region</TableHead>
+                <TableHead>Firms per 10k</TableHead>
+                <TableHead>Recent Movers</TableHead>
+                <TableHead>Market Status</TableHead>
+                <TableHead>Opportunity</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {competitiveInsights.map((item) => (
-                <TableRow 
-                  key={item.region} 
-                  className="border-white/10 cursor-pointer hover:bg-white/5"
-                  onClick={() => handleRowClick(item.region)}
-                >
-                  <TableCell className="text-white">{item.region}</TableCell>
-                  <TableCell>{item.firmDensity}</TableCell>
-                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
-                  <TableCell>{item.stability}</TableCell>
-                </TableRow>
-              ))}
+              <TableRow className="cursor-pointer" onClick={() => handleRowClick("Gallatin County")}>
+                <TableCell>Gallatin County</TableCell>
+                <TableCell>5.2</TableCell>
+                <TableCell>12,500</TableCell>
+                <TableCell>Underserved</TableCell>
+                <TableCell>High</TableCell>
+              </TableRow>
+              <TableRow className="cursor-pointer" onClick={() => handleRowClick("Missoula County")}>
+                <TableCell>Missoula County</TableCell>
+                <TableCell>6.8</TableCell>
+                <TableCell>8,900</TableCell>
+                <TableCell>Growing</TableCell>
+                <TableCell>Medium</TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TabsContent>
-
-        <TabsContent value="service">
+        <TabsContent value="affordable">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="text-white/60">Region</TableHead>
-                <TableHead className="text-white/60">Specialized Service</TableHead>
-                <TableHead className="text-white/60">Avg Firms/10k</TableHead>
-                <TableHead className="text-white/60">Growth Rate (YoY)</TableHead>
+              <TableRow>
+                <TableHead>Region</TableHead>
+                <TableHead>Median Rent</TableHead>
+                <TableHead>Accountant Density</TableHead>
+                <TableHead>Vacancy Rate</TableHead>
+                <TableHead>Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {serviceSpecialization.map((item) => (
-                <TableRow 
-                  key={item.region} 
-                  className="border-white/10 cursor-pointer hover:bg-white/5"
-                  onClick={() => handleRowClick(item.region)}
-                >
-                  <TableCell className="text-white">{item.region}</TableCell>
-                  <TableCell>{item.service}</TableCell>
-                  <TableCell>{item.firmDensity}</TableCell>
-                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
-                </TableRow>
-              ))}
+              <TableRow className="cursor-pointer" onClick={() => handleRowClick("Lewis and Clark County")}>
+                <TableCell>Lewis and Clark County</TableCell>
+                <TableCell>$1,200</TableCell>
+                <TableCell>8.5</TableCell>
+                <TableCell>4.2%</TableCell>
+                <TableCell>85</TableCell>
+              </TableRow>
+              <TableRow className="cursor-pointer" onClick={() => handleRowClick("Flathead County")}>
+                <TableCell>Flathead County</TableCell>
+                <TableCell>$1,350</TableCell>
+                <TableCell>7.2</TableCell>
+                <TableCell>3.8%</TableCell>
+                <TableCell>82</TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TabsContent>
