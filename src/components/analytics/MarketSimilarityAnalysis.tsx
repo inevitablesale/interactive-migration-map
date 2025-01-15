@@ -34,11 +34,11 @@ export function MarketSimilarityAnalysis() {
       return (data || []).map(item => ({
         ...item,
         key_factors: {
-          median_income: Number(item.key_factors.median_income),
-          labor_force: Number(item.key_factors.labor_force),
-          property_value: Number(item.key_factors.property_value),
-          market_saturation: Number(item.key_factors.market_saturation),
-          deal_velocity: Number(item.key_factors.deal_velocity)
+          median_income: Number((item.key_factors as any).median_income),
+          labor_force: Number((item.key_factors as any).labor_force),
+          property_value: Number((item.key_factors as any).property_value),
+          market_saturation: Number((item.key_factors as any).market_saturation),
+          deal_velocity: Number((item.key_factors as any).deal_velocity)
         }
       }));
     },
