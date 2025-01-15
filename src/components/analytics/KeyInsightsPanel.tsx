@@ -25,6 +25,7 @@ interface MarketGrowthMetric {
 interface ValueMetric {
   county_name: string;
   state: string;
+  state_name: string; // Add this for full state name
   median_income: number;
   median_home_value: number;
   total_firms: number;
@@ -159,6 +160,7 @@ export function KeyInsightsPanel() {
       .map(county => ({
         county_name: county.countyname.endsWith(" County") ? county.countyname : `${county.countyname} County`,
         state: county.statefp,
+        state_name: getStateNameFromFIPS(county.statefp), // Add function to get full state name
         median_income: county.state_density_avg * 50000,
         median_home_value: county.state_growth_avg * 100000,
         total_firms: county.total_firms,
@@ -200,7 +202,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(market.county_name, market.state)}
+                        onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
                       >
                         <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
@@ -491,4 +493,62 @@ export function KeyInsightsPanel() {
       </div>
     </section>
   );
+}
+
+// Helper function to get full state name from FIPS code
+function getStateNameFromFIPS(fips: string): string {
+  const stateMap: { [key: string]: string } = {
+    '01': 'Alabama',
+    '02': 'Alaska',
+    '04': 'Arizona',
+    '05': 'Arkansas',
+    '06': 'California',
+    '08': 'Colorado',
+    '09': 'Connecticut',
+    '10': 'Delaware',
+    '11': 'District of Columbia',
+    '12': 'Florida',
+    '13': 'Georgia',
+    '15': 'Hawaii',
+    '16': 'Idaho',
+    '17': 'Illinois',
+    '18': 'Indiana',
+    '19': 'Iowa',
+    '20': 'Kansas',
+    '21': 'Kentucky',
+    '22': 'Louisiana',
+    '23': 'Maine',
+    '24': 'Maryland',
+    '25': 'Massachusetts',
+    '26': 'Michigan',
+    '27': 'Minnesota',
+    '28': 'Mississippi',
+    '29': 'Missouri',
+    '30': 'Montana',
+    '31': 'Nebraska',
+    '32': 'Nevada',
+    '33': 'New Hampshire',
+    '34': 'New Jersey',
+    '35': 'New Mexico',
+    '36': 'New York',
+    '37': 'North Carolina',
+    '38': 'North Dakota',
+    '39': 'Ohio',
+    '40': 'Oklahoma',
+    '41': 'Oregon',
+    '42': 'Pennsylvania',
+    '44': 'Rhode Island',
+    '45': 'South Carolina',
+    '46': 'South Dakota',
+    '47': 'Tennessee',
+    '48': 'Texas',
+    '49': 'Utah',
+    '50': 'Vermont',
+    '51': 'Virginia',
+    '53': 'Washington',
+    '54': 'West Virginia',
+    '55': 'Wisconsin',
+    '56': 'Wyoming'
+  };
+  return stateMap[fips] || fips;
 }
