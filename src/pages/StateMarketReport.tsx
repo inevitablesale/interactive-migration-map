@@ -46,16 +46,26 @@ export default function StateMarketReport() {
   const { data: countyData } = useQuery({
     queryKey: ['countyData', state],
     queryFn: async () => {
+      // Using a subquery to get distinct counties with their latest data
       const { data, error } = await supabase
         .from('county_data')
-        .select('DISTINCT ON (COUNTYNAME) *')
+        .select('*')
         .eq('STATEFP', state)
-        .order('COUNTYNAME')
         .order('B01001_001E', { ascending: false })
         .limit(6);
 
       if (error) throw error;
-      return data;
+      
+      // Remove duplicates manually by COUNTYNAME
+      const uniqueCounties = data?.reduce((acc: any[], current) => {
+        const exists = acc.find(item => item.COUNTYNAME === current.COUNTYNAME);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      return uniqueCounties?.slice(0, 6);
     },
     enabled: !!state
   });
@@ -219,7 +229,6 @@ export default function StateMarketReport() {
           </div>
         )}
 
-        {/* Market Opportunities */}
         {marketOpportunities && marketOpportunities.length > 0 && (
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6 mb-6">
             <h2 className="text-xl font-semibold text-white mb-4">Growth Opportunities</h2>
