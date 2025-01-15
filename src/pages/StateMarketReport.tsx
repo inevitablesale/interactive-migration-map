@@ -88,9 +88,9 @@ export default function StateMarketReport() {
   }, [state]);
 
   const handleCountyClick = (countyName: string) => {
-    // Remove " County" suffix if present for the URL
-    const formattedCounty = countyName.replace(/ County$/, '');
-    navigate(`/market-report/${stateAbbr}/${formattedCounty}`);
+    // Ensure county name includes "County" suffix if not present
+    const formattedCounty = countyName.endsWith(" County") ? countyName : `${countyName} County`;
+    navigate(`/market-report/${formattedCounty}/${stateName}`);
   };
 
   if (isLoading) {
