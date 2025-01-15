@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ComprehensiveMarketData } from "@/types/rankings";
+import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
   console.log('1. useMarketReportData called with:', { county, stateName });
