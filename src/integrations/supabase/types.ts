@@ -633,6 +633,42 @@ export type Database = {
         }
         Relationships: []
       }
+      scenario_models: {
+        Row: {
+          base_data: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          projected_results: Json
+          scenario_parameters: Json
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          base_data: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          projected_results: Json
+          scenario_parameters: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          base_data?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          projected_results?: Json
+          scenario_parameters?: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sold_firms_data: {
         Row: {
           annual_revenue: number | null
@@ -709,6 +745,9 @@ export type Database = {
           C24060_007E: number | null
           EMP: number | null
           ESTAB: number | null
+          MOVEDIN2020: number | null
+          MOVEDIN2021: number | null
+          MOVEDIN2022: number | null
           PAYANN: number | null
           STATEFP: string
         }
@@ -742,6 +781,9 @@ export type Database = {
           C24060_007E?: number | null
           EMP?: number | null
           ESTAB?: number | null
+          MOVEDIN2020?: number | null
+          MOVEDIN2021?: number | null
+          MOVEDIN2022?: number | null
           PAYANN?: number | null
           STATEFP: string
         }
@@ -775,6 +817,9 @@ export type Database = {
           C24060_007E?: number | null
           EMP?: number | null
           ESTAB?: number | null
+          MOVEDIN2020?: number | null
+          MOVEDIN2021?: number | null
+          MOVEDIN2022?: number | null
           PAYANN?: number | null
           STATEFP?: string
         }
@@ -802,55 +847,18 @@ export type Database = {
     Views: {
       county_rankings: {
         Row: {
-          B01001_001E: number | null
-          B01002_001E: number | null
-          B08303_001E: number | null
-          B11001_001E: number | null
-          B11003_001E: number | null
-          B15003_001E: number | null
-          B15003_022E: number | null
-          B15003_023E: number | null
-          B15003_025E: number | null
-          B17001_001E: number | null
-          B17001_002E: number | null
-          B19013_001E: number | null
-          B23001_001E: number | null
-          B23025_004E: number | null
-          B23025_005E: number | null
-          B25001_001E: number | null
-          B25002_002E: number | null
-          B25002_003E: number | null
-          B25064_001E: number | null
-          B25077_001E: number | null
-          C24010_001E: number | null
-          C24010_012E: number | null
-          C24010_033E: number | null
-          C24010_034E: number | null
-          C24060_001E: number | null
-          C24060_004E: number | null
-          C24060_007E: number | null
           COUNTYFP: string | null
           COUNTYNAME: string | null
-          EMP: number | null
-          ESTAB: number | null
-          firm_density_rank: number | null
-          firms_per_10k: number | null
+          density_rank: number | null
+          firm_density: number | null
           growth_rank: number | null
-          income_rank: number | null
-          MOVEDIN2020: number | null
-          MOVEDIN2021: number | null
-          MOVEDIN2022: number | null
-          PAYANN: number | null
-          PLACEFP: string | null
-          PLACENAME: string | null
-          PLACENS: string | null
-          population_growth_rate: number | null
-          population_rank: number | null
-          rent_rank: number | null
+          growth_rate: number | null
+          market_saturation: number | null
+          population: number | null
+          state_density_avg: number | null
+          state_growth_avg: number | null
           STATEFP: string | null
-          top_firms: Json | null
-          vacancy_rank: number | null
-          vacancy_rate: number | null
+          total_firms: number | null
         }
         Relationships: []
       }
@@ -872,6 +880,19 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_scenario_metrics: {
+        Args: {
+          base_revenue: number
+          growth_rate: number
+          market_saturation: number
+          competition_level: number
+        }
+        Returns: {
+          projected_revenue: number
+          market_opportunity_score: number
+          risk_score: number
+        }[]
+      }
       get_affordable_talent_hubs: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1045,6 +1066,22 @@ export type Database = {
           migration_score: number
           business_density_score: number
           service_coverage_score: number
+        }[]
+      }
+      get_market_similarity_analysis: {
+        Args: {
+          p_state_fp?: string
+        }
+        Returns: {
+          region_name: string
+          total_sold_firms: number
+          avg_deal_size: number
+          active_firms_count: number
+          market_density: number
+          similarity_score: number
+          potential_opportunities: number
+          projected_success_rate: number
+          key_factors: Json
         }[]
       }
       get_market_trends: {
