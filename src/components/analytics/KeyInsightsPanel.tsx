@@ -250,7 +250,11 @@ export function KeyInsightsPanel() {
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {growthMetrics?.slice(0, 5).map((region, index) => (
-                      <div key={index} className="p-4 bg-black/40 rounded-lg">
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => navigate(`/market-report/${region.county_name}/${region.state}`)}
+                      >
                         <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state}</h3>
                         <p className="text-sm text-gray-300">Growth Rate: {region.growth_rate_percentage.toFixed(1)}%</p>
                         <p className="text-sm text-gray-300">Total Moves: {region.total_moves.toLocaleString()}</p>
