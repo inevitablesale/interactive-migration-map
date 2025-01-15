@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
+import { MarketInsightsPanel } from "@/components/analytics/insights/MarketInsightsPanel";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -86,6 +87,7 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
+        <MarketInsightsPanel />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
             <div className="flex items-center gap-2 mb-6">
