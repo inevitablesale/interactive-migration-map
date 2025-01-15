@@ -57,12 +57,12 @@ interface UnderservedRegionMetric {
 
 interface EmergingTalentMarket {
   county_name: string;
+  state_name: string;
   education_rate_percent: number;
   total_educated: number;
   education_growth_rate: number;
   median_age: number;
   private_to_public_ratio?: number;
-  state_name?: string;
 }
 
 interface FutureSaturationRisk {
@@ -118,9 +118,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      return data.filter((region, index, self) =>
-        index === self.findIndex(r => r.county_name === region.county_name)
-      );
+      return data;
     },
   });
 
@@ -309,7 +307,7 @@ export function KeyInsightsPanel() {
     {
       title: "Talent Availability",
       value: emergingTalentData[0] 
-        ? `${emergingTalentData[0].county_name}`
+        ? `${emergingTalentData[0].county_name}, ${emergingTalentData[0].state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -327,27 +325,20 @@ export function KeyInsightsPanel() {
                     <DialogTitle className="text-xl font-bold text-white">Education Demographics</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4 space-y-4">
-                    {emergingTalentData?.map((region, index) => {
-                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
-                      const finalCountyName = countyName || region.county_name;
-                      const finalStateName = stateName || region.state_name;
-                      
-                      return (
-                        <div 
-                          key={index} 
-                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                          onClick={() => handleNavigateToMarket(finalCountyName, finalStateName)}
-                        >
-                          <h3 className="text-lg font-semibold text-white">
-                            {finalCountyName}
-                            {finalStateName && `, ${finalStateName}`}
-                          </h3>
-                          <p className="text-sm text-gray-300">Education Rate: {region.education_rate_percent.toFixed(1)}%</p>
-                          <p className="text-sm text-gray-300">Total Educated: {region.total_educated.toLocaleString()}</p>
-                          <p className="text-sm text-gray-300">Median Age: {Math.round(region.median_age)}</p>
-                        </div>
-                      );
-                    })}
+                    {emergingTalentData?.map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">
+                          {region.county_name}, {region.state_name}
+                        </h3>
+                        <p className="text-sm text-gray-300">Education Rate: {region.education_rate_percent.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Educated: {region.total_educated.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Median Age: {Math.round(region.median_age)}</p>
+                      </div>
+                    ))}
                   </div>
                 </DialogContent>
               </Dialog>
