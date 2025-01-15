@@ -115,13 +115,8 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
-        <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
-          <div className="p-6">
-            <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
-            <ComparisonTool embedded={true} />
-          </div>
-        </div>
         <MarketHighlights />
+        <ComparisonTool />
       </div>
     </div>
   );
