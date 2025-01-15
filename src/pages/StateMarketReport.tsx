@@ -13,8 +13,25 @@ export default function StateMarketReport() {
   const navigate = useNavigate();
   const [stateName, setStateName] = useState<string>("");
 
-  const { data: stateData, isLoading } = useQuery({
-    queryKey: ['stateMarketReport', state],
+  // Query the materialized view for state rankings
+  const { data: stateRankings, isLoading: rankingsLoading } = useQuery({
+    queryKey: ['stateRankings', state],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_rankings')
+        .select('*')
+        .eq('STATEFP', state)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!state
+  });
+
+  // Get state data
+  const { data: stateData, isLoading: stateLoading } = useQuery({
+    queryKey: ['stateData', state],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('state_data')
@@ -25,16 +42,6 @@ export default function StateMarketReport() {
       if (error) throw error;
       return data;
     }
-  });
-
-  // Get state rankings
-  const { data: stateRankings } = useQuery({
-    queryKey: ['stateRankings'],
-    queryFn: async () => {
-      const { data: rankings } = await supabase.rpc('get_state_rankings');
-      return rankings?.find(r => r.statefp === state);
-    },
-    enabled: !!state
   });
 
   // First get state abbreviation
@@ -113,19 +120,16 @@ export default function StateMarketReport() {
     navigate(`/market-report/${formattedCounty}/${stateName}`);
   };
 
-  // Calculate combined national rank
-
-  // Calculate combined national rank
+  // Calculate combined national rank using the materialized view data
   const calculateNationalRank = () => {
     if (!stateRankings) return null;
     
-    // Get individual ranks, defaulting to the total number of states if rank is missing
+    // Get individual ranks, defaulting to 50 if missing
     const densityRank = stateRankings.density_rank || 50;
     const growthRank = stateRankings.growth_rank || 50;
     const marketSaturationRank = stateRankings.market_saturation_rank || 50;
     
-    // Calculate weighted average of ranks
-    // Give more weight to density and growth as they are more indicative of market health
+    // Calculate weighted average of ranks (40% density, 40% growth, 20% market saturation)
     const weightedRank = Math.round(
       (densityRank * 0.4) + 
       (growthRank * 0.4) + 
@@ -135,7 +139,7 @@ export default function StateMarketReport() {
     return weightedRank;
   };
 
-  if (isLoading) {
+  if (stateLoading || rankingsLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
         <div className="max-w-7xl mx-auto">
@@ -145,7 +149,7 @@ export default function StateMarketReport() {
     );
   }
 
-  if (!stateData) {
+  if (!stateData || !stateRankings) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
         <div className="max-w-7xl mx-auto">
@@ -299,4 +303,3 @@ export default function StateMarketReport() {
       </div>
     </div>
   );
-}

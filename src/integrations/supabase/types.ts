@@ -905,6 +905,24 @@ export type Database = {
         }
         Relationships: []
       }
+      state_rankings: {
+        Row: {
+          avg_payroll_per_firm: number | null
+          density_rank: number | null
+          education_rate: number | null
+          firm_density: number | null
+          growth_rank: number | null
+          growth_rate: number | null
+          market_saturation: number | null
+          market_saturation_rank: number | null
+          national_density_avg: number | null
+          national_growth_avg: number | null
+          population: number | null
+          STATEFP: string | null
+          total_firms: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_scenario_metrics: {
@@ -1223,6 +1241,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_state_mappings: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_state_rankings: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
