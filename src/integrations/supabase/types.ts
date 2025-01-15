@@ -344,46 +344,46 @@ export type Database = {
       }
       msa_county_reference: {
         Row: {
-          county_name: string
+          COUNTYNAME: string
           fipscty: string
-          fipstate: string
-          msa: string
+          MSA: string
           msa_name: string
+          STATEFP: string
         }
         Insert: {
-          county_name: string
+          COUNTYNAME: string
           fipscty: string
-          fipstate: string
-          msa: string
+          MSA: string
           msa_name: string
+          STATEFP: string
         }
         Update: {
-          county_name?: string
+          COUNTYNAME?: string
           fipscty?: string
-          fipstate?: string
-          msa?: string
+          MSA?: string
           msa_name?: string
+          STATEFP?: string
         }
         Relationships: []
       }
       msa_state_crosswalk: {
         Row: {
-          county_name: string | null
-          msa: string | null
+          COUNTYNAME: string | null
+          MSA: string | null
           msa_name: string | null
-          state_fips: string | null
+          STATEFP: string | null
         }
         Insert: {
-          county_name?: string | null
-          msa?: string | null
+          COUNTYNAME?: string | null
+          MSA?: string | null
           msa_name?: string | null
-          state_fips?: string | null
+          STATEFP?: string | null
         }
         Update: {
-          county_name?: string | null
-          msa?: string | null
+          COUNTYNAME?: string | null
+          MSA?: string | null
           msa_name?: string | null
-          state_fips?: string | null
+          STATEFP?: string | null
         }
         Relationships: []
       }

@@ -20,7 +20,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .select('*')
         .eq('state_name', stateName)
         .ilike('countyname', county)
-        .maybeSingle();
+        .limit(1)
+        .single();
 
       if (countyError) {
         console.error('4. Error fetching county data:', countyError);
