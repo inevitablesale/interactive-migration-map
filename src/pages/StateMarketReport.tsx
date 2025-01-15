@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Building2, TrendingUp, DollarSign } from "lucide-react";
+import { ArrowLeft, Users, Building2, TrendingUp, DollarSign, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,22 @@ export default function StateMarketReport() {
       if (error) throw error;
       return data;
     }
+  });
+
+  const { data: countyData } = useQuery({
+    queryKey: ['countyData', state],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('county_data')
+        .select('*')
+        .eq('STATEFP', state)
+        .order('B01001_001E', { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!state
   });
 
   const { data: marketOpportunities } = useQuery({
@@ -54,6 +70,10 @@ export default function StateMarketReport() {
     };
     loadStateName();
   }, [state]);
+
+  const handleCountyClick = (countyName: string) => {
+    navigate(`/market-report/${state}/${countyName}`);
+  };
 
   if (isLoading) {
     return (
@@ -102,91 +122,80 @@ export default function StateMarketReport() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          {/* Market Overview */}
+        {/* State Level Metrics */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Building2 className="w-5 h-5 text-blue-400" />
-              <h2 className="text-lg font-semibold text-white">Market Overview</h2>
+              <h2 className="text-lg font-semibold text-white">Total Establishments</h2>
             </div>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-400">Total Establishments</p>
-                <p className="text-2xl font-bold text-white">{stateData.ESTAB?.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Employment</p>
-                <p className="text-2xl font-bold text-white">{stateData.EMP?.toLocaleString()}</p>
-              </div>
-            </div>
+            <p className="text-2xl font-bold text-white">{stateData.ESTAB?.toLocaleString()}</p>
           </Card>
-
-          {/* Economic Indicators */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="w-5 h-5 text-green-400" />
-              <h2 className="text-lg font-semibold text-white">Economic Indicators</h2>
+              <h2 className="text-lg font-semibold text-white">Annual Payroll</h2>
             </div>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-400">Annual Payroll</p>
-                <p className="text-2xl font-bold text-white">
-                  ${(stateData.PAYANN / 1000000).toFixed(1)}M
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Median Income</p>
-                <p className="text-2xl font-bold text-white">
-                  ${stateData.B19013_001E?.toLocaleString()}
-                </p>
-              </div>
-            </div>
+            <p className="text-2xl font-bold text-white">${(stateData.PAYANN / 1000000).toFixed(1)}M</p>
           </Card>
-
-          {/* Demographics */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Demographics</h2>
+              <h2 className="text-lg font-semibold text-white">Total Population</h2>
             </div>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-400">Total Population</p>
-                <p className="text-2xl font-bold text-white">
-                  {stateData.B01001_001E?.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Labor Force</p>
-                <p className="text-2xl font-bold text-white">
-                  {stateData.B23025_004E?.toLocaleString()}
-                </p>
-              </div>
-            </div>
+            <p className="text-2xl font-bold text-white">{stateData.B01001_001E?.toLocaleString()}</p>
           </Card>
-
-          {/* Market Growth */}
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-5 h-5 text-yellow-400" />
-              <h2 className="text-lg font-semibold text-white">Market Growth</h2>
+              <h2 className="text-lg font-semibold text-white">Growth Rate</h2>
             </div>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-400">Firms per 10k Population</p>
-                <p className="text-2xl font-bold text-white">
-                  {((stateData.ESTAB / stateData.B01001_001E) * 10000).toFixed(1)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Market Saturation</p>
-                <p className="text-2xl font-bold text-white">
-                  {competitiveAnalysis?.market_concentration.toFixed(1)}%
-                </p>
-              </div>
-            </div>
+            <p className="text-2xl font-bold text-white">{stateData.growth_rate_percentage?.toFixed(1)}%</p>
           </Card>
         </div>
+
+        {/* County Level Metrics */}
+        {countyData && countyData.length > 0 && (
+          <div className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Top Counties</h2>
+              <Button variant="ghost" className="text-gray-400 hover:text-white">
+                View All Counties <ChevronRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {countyData.map((county) => (
+                <Card 
+                  key={county.COUNTYFP}
+                  className="bg-black/40 backdrop-blur-md border-white/10 p-6 cursor-pointer hover:bg-black/60 transition-colors"
+                  onClick={() => handleCountyClick(county.COUNTYNAME)}
+                >
+                  <h3 className="text-lg font-semibold text-white mb-4">{county.COUNTYNAME}</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-400">Population</p>
+                      <p className="text-xl font-bold text-white">
+                        {county.B01001_001E?.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Establishments</p>
+                      <p className="text-xl font-bold text-white">
+                        {county.ESTAB?.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Recent Moves</p>
+                      <p className="text-xl font-bold text-white">
+                        {county.MOVEDIN2022?.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Market Opportunities */}
         {marketOpportunities && marketOpportunities.length > 0 && (
