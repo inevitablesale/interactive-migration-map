@@ -139,6 +139,14 @@ export default function StateMarketReport() {
     return weightedRank;
   };
 
+  const calculateEducationPercentages = (stateData: any) => {
+    const total = stateData.B15003_001E || 1;
+    const bachelors = ((stateData.B15003_022E || 0) / total * 100).toFixed(1);
+    const masters = ((stateData.B15003_023E || 0) / total * 100).toFixed(1);
+    const doctorate = ((stateData.B15003_025E || 0) / total * 100).toFixed(1);
+    return { bachelors, masters, doctorate };
+  };
+
   if (stateLoading || rankingsLoading) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
@@ -164,6 +172,7 @@ export default function StateMarketReport() {
   }
 
   const nationalRank = calculateNationalRank();
+  const educationPercentages = calculateEducationPercentages(stateData);
 
   return (
     <div className="min-h-screen bg-[#111111]">
@@ -204,6 +213,7 @@ export default function StateMarketReport() {
             </div>
             <p className="text-2xl font-bold text-white">{stateData.ESTAB?.toLocaleString()}</p>
           </Card>
+
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="w-5 h-5 text-green-400" />
@@ -211,12 +221,26 @@ export default function StateMarketReport() {
             </div>
             <p className="text-2xl font-bold text-white">${(stateData.PAYANN / 1000000).toFixed(1)}M</p>
           </Card>
+
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Total Population</h2>
+              <h2 className="text-lg font-semibold text-white">Education Distribution</h2>
             </div>
-            <p className="text-2xl font-bold text-white">{stateData.B01001_001E?.toLocaleString()}</p>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Bachelor's</span>
+                <span className="text-white">{educationPercentages.bachelors}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Master's</span>
+                <span className="text-white">{educationPercentages.masters}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Doctorate</span>
+                <span className="text-white">{educationPercentages.doctorate}%</span>
+              </div>
+            </div>
           </Card>
 
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
