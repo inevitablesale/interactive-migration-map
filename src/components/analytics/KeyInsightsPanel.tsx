@@ -171,12 +171,23 @@ export function KeyInsightsPanel() {
   }, [countyRankings]);
 
   const handleNavigateToMarket = (county: string, state: string) => {
-    if (!state) {
+    // If state is undefined, try to extract it from county name which might be in format "County Name, State"
+    let finalState = state;
+    let finalCounty = county;
+    
+    if (!finalState && county.includes(',')) {
+      const [countyPart, statePart] = county.split(',').map(s => s.trim());
+      finalCounty = countyPart;
+      finalState = statePart;
+    }
+
+    if (!finalState) {
       console.error('State is undefined for county:', county);
       return;
     }
-    const formattedCounty = county.endsWith(" County") ? county : `${county} County`;
-    navigate(`/market-report/${formattedCounty}/${state}`);
+
+    const formattedCounty = finalCounty.endsWith(" County") ? finalCounty : `${finalCounty} County`;
+    navigate(`/market-report/${formattedCounty}/${finalState}`);
   };
 
   const insights = [
