@@ -108,4 +108,31 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         payann: countyData.payann || null,
         total_establishments: countyData.total_establishments || null,
         emp: countyData.emp || null,
-        public_to_private_ra
+        public_to_private_ratio: countyData.public_to_private_ratio || null,
+        vacancy_rate: countyData.vacancy_rate || null,
+        vacancy_rank: countyData.vacancy_rank || null,
+        income_rank: countyData.income_rank || null,
+        population_rank: countyData.population_rank || null,
+        rent_rank: countyData.rent_rank || null,
+        density_rank: countyData.density_rank || null,
+        growth_rank: countyData.growth_rank || null,
+        top_firms: transformedTopFirms,
+      };
+
+      console.log('14. Final transformed data:', transformedData);
+
+      return transformedData;
+    },
+    enabled: !!stateName && !!county,
+  });
+
+  const hasMarketData = !!marketData;
+  console.log('15. Query complete:', { 
+    hasData: hasMarketData, 
+    isLoading, 
+    hasError: !!error,
+    firmsCount: marketData?.top_firms?.length 
+  });
+
+  return { marketData, isLoading, hasMarketData, error };
+};
