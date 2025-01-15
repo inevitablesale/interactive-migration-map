@@ -70,14 +70,13 @@ export function MarketHighlights() {
   const handleRowClick = (region: string) => {
     if (region.includes(",")) {
       // For format like "Helena, MT"
-      const [county, stateAbbr] = region.split(",").map(s => s.trim());
+      const [city, stateAbbr] = region.split(",").map(s => s.trim());
       const stateName = stateMap[stateAbbr] || stateAbbr;
-      navigate(`/market-report/${county}%20County/${stateName}`);
+      // Helena is in Lewis and Clark County
+      navigate(`/market-report/Lewis%20and%20Clark%20County/${stateName}`);
     } else if (region.includes("County")) {
       // For format like "Jefferson County"
-      const [county, _] = region.split(" County");
-      // Since we know we're dealing with Montana from the context
-      navigate(`/market-report/${county}%20County/${stateMap['MT']}`);
+      navigate(`/market-report/${encodeURIComponent(region)}/${stateMap['MT']}`);
     } else {
       // For single state names, convert if it's an abbreviation
       const stateName = stateMap[region] || region;
