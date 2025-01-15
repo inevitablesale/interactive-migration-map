@@ -30,7 +30,7 @@ export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsC
       case 'money':
         return `$${numValue.toLocaleString()}`;
       case 'density':
-        return `${numValue.toFixed(1)}`;
+        return `${numValue.toFixed(1)}%`;
       case 'growth':
       case 'saturation':
         return `${numValue.toFixed(1)}%`;
