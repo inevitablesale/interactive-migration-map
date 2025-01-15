@@ -1,4 +1,4 @@
-import { ChartBar, Users, TrendingUp } from "lucide-react";
+import { ChartBar, Users, TrendingUp, Bot, Sparkles } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
@@ -88,39 +88,52 @@ export default function Analysis() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AlertsPanel />
-          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
-            <div className="space-y-4">
-              <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
-                <Button 
-                  onClick={() => setShowProfileForm(true)}
-                  className="w-full bg-blue-500 hover:bg-blue-600"
-                >
-                  Create Buyer Profile
-                </Button>
-                <DialogContent className="bg-gray-900 border-white/10">
-                  <DialogHeader>
-                    <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
-                    <DialogDescription className="text-gray-300">
-                      Set up your buyer profile to receive personalized market insights and opportunities that match your investment criteria.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
-                </DialogContent>
-              </Dialog>
-              <p className="text-sm text-gray-300">
-                Create a buyer profile to get personalized recommendations, market insights, and notifications about opportunities that match your criteria.
-              </p>
+          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Bot className="w-6 h-6 text-blue-400" />
+              <h2 className="text-xl font-semibold text-white">AI Deal Sourcer</h2>
+            </div>
+            <div className="space-y-6">
+              <div className="bg-white/5 rounded-lg p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-medium text-white">Personalized Deal Matching</h3>
+                </div>
+                <p className="text-white/70 mb-6">
+                  Our AI analyzes market data and your preferences to find the perfect opportunities. Set up your profile and alerts to get started.
+                </p>
+                <div className="space-y-4">
+                  <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+                    <Button 
+                      onClick={() => setShowProfileForm(true)}
+                      className="w-full bg-blue-500 hover:bg-blue-600"
+                    >
+                      Create AI-Powered Buyer Profile
+                    </Button>
+                    <DialogContent className="bg-gray-900 border-white/10">
+                      <DialogHeader>
+                        <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
+                        <DialogDescription className="text-gray-300">
+                          Set up your buyer profile to receive AI-powered market insights and opportunities that match your investment criteria.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+                    </DialogContent>
+                  </Dialog>
+                  <AlertsPanel />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <KeyInsightsPanel />
-        <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
-          <div className="p-6">
-            <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
+          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <ChartBar className="w-6 h-6 text-purple-400" />
+              <h2 className="text-xl font-semibold text-white">Market Intelligence</h2>
+            </div>
             <ComparisonTool embedded={true} />
           </div>
         </div>
+        <KeyInsightsPanel />
         <MarketHighlights />
       </div>
     </div>
