@@ -126,7 +126,10 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_future_saturation_risk');
       if (error) throw error;
-      return data;
+      // Filter out duplicates based on county_name
+      return data.filter((region, index, self) =>
+        index === self.findIndex(r => r.county_name === region.county_name)
+      );
     },
   });
 
