@@ -16,7 +16,6 @@ export interface ComprehensiveMarketData {
   payann?: number;
   total_establishments?: number;
   emp?: number;
-  public_to_private_ratio?: number | null;
   vacancy_rate?: number;
   vacancy_rank?: number;
   income_rank?: number;
