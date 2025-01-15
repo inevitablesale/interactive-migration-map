@@ -16,7 +16,7 @@ export const useMarketReportData = (countyName: string, state: string) => {
       if (stateFipsError) throw stateFipsError;
       if (!stateFips) throw new Error('State not found');
 
-      // Then get the state data using the FIPS code
+      // Get state data
       const { data: stateData, error: stateError } = await supabase
         .from('state_data')
         .select('*')
@@ -26,7 +26,9 @@ export const useMarketReportData = (countyName: string, state: string) => {
       if (stateError) throw stateError;
       if (!stateData) throw new Error('State data not found');
 
-      // Then, get the county data
+      console.log('State Data:', stateData);
+
+      // Get county data for detailed census information
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
         .select('*')
@@ -39,6 +41,16 @@ export const useMarketReportData = (countyName: string, state: string) => {
 
       console.log('County Data:', countyData);
 
+      // Get rankings data
+      const { data: rankingsData, error: rankingsError } = await supabase
+        .rpc('get_county_rankings')
+        .eq('statefp', stateFips.STATEFP)
+        .eq('countyname', countyName)
+        .maybeSingle();
+
+      if (rankingsError) throw rankingsError;
+      console.log('Rankings Data:', rankingsData);
+
       // Get firms in county
       const { data: firms, error: firmsError } = await supabase
         .from('canary_firms_data')
@@ -47,6 +59,13 @@ export const useMarketReportData = (countyName: string, state: string) => {
         .eq('COUNTYNAME', countyName);
 
       if (firmsError) throw firmsError;
+
+      // Calculate employment metrics
+      const employmentData = {
+        private_sector: countyData.C24060_004E,
+        public_sector: countyData.C24060_007E
+      };
+      console.log('Employment Data:', employmentData);
 
       // Calculate average salary per employee if both payann and emp exist
       const avgSalaryPerEmployee = countyData.PAYANN && countyData.EMP 
@@ -63,8 +82,7 @@ export const useMarketReportData = (countyName: string, state: string) => {
         total_establishments: countyData.ESTAB,
         emp: countyData.EMP,
         avgPayrollPerFirm,
-        avgSalaryPerEmployee,
-        firms_per_10k_population: countyData.firms_per_10k_population
+        avgSalaryPerEmployee
       });
 
       // Transform the data to match our ComprehensiveMarketData type
@@ -76,15 +94,9 @@ export const useMarketReportData = (countyName: string, state: string) => {
         employed_population: countyData.B23025_004E,
         private_sector_accountants: countyData.C24060_004E,
         public_sector_accountants: countyData.C24060_007E,
-        firms_per_10k_population: countyData.ESTAB && countyData.B01001_001E 
-          ? (countyData.ESTAB / countyData.B01001_001E) * 10000 
-          : 0,
-        growth_rate_percentage: countyData.MOVEDIN2022 && countyData.MOVEDIN2021
-          ? ((countyData.MOVEDIN2022 - countyData.MOVEDIN2021) / countyData.MOVEDIN2021) * 100
-          : 0,
-        market_saturation_index: countyData.ESTAB && countyData.B23025_004E
-          ? (countyData.ESTAB / countyData.B23025_004E) * 100
-          : 0,
+        firms_per_10k_population: rankingsData?.firm_density || 0,
+        growth_rate_percentage: rankingsData?.growth_rate || 0,
+        market_saturation_index: rankingsData?.market_saturation || 0,
         total_education_population: countyData.B15003_001E,
         bachelors_degree_holders: countyData.B15003_022E,
         masters_degree_holders: countyData.B15003_023E,
@@ -96,6 +108,11 @@ export const useMarketReportData = (countyName: string, state: string) => {
         vacancy_rate: countyData.B25002_002E && countyData.B25002_003E
           ? (countyData.B25002_003E / countyData.B25002_002E) * 100
           : 0,
+        population_rank: rankingsData?.density_rank || 0,
+        income_rank: null,
+        rent_rank: null,
+        vacancy_rank: null,
+        growth_rank: rankingsData?.growth_rank || 0,
         top_firms: firms?.map(firm => ({
           company_name: firm["Company Name"],
           employee_count: firm.employeeCount,
