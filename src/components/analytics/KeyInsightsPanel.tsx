@@ -68,7 +68,6 @@ interface FutureSaturationRisk {
   projected_firm_density: number;
   firm_growth_rate: number;
   population_growth_rate: number;
-  median_income?: number;
 }
 
 export function KeyInsightsPanel() {
@@ -420,6 +419,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(region.county_name, getStateNameFromFIPS(region.county_name.split(',')[1]?.trim() || ''))}
                       >
                         <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
                         <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
