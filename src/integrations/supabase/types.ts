@@ -827,19 +827,19 @@ export type Database = {
       }
       state_fips_codes: {
         Row: {
-          fips_code: string | null
           postal_abbr: string | null
           state: string | null
+          STATEFP: string | null
         }
         Insert: {
-          fips_code?: string | null
           postal_abbr?: string | null
           state?: string | null
+          STATEFP?: string | null
         }
         Update: {
-          fips_code?: string | null
           postal_abbr?: string | null
           state?: string | null
+          STATEFP?: string | null
         }
         Relationships: []
       }
