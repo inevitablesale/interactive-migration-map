@@ -171,6 +171,10 @@ export function KeyInsightsPanel() {
   }, [countyRankings]);
 
   const handleNavigateToMarket = (county: string, state: string) => {
+    if (!state) {
+      console.error('State is undefined for county:', county);
+      return;
+    }
     const formattedCounty = county.endsWith(" County") ? county : `${county} County`;
     navigate(`/market-report/${formattedCounty}/${state}`);
   };
