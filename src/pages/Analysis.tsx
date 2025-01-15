@@ -5,6 +5,10 @@ import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
+import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -52,6 +56,7 @@ async function fetchStats() {
 }
 
 export default function Analysis() {
+  const [showProfileForm, setShowProfileForm] = useState(false);
   const { data: stats } = useQuery({
     queryKey: ['analysisStats'],
     queryFn: fetchStats
@@ -99,14 +104,31 @@ export default function Analysis() {
               </div>
             ))}
           </div>
+          
+          <div className="mt-12">
+            <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+              <Button 
+                onClick={() => setShowProfileForm(true)}
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                Create Buyer Profile
+              </Button>
+              <DialogContent className="bg-black/90 border-white/10">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Create Buyer Profile</DialogTitle>
+                </DialogHeader>
+                <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </section>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
+        <AlertsPanel />
         <KeyInsightsPanel />
         <MarketHighlights />
-        <AlertsPanel />
         <ComparisonTool />
       </div>
     </div>
