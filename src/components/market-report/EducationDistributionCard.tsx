@@ -12,6 +12,14 @@ export function EducationDistributionCard({ marketData }: EducationDistributionC
     return (value / total) * 100;
   };
 
+  // Add console logs for debugging education data
+  console.log('Education Data:', {
+    total_population: marketData.total_education_population,
+    bachelors: marketData.bachelors_degree_holders,
+    masters: marketData.masters_degree_holders,
+    doctorate: marketData.doctorate_degree_holders
+  });
+
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader>
@@ -55,7 +63,7 @@ export function EducationDistributionCard({ marketData }: EducationDistributionC
           <div className="flex justify-between items-baseline">
             <span className="text-sm text-white/60">Total Population</span>
             <span className="text-white font-medium">
-              {marketData.total_education_population?.toLocaleString()}
+              {marketData.total_education_population?.toLocaleString() || 'N/A'}
             </span>
           </div>
         </div>

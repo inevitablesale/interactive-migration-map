@@ -17,6 +17,28 @@ interface MarketMetricsCardProps {
 }
 
 export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsCardProps) {
+  // Format value based on type
+  const formatValue = (value: string | undefined, type: 'population' | 'money' | 'density' | 'growth' | 'saturation'): string => {
+    if (value === undefined || value === null || value === '') return 'N/A';
+    
+    const numValue = Number(value.replace(/[^0-9.-]/g, ''));
+    if (isNaN(numValue)) return 'N/A';
+
+    switch (type) {
+      case 'population':
+        return numValue.toLocaleString();
+      case 'money':
+        return `$${numValue.toLocaleString()}`;
+      case 'density':
+        return `${numValue.toFixed(1)}`;
+      case 'growth':
+      case 'saturation':
+        return `${numValue.toFixed(1)}%`;
+      default:
+        return value;
+    }
+  };
+
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader className="pb-2">
@@ -36,8 +58,8 @@ export function MarketMetricsCard({ title, icon: Icon, metrics }: MarketMetricsC
                 )}
               </h3>
               <div className="flex items-baseline justify-between">
-                <p className={`text-4xl font-bold tracking-tight break-words ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '')), metric.type)}`}>
-                  {metric.value || 'N/A'}
+                <p className={`text-4xl font-bold tracking-tight break-words ${getMetricColor(Number(metric.value?.replace(/[^0-9.-]/g, '') || 0), metric.type)}`}>
+                  {formatValue(metric.value, metric.type)}
                 </p>
                 {metric.rank && (
                   <div className="text-right">
