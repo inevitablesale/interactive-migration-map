@@ -22,12 +22,72 @@ serve(async (req) => {
     // Process and correlate data
     const marketMetrics = processMarketData(soldFirms, activeFirms, censusData);
     
-    // Create comprehensive analysis prompt
-    const prompt = generateAnalysisPrompt(marketMetrics, filters);
+    // Create comprehensive analysis prompt with context
+    const prompt = `You are a market analysis expert specializing in professional services firms, particularly accounting and advisory practices. Your task is to analyze market data and provide strategic insights.
+
+CONTEXT:
+Professional services firms' value is heavily influenced by:
+- Service line mix and specialization
+- Client relationships and retention
+- Geographic market conditions
+- Workforce quality and stability
+- Local economic indicators
+
+AVAILABLE DATA:
+${JSON.stringify(marketMetrics, null, 2)}
+
+ANALYSIS OBJECTIVES:
+
+1. Service Line Analysis:
+- Identify most profitable service combinations
+- Correlate service types with client retention
+- Map service demands to geographic areas
+- Calculate revenue per service line
+
+2. Client Base Analysis:
+- Segment clients by industry and size
+- Map geographic distribution of client types
+- Analyze revenue per client segment
+- Identify underserved markets
+
+3. Geographic Analysis:
+- Correlate location with firm performance
+- Analyze demographic impacts on pricing
+- Identify market saturation levels
+- Map expansion opportunities
+
+4. Financial Metrics:
+- Calculate revenue per employee
+- Analyze price-to-revenue ratios
+- Compare valuations across regions
+- Identify pricing trends
+
+5. Workforce Analysis:
+- Optimal employee structures
+- Geographic talent availability
+- Compensation trends
+- Growth constraints
+
+Please analyze these relationships and provide:
+1. Key correlations between service lines, clientele, and financial performance
+2. Geographic market opportunities based on census data
+3. Pricing insights based on service mix and location
+4. Strategic recommendations for market entry or expansion
+5. Risk factors specific to each market segment
+
+Format your response with clear sections for:
+- Opportunities (based on data correlations)
+- Growth Potential (with specific metrics)
+- Risk Factors (by market segment)
+- Strategic Recommendations (actionable insights)`;
+
+    console.log('Sending prompt to Gemini:', prompt);
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+    
+    console.log('Received response from Gemini:', text);
 
     // Parse and structure the response
     const insights = parseGeminiResponse(text);
