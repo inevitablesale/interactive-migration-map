@@ -28,14 +28,19 @@ async function fetchStats() {
   let avgGrowthRate = 0;
   if (growthData && growthData.length > 0) {
     const growthRates = growthData.map(county => {
-      const total2022 = county.MOVEDIN2022;
-      const total2021 = county.MOVEDIN2021;
-      const total2020 = county.MOVEDIN2020;
-      const combinedGrowth = ((total2022 + total2021 + total2020) / 3);
-      const yearlyGrowth = ((combinedGrowth - total2020) / total2020) * 100;
-      return yearlyGrowth;
+      const total2022 = county.MOVEDIN2022 || 0;
+      const total2021 = county.MOVEDIN2021 || 0;
+      const total2020 = county.MOVEDIN2020 || 0;
+      
+      // Calculate year-over-year growth rates
+      const growth2021 = ((total2021 - total2020) / total2020) * 100;
+      const growth2022 = ((total2022 - total2021) / total2021) * 100;
+      
+      // Return average of the two year-over-year rates
+      return (growth2021 + growth2022) / 2;
     });
     
+    // Calculate the average growth rate across all counties
     avgGrowthRate = growthRates.reduce((acc, rate) => acc + rate, 0) / growthRates.length;
   }
 
