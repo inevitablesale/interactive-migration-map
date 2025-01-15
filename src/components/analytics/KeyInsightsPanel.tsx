@@ -159,7 +159,7 @@ export function KeyInsightsPanel() {
       .map(county => ({
         county_name: county.countyname.endsWith(" County") ? county.countyname : `${county.countyname} County`,
         state: county.statefp,
-        state_name: getStateNameFromFIPS(county.statefp), // Add function to get full state name
+        state_name: getStateNameFromFIPS(county.statefp),
         median_income: county.state_density_avg * 50000,
         median_home_value: county.state_growth_avg * 100000,
         total_firms: county.total_firms,
@@ -469,44 +469,10 @@ export function KeyInsightsPanel() {
           </Card>
         ))}
       </div>
-
-      <div className="mt-8">
-        <h3 className="text-2xl font-bold mb-4 text-white">State Performance Comparison</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {stateData?.map((state, index) => (
-            <Card 
-              key={index} 
-              className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
-              onClick={() => handleNavigateToMarket('All Counties', state.STATEFP)}
-            >
-              <h4 className="text-lg font-semibold text-white mb-4">State {state.STATEFP}</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Total Establishments</span>
-                  <span className="text-white font-medium">{state.ESTAB?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Total Employment</span>
-                  <span className="text-white font-medium">{state.EMP?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Annual Payroll</span>
-                  <span className="text-white font-medium">${(state.PAYANN / 1000000).toFixed(1)}M</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Median Income</span>
-                  <span className="text-white font-medium">${state.B19013_001E?.toLocaleString()}</span>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }
 
-// Helper function to get full state name from FIPS code
 function getStateNameFromFIPS(fips: string): string {
   const stateMap: { [key: string]: string } = {
     '01': 'Alabama',
