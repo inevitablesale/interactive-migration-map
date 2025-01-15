@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
+import { StrategyBuilder } from "@/components/analytics/StrategyBuilder";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -115,6 +116,7 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
+        <StrategyBuilder />
         <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
             <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
