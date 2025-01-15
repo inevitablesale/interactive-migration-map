@@ -117,11 +117,11 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
           ? countyData.C24060_007E / countyData.C24060_004E 
           : null,
-        vacancy_rate: (countyData.B25002_003E / countyData.B25002_001E) * 100 || null,
-        vacancy_rank: rankingData?.vacancy_rank || null,
-        income_rank: rankingData?.income_rank || null,
-        population_rank: rankingData?.population_rank || null,
-        rent_rank: rankingData?.rent_rank || null,
+        vacancy_rate: (countyData.B25002_003E / countyData.B25002_002E) * 100 || null,
+        vacancy_rank: rankingData?.density_rank || null,
+        income_rank: rankingData?.growth_rank || null,
+        population_rank: rankingData?.population || null,
+        rent_rank: rankingData?.density_rank || null,
         density_rank: rankingData?.density_rank || null,
         growth_rank: rankingData?.growth_rank || null,
         top_firms: transformedTopFirms,
