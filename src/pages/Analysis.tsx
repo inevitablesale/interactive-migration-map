@@ -2,6 +2,7 @@ import { ChartBar, Users, TrendingUp } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
+import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,12 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
+        <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
+          <div className="p-6">
+            <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
+            <ComparisonTool embedded={true} />
+          </div>
+        </div>
         <MarketHighlights />
       </div>
     </div>
