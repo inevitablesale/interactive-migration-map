@@ -918,6 +918,7 @@ export type Database = {
           growth_rank: number
           state_density_avg: number
           state_growth_avg: number
+          market_saturation: number
         }[]
       }
       get_education_age_analysis: {
