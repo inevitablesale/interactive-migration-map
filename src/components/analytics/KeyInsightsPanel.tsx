@@ -207,7 +207,7 @@ export function KeyInsightsPanel() {
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
                         onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
@@ -461,7 +461,7 @@ export function KeyInsightsPanel() {
               <insight.icon className="w-5 h-5 text-yellow-400" />
               <h3 className="font-semibold text-lg text-white">{insight.title}</h3>
             </div>
-            <p className="text-2xl font-bold text-white mb-2">{insight.value}</p>
+            <p className="text-2xl font-bold text-white mb-2 min-h-[4rem] flex items-center">{insight.value}</p>
             <div className="text-sm text-white/80">{insight.insight}</div>
           </Card>
         ))}
