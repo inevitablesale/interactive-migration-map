@@ -181,7 +181,7 @@ export default function StateMarketReport() {
               <h2 className="text-lg font-semibold text-white">Growth Rate</h2>
             </div>
             <p className="text-2xl font-bold text-white">
-              {((stateData.MOVEDIN2022 ?? 0) - (stateData.MOVEDIN2021 ?? 0)) / (stateData.MOVEDIN2021 || 1) * 100}%
+              {((stateData.MOVEDIN2022 ?? 0) - (stateData.MOVEDIN2021 ?? 0)) / ((stateData.MOVEDIN2021 ?? 1)) * 100}%
             </p>
           </Card>
         </div>

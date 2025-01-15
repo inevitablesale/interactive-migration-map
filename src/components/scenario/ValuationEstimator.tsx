@@ -26,10 +26,11 @@ export function ValuationEstimator() {
   });
 
   const valuationMetrics = soldFirmsData?.map(firm => ({
-    revenue: firm.annual_revenue,
-    askingPrice: firm.asking_price,
-    employeeCount: firm.employee_count,
-    multiple: firm.asking_price / firm.annual_revenue
+    revenue: Number(firm.annual_revenue) || 0,
+    askingPrice: Number(firm.asking_price) || 0,
+    employeeCount: Number(firm.employee_count) || 0,
+    multiple: firm.annual_revenue && firm.asking_price ? 
+      Number(firm.asking_price) / Number(firm.annual_revenue) : 0
   })) || [];
 
   return (
@@ -43,13 +44,13 @@ export function ValuationEstimator() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="revenue" 
-                tickFormatter={(value) => `$${(value/1000000).toFixed(1)}M`}
+                tickFormatter={(value) => `$${(Number(value)/1000000).toFixed(1)}M`}
               />
               <YAxis 
-                tickFormatter={(value) => value.toFixed(1) + 'x'}
+                tickFormatter={(value) => `${Number(value).toFixed(1)}x`}
               />
               <Tooltip 
-                formatter={(value, name) => [
+                formatter={(value: number, name) => [
                   name === 'multiple' ? `${value.toFixed(2)}x` : `$${(value/1000000).toFixed(1)}M`,
                   name === 'multiple' ? 'Revenue Multiple' : 'Annual Revenue'
                 ]}
