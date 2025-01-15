@@ -36,15 +36,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       // Get data from county_rankings materialized view
       console.log('7. Fetching county rankings data for:', { county, stateFips: stateFips.STATEFP });
       
-      // Debug query to see what's being returned
-      const debugQuery = await supabase
-        .from('county_rankings')
-        .select('*')
-        .eq('STATEFP', stateFips.STATEFP)
-        .eq('COUNTYNAME', county);
-      
-      console.log('Debug - All matching rows:', debugQuery.data);
-
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
@@ -63,6 +54,22 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       console.log('10. Retrieved county data:', countyData);
+
+      // Get top firms data
+      const { data: topFirms, error: firmsError } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .eq('COUNTYNAME', county)
+        .eq('State Name', stateName)
+        .order('employeeCount', { ascending: false })
+        .limit(10);
+
+      if (firmsError) {
+        console.error('Error fetching top firms:', firmsError.message);
+        throw new Error('Error fetching top firms');
+      }
+
+      console.log('11. Retrieved top firms:', topFirms?.length);
 
       // Transform the data using the county_rankings view data
       const transformedData: ComprehensiveMarketData = {
@@ -91,10 +98,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         rent_rank: countyData.rent_rank || null,
         density_rank: countyData.density_rank || null,
         growth_rank: countyData.growth_rank || null,
-        top_firms: countyData.top_firms || [],
+        top_firms: topFirms || [],
       };
 
-      console.log('11. Transformed data:', transformedData);
+      console.log('12. Transformed data:', transformedData);
 
       return transformedData;
     },
@@ -102,7 +109,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('12. Query complete:', { 
+  console.log('13. Query complete:', { 
     hasData: hasMarketData, 
     isLoading, 
     hasError: !!error,
