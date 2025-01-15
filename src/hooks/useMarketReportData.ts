@@ -116,10 +116,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         rent_rank: countyData.rent_rank || null,
         density_rank: countyData.density_rank || null,
         growth_rank: countyData.growth_rank || null,
-        top_firms: transformedTopFirms,
+        top_firms: transformedTopFirms, // Include top_firms in the final transformed data
       };
 
-      console.log('14. Final transformed data:', transformedData);
+      console.log('15. Final transformed data:', transformedData);
 
       return transformedData;
     },
@@ -127,7 +127,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('15. Query complete:', { 
+  console.log('16. Query complete:', { 
     hasData: hasMarketData, 
     isLoading, 
     hasError: !!error,
