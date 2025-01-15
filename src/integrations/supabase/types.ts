@@ -850,7 +850,6 @@ export type Database = {
           bachelors_degree_holders: number | null
           calculated_firm_density: number | null
           calculated_growth_rate: number | null
-          calculated_market_saturation: number | null
           COUNTYFP: string | null
           COUNTYNAME: string | null
           density_rank: number | null
@@ -874,9 +873,9 @@ export type Database = {
           state_growth_avg: number | null
           state_name: string | null
           STATEFP: string | null
+          top_firms: Json | null
           total_education_population: number | null
           total_establishments: number | null
-          total_firms: number | null
           vacancy_rank: number | null
           vacancy_rate: number | null
         }
