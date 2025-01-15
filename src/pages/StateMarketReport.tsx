@@ -7,14 +7,27 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getStateName } from "@/utils/stateUtils";
 import { useEffect, useState } from "react";
-import { useStateMarketData } from "@/hooks/useStateMarketData";
 
 export default function StateMarketReport() {
   const { state } = useParams();
   const navigate = useNavigate();
   const [stateName, setStateName] = useState<string>("");
 
-  // Get state abbreviation
+  const { data: stateData, isLoading } = useQuery({
+    queryKey: ['stateMarketReport', state],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_data')
+        .select('*')
+        .eq('STATEFP', state)
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // First get state abbreviation
   const { data: stateAbbr } = useQuery({
     queryKey: ['stateAbbr', state],
     queryFn: async () => {
@@ -30,8 +43,50 @@ export default function StateMarketReport() {
     enabled: !!state
   });
 
-  // Use our new hook for state market data
-  const { data, isLoading } = useStateMarketData(state || '');
+  const { data: countyData } = useQuery({
+    queryKey: ['countyData', state],
+    queryFn: async () => {
+      // Get all counties for the state, sorted by population
+      const { data, error } = await supabase
+        .from('county_data')
+        .select('*')
+        .eq('STATEFP', state)
+        .order('B01001_001E', { ascending: false });
+
+      if (error) throw error;
+
+      // Create a Map to keep track of unique counties while preserving the sort order
+      const uniqueCounties = new Map();
+      
+      data?.forEach(county => {
+        if (!uniqueCounties.has(county.COUNTYNAME)) {
+          uniqueCounties.set(county.COUNTYNAME, county);
+        }
+      });
+
+      // Convert Map values back to array and take top 6
+      return Array.from(uniqueCounties.values()).slice(0, 6);
+    },
+    enabled: !!state
+  });
+
+  const { data: marketOpportunities } = useQuery({
+    queryKey: ['stateOpportunities', state],
+    queryFn: async () => {
+      const { data: opportunities } = await supabase.rpc('get_market_opportunities');
+      return opportunities?.filter(opp => opp.statefp === state);
+    },
+    enabled: !!state
+  });
+
+  const { data: competitiveAnalysis } = useQuery({
+    queryKey: ['stateCompetitiveAnalysis', state],
+    queryFn: async () => {
+      const { data: analysis } = await supabase.rpc('get_competitive_analysis');
+      return analysis?.find(a => a.statefp === state);
+    },
+    enabled: !!state
+  });
 
   useEffect(() => {
     const loadStateName = async () => {
@@ -44,6 +99,7 @@ export default function StateMarketReport() {
   }, [state]);
 
   const handleCountyClick = (countyName: string) => {
+    // Ensure county name includes "County" suffix if not present
     const formattedCounty = countyName.endsWith(" County") ? countyName : `${countyName} County`;
     navigate(`/market-report/${formattedCounty}/${stateName}`);
   };
@@ -58,7 +114,7 @@ export default function StateMarketReport() {
     );
   }
 
-  if (!data?.stateData) {
+  if (!stateData) {
     return (
       <div className="min-h-screen bg-[#222222] p-8">
         <div className="max-w-7xl mx-auto">
@@ -87,10 +143,10 @@ export default function StateMarketReport() {
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
             <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">
-              {data?.competitiveAnalysis?.competition_level || 'Analyzing'} Competition
+              {competitiveAnalysis?.competition_level || 'Analyzing'} Competition
             </Badge>
             <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
-              {data?.marketOpportunities.length ? 'Growth Opportunities' : 'Stable Market'}
+              {marketOpportunities?.length ? 'Growth Opportunities' : 'Stable Market'}
             </Badge>
           </div>
         </div>
@@ -102,21 +158,21 @@ export default function StateMarketReport() {
               <Building2 className="w-5 h-5 text-blue-400" />
               <h2 className="text-lg font-semibold text-white">Total Establishments</h2>
             </div>
-            <p className="text-2xl font-bold text-white">{data.stateData.ESTAB?.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-white">{stateData.ESTAB?.toLocaleString()}</p>
           </Card>
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="w-5 h-5 text-green-400" />
               <h2 className="text-lg font-semibold text-white">Annual Payroll</h2>
             </div>
-            <p className="text-2xl font-bold text-white">${(data.stateData.PAYANN / 1000000).toFixed(1)}M</p>
+            <p className="text-2xl font-bold text-white">${(stateData.PAYANN / 1000000).toFixed(1)}M</p>
           </Card>
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-purple-400" />
               <h2 className="text-lg font-semibold text-white">Total Population</h2>
             </div>
-            <p className="text-2xl font-bold text-white">{data.stateData.B01001_001E?.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-white">{stateData.B01001_001E?.toLocaleString()}</p>
           </Card>
 
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
@@ -125,13 +181,13 @@ export default function StateMarketReport() {
               <h2 className="text-lg font-semibold text-white">Growth Rate</h2>
             </div>
             <p className="text-2xl font-bold text-white">
-              {((data.stateData.MOVEDIN2022 ?? 0) - (data.stateData.MOVEDIN2021 ?? 0)) / (data.stateData.MOVEDIN2021 || 1) * 100}%
+              {((stateData.MOVEDIN2022 ?? 0) - (stateData.MOVEDIN2021 ?? 0)) / (stateData.MOVEDIN2021 || 1) * 100}%
             </p>
           </Card>
         </div>
 
         {/* County Level Metrics */}
-        {data.topCounties && data.topCounties.length > 0 && (
+        {countyData && countyData.length > 0 && (
           <div className="mt-12">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-white">Top Counties</h2>
@@ -140,7 +196,7 @@ export default function StateMarketReport() {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.topCounties.map((county) => (
+              {countyData.map((county) => (
                 <Card 
                   key={`${county.COUNTYFP}-${county.STATEFP}`}
                   className="bg-black/40 backdrop-blur-md border-white/10 p-6 cursor-pointer hover:bg-black/60 transition-colors"
@@ -174,11 +230,11 @@ export default function StateMarketReport() {
         )}
 
         {/* Market Opportunities */}
-        {data.marketOpportunities && data.marketOpportunities.length > 0 && (
+        {marketOpportunities && marketOpportunities.length > 0 && (
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6 mb-6">
             <h2 className="text-xl font-semibold text-white mb-4">Growth Opportunities</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.marketOpportunities.map((opportunity, index) => (
+              {marketOpportunities.map((opportunity, index) => (
                 <Card key={index} className="bg-black/40 backdrop-blur-md border-white/10 p-4">
                   <h3 className="text-lg font-medium text-white mb-2">{opportunity.countyname}</h3>
                   <div className="space-y-2">
