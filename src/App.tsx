@@ -3,6 +3,7 @@ import Index from "@/pages/Index";
 import Analysis from "@/pages/Analysis";
 import Opportunities from "@/pages/Opportunities";
 import MarketReport from "@/pages/MarketReport";
+import StateMarketReport from "@/pages/StateMarketReport";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/analysis" element={<Analysis />} />
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/market-report/:county/:state" element={<MarketReport />} />
+        <Route path="/state-market-report/:state" element={<StateMarketReport />} />
       </Routes>
     </Router>
   );
