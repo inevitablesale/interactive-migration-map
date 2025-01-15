@@ -75,7 +75,7 @@ interface FutureSaturationRisk {
 export function KeyInsightsPanel() {
   const navigate = useNavigate();
 
-  const { data: marketGrowthMetrics } = useQuery({
+  const { data: marketGrowthMetrics = [] } = useQuery({
     queryKey: ['marketGrowthMetrics'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_growth_metrics');
@@ -84,7 +84,7 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: competitiveMarkets } = useQuery({
+  const { data: competitiveMarkets = [] } = useQuery({
     queryKey: ['competitiveMarkets'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -98,7 +98,7 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: underservedRegions } = useQuery({
+  const { data: underservedRegions = [] } = useQuery({
     queryKey: ['underservedRegions'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_underserved_regions');
@@ -107,7 +107,7 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: emergingTalentData } = useQuery({
+  const { data: emergingTalentData = [] } = useQuery({
     queryKey: ['emergingTalentMarkets'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
@@ -116,7 +116,7 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: futureSaturationData } = useQuery({
+  const { data: futureSaturationData = [] } = useQuery({
     queryKey: ['futureSaturationRisk'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_future_saturation_risk');
@@ -125,7 +125,7 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: stateComparison } = useQuery({
+  const { data: stateComparison = [] } = useQuery({
     queryKey: ['stateComparison'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -214,12 +214,12 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Market Growth Leaders",
-      value: marketGrowthMetrics[0] 
+      value: marketGrowthMetrics?.[0] 
         ? `${marketGrowthMetrics[0].county_name}, ${marketGrowthMetrics[0].state}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {marketGrowthMetrics[0] ? (
+          {marketGrowthMetrics?.[0] ? (
             <>
               {`${marketGrowthMetrics[0].growth_rate_percentage.toFixed(1)}% growth rate, ${(marketGrowthMetrics[0].total_moves || 0).toLocaleString()} total moves`}
               <Dialog>
@@ -450,7 +450,6 @@ export function KeyInsightsPanel() {
         ))}
       </div>
 
-      {/* State Comparison Section */}
       <div className="mt-8">
         <h3 className="text-2xl font-bold mb-4">State Performance Comparison</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
