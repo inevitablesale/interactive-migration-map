@@ -33,54 +33,78 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('6. Found state FIPS:', stateFips.STATEFP);
 
-      // Fetch the county FIPS code
+      // Get data from county_data view
       console.log('7. Fetching county rankings data for:', { county, stateFips: stateFips.STATEFP });
-      const { data: countyFipsData, error: countyFipsError } = await supabase
-        .from('county_rankings')
-        .select('COUNTYFP')
+      const { data: countyData, error: countyError } = await supabase
+        .from('county_data')
+        .select('*')
         .eq('STATEFP', stateFips.STATEFP)
         .eq('COUNTYNAME', county)
         .maybeSingle();
 
-      if (countyFipsError) {
-        console.error('8. Error fetching county FIPS data:', countyFipsError.message);
-        throw new Error('Error fetching county FIPS data');
+      if (countyError) {
+        console.error('8. Error fetching county data:', countyError.message);
+        throw new Error('Error fetching county data');
       }
 
-      if (!countyFipsData) {
-        console.error('9. No county FIPS found for:', { county, stateName });
+      if (!countyData) {
+        console.error('9. No county data found for:', { county, stateName });
         return null;
       }
 
-      console.log('10. Found county FIPS:', countyFipsData.COUNTYFP);
-
       // Fetch top firms data
-      console.log('11. Fetching top firms data for:', { stateFips: stateFips.STATEFP, countyFips: countyFipsData.COUNTYFP });
+      console.log('10. Fetching top firms data');
       const { data: topFirms, error: firmsError } = await supabase
         .from('canary_firms_data')
-        .select('*') // Fetch all columns
+        .select('*')
         .eq('STATEFP', stateFips.STATEFP)
-        .eq('COUNTYFP', countyFipsData.COUNTYFP)
-        .order('employeeCount', { ascending: false, nullsLast: true })
-        .limit(5); // Limit to top 5 firms
+        .eq('COUNTYFP', countyData.COUNTYFP)
+        .order('employeeCount', { ascending: false })
+        .limit(5);
 
       if (firmsError) {
-        console.error('12. Error fetching top firms:', firmsError.message);
+        console.error('11. Error fetching top firms:', firmsError.message);
         throw new Error('Error fetching top firms');
       }
 
-      console.log('13. Retrieved top firms:', topFirms?.length);
-
-      // Construct the final data object
+      // Transform the data to match ComprehensiveMarketData interface
       const transformedData: ComprehensiveMarketData = {
-        top_firms: topFirms || [], // Include fetched top firms
+        total_population: countyData.B01001_001E,
+        median_household_income: countyData.B19013_001E,
+        median_gross_rent: countyData.B25064_001E,
+        median_home_value: countyData.B25077_001E,
+        employed_population: countyData.B23025_004E,
+        private_sector_accountants: countyData.C24060_004E,
+        public_sector_accountants: countyData.C24060_007E,
+        firms_per_10k_population: countyData.ESTAB ? (countyData.ESTAB / countyData.B01001_001E) * 10000 : null,
+        growth_rate_percentage: countyData.MOVEDIN2022 && countyData.MOVEDIN2021 
+          ? ((countyData.MOVEDIN2022 - countyData.MOVEDIN2021) / countyData.MOVEDIN2021) * 100 
+          : null,
+        market_saturation_index: countyData.B25002_003E && countyData.B25002_002E 
+          ? (countyData.B25002_003E / countyData.B25002_002E) * 100 
+          : null,
+        total_education_population: countyData.B15003_001E,
+        bachelors_degree_holders: countyData.B15003_022E,
+        masters_degree_holders: countyData.B15003_023E,
+        doctorate_degree_holders: countyData.B15003_025E,
+        payann: countyData.PAYANN,
+        total_establishments: countyData.ESTAB,
+        emp: countyData.EMP,
+        public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
+          ? countyData.C24060_007E / countyData.C24060_004E 
+          : null,
+        vacancy_rate: countyData.B25002_003E && countyData.B25002_002E 
+          ? (countyData.B25002_003E / countyData.B25002_002E) * 100 
+          : null,
+        top_firms: topFirms || [],
       };
 
-      console.log('14. Final transformed data:', transformedData);
-
+      console.log('12. Transformed data:', transformedData);
       return transformedData;
     },
     enabled: !!stateName && !!county,
+    gcTime: 1000 * 60 * 60, // Cache for 1 hour
+    staleTime: Infinity, // Data will never go stale
   });
 
   const hasMarketData = !!marketData;
