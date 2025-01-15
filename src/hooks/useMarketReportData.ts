@@ -28,7 +28,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       if (!countyData) {
-        console.error('5. No county data found for:', { county, stateName });
+        console.log('5. No county data found for:', { county, stateName });
         return null;
       }
 
