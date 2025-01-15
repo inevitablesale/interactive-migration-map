@@ -1,27 +1,27 @@
-import { ChartBar, Users, TrendingUp, Brain, Bot } from "lucide-react";
+import { ChartBar, Users, TrendingUp } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
-import { MarketSimilarityAnalysis } from "@/components/analytics/MarketSimilarityAnalysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
-import { ScenarioModeling } from "@/components/scenario/ScenarioModeling";
-import { GeminiInsights } from "@/components/analytics/GeminiInsights";
 
 async function fetchStats() {
+  // Get total regions analyzed from county_rankings view
   const { count: regionsCount } = await supabase
     .from('county_rankings')
     .select('*', { count: 'exact', head: true });
 
+  // Get total firms monitored
   const { count: firmsCount } = await supabase
     .from('canary_firms_data')
     .select('*', { count: 'exact', head: true });
 
+  // Get count of cities tracked
   const { count: citiesCount } = await supabase
     .from('region_data')
     .select('*', { count: 'exact', head: true });
@@ -35,38 +35,10 @@ async function fetchStats() {
 
 export default function Analysis() {
   const [showProfileForm, setShowProfileForm] = useState(false);
-  const [scenarioData, setScenarioData] = useState<any[]>([]);
-  
   const { data: stats } = useQuery({
     queryKey: ['analysisStats'],
     queryFn: fetchStats
   });
-
-  const { data: stateData } = useQuery({
-    queryKey: ['stateData'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_data')
-        .select('*');
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  const { data: statesList } = useQuery({
-    queryKey: ['statesList'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_fips_codes')
-        .select('*');
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  const handleUpdateScenario = (updatedData: any[]) => {
-    setScenarioData(updatedData);
-  };
 
   const statsData = [
     {
@@ -88,6 +60,7 @@ export default function Analysis() {
 
   return (
     <div className="min-h-screen bg-[#222222]">
+      {/* Hero Section */}
       <section className="relative py-20 px-4 bg-black/40">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
@@ -112,71 +85,39 @@ export default function Analysis() {
         </div>
       </section>
 
+      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Bot className="w-5 h-5 text-blue-400" />
-              <h2 className="text-xl font-semibold text-white">AI-Powered Alerts</h2>
-            </div>
-            <AlertsPanel />
-          </div>
+          <AlertsPanel />
           <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
-            <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-blue-400" />
-                  <h2 className="text-xl font-semibold text-white">AI Buyer Profile</h2>
-                </div>
-                <p className="text-sm text-gray-300">
-                  Create an AI-powered buyer profile to receive intelligent market insights, personalized recommendations, and predictive notifications about opportunities that align with your investment strategy.
-                </p>
+            <div className="space-y-4">
+              <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
                 <Button 
                   onClick={() => setShowProfileForm(true)}
                   className="w-full bg-blue-500 hover:bg-blue-600"
                 >
-                  Create AI Buyer Profile
+                  Create Buyer Profile
                 </Button>
-              </div>
-              <DialogContent className="bg-gray-900 border-white/10">
-                <DialogHeader>
-                  <DialogTitle className="text-white text-xl">Create AI Buyer Profile</DialogTitle>
-                  <DialogDescription className="text-gray-300">
-                    Set up your AI-powered buyer profile to receive personalized market insights and predictive opportunity matches based on your investment criteria.
-                  </DialogDescription>
-                </DialogHeader>
-                <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
-              </DialogContent>
-            </Dialog>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
+                    <DialogDescription className="text-gray-300">
+                      Set up your buyer profile to receive personalized market insights and opportunities that match your investment criteria.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+                </DialogContent>
+              </Dialog>
+              <p className="text-sm text-gray-300">
+                Create a buyer profile to get personalized recommendations, market insights, and notifications about opportunities that match your criteria.
+              </p>
+            </div>
           </div>
         </div>
-
-        <MarketSimilarityAnalysis filters={{
-          employeeCountMin: "0",
-          employeeCountMax: "1000+",
-          revenueMin: "0",
-          revenueMax: "10M+",
-          region: "all"
-        }} />
-        
         <KeyInsightsPanel />
-        
-        {stateData && statesList && (
-          <ScenarioModeling 
-            stateData={stateData}
-            statesList={statesList}
-            onUpdateScenario={handleUpdateScenario}
-          />
-        )}
         <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Brain className="w-6 h-6 text-blue-400" />
-              <h2 className="text-2xl font-semibold text-white">AI-Powered State Comparison</h2>
-            </div>
-            <p className="text-gray-300 mb-6">
-              Our AI analyzes comprehensive state-level data to provide intelligent comparisons and predictive insights for your market expansion strategy.
-            </p>
+            <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
             <ComparisonTool embedded={true} />
           </div>
         </div>

@@ -633,42 +633,6 @@ export type Database = {
         }
         Relationships: []
       }
-      scenario_models: {
-        Row: {
-          base_data: Json
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          projected_results: Json
-          scenario_parameters: Json
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          base_data: Json
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          projected_results: Json
-          scenario_parameters: Json
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          base_data?: Json
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          projected_results?: Json
-          scenario_parameters?: Json
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       sold_firms_data: {
         Row: {
           annual_revenue: number | null
@@ -908,19 +872,6 @@ export type Database = {
       }
     }
     Functions: {
-      calculate_scenario_metrics: {
-        Args: {
-          base_revenue: number
-          growth_rate: number
-          market_saturation: number
-          competition_level: number
-        }
-        Returns: {
-          projected_revenue: number
-          market_opportunity_score: number
-          risk_score: number
-        }[]
-      }
       get_affordable_talent_hubs: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1094,22 +1045,6 @@ export type Database = {
           migration_score: number
           business_density_score: number
           service_coverage_score: number
-        }[]
-      }
-      get_market_similarity_analysis: {
-        Args: {
-          p_state_fp?: string
-        }
-        Returns: {
-          region_name: string
-          total_sold_firms: number
-          avg_deal_size: number
-          active_firms_count: number
-          market_density: number
-          similarity_score: number
-          potential_opportunities: number
-          projected_success_rate: number
-          key_factors: Json
         }[]
       }
       get_market_trends: {
