@@ -34,7 +34,7 @@ export default function StateMarketReport() {
       const { data, error } = await supabase
         .from('state_fips_codes')
         .select('postal_abbr')
-        .eq('fips_code', state)
+        .eq('STATEFP', state)
         .single();
 
       if (error) throw error;
