@@ -114,12 +114,37 @@ async function fetchCountyRankings() {
   return data as CountyRanking[];
 }
 
+async function fetchTopFirmsGrowth(companyIds: string[]) {
+  if (!companyIds || companyIds.length === 0) return [];
+  
+  const { data, error } = await supabase
+    .from('canary_firms_data')
+    .select('*')
+    .in('Company ID', companyIds);
+  
+  if (error) throw error;
+  return data;
+}
+
 export function KeyInsightsPanel() {
   const navigate = useNavigate();
   const { data: countyRankings } = useQuery({
     queryKey: ['countyRankings'],
     queryFn: fetchCountyRankings,
   });
+
+  const topGrowthCounty = countyRankings?.[0];
+  const topFirmIds = topGrowthCounty?.top_firms?.map(firm => firm['Company ID']) || [];
+
+  const { data: topFirmsData } = useQuery({
+    queryKey: ['topFirmsGrowth', topFirmIds],
+    queryFn: () => fetchTopFirmsGrowth(topFirmIds),
+    enabled: topFirmIds.length > 0,
+  });
+
+  const averageGrowthRate = topFirmsData?.length 
+    ? topFirmsData.reduce((acc, firm) => acc + (firm.employeeCount || 0), 0) / topFirmsData.length
+    : 0;
 
   const { data: growthMetrics } = useQuery({
     queryKey: ['marketGrowthMetrics'],
@@ -199,7 +224,6 @@ export function KeyInsightsPanel() {
     }
   });
 
-  const topGrowthCounty = countyRankings?.[0];
   const topCompetitiveMarket = competitiveMetrics?.[0];
   const topUnderservedRegion = underservedMetrics?.[0];
 
@@ -213,7 +237,7 @@ export function KeyInsightsPanel() {
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthCounty ? (
             <>
-              {`${((topGrowthCounty.population_growth_rate || 0) * 100).toFixed(1)}% growth rate, ${((topGrowthCounty.top_firms || []).length || 0).toLocaleString()} firms`}
+              {`${((topGrowthCounty.population_growth_rate || 0) * 100).toFixed(1)}% growth rate, ${((topGrowthCounty.top_firms || []).length || 0).toLocaleString()} firms (avg. ${averageGrowthRate.toFixed(1)} employees)`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
