@@ -36,10 +36,38 @@ async function fetchStats() {
 
 export default function Analysis() {
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [scenarioData, setScenarioData] = useState<any[]>([]);
+  
   const { data: stats } = useQuery({
     queryKey: ['analysisStats'],
     queryFn: fetchStats
   });
+
+  const { data: stateData } = useQuery({
+    queryKey: ['stateData'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_data')
+        .select('*');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const { data: statesList } = useQuery({
+    queryKey: ['statesList'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_fips_codes')
+        .select('*');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const handleUpdateScenario = (updatedData: any[]) => {
+    setScenarioData(updatedData);
+  };
 
   const statsData = [
     {
@@ -114,7 +142,13 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
-        <ScenarioModeling />
+        {stateData && statesList && (
+          <ScenarioModeling 
+            stateData={stateData}
+            statesList={statesList}
+            onUpdateScenario={handleUpdateScenario}
+          />
+        )}
         <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
             <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
