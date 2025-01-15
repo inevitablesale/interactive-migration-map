@@ -289,7 +289,6 @@ export function KeyInsightsPanel() {
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {emergingTalentData?.slice(0, 5).map((market, index) => {
-                      // Extract state name from county_name (assuming format "County Name, State")
                       const [countyName, stateName] = market.county_name.split(',').map(s => s.trim());
                       return (
                         <div 
@@ -425,7 +424,6 @@ export function KeyInsightsPanel() {
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     {futureSaturationData?.slice(0, 5).map((region, index) => {
-                      // Extract state name from the county_name (assuming format "County Name, State")
                       const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
                       return (
                         <div 
@@ -565,4 +563,3 @@ function getStateNameFromFIPS(fips: string): string {
   };
   return stateMap[fips] || fips;
 }
-
