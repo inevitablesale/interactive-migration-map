@@ -109,7 +109,7 @@ async function fetchCountyRankings() {
     .order('growth_rank', { ascending: true })
     .limit(1);
   if (error) throw error;
-  return data as CountyRanking[];
+  return data || [];
 }
 
 export function KeyInsightsPanel() {
@@ -205,13 +205,13 @@ export function KeyInsightsPanel() {
     {
       title: "Top Growth Region",
       value: topGrowthCounty 
-        ? `${topGrowthCounty.countyname}`
+        ? `${topGrowthCounty.countyname || 'N/A'}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthCounty ? (
             <>
-              {`${(topGrowthCounty.growth_rate * 100).toFixed(1)}% growth rate, ${topGrowthCounty.total_firms.toLocaleString()} firms`}
+              {`${((topGrowthCounty.growth_rate || 0) * 100).toFixed(1)}% growth rate, ${(topGrowthCounty.total_firms || 0).toLocaleString()} firms`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -221,9 +221,9 @@ export function KeyInsightsPanel() {
                     <div className="space-y-2 p-1">
                       <p className="text-sm font-medium text-white">Region Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Population: {topGrowthCounty.population.toLocaleString()}</p>
-                        <p>Firm Density: {topGrowthCounty.firm_density.toFixed(2)} per capita</p>
-                        <p>Growth Rank: #{topGrowthCounty.growth_rank}</p>
+                        <p>Population: {(topGrowthCounty.population || 0).toLocaleString()}</p>
+                        <p>Firm Density: {(topGrowthCounty.firm_density || 0).toFixed(2)} per capita</p>
+                        <p>Growth Rank: #{topGrowthCounty.growth_rank || 'N/A'}</p>
                       </div>
                     </div>
                   </TooltipContent>
