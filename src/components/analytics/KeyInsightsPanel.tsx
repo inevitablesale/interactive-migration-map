@@ -175,7 +175,7 @@ export function KeyInsightsPanel() {
         avg_revenue: (county.total_payroll || 0) / (county.total_establishments || 1),
         growth_potential: county.population_growth_rate || 0,
         rank: county.density_rank,
-        national_rank: county.national_density_rank
+        national_rank: county.national_firm_density_rank
       }))
       .sort((a, b) => b.avg_revenue - a.avg_revenue)
       .slice(0, 5);
