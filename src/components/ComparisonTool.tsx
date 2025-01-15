@@ -84,15 +84,7 @@ export function ComparisonTool() {
   };
 
   if (!isVisible) {
-    return (
-      <Button
-        onClick={() => setIsVisible(true)}
-        className="fixed right-4 top-20 bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/70"
-      >
-        <GripHorizontal className="h-4 w-4 mr-2" />
-        Compare States
-      </Button>
-    );
+    return null;
   }
 
   return (
