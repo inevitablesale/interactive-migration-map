@@ -415,18 +415,22 @@ export function KeyInsightsPanel() {
                     <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
-                    {futureSaturationData?.slice(0, 5).map((region, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(region.county_name, getStateNameFromFIPS(region.county_name.split(',')[1]?.trim() || ''))}
-                      >
-                        <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
-                        <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
-                        <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
-                        <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
-                      </div>
-                    ))}
+                    {futureSaturationData?.slice(0, 5).map((region, index) => {
+                      // Extract state name from the county_name (assuming format "County Name, State")
+                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
+                      return (
+                        <div 
+                          key={index} 
+                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                          onClick={() => handleNavigateToMarket(countyName, stateName)}
+                        >
+                          <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
+                          <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
+                          <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
+                          <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </DialogContent>
               </Dialog>
