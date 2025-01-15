@@ -77,7 +77,7 @@ interface CountyRanking {
   total_firms: number;
   B01001_001E: number;
   firms_per_10k: number;
-  population_growth_rate: number;
+  growth_rate: number;
   firm_density_rank: number;
   growth_rank: number;
   state_density_avg: number;
@@ -150,6 +150,82 @@ export function KeyInsightsPanel() {
     queryKey: ['marketGrowthMetrics'],
     queryFn: fetchMarketGrowthMetrics,
   });
+
+  const { data: competitiveMetrics } = useQuery({
+    queryKey: ['competitiveMarketMetrics'],
+    queryFn: fetchCompetitiveMarketMetrics,
+  });
+
+  const { data: underservedMetrics } = useQuery({
+    queryKey: ['underservedRegions'],
+    queryFn: fetchUnderservedRegions,
+  });
+
+  const { data: employeeRentData } = useQuery({
+    queryKey: ['employeeRentAnalysis'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_employee_rent_analysis');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: followerData } = useQuery({
+    queryKey: ['followerAnalysis'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_follower_analysis');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: vacancyData } = useQuery({
+    queryKey: ['vacancyAnalysis'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_vacancy_analysis');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: educationData } = useQuery({
+    queryKey: ['educationAgeAnalysis'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_education_age_analysis');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: futureSaturationData } = useQuery({
+    queryKey: ['futureSaturationRisk'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_future_saturation_risk');
+      if (error) throw error;
+      return data as FutureSaturationRisk[];
+    }
+  });
+
+  const { data: emergingTalentData } = useQuery({
+    queryKey: ['emergingTalentMarkets'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_emerging_talent_markets');
+      if (error) throw error;
+      return data as EmergingTalentMarket[];
+    }
+  });
+
+  const { data: affordableTalentData } = useQuery({
+    queryKey: ['affordableTalentHubs'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_affordable_talent_hubs');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const topCompetitiveMarket = competitiveMetrics?.[0];
+  const topUnderservedRegion = underservedMetrics?.[0];
 
   const insights = [
     {
