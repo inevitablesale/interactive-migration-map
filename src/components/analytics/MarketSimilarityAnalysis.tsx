@@ -2,21 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { 
-  TrendingUp, 
-  Building2, 
-  DollarSign, 
-  Users, 
-  BarChart3,
-  Scale
+  TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
+  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
+  DollarSign, Briefcase, LineChart, Building
 } from "lucide-react";
-import type { MarketSimilarityAnalysis } from "@/types/market-analysis";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface AnalysisFilters {
   employeeCountMin: string;
@@ -31,31 +22,34 @@ interface Props {
 }
 
 export function MarketSimilarityAnalysis({ filters }: Props) {
-  const { data: marketAnalysis, error } = useQuery<MarketSimilarityAnalysis[]>({
+  const { data: marketAnalysis, error } = useQuery({
     queryKey: ['marketSimilarityAnalysis', filters],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_market_similarity_analysis', {
-        p_state_fp: filters.region === 'all' ? null : filters.region
-      });
+      try {
+        const { data, error } = await supabase.rpc('get_market_similarity_analysis', {
+          p_state_fp: filters.region === 'all' ? null : filters.region
+        });
 
-      if (error) {
-        console.error('Error fetching market similarity analysis:', error);
-        toast.error('Failed to load market analysis data');
+        if (error) {
+          console.error('Error fetching market similarity analysis:', error);
+          throw error;
+        }
+
+        return data?.map(item => ({
+          ...item,
+          key_factors: {
+            median_income: Number((item.key_factors as any).median_income || 0),
+            labor_force: Number((item.key_factors as any).labor_force || 0),
+            property_value: Number((item.key_factors as any).property_value || 0),
+            market_saturation: Number((item.key_factors as any).market_saturation || 0),
+            deal_velocity: Number((item.key_factors as any).deal_velocity || 0)
+          }
+        })) || [];
+      } catch (error) {
+        console.error('Error in market similarity analysis:', error);
         throw error;
       }
-      
-      return (data || []).map(item => ({
-        ...item,
-        key_factors: {
-          median_income: Number((item.key_factors as any).median_income),
-          labor_force: Number((item.key_factors as any).labor_force),
-          property_value: Number((item.key_factors as any).property_value),
-          market_saturation: Number((item.key_factors as any).market_saturation),
-          deal_velocity: Number((item.key_factors as any).deal_velocity)
-        }
-      }));
-    },
-    retry: 1
+    }
   });
 
   if (error) {
