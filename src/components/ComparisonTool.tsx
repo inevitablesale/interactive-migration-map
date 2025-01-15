@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -74,6 +75,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [scenarioData, setScenarioData] = useState<any[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: statesList } = useQuery({
     queryKey: ['statesList'],
@@ -138,6 +140,10 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
     });
   };
 
+  const handleStateClick = (stateFp: string) => {
+    navigate(`/state-market-report/${stateFp}`);
+  };
+
   const renderMetricComparison = (metric: keyof StateData, label: string, icon: React.ReactNode, formatFn = formatNumber, suffix = '') => {
     if (!stateData?.length) return null;
     const data = scenarioData.length ? scenarioData : stateData;
@@ -159,9 +165,10 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
               <div 
                 key={index} 
                 className={cn(
-                  "bg-[#1A1A1A] p-4 rounded-lg transition-colors",
+                  "bg-[#1A1A1A] p-4 rounded-lg transition-colors cursor-pointer hover:bg-[#252525]",
                   isHighest && "bg-[#252525] border border-white/10"
                 )}
+                onClick={() => handleStateClick(state.STATEFP)}
               >
                 <div className="text-sm text-white/70 mb-1">
                   {statesList?.find(s => s.fips_code === state.STATEFP)?.state || `State ${index + 1}`}
