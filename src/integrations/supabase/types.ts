@@ -1096,6 +1096,22 @@ export type Database = {
           service_coverage_score: number
         }[]
       }
+      get_market_similarity_analysis: {
+        Args: {
+          p_state_fp?: string
+        }
+        Returns: {
+          region_name: string
+          total_sold_firms: number
+          avg_deal_size: number
+          active_firms_count: number
+          market_density: number
+          similarity_score: number
+          potential_opportunities: number
+          projected_success_rate: number
+          key_factors: Json
+        }[]
+      }
       get_market_trends: {
         Args: Record<PropertyKey, never>
         Returns: {

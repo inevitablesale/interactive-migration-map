@@ -3,6 +3,7 @@ import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
+import { MarketSimilarityAnalysis } from "@/components/analytics/MarketSimilarityAnalysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -142,6 +143,7 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
+        <MarketSimilarityAnalysis />
         {stateData && statesList && (
           <ScenarioModeling 
             stateData={stateData}
