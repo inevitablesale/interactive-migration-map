@@ -73,7 +73,7 @@ interface FutureSaturationRisk {
 interface CountyRanking {
   statefp: string;
   countyfp: string;
-  countyname: string;
+  COUNTYNAME: string;
   total_firms: number;
   population: number;
   firm_density: number;
@@ -205,7 +205,7 @@ export function KeyInsightsPanel() {
     {
       title: "Top Growth Region",
       value: topGrowthCounty 
-        ? `${topGrowthCounty.countyname || 'N/A'}`
+        ? `${topGrowthCounty.COUNTYNAME || 'N/A'}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -221,7 +221,7 @@ export function KeyInsightsPanel() {
                     <div className="space-y-2 p-1">
                       <p className="text-sm font-medium text-white">Region Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Population: {(topGrowthCounty.population || 0).toLocaleString()}</p>
+                        <p>Population: {(topGrowthCounty.B01001_001E || 0).toLocaleString()}</p>
                         <p>Firm Density: {(topGrowthCounty.firm_density || 0).toFixed(2)} per capita</p>
                         <p>Growth Rank: #{topGrowthCounty.growth_rank || 'N/A'}</p>
                       </div>
