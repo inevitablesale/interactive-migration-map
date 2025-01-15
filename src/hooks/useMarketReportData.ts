@@ -44,18 +44,39 @@ export const useMarketReportData = (countyName: string, state: string) => {
 
       if (firmsError) throw firmsError;
 
+      // Transform the data to match our ComprehensiveMarketData type
+      const transformedCountyData = {
+        ...countyData,
+        firms_per_10k_population: countyData?.firms_per_10k || 0,
+        growth_rate_percentage: countyData?.growth_rate || 0,
+        market_saturation_index: countyData?.market_saturation || 0,
+        total_education_population: countyData?.education_population || 0,
+        bachelors_degree_holders: countyData?.bachelors_holders || 0,
+        masters_degree_holders: countyData?.masters_holders || 0,
+        doctorate_degree_holders: countyData?.doctorate_holders || 0,
+        payann: stateData?.PAYANN || 0,
+        emp: stateData?.EMP || 0,
+        public_to_private_ratio: countyData?.public_to_private_ratio || 0,
+        density_rank: countyData?.firm_density_rank || 0,
+        top_firms: firms?.map(firm => ({
+          company_name: firm["Company Name"],
+          employee_count: firm.employeeCount,
+          follower_count: firm.followerCount,
+          follower_ratio: firm.followerCount / (firm.employeeCount || 1),
+          logoResolutionResult: firm.logoResolutionResult,
+          originalCoverImage: firm.originalCoverImage,
+          primarySubtitle: firm["Primary Subtitle"],
+          employeeCountRangeLow: firm.employeeCountRangeLow,
+          employeeCountRangeHigh: firm.employeeCountRangeHigh,
+          specialities: firm.specialities,
+          websiteUrl: firm.websiteUrl,
+          Location: firm.Location,
+          Summary: firm.Summary
+        })) || []
+      };
+
       return {
-        countyData: {
-          ...countyData,
-          firms_per_10k_population: countyData?.firm_density || 0,
-          growth_rate_percentage: countyData?.growth_rate || 0,
-          market_saturation_index: countyData?.market_saturation || 0,
-          total_education_population: countyData?.education_population || 0,
-          bachelors_degree_holders: countyData?.bachelors_holders || 0,
-          masters_degree_holders: countyData?.masters_holders || 0,
-          doctorate_degree_holders: countyData?.doctorate_holders || 0,
-          top_firms: firms || []
-        },
+        countyData: transformedCountyData,
         stateData,
         firms: firms || []
       };
