@@ -847,35 +847,43 @@ export type Database = {
     Views: {
       county_rankings: {
         Row: {
-          bachelors_degree_holders: number | null
-          calculated_firm_density: number | null
-          calculated_growth_rate: number | null
+          avg_firms_per_10k: number | null
+          avg_growth_rate: number | null
+          avg_market_saturation: number | null
+          bachelors_holders: number | null
           COUNTYFP: string | null
           COUNTYNAME: string | null
-          density_rank: number | null
-          doctorate_degree_holders: number | null
-          emp: number | null
+          doctorate_holders: number | null
+          education_population: number | null
           employed_population: number | null
+          firm_density_rank: number | null
+          firms_per_10k: number | null
           growth_rank: number | null
           income_rank: number | null
-          masters_degree_holders: number | null
+          market_saturation: number | null
+          market_saturation_rank: number | null
+          masters_holders: number | null
           median_gross_rent: number | null
           median_home_value: number | null
           median_household_income: number | null
-          payann: number | null
-          population: number | null
+          national_firm_density_rank: number | null
+          national_growth_rank: number | null
+          national_income_rank: number | null
+          national_market_saturation_rank: number | null
+          national_population_rank: number | null
+          national_rent_rank: number | null
+          national_vacancy_rank: number | null
+          population_growth_rate: number | null
           population_rank: number | null
           private_sector_accountants: number | null
           public_sector_accountants: number | null
-          public_to_private_ratio: number | null
           rent_rank: number | null
-          state_density_avg: number | null
-          state_growth_avg: number | null
           state_name: string | null
           STATEFP: string | null
-          top_firms: Json | null
-          total_education_population: number | null
+          total_employees: number | null
           total_establishments: number | null
+          total_payroll: number | null
+          total_population: number | null
           vacancy_rank: number | null
           vacancy_rate: number | null
         }
