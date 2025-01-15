@@ -110,7 +110,7 @@ async function fetchCountyRankings() {
     .order('growth_rank', { ascending: true })
     .limit(1);
   if (error) throw error;
-  return data || [];
+  return data as CountyRanking[];
 }
 
 export function KeyInsightsPanel() {
