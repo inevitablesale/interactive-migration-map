@@ -27,12 +27,28 @@ export default function StateMarketReport() {
     }
   });
 
+  // First get state abbreviation
+  const { data: stateAbbr } = useQuery({
+    queryKey: ['stateAbbr', state],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_fips_codes')
+        .select('postal_abbr')
+        .eq('fips_code', state)
+        .single();
+
+      if (error) throw error;
+      return data?.postal_abbr;
+    },
+    enabled: !!state
+  });
+
   const { data: countyData } = useQuery({
     queryKey: ['countyData', state],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('county_data')
-        .select('*, state_fips_codes!inner(postal_abbr)')
+        .select('*')
         .eq('STATEFP', state)
         .order('B01001_001E', { ascending: false })
         .limit(6);
@@ -71,7 +87,7 @@ export default function StateMarketReport() {
     loadStateName();
   }, [state]);
 
-  const handleCountyClick = (countyName: string, stateAbbr: string) => {
+  const handleCountyClick = (countyName: string) => {
     // Remove " County" suffix if present for the URL
     const formattedCounty = countyName.replace(/ County$/, '');
     navigate(`/market-report/${stateAbbr}/${formattedCounty}`);
@@ -173,7 +189,7 @@ export default function StateMarketReport() {
                 <Card 
                   key={county.COUNTYFP}
                   className="bg-black/40 backdrop-blur-md border-white/10 p-6 cursor-pointer hover:bg-black/60 transition-colors"
-                  onClick={() => handleCountyClick(county.COUNTYNAME, county.state_fips_codes.postal_abbr)}
+                  onClick={() => handleCountyClick(county.COUNTYNAME)}
                 >
                   <h3 className="text-lg font-semibold text-white mb-4">{county.COUNTYNAME}</h3>
                   <div className="space-y-4">
