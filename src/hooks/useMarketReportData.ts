@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
+import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
   console.log('1. useMarketReportData called with:', { county, stateName });
@@ -35,7 +35,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Get data from county_rankings materialized view
       console.log('7. Fetching county rankings data for:', { county, stateFips: stateFips.STATEFP });
-      
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
@@ -55,29 +54,27 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('10. Retrieved county data:', countyData);
 
-      // Get top firms data
-      const { data: topFirmsData, error: firmsError } = await supabase
+      // Get firms data
+      console.log('11. Fetching firms data');
+      const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('COUNTYNAME', county)
-        .eq('State Name', stateName)
-        .order('employeeCount', { ascending: false })
-        .limit(10);
+        .eq('STATE', stateName)
+        .eq('COUNTYNAME', county);
 
       if (firmsError) {
-        console.error('Error fetching top firms:', firmsError.message);
-        throw new Error('Error fetching top firms');
+        console.error('12. Error fetching firms data:', firmsError.message);
+        throw new Error('Error fetching firms data');
       }
 
-      console.log('11. Retrieved top firms:', topFirmsData?.length);
+      console.log('13. Retrieved firms data:', firmsData);
 
-      // Transform top firms data to match TopFirm interface
-      const topFirms: TopFirm[] = topFirmsData?.map(firm => ({
+      // Transform firms data
+      const transformedTopFirms = firmsData ? firmsData.map((firm: any) => ({
         company_name: firm['Company Name'] || '',
         employee_count: firm.employeeCount || 0,
         follower_count: firm.followerCount || 0,
-        follower_ratio: firm.followerCount && firm.employeeCount ? 
-          firm.followerCount / firm.employeeCount : 0,
+        follower_ratio: firm.followerCount && firm.employeeCount ? firm.followerCount / firm.employeeCount : 0,
         logoResolutionResult: firm.logoResolutionResult,
         originalCoverImage: firm.originalCoverImage,
         primarySubtitle: firm['Primary Subtitle'],
@@ -87,8 +84,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         specialities: firm.specialities,
         websiteUrl: firm.websiteUrl,
         Location: firm.Location,
-        Summary: firm.Summary
-      })) || [];
+        Summary: firm.Summary,
+      })) : [];
+
+      console.log('14. Transformed firms data. Count:', transformedTopFirms.length);
 
       // Transform the data using the county_rankings view data
       const transformedData: ComprehensiveMarketData = {
@@ -101,7 +100,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_sector_accountants: countyData.public_sector_accountants || null,
         firms_per_10k_population: countyData.calculated_firm_density || null,
         growth_rate_percentage: countyData.calculated_growth_rate ? countyData.calculated_growth_rate * 100 : null,
-        market_saturation_index: countyData.market_saturation || null,
+        market_saturation_index: countyData.calculated_market_saturation || null,
         total_education_population: countyData.total_education_population || null,
         bachelors_degree_holders: countyData.bachelors_degree_holders || null,
         masters_degree_holders: countyData.masters_degree_holders || null,
@@ -117,10 +116,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         rent_rank: countyData.rent_rank || null,
         density_rank: countyData.density_rank || null,
         growth_rank: countyData.growth_rank || null,
-        top_firms: topFirms,
+        top_firms: transformedTopFirms,
       };
 
-      console.log('12. Transformed data:', transformedData);
+      console.log('14. Final transformed data:', transformedData);
 
       return transformedData;
     },
@@ -128,7 +127,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('13. Query complete:', { 
+  console.log('15. Query complete:', { 
     hasData: hasMarketData, 
     isLoading, 
     hasError: !!error,
