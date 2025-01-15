@@ -1,6 +1,12 @@
 import { ChartBar, Users, TrendingUp, Bot, Sparkles } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
+</lov-replace>
+
+<lov-search>
+                  <AlertsPanel />
+</lov-search>
+<lov-replace>
 import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
-import { MarketInsightsPanel } from "@/components/analytics/insights/MarketInsightsPanel";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -87,7 +92,6 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        <MarketInsightsPanel />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
             <div className="flex items-center gap-2 mb-6">
@@ -101,25 +105,28 @@ export default function Analysis() {
                   <h3 className="text-lg font-medium text-white">Personalized Deal Matching</h3>
                 </div>
                 <p className="text-white/70 mb-6">
-                  Our AI analyzes market data and your preferences to find the perfect opportunities. Set up your profile to get started.
+                  Our AI analyzes market data and your preferences to find the perfect opportunities. Set up your profile and alerts to get started.
                 </p>
-                <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
-                  <Button 
-                    onClick={() => setShowProfileForm(true)}
-                    className="w-full bg-blue-500 hover:bg-blue-600"
-                  >
-                    Create AI-Powered Buyer Profile
-                  </Button>
-                  <DialogContent className="bg-gray-900 border-white/10">
-                    <DialogHeader>
-                      <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
-                      <DialogDescription className="text-gray-300">
-                        Set up your buyer profile to receive AI-powered market insights and opportunities that match your investment criteria.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
-                  </DialogContent>
-                </Dialog>
+                <div className="space-y-4">
+                  <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+                    <Button 
+                      onClick={() => setShowProfileForm(true)}
+                      className="w-full bg-blue-500 hover:bg-blue-600"
+                    >
+                      Create AI-Powered Buyer Profile
+                    </Button>
+                    <DialogContent className="bg-gray-900 border-white/10">
+                      <DialogHeader>
+                        <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
+                        <DialogDescription className="text-gray-300">
+                          Set up your buyer profile to receive AI-powered market insights and opportunities that match your investment criteria.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+                    </DialogContent>
+                  </Dialog>
+                  <AlertsPanel />
+                </div>
               </div>
             </div>
           </div>
