@@ -12,7 +12,7 @@ export const MarketRankingBadges: React.FC<MarketRankingBadgesProps> = ({ market
     const score = (
       (marketData.income_rank || 0) * 0.3 +
       (marketData.growth_rank || 0) * 0.4 +
-      (marketData.density_rank || 0) * 0.3
+      (marketData.population_rank || 0) * 0.3
     );
     if (score <= 20) return { label: "Top Market", color: "bg-emerald-500/90 hover:bg-emerald-500/80" };
     if (score <= 50) return { label: "Strong Market", color: "bg-blue-500/90 hover:bg-blue-500/80" };
@@ -49,7 +49,7 @@ export const MarketRankingBadges: React.FC<MarketRankingBadgesProps> = ({ market
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
-            <p className="text-sm">Based on income levels, growth trends, and business density</p>
+            <p className="text-sm">Based on income levels, growth trends, and population</p>
           </TooltipContent>
         </Tooltip>
 
