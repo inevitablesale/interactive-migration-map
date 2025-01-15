@@ -6,7 +6,7 @@ import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
 
@@ -82,23 +82,6 @@ export default function Analysis() {
               </div>
             ))}
           </div>
-          
-          <div className="mt-12 flex justify-center gap-4">
-            <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
-              <Button 
-                onClick={() => setShowProfileForm(true)}
-                className="bg-blue-500 hover:bg-blue-600"
-              >
-                Create Buyer Profile
-              </Button>
-              <DialogContent className="bg-black/90 border-white/10">
-                <DialogHeader>
-                  <DialogTitle className="text-white">Create Buyer Profile</DialogTitle>
-                </DialogHeader>
-                <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
-              </DialogContent>
-            </Dialog>
-          </div>
         </div>
       </section>
 
@@ -107,20 +90,28 @@ export default function Analysis() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AlertsPanel />
           <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
-            <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
-              <Button 
-                onClick={() => setShowProfileForm(true)}
-                className="w-full bg-blue-500 hover:bg-blue-600"
-              >
-                Create Buyer Profile
-              </Button>
-              <DialogContent className="bg-black/90 border-white/10">
-                <DialogHeader>
-                  <DialogTitle className="text-white">Create Buyer Profile</DialogTitle>
-                </DialogHeader>
-                <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
-              </DialogContent>
-            </Dialog>
+            <div className="space-y-4">
+              <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+                <Button 
+                  onClick={() => setShowProfileForm(true)}
+                  className="w-full bg-blue-500 hover:bg-blue-600"
+                >
+                  Create Buyer Profile
+                </Button>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
+                    <DialogDescription className="text-gray-300">
+                      Set up your buyer profile to receive personalized market insights and opportunities that match your investment criteria.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+                </DialogContent>
+              </Dialog>
+              <p className="text-sm text-gray-300">
+                Create a buyer profile to get personalized recommendations, market insights, and notifications about opportunities that match your criteria.
+              </p>
+            </div>
           </div>
         </div>
         <KeyInsightsPanel />
