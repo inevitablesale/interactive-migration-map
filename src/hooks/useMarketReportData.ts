@@ -16,7 +16,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       // First, get the state FIPS code
       const { data: stateData, error: stateError } = await supabase
         .from('state_fips_codes')
-        .select('STATEFP, state')
+        .select('STATEFP')
         .eq('state', stateName)
         .maybeSingle();
 
@@ -33,13 +33,13 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Found state FIPS:', stateData.STATEFP);
 
-      // Then, get the county data using the FIPS code
+      // Then, get the county data using the FIPS code - simplified query
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
         .select('*')
-        .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.STATEFP)
-        .maybeSingle();
+        .eq('COUNTYNAME', county)
+        .single();
 
       if (countyError) {
         console.error('Error fetching county data:', countyError);
@@ -110,7 +110,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_sector_accountants: countyData.C24060_007E,
         firms_per_10k_population: firmsPerTenK,
         growth_rate_percentage: growthRate,
-        market_saturation_index: null, // This will need to be calculated if needed
+        market_saturation_index: null,
         total_education_population: countyData.B15003_001E,
         bachelors_degree_holders: countyData.B15003_022E,
         masters_degree_holders: countyData.B15003_023E,
@@ -121,13 +121,13 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
           ? countyData.C24060_007E / countyData.C24060_004E 
           : null,
-        vacancy_rate: null, // This will need to be calculated if needed
-        vacancy_rank: null, // This will need to be calculated if needed
-        income_rank: null, // This will need to be calculated if needed
-        population_rank: null, // This will need to be calculated if needed
-        rent_rank: null, // This will need to be calculated if needed
-        density_rank: null, // This will need to be calculated if needed
-        growth_rank: null, // This will need to be calculated if needed
+        vacancy_rate: null,
+        vacancy_rank: null,
+        income_rank: null,
+        population_rank: null,
+        rent_rank: null,
+        density_rank: null,
+        growth_rank: null,
         top_firms: transformedTopFirms,
       };
 
