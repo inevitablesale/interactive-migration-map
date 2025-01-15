@@ -89,7 +89,7 @@ export default function Analysis() {
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AlertsPanel />
-          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
+          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
             <div className="space-y-4">
               <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
                 <Button 
@@ -115,7 +115,7 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
-        <div className="bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
             <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
             <ComparisonTool embedded={true} />
