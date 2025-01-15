@@ -7,9 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 async function fetchStats() {
-  // Get total regions analyzed
+  // Get total regions analyzed from county_rankings view
   const { count: regionsCount } = await supabase
-    .from('county_data')
+    .from('county_rankings')
     .select('*', { count: 'exact', head: true });
 
   // Get total firms monitored
