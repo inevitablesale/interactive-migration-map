@@ -32,7 +32,7 @@ export default function StateMarketReport() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('county_data')
-        .select('*')
+        .select('*, state_fips_codes!inner(postal_abbr)')
         .eq('STATEFP', state)
         .order('B01001_001E', { ascending: false })
         .limit(6);
@@ -71,10 +71,10 @@ export default function StateMarketReport() {
     loadStateName();
   }, [state]);
 
-  const handleCountyClick = (countyName: string) => {
+  const handleCountyClick = (countyName: string, stateAbbr: string) => {
     // Remove " County" suffix if present for the URL
     const formattedCounty = countyName.replace(/ County$/, '');
-    navigate(`/market-report/${stateName}/${formattedCounty}`);
+    navigate(`/market-report/${stateAbbr}/${formattedCounty}`);
   };
 
   if (isLoading) {
@@ -147,13 +147,14 @@ export default function StateMarketReport() {
             </div>
             <p className="text-2xl font-bold text-white">{stateData.B01001_001E?.toLocaleString()}</p>
           </Card>
+
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-5 h-5 text-yellow-400" />
               <h2 className="text-lg font-semibold text-white">Growth Rate</h2>
             </div>
             <p className="text-2xl font-bold text-white">
-              {((stateData.MOVEDIN2022 - stateData.MOVEDIN2021) / stateData.MOVEDIN2021 * 100).toFixed(1)}%
+              {((stateData.MOVEDIN2022 ?? 0) - (stateData.MOVEDIN2021 ?? 0)) / (stateData.MOVEDIN2021 || 1) * 100}%
             </p>
           </Card>
         </div>
@@ -172,7 +173,7 @@ export default function StateMarketReport() {
                 <Card 
                   key={county.COUNTYFP}
                   className="bg-black/40 backdrop-blur-md border-white/10 p-6 cursor-pointer hover:bg-black/60 transition-colors"
-                  onClick={() => handleCountyClick(county.COUNTYNAME)}
+                  onClick={() => handleCountyClick(county.COUNTYNAME, county.state_fips_codes.postal_abbr)}
                 >
                   <h3 className="text-lg font-semibold text-white mb-4">{county.COUNTYNAME}</h3>
                   <div className="space-y-4">
