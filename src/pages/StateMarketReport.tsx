@@ -209,7 +209,7 @@ export default function StateMarketReport() {
           <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Building2 className="w-5 h-5 text-blue-400" />
-              <h2 className="text-lg font-semibold text-white">Total Establishments</h2>
+              <h2 className="text-lg font-semibold text-white">Total Firms</h2>
             </div>
             <p className="text-2xl font-bold text-white">{stateData.ESTAB?.toLocaleString()}</p>
           </Card>
@@ -282,7 +282,7 @@ export default function StateMarketReport() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">Establishments</p>
+                      <p className="text-sm text-gray-400">Firms</p>
                       <p className="text-xl font-bold text-white">
                         {county.ESTAB?.toLocaleString()}
                       </p>
