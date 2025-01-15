@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
-import { toast } from "sonner";
+import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
   console.log('useMarketReportData called with:', { county, stateName }); // Debug log
@@ -22,7 +21,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       if (stateError) {
         console.error('Error fetching state FIPS:', stateError);
-        toast.error('Error fetching state data');
         throw stateError;
       }
 
@@ -33,28 +31,35 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Found state FIPS:', stateData.fips_code); // Debug log
 
-      // Then, get the county data using the FIPS code
-      const { data: rankingData, error: rankingError } = await supabase
-        .from('county_rankings')
-        .select('*')
+      // Get both rankings and detailed data
+      const { data: countyData, error: countyError } = await supabase
+        .from('county_data')
+        .select(`
+          *,
+          rankings:county_rankings!inner(
+            density_rank,
+            growth_rank,
+            firm_density,
+            growth_rate,
+            market_saturation,
+            total_firms
+          )
+        `)
         .ilike('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
         .maybeSingle();
 
-      if (rankingError) {
-        console.error('Error fetching market data:', rankingError);
-        toast.error('Error fetching market data');
-        throw rankingError;
+      if (countyError) {
+        console.error('Error fetching market data:', countyError);
+        throw countyError;
       }
 
-      if (!rankingData) {
-        console.log('No county data found for:', { county, stateName }); // Debug log
+      if (!countyData) {
+        console.log('No county data found for:', { county, stateName });
         return null;
       }
 
-      console.log('Raw ranking data:', rankingData); // Debug log
-
-      // Get firms data from canary_firms_data
+      // Get firms data
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
@@ -63,14 +68,11 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
-        toast.error('Error fetching firms data');
         throw firmsError;
       }
 
-      console.log('Raw firms data:', firmsData); // Debug log
-
-      // Transform firms data to match TopFirm interface
-      const transformedTopFirms: TopFirm[] = firmsData ? firmsData.map((firm: any) => ({
+      // Transform firms data
+      const transformedTopFirms = firmsData ? firmsData.map((firm: any) => ({
         company_name: firm['Company Name'] || '',
         employee_count: firm.employeeCount || 0,
         follower_count: firm.followerCount || 0,
@@ -87,33 +89,36 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         Summary: firm.Summary
       })) : [];
 
-      // Transform the data to match ComprehensiveMarketData type
+      // Calculate vacancy rate
+      const vacancyRate = countyData.B25002_003E && countyData.B25002_002E
+        ? (countyData.B25002_003E / countyData.B25002_002E) * 100
+        : null;
+
+      // Transform the data
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.population,
-        median_household_income: rankingData.median_income,
-        median_gross_rent: rankingData.median_rent,
-        median_home_value: rankingData.median_home_value,
-        employed_population: rankingData.employed_population,
-        private_sector_accountants: rankingData.private_sector_accountants,
-        public_sector_accountants: rankingData.public_sector_accountants,
-        firms_per_10k_population: rankingData.firm_density,
-        growth_rate_percentage: rankingData.growth_rate,
-        market_saturation_index: rankingData.market_saturation,
-        total_education_population: rankingData.total_education_population,
-        bachelors_degree_holders: rankingData.bachelors_degree_holders,
-        masters_degree_holders: rankingData.masters_degree_holders,
-        doctorate_degree_holders: rankingData.doctorate_degree_holders,
-        payann: rankingData.payann,
-        total_establishments: rankingData.total_establishments,
-        emp: rankingData.emp,
-        public_to_private_ratio: rankingData.public_to_private_ratio,
-        vacancy_rate: rankingData.vacancy_rate,
-        vacancy_rank: rankingData.vacancy_rank,
-        income_rank: rankingData.income_rank,
-        population_rank: rankingData.population_rank,
-        rent_rank: rankingData.rent_rank,
-        density_rank: rankingData.density_rank,
-        growth_rank: rankingData.growth_rank,
+        total_population: countyData.B01001_001E,
+        median_household_income: countyData.B19013_001E,
+        median_gross_rent: countyData.B25064_001E,
+        median_home_value: countyData.B25077_001E,
+        employed_population: countyData.B23025_004E,
+        private_sector_accountants: countyData.C24060_004E,
+        public_sector_accountants: countyData.C24060_007E,
+        firms_per_10k_population: countyData.rankings.firm_density,
+        growth_rate_percentage: countyData.rankings.growth_rate,
+        market_saturation_index: countyData.rankings.market_saturation,
+        total_education_population: countyData.B15003_001E,
+        bachelors_degree_holders: countyData.B15003_022E,
+        masters_degree_holders: countyData.B15003_023E,
+        doctorate_degree_holders: countyData.B15003_025E,
+        payann: countyData.PAYANN,
+        total_establishments: countyData.ESTAB,
+        emp: countyData.EMP,
+        public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
+          ? countyData.C24060_007E / countyData.C24060_004E 
+          : null,
+        vacancy_rate: vacancyRate,
+        density_rank: countyData.rankings.density_rank,
+        growth_rank: countyData.rankings.growth_rank,
         top_firms: transformedTopFirms,
       };
 
