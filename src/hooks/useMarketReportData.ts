@@ -25,27 +25,25 @@ export const useMarketReportData = (countyName: string, state: string) => {
       if (stateError) throw stateError;
       if (!stateData) throw new Error('State data not found');
 
-      // Get both county data and rankings
+      // Get county data
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
-        .select(`
-          *,
-          county_rankings!inner(
-            firms_per_10k,
-            avg_growth_rate,
-            market_saturation,
-            population_rank,
-            income_rank,
-            rent_rank,
-            vacancy_rank,
-            growth_rank
-          )
-        `)
+        .select('*')
         .eq('COUNTYNAME', countyName)
         .eq('STATEFP', stateFips.STATEFP)
         .maybeSingle();
 
       if (countyError) throw countyError;
+      if (!countyData) throw new Error('County data not found');
+
+      // Get county rankings using the existing function
+      const { data: rankings, error: rankingsError } = await supabase
+        .rpc('get_county_rankings')
+        .eq('statefp', stateFips.STATEFP)
+        .eq('countyfp', countyData.COUNTYFP)
+        .maybeSingle();
+
+      if (rankingsError) throw rankingsError;
 
       // Get firms in county
       const { data: firms, error: firmsError } = await supabase
@@ -72,9 +70,9 @@ export const useMarketReportData = (countyName: string, state: string) => {
         vacancy_rate: countyData?.B25002_003E && countyData?.B25002_002E 
           ? (countyData.B25002_003E / countyData.B25002_002E) * 100 
           : 0,
-        firms_per_10k_population: countyData?.county_rankings?.firms_per_10k || 0,
-        growth_rate_percentage: countyData?.county_rankings?.avg_growth_rate || 0,
-        market_saturation_index: countyData?.county_rankings?.market_saturation || 0,
+        firms_per_10k_population: rankings?.firm_density || 0,
+        growth_rate_percentage: rankings?.growth_rate || 0,
+        market_saturation_index: rankings?.market_saturation || 0,
         total_education_population: countyData?.B15003_001E || 0,
         bachelors_degree_holders: countyData?.B15003_022E || 0,
         masters_degree_holders: countyData?.B15003_023E || 0,
@@ -85,11 +83,11 @@ export const useMarketReportData = (countyName: string, state: string) => {
         emp: stateData?.EMP || 0,
         total_establishments: stateData?.ESTAB || 0,
         avgSalaryPerEmployee,
-        population_rank: countyData?.county_rankings?.population_rank,
-        income_rank: countyData?.county_rankings?.income_rank,
-        rent_rank: countyData?.county_rankings?.rent_rank,
-        vacancy_rank: countyData?.county_rankings?.vacancy_rank,
-        growth_rank: countyData?.county_rankings?.growth_rank,
+        population_rank: rankings?.density_rank,
+        income_rank: rankings?.income_rank,
+        rent_rank: rankings?.rent_rank,
+        vacancy_rank: rankings?.vacancy_rank,
+        growth_rank: rankings?.growth_rank,
         top_firms: firms?.map(firm => ({
           company_name: firm["Company Name"],
           employee_count: firm.employeeCount,
@@ -111,6 +109,7 @@ export const useMarketReportData = (countyName: string, state: string) => {
       console.log('Market Data:', transformedCountyData);
       console.log('State Data:', stateData);
       console.log('County Data:', countyData);
+      console.log('Rankings Data:', rankings);
 
       return {
         countyData: transformedCountyData,
