@@ -13,6 +13,9 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
+      // Clean up county name by removing "County" suffix if present
+      const cleanCounty = county.replace(/ County$/, '');
+
       // First get the state FIPS code
       console.log('3. Getting state FIPS code for:', stateName);
       const { data: stateFips, error: stateFipsError } = await supabase
@@ -34,12 +37,12 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       console.log('5. Found state FIPS:', stateFips.fips_code);
 
       // Get data from county_rankings materialized view
-      console.log('6. Fetching county rankings data for:', { county, stateFips: stateFips.fips_code });
+      console.log('6. Fetching county rankings data for:', { cleanCounty, stateFips: stateFips.fips_code });
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
         .eq('statefp', stateFips.fips_code)
-        .ilike('countyname', county)
+        .ilike('countyname', cleanCounty)
         .limit(1)
         .maybeSingle();
 
@@ -49,7 +52,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       if (!countyData) {
-        console.log('8. No county data found for:', { county, stateName });
+        console.log('8. No county data found for:', { cleanCounty, stateName });
         return null;
       }
 
@@ -60,8 +63,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('STATE', stateName)
-        .ilike('COUNTYNAME', county);
+        .ilike('STATE', stateName)
+        .ilike('COUNTYNAME', cleanCounty);
 
       if (firmsError) {
         console.error('11. Error fetching firms data:', firmsError);
@@ -70,8 +73,24 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('12. Retrieved firms data:', firmsData);
 
-      // Transform firms data
-      const transformedTopFirms = firmsData ? firmsData.map((firm: any) => ({
+      // Transform firms data with proper typing
+      interface FirmData {
+        'Company Name': string;
+        employeeCount: number;
+        followerCount: number;
+        logoResolutionResult?: string;
+        originalCoverImage?: string;
+        'Primary Subtitle'?: string;
+        employeeCountRangeLow?: number;
+        employeeCountRangeHigh?: number;
+        foundedOn?: number;
+        specialities?: string;
+        websiteUrl?: string;
+        Location?: string;
+        Summary?: string;
+      }
+
+      const transformedTopFirms = firmsData ? firmsData.map((firm: FirmData) => ({
         company_name: firm['Company Name'] || '',
         employee_count: firm.employeeCount || 0,
         follower_count: firm.followerCount || 0,
