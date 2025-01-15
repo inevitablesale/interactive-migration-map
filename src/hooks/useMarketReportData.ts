@@ -35,7 +35,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Then, get the county data using the FIPS code
       const { data: rankingData, error: rankingError } = await supabase
-        .from('county_data')
+        .from('county_rankings')
         .select('*')
         .ilike('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
@@ -89,29 +89,26 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: rankingData.B01001_001E,
-        median_household_income: rankingData.B19013_001E,
-        median_gross_rent: rankingData.B25064_001E,
-        median_home_value: rankingData.B25077_001E,
-        employed_population: rankingData.B23025_004E,
-        private_sector_accountants: rankingData.C24060_004E,
-        public_sector_accountants: rankingData.C24060_007E,
-        firms_per_10k_population: rankingData.firms_per_10k,
-        growth_rate_percentage: rankingData.population_growth_rate,
-        market_saturation_index: rankingData.firm_density_rank,
-        total_education_population: rankingData.B15003_001E,
-        bachelors_degree_holders: rankingData.B15003_022E,
-        masters_degree_holders: rankingData.B15003_023E,
-        doctorate_degree_holders: rankingData.B15003_025E,
-        payann: rankingData.PAYANN,
-        total_establishments: rankingData.ESTAB,
-        emp: rankingData.EMP,
-        public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
-          ? rankingData.C24060_007E / rankingData.C24060_004E 
-          : null,
-        vacancy_rate: rankingData.B25002_003E && rankingData.B25002_002E
-          ? (rankingData.B25002_003E / rankingData.B25002_002E) * 100
-          : null,
+        total_population: rankingData.population,
+        median_household_income: rankingData.median_income,
+        median_gross_rent: rankingData.median_rent,
+        median_home_value: rankingData.median_home_value,
+        employed_population: rankingData.employed_population,
+        private_sector_accountants: rankingData.private_sector_accountants,
+        public_sector_accountants: rankingData.public_sector_accountants,
+        firms_per_10k_population: rankingData.firm_density,
+        growth_rate_percentage: rankingData.growth_rate,
+        market_saturation_index: rankingData.market_saturation,
+        total_education_population: rankingData.total_education_population,
+        bachelors_degree_holders: rankingData.bachelors_degree_holders,
+        masters_degree_holders: rankingData.masters_degree_holders,
+        doctorate_degree_holders: rankingData.doctorate_degree_holders,
+        payann: rankingData.payann,
+        total_establishments: rankingData.total_establishments,
+        emp: rankingData.emp,
+        public_to_private_ratio: rankingData.public_to_private_ratio,
+        vacancy_rate: rankingData.vacancy_rate,
+        vacancy_rank: rankingData.vacancy_rank,
         income_rank: rankingData.income_rank,
         population_rank: rankingData.population_rank,
         rent_rank: rankingData.rent_rank,
