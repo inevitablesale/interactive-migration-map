@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ComparisonCharts } from "./comparison/ComparisonCharts";
 import { ScenarioModeling } from "./comparison/ScenarioModeling";
@@ -66,11 +67,6 @@ const formatCurrency = (value: number | null) => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
-};
-
-const calculateGrowth = (current: number | null, previous: number | null) => {
-  if (!current || !previous || previous === 0) return null;
-  return ((current - previous) / previous) * 100;
 };
 
 export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
@@ -264,36 +260,54 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
         </div>
 
         {stateData && stateData.length > 0 ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-6">
-                {renderMetricComparison('EMP', 'Employment', <Users className="h-4 w-4" />)}
-                {renderMetricComparison('PAYANN', 'Annual Payroll', <DollarSign className="h-4 w-4" />, formatCurrency)}
-                {renderMetricComparison('ESTAB', 'Establishments', <Building2 className="h-4 w-4" />)}
-              </div>
-              <div className="space-y-6">
-                {renderMetricComparison('B19013_001E', 'Median Income', <TrendingUp className="h-4 w-4" />, formatCurrency)}
-                {renderMetricComparison('B23025_004E', 'Labor Force', <Users className="h-4 w-4" />)}
-                {renderMetricComparison(
-                  'B25077_001E', 
-                  'Housing Affordability', 
-                  <GraduationCap className="h-4 w-4" />,
-                  (value) => formatCurrency(value as number)
-                )}
-              </div>
-            </div>
+          <Tabs defaultValue="metrics" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3 bg-[#1A1A1A]">
+              <TabsTrigger value="metrics" className="data-[state=active]:bg-blue-500/20">
+                Key Metrics
+              </TabsTrigger>
+              <TabsTrigger value="charts" className="data-[state=active]:bg-blue-500/20">
+                Charts
+              </TabsTrigger>
+              <TabsTrigger value="scenarios" className="data-[state=active]:bg-blue-500/20">
+                Scenarios
+              </TabsTrigger>
+            </TabsList>
 
-            <ComparisonCharts 
-              stateData={scenarioData.length ? scenarioData : stateData} 
-              statesList={statesList || []} 
-            />
+            <TabsContent value="metrics" className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-6">
+                  {renderMetricComparison('EMP', 'Employment', <Users className="h-4 w-4" />)}
+                  {renderMetricComparison('PAYANN', 'Annual Payroll', <DollarSign className="h-4 w-4" />, formatCurrency)}
+                  {renderMetricComparison('ESTAB', 'Establishments', <Building2 className="h-4 w-4" />)}
+                </div>
+                <div className="space-y-6">
+                  {renderMetricComparison('B19013_001E', 'Median Income', <TrendingUp className="h-4 w-4" />, formatCurrency)}
+                  {renderMetricComparison('B23025_004E', 'Labor Force', <Users className="h-4 w-4" />)}
+                  {renderMetricComparison(
+                    'B25077_001E', 
+                    'Housing Affordability', 
+                    <GraduationCap className="h-4 w-4" />,
+                    (value) => formatCurrency(value as number)
+                  )}
+                </div>
+              </div>
+            </TabsContent>
 
-            <ScenarioModeling 
-              stateData={stateData} 
-              statesList={statesList || []} 
-              onUpdateScenario={setScenarioData}
-            />
-          </div>
+            <TabsContent value="charts">
+              <ComparisonCharts 
+                stateData={scenarioData.length ? scenarioData : stateData} 
+                statesList={statesList || []} 
+              />
+            </TabsContent>
+
+            <TabsContent value="scenarios">
+              <ScenarioModeling 
+                stateData={stateData} 
+                statesList={statesList || []} 
+                onUpdateScenario={setScenarioData}
+              />
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white/60">
