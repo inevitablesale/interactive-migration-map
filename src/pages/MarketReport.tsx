@@ -8,7 +8,6 @@ import { getMetricColor } from '@/utils/market-report/formatters';
 import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
-import { MarketRankingBadges } from "@/components/market-report/MarketRankingBadges";
 
 export default function MarketReport() {
   const { county, state } = useParams();
@@ -54,7 +53,14 @@ export default function MarketReport() {
             <h1 className="text-4xl font-bold text-white">{county}, {state}</h1>
             <p className="text-gray-400 mt-2">Comprehensive Market Analysis</p>
           </div>
-          <MarketRankingBadges marketData={marketData} />
+          <div className="flex gap-2 mt-4 md:mt-0">
+            <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">
+              Developing Market
+            </Badge>
+            <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
+              Moderate Growth
+            </Badge>
+          </div>
         </div>
 
         {/* Accounting Industry Metrics */}
@@ -76,8 +82,7 @@ export default function MarketReport() {
               },
               {
                 label: "Median Household Income",
-                value: marketData.median_household_income ? 
-                  `$${marketData.median_household_income.toLocaleString()}` : undefined,
+                value: `$${marketData.median_household_income?.toLocaleString()}`,
                 type: 'money',
                 rank: marketData.income_rank
               }
@@ -91,15 +96,13 @@ export default function MarketReport() {
             metrics={[
               {
                 label: "Median Gross Rent",
-                value: marketData.median_gross_rent ? 
-                  `$${marketData.median_gross_rent.toLocaleString()}` : undefined,
+                value: `$${marketData.median_gross_rent?.toLocaleString()}`,
                 type: 'money',
                 rank: marketData.rent_rank
               },
               {
                 label: "Vacancy Rate",
-                value: marketData.vacancy_rate ? 
-                  `${marketData.vacancy_rate.toFixed(1)}%` : undefined,
+                value: `${marketData.vacancy_rate?.toFixed(1)}%`,
                 type: 'saturation',
                 rank: marketData.vacancy_rank
               }
@@ -119,8 +122,7 @@ export default function MarketReport() {
               },
               {
                 label: "Growth Rate",
-                value: marketData.growth_rate_percentage ? 
-                  `${marketData.growth_rate_percentage.toFixed(1)}%` : undefined,
+                value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
                 type: 'growth',
                 rank: marketData.growth_rank
               }
@@ -134,20 +136,17 @@ export default function MarketReport() {
             metrics={[
               {
                 label: "Bachelor's Degree",
-                value: marketData.total_education_population && marketData.bachelors_degree_holders ? 
-                  `${((marketData.bachelors_degree_holders / marketData.total_education_population) * 100).toFixed(1)}%` : undefined,
+                value: `${((marketData.bachelors_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
                 type: 'density'
               },
               {
                 label: "Master's Degree",
-                value: marketData.total_education_population && marketData.masters_degree_holders ? 
-                  `${((marketData.masters_degree_holders / marketData.total_education_population) * 100).toFixed(1)}%` : undefined,
+                value: `${((marketData.masters_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
                 type: 'density'
               },
               {
                 label: "Doctorate Degree",
-                value: marketData.total_education_population && marketData.doctorate_degree_holders ? 
-                  `${((marketData.doctorate_degree_holders / marketData.total_education_population) * 100).toFixed(1)}%` : undefined,
+                value: `${((marketData.doctorate_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
                 type: 'density'
               }
             ]}

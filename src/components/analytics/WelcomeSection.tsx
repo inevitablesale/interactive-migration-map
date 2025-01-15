@@ -8,10 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { AlertForm } from "./AlertForm";
 import { useNavigate } from "react-router-dom";
 import { BuyerProfileForm } from "./BuyerProfileForm";
 
 export const WelcomeSection = () => {
+  const [showAlertForm, setShowAlertForm] = useState(false);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const navigate = useNavigate();
 
@@ -31,6 +33,26 @@ export const WelcomeSection = () => {
             data-driven insights and market analysis tools.
           </p>
           <div className="flex flex-wrap items-center gap-4">
+            <Dialog open={showAlertForm} onOpenChange={setShowAlertForm}>
+              <Button
+                variant="outline"
+                className="border-white/10 hover:bg-white/5"
+                onClick={() => setShowAlertForm(true)}
+              >
+                Create Alert
+              </Button>
+              <DialogContent className="bg-black/90 border-white/10">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Create Alert</DialogTitle>
+                  <DialogDescription className="text-white/60">
+                    Set up alerts to get notified about new opportunities that
+                    match your criteria.
+                  </DialogDescription>
+                </DialogHeader>
+                <AlertForm onSuccess={() => setShowAlertForm(false)} />
+              </DialogContent>
+            </Dialog>
+
             <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
               <Button
                 variant="outline"

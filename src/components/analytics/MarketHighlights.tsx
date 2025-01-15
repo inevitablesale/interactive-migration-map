@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -76,19 +75,6 @@ const serviceSpecialization = [
 
 export function MarketHighlights() {
   const [activeTab, setActiveTab] = useState("growth");
-  const navigate = useNavigate();
-
-  const handleRowClick = (region: string) => {
-    // Extract county and state from region string
-    if (region.includes(",")) {
-      // For format like "Helena, MT"
-      const [county, state] = region.split(",").map(s => s.trim());
-      navigate(`/market-report/${county} County/${state}`);
-    } else {
-      // For single state names or county names
-      navigate(`/state-market-report/${region}`);
-    }
-  };
 
   return (
     <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
@@ -126,11 +112,7 @@ export function MarketHighlights() {
             </TableHeader>
             <TableBody>
               {growthLeaders.map((item) => (
-                <TableRow 
-                  key={item.region} 
-                  className="border-white/10 cursor-pointer hover:bg-white/5"
-                  onClick={() => handleRowClick(item.region)}
-                >
+                <TableRow key={item.region} className="border-white/10">
                   <TableCell className="text-white">{item.region}</TableCell>
                   <TableCell className="text-blue-400">{item.growthRate}</TableCell>
                   <TableCell className="text-white/80">{item.firmDensity}</TableCell>
@@ -153,11 +135,7 @@ export function MarketHighlights() {
             </TableHeader>
             <TableBody>
               {competitiveInsights.map((item) => (
-                <TableRow 
-                  key={item.region} 
-                  className="border-white/10 cursor-pointer hover:bg-white/5"
-                  onClick={() => handleRowClick(item.region)}
-                >
+                <TableRow key={item.region} className="border-white/10">
                   <TableCell className="text-white">{item.region}</TableCell>
                   <TableCell>{item.firmDensity}</TableCell>
                   <TableCell className="text-blue-400">{item.growthRate}</TableCell>
@@ -180,11 +158,7 @@ export function MarketHighlights() {
             </TableHeader>
             <TableBody>
               {serviceSpecialization.map((item) => (
-                <TableRow 
-                  key={item.region} 
-                  className="border-white/10 cursor-pointer hover:bg-white/5"
-                  onClick={() => handleRowClick(item.region)}
-                >
+                <TableRow key={item.region} className="border-white/10">
                   <TableCell className="text-white">{item.region}</TableCell>
                   <TableCell>{item.service}</TableCell>
                   <TableCell>{item.firmDensity}</TableCell>
