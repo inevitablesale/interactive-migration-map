@@ -80,7 +80,7 @@ export const AlertsPanel = () => {
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="hover:bg-white/10">
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 text-white" />
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-gray-900 border-white/10 text-white">
@@ -94,7 +94,7 @@ export const AlertsPanel = () => {
             </DialogContent>
           </Dialog>
           <Button variant="ghost" size="icon" className="hover:bg-white/10">
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4 text-white" />
           </Button>
         </div>
       </div>
@@ -119,7 +119,7 @@ export const AlertsPanel = () => {
                   className="h-8 w-8 hover:bg-white/10"
                   onClick={() => deleteAlert(alert.id)}
                 >
-                  <Trash2 className="w-4 h-4 text-red-400" />
+                  <Trash2 className="w-4 h-4 text-white" />
                 </Button>
               </div>
               <p className="text-sm text-blue-100/60">
@@ -134,7 +134,7 @@ export const AlertsPanel = () => {
           className="w-full bg-white/5 hover:bg-white/10 border-white/10"
           onClick={() => setShowForm(true)}
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4 mr-2 text-white" />
           Add New Alert
         </Button>
       </div>

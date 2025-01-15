@@ -106,8 +106,8 @@ async function fetchCountyRankings() {
   const { data, error } = await supabase
     .from('county_rankings')
     .select('*')
-    .order('growth_rate', { ascending: false })
-    .limit(10);
+    .order('growth_rank', { ascending: true })
+    .limit(1);
   if (error) throw error;
   return data as CountyRanking[];
 }
@@ -229,52 +229,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Top Regions</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold mb-4">Top Growth Regions</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-4 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
-                        <div>Rank</div>
-                        <div>Region</div>
-                        <div>Growth Rate</div>
-                        <div>Total Firms</div>
-                      </div>
-                      {countyRankings?.map((county, index) => (
-                        <div 
-                          key={`${county.countyname}-${county.statefp}-${index}`}
-                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                          onClick={() => {
-                            navigate(`/market-report/${encodeURIComponent(county.countyname)}/${encodeURIComponent(county.statefp)}`);
-                          }}
-                        >
-                          <div className="flex items-center">
-                            <span className="text-lg font-bold text-accent">#{index + 1}</span>
-                          </div>
-                          <div>
-                            <p className="font-medium">{county.countyname}</p>
-                            <p className="text-sm text-white/60">State {county.statefp}</p>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="text-green-400">+{(county.growth_rate * 100).toFixed(1)}%</span>
-                          </div>
-                          <div className="flex items-center">
-                            {county.total_firms.toLocaleString()}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing regional data"
@@ -310,49 +264,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Top Markets</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold mb-4">Top Competitive Markets</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-4 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
-                        <div>Rank</div>
-                        <div>Region</div>
-                        <div>Establishments</div>
-                        <div>Density</div>
-                      </div>
-                      {competitiveMetrics?.slice(0, 10).map((market, index) => (
-                        <div 
-                          key={`${market.county_name}-${market.state_fp}-${index}`}
-                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
-                        >
-                          <div className="flex items-center">
-                            <span className="text-lg font-bold text-accent">#{index + 1}</span>
-                          </div>
-                          <div>
-                            <p className="font-medium">{market.county_name}</p>
-                            <p className="text-sm text-white/60">State {market.state_fp}</p>
-                          </div>
-                          <div className="flex items-center">
-                            {market.total_establishments.toLocaleString()}
-                          </div>
-                          <div className="flex items-center">
-                            {formatDensity(market.establishments_per_1000_population)} per 1k
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing market data"
@@ -389,53 +300,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Underserved Regions</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold mb-4">Underserved Regions</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-4 gap-4 px-4 py-2 bg-white/10 rounded-lg text-sm font-medium">
-                        <div>Region</div>
-                        <div>Firms per 10k</div>
-                        <div>Market Status</div>
-                        <div>Opportunity</div>
-                      </div>
-                      {underservedMetrics?.map((region, index) => (
-                        <div 
-                          key={`${region.county_name}-${region.state_name}-${index}`}
-                          className="grid grid-cols-4 gap-4 px-4 py-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
-                        >
-                          <div>
-                            <p className="font-medium">{region.county_name}</p>
-                            <p className="text-sm text-white/60">{region.state_name}</p>
-                          </div>
-                          <div className="flex items-center">
-                            {region.firms_per_10k_population.toFixed(1)}
-                          </div>
-                          <div className="flex items-center">
-                            <span className={region.market_status === 'Underserved' ? 'text-yellow-400' : 'text-green-400'}>
-                              {region.market_status}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className={region.opportunity_status === 'High Opportunity' ? 'text-green-400' : 'text-yellow-400'}>
-                              {region.opportunity_status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing market data"
@@ -470,35 +334,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Details</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Employee Density Analysis</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {employeeRentData?.map((region, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{region.county_name}</h4>
-                            <p className="text-sm text-gray-400">State {region.state_fp}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">{Math.round(region.employees_per_1k_population)} per 1k</p>
-                            <p className="text-sm text-gray-400">{region.total_employees.toLocaleString()} employees</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing employee data..."
@@ -527,35 +362,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Top Companies</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Social Media Engagement Analysis</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {followerData?.map((company, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{company.company_name}</h4>
-                            <p className="text-sm text-gray-400">{company.employee_count} employees</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">{Math.round(company.followers_per_employee)}x</p>
-                            <p className="text-sm text-gray-400">{company.follower_count.toLocaleString()} followers</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing social data..."
@@ -590,39 +396,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Markets</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Housing Market Analysis</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {vacancyData?.map((region, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{region.county_name}</h4>
-                            <p className="text-sm text-gray-400">State {region.state_fp}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">
-                              {(region.vacant_to_occupied_ratio * 100).toFixed(1)}%
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              {Math.round(region.firms_per_10k_population)} firms/10k pop
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing housing data..."
@@ -657,39 +430,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Demographics</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Education Demographics</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {educationData?.map((region, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{region.county_name}</h4>
-                            <p className="text-sm text-gray-400">State {region.state_fp}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">
-                              {region.masters_degree_percent.toFixed(1)}%
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Median Age: {Math.round(region.median_age)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing education data..."
@@ -727,41 +467,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Projections</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Future Market Saturation Analysis</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {futureSaturationData?.map((region, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{region.county_name}</h4>
-                            <p className="text-sm text-gray-400">
-                              Current Density: {region.current_firm_density?.toFixed(1) || '0'} per 10k
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">
-                              {region.projected_firm_density?.toFixed(1) || '0'} per 10k
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Growth: {(region.firm_growth_rate || 0).toFixed(1)}%
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing market data..."
@@ -797,41 +502,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Markets</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Emerging Talent Markets</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {emergingTalentData?.map((market, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{market.county_name}</h4>
-                            <p className="text-sm text-gray-400">
-                              {market.total_educated?.toLocaleString()} educated professionals
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">
-                              {market.education_rate_percent?.toFixed(1)}%
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Growth: {market.education_growth_rate?.toFixed(1)}%
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing talent data..."
@@ -867,41 +537,6 @@ export function KeyInsightsPanel() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors">
-                    <ArrowUpRight className="h-4 w-4" />
-                    <span className="text-xs">View Hubs</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Affordable Talent Hubs</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {affordableTalentData?.map((hub, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{hub.county_name}</h4>
-                            <p className="text-sm text-gray-400">
-                              {hub.accountant_density.toFixed(1)} accountants per 10k
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">
-                              ${hub.median_rent.toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Score: {hub.affordability_score.toFixed(1)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </>
           ) : (
             "Analyzing hub data..."
