@@ -31,6 +31,7 @@ interface ValueMetric {
   total_firms: number;
   avg_revenue: number;
   growth_potential: number;
+  rank?: number;
 }
 
 interface CompetitiveMarketMetric {
@@ -173,7 +174,8 @@ export function KeyInsightsPanel() {
         median_home_value: county.median_home_value || 0,
         total_firms: county.total_establishments || 0,
         avg_revenue: (county.total_payroll || 0) / (county.total_establishments || 1),
-        growth_potential: county.population_growth_rate || 0
+        growth_potential: county.population_growth_rate || 0,
+        rank: county.density_rank
       }))
       .sort((a, b) => b.avg_revenue - a.avg_revenue)
       .slice(0, 5);
