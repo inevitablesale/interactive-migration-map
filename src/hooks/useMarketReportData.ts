@@ -1,26 +1,37 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useMarketReportData = (countyName: string, stateFp: string) => {
+export const useMarketReportData = (countyName: string, state: string) => {
   return useQuery({
-    queryKey: ['marketReport', countyName, stateFp],
+    queryKey: ['marketReport', countyName, state],
     queryFn: async () => {
-      // First get the state data
+      // First get the state FIPS code
+      const { data: stateFips, error: stateFipsError } = await supabase
+        .from('state_fips_codes')
+        .select('STATEFP')
+        .eq('state', state)
+        .single();
+
+      if (stateFipsError) throw stateFipsError;
+      if (!stateFips) throw new Error('State not found');
+
+      // Then get the state data using the FIPS code
       const { data: stateData, error: stateError } = await supabase
         .from('state_data')
         .select('*')
-        .eq('STATEFP', stateFp)
-        .single();
+        .eq('STATEFP', stateFips.STATEFP)
+        .maybeSingle();
 
       if (stateError) throw stateError;
+      if (!stateData) throw new Error('State data not found');
 
       // Then, get the county data from the county_rankings table
       const { data: countyData, error: countyError } = await supabase
-        .from('county_rankings') // Use county_rankings table
-        .select('*') // Fetch all columns
-        .eq('COUNTYNAME', countyName) // Filter by COUNTYNAME
-        .eq('STATEFP', stateData.STATEFP) // Filter by STATEFP
-        .maybeSingle(); // Ensure a single result is returned
+        .from('county_rankings')
+        .select('*')
+        .eq('COUNTYNAME', countyName)
+        .eq('STATEFP', stateFips.STATEFP)
+        .maybeSingle();
 
       if (countyError) throw countyError;
 
@@ -28,13 +39,23 @@ export const useMarketReportData = (countyName: string, stateFp: string) => {
       const { data: firms, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('STATEFP', parseInt(stateFp))
+        .eq('STATEFP', parseInt(stateFips.STATEFP))
         .eq('COUNTYNAME', countyName);
 
       if (firmsError) throw firmsError;
 
       return {
-        countyData,
+        countyData: {
+          ...countyData,
+          firms_per_10k_population: countyData?.firm_density || 0,
+          growth_rate_percentage: countyData?.growth_rate || 0,
+          market_saturation_index: countyData?.market_saturation || 0,
+          total_education_population: countyData?.education_population || 0,
+          bachelors_degree_holders: countyData?.bachelors_holders || 0,
+          masters_degree_holders: countyData?.masters_holders || 0,
+          doctorate_degree_holders: countyData?.doctorate_holders || 0,
+          top_firms: firms || []
+        },
         stateData,
         firms: firms || []
       };

@@ -1,107 +1,35 @@
-import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { MSAData } from '@/types/map';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-export const useMSAData = () => {
-  const [msaData, setMsaData] = useState<MSAData[]>([]);
-  const [statesWithMSA, setStatesWithMSA] = useState<string[]>([]);
-  const [msaCountByState, setMsaCountByState] = useState<{ [key: string]: number }>({});
-
-  const fetchMSAData = useCallback(async (stateId: string) => {
-    console.log('Fetching MSA data for state:', stateId);
-    try {
-      const paddedStateId = stateId.padStart(2, '0');
-      const unpaddenStateId = parseInt(stateId, 10).toString();
-      
-      const { data: msaCrosswalk, error: crosswalkError } = await supabase
+export const useMSAData = (stateFp: string) => {
+  return useQuery({
+    queryKey: ['msaData', stateFp],
+    queryFn: async () => {
+      const { data: msaList, error: msaError } = await supabase
         .from('msa_state_crosswalk')
-        .select('MSA, msa_name')
-        .or(`STATEFP.eq.${paddedStateId},STATEFP.eq.${unpaddenStateId}`);
+        .select('MSA, msa_name, STATEFP')
+        .eq('STATEFP', stateFp);
 
-      if (crosswalkError) {
-        console.error('Error fetching MSA crosswalk:', crosswalkError);
-        return [];
-      }
+      if (msaError) throw msaError;
 
-      const uniqueMsaCodes = [...new Set(msaCrosswalk?.map(m => m.MSA) || [])];
+      const msaData = await Promise.all(
+        msaList.map(async (msa) => {
+          const { data: metrics, error: metricsError } = await supabase
+            .from('region_data')
+            .select('*')
+            .eq('MSA', msa.MSA)
+            .single();
 
-      if (uniqueMsaCodes.length === 0) {
-        console.log('No MSA codes found for state:', paddedStateId);
-        return [];
-      }
+          if (metricsError) throw metricsError;
 
-      const { data: regionData, error: regionError } = await supabase
-        .from('region_data')
-        .select('msa, EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
-        .in('msa', uniqueMsaCodes);
-
-      if (regionError) {
-        console.error('Error fetching region data:', regionError);
-        return [];
-      }
-
-      const msaMap = new Map();
-      
-      msaCrosswalk?.forEach(msa => {
-        const regionInfo = regionData?.find(rd => rd.msa === msa.MSA);
-        if (regionInfo) {
-          if (!msaMap.has(msa.MSA)) {
-            msaMap.set(msa.MSA, {
-              ...msa,
-              ...regionInfo
-            });
-          }
-        }
-      });
-
-      const combinedData = Array.from(msaMap.values());
-      setMsaData(combinedData);
-      return combinedData;
-    } catch (error) {
-      console.error('Error in fetchMSAData:', error);
-      return [];
-    }
-  }, []);
-
-  const fetchStatesWithMSA = useCallback(async () => {
-    try {
-      const { data: msaData, error: msaError } = await supabase
-        .from('msa_state_crosswalk')
-        .select('STATEFP, MSA')
-        .not('STATEFP', 'is', null);
-
-      if (msaError) {
-        console.error('Error fetching states with MSA:', msaError);
-        return;
-      }
-
-      const msaCountByState = msaData?.reduce((acc: { [key: string]: number }, curr) => {
-        if (curr.STATEFP) {
-          const stateFips = curr.STATEFP.toString().padStart(2, '0');
-          acc[stateFips] = (acc[stateFips] || 0) + 1;
-        }
-        return acc;
-      }, {}) || {};
-
-      const uniqueStates = Object.keys(msaCountByState).map(state => 
-        state.toString().padStart(2, '0')
+          return {
+            ...msa,
+            ...metrics,
+          };
+        })
       );
-      
-      setStatesWithMSA(uniqueStates);
-      setMsaCountByState(msaCountByState);
-    } catch (error) {
-      console.error('Error in fetchStatesWithMSA:', error);
-    }
-  }, []);
 
-  return {
-    msaData,
-    setMsaData,
-    statesWithMSA,
-    setStatesWithMSA,
-    msaCountByState,
-    setMsaCountByState,
-    fetchMSAData,
-    fetchStatesWithMSA
-  };
+      return msaData;
+    },
+  });
 };
