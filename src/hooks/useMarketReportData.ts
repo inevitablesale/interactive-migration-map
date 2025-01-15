@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ComprehensiveMarketData } from "@/types/rankings";
+import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
   console.log('1. useMarketReportData called with:', { county, stateName });
@@ -35,6 +35,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Get data from county_rankings materialized view
       console.log('7. Fetching county rankings data for:', { county, stateFips: stateFips.STATEFP });
+      
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
@@ -55,21 +56,39 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       console.log('10. Retrieved county data:', countyData);
 
       // Get top firms data
-      console.log('11. Fetching top firms data for:', { county, stateName });
-      const { data: topFirms, error: firmsError } = await supabase
+      const { data: topFirmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
-        .select('Company Name, employeeCount, followerCount, COUNTYNAME, State Name')
+        .select('*')
         .eq('COUNTYNAME', county)
         .eq('State Name', stateName)
-        .order('employeeCount', { ascending: false, nullsLast: true })
-        .limit(5); // Match SQL query limit
+        .order('employeeCount', { ascending: false })
+        .limit(10);
 
       if (firmsError) {
-        console.error('12. Error fetching top firms:', firmsError.message);
+        console.error('Error fetching top firms:', firmsError.message);
         throw new Error('Error fetching top firms');
       }
 
-      console.log('13. Retrieved top firms:', topFirms?.length);
+      console.log('11. Retrieved top firms:', topFirmsData?.length);
+
+      // Transform top firms data to match TopFirm interface
+      const topFirms: TopFirm[] = topFirmsData?.map(firm => ({
+        company_name: firm['Company Name'] || '',
+        employee_count: firm.employeeCount || 0,
+        follower_count: firm.followerCount || 0,
+        follower_ratio: firm.followerCount && firm.employeeCount ? 
+          firm.followerCount / firm.employeeCount : 0,
+        logoResolutionResult: firm.logoResolutionResult,
+        originalCoverImage: firm.originalCoverImage,
+        primarySubtitle: firm['Primary Subtitle'],
+        employeeCountRangeLow: firm.employeeCountRangeLow,
+        employeeCountRangeHigh: firm.employeeCountRangeHigh,
+        foundedOn: firm.foundedOn?.toString(),
+        specialities: firm.specialities,
+        websiteUrl: firm.websiteUrl,
+        Location: firm.Location,
+        Summary: firm.Summary
+      })) || [];
 
       // Transform the data using the county_rankings view data
       const transformedData: ComprehensiveMarketData = {
@@ -98,10 +117,10 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         rent_rank: countyData.rent_rank || null,
         density_rank: countyData.density_rank || null,
         growth_rank: countyData.growth_rank || null,
-        top_firms: topFirms || [], // Include fetched top firms
+        top_firms: topFirms,
       };
 
-      console.log('14. Transformed data:', transformedData);
+      console.log('12. Transformed data:', transformedData);
 
       return transformedData;
     },
@@ -109,7 +128,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('15. Query complete:', { 
+  console.log('13. Query complete:', { 
     hasData: hasMarketData, 
     isLoading, 
     hasError: !!error,
