@@ -83,9 +83,13 @@ export function MarketHighlights() {
     if (region.includes(",")) {
       // For format like "Helena, MT"
       const [county, state] = region.split(",").map(s => s.trim());
-      navigate(`/market-report/${county} County/${state}`);
+      navigate(`/market-report/${county}/${state}`);
+    } else if (region.includes("County")) {
+      // For format like "Jefferson County"
+      const [county, _] = region.split(" County");
+      navigate(`/market-report/${county}/MT`);
     } else {
-      // For single state names or county names
+      // For single state names
       navigate(`/state-market-report/${region}`);
     }
   };
