@@ -72,7 +72,9 @@ export default function StateMarketReport() {
   }, [state]);
 
   const handleCountyClick = (countyName: string) => {
-    navigate(`/market-report/${state}/${countyName}`);
+    // Remove " County" suffix if present for the URL
+    const formattedCounty = countyName.replace(/ County$/, '');
+    navigate(`/market-report/${stateName}/${formattedCounty}`);
   };
 
   if (isLoading) {
@@ -150,7 +152,9 @@ export default function StateMarketReport() {
               <TrendingUp className="w-5 h-5 text-yellow-400" />
               <h2 className="text-lg font-semibold text-white">Growth Rate</h2>
             </div>
-            <p className="text-2xl font-bold text-white">{stateData.growth_rate_percentage?.toFixed(1)}%</p>
+            <p className="text-2xl font-bold text-white">
+              {((stateData.MOVEDIN2022 - stateData.MOVEDIN2021) / stateData.MOVEDIN2021 * 100).toFixed(1)}%
+            </p>
           </Card>
         </div>
 
