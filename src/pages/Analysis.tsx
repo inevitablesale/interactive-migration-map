@@ -1,7 +1,12 @@
 import { ChartBar, Users, TrendingUp, Bot, Sparkles } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
-import { AlertsPanel } from "@/components/analytics/AlertsPanel";
+</lov-replace>
+
+<lov-search>
+                  <AlertsPanel />
+</lov-search>
+<lov-replace>
 import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
