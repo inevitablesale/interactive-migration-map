@@ -25,7 +25,7 @@ interface MarketGrowthMetric {
 interface ValueMetric {
   county_name: string;
   state: string;
-  state_name: string; // Add this for full state name
+  state_name: string;
   median_income: number;
   median_home_value: number;
   total_firms: number;
@@ -95,7 +95,7 @@ export function KeyInsightsPanel() {
       
       return data.map(market => ({
         ...market,
-        market_saturation: (market.employeeCount / 1000) * 100 // Example calculation
+        market_saturation: (market.employeeCount / 1000) * 100
       }));
     },
   });
@@ -255,7 +255,7 @@ export function KeyInsightsPanel() {
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Growth Leaders</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 mt-4">
+                  <div className="mt-4 space-y-4">
                     {marketGrowthMetrics?.slice(0, 5).map((region, index) => (
                       <div 
                         key={index} 
@@ -294,23 +294,33 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Talent Markets</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-white">Education Demographics</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    {emergingTalentData?.slice(0, 5).map((market, index) => {
-                      const [countyName, stateName] = market.county_name.split(',').map(s => s.trim());
+                  <div className="mt-4 space-y-4">
+                    {emergingTalentData?.map((region, index) => {
+                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
                       return (
                         <div 
                           key={index} 
-                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                          className="p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                           onClick={() => handleNavigateToMarket(countyName, stateName)}
                         >
-                          <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}</h3>
-                          <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
-                          <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
-                          <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-medium">{region.county_name}</h4>
+                              <p className="text-sm text-gray-400">State {region.state_fp}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-semibold">
+                                {region.education_rate_percent.toFixed(1)}%
+                              </p>
+                              <p className="text-sm text-gray-400">
+                                Median Age: {Math.round(region.median_age)}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -319,7 +329,7 @@ export function KeyInsightsPanel() {
               </Dialog>
             </>
           ) : (
-            "Analyzing talent data..."
+            "Analyzing education data..."
           )}
         </div>
       ),
@@ -345,7 +355,7 @@ export function KeyInsightsPanel() {
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Competition</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 mt-4">
+                  <div className="mt-4 space-y-4">
                     {competitiveMarkets?.slice(0, 5).map((market, index) => (
                       <div 
                         key={index} 
@@ -389,7 +399,7 @@ export function KeyInsightsPanel() {
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Growth Opportunities</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 mt-4">
+                  <div className="mt-4 space-y-4">
                     {underservedRegions?.slice(0, 5).map((region, index) => (
                       <div 
                         key={index} 
@@ -429,23 +439,32 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
+                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    {futureSaturationData?.slice(0, 5).map((region, index) => {
+                  <div className="mt-4 space-y-4">
+                    {futureSaturationData?.map((region, index) => {
                       const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
                       return (
                         <div 
                           key={index} 
-                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                          className="p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                           onClick={() => handleNavigateToMarket(countyName, stateName)}
                         >
-                          <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{region.county_name}</h3>
-                          <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
-                          <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
-                          <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-medium">{region.county_name}</h4>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-semibold">
+                                {region.current_firm_density.toFixed(1)} → {region.projected_firm_density.toFixed(1)}
+                              </p>
+                              <p className="text-sm text-gray-400">
+                                Growth Rate: {region.firm_growth_rate.toFixed(1)}%
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
