@@ -142,7 +142,10 @@ export function KeyInsightsPanel() {
   const { data: countyRankings } = useQuery({
     queryKey: ['countyRankings'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_county_rankings');
+      const { data, error } = await supabase
+        .from('county_rankings')
+        .select('*')
+        .order('firms_per_10k', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -153,25 +156,24 @@ export function KeyInsightsPanel() {
     
     return countyRankings
       .filter((county, index, self) => 
-        index === self.findIndex(c => c.countyname === county.countyname)
+        index === self.findIndex(c => c.COUNTYNAME === county.COUNTYNAME)
       )
-      .filter(county => county.total_firms > 0)
+      .filter(county => county.total_establishments > 0)
       .map(county => ({
-        county_name: county.countyname.endsWith(" County") ? county.countyname : `${county.countyname} County`,
-        state: county.statefp,
-        state_name: getStateNameFromFIPS(county.statefp),
-        median_income: county.state_density_avg * 50000,
-        median_home_value: county.state_growth_avg * 100000,
-        total_firms: county.total_firms,
-        avg_revenue: county.firm_density * 10000,
-        growth_potential: county.growth_rate
+        county_name: county.COUNTYNAME.endsWith(" County") ? county.COUNTYNAME : `${county.COUNTYNAME} County`,
+        state: county.STATEFP,
+        state_name: county.state_name || getStateNameFromFIPS(county.STATEFP),
+        median_income: county.median_household_income || 0,
+        median_home_value: county.median_home_value || 0,
+        total_firms: county.total_establishments || 0,
+        avg_revenue: (county.total_payroll || 0) / (county.total_establishments || 1),
+        growth_potential: county.population_growth_rate || 0
       }))
       .sort((a, b) => b.avg_revenue - a.avg_revenue)
       .slice(0, 5);
   }, [countyRankings]);
 
   const handleNavigateToMarket = (county: string, state: string) => {
-    // If state is undefined, try to extract it from county name which might be in format "County Name, State"
     let finalState = state;
     let finalCounty = county;
     
