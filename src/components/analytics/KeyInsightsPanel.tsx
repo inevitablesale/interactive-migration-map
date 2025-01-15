@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
   Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
@@ -9,7 +10,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
 
 interface MarketGrowthMetric {
   county_name: string;
@@ -151,40 +151,21 @@ export function KeyInsightsPanel() {
       .slice(0, 5);
   }, [countyRankings]);
 
-  // Add state comparison data
-  const { data: stateComparison } = useQuery({
-    queryKey: ['stateComparison'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
-        .order('ESTAB', { ascending: false })
-        .limit(10);
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Restore the top metrics declarations
-  const topGrowthMetric = marketGrowthMetrics?.[0];
-  const topCompetitiveMarket = competitiveMarkets?.[0];
-  const topUnderservedRegion = underservedRegions?.[0];
-  const topEmergingTalentMarket = emergingTalentData?.[0];
-  const topFutureSaturationRisk = futureSaturationData?.[0];
-  const topValueMetric = transformedValueMetrics?.[0];
+  const handleNavigateToMarket = (county: string, state: string) => {
+    navigate(`/market-report/${county}/${state}`);
+  };
 
   const insights = [
     {
       title: "High-Value Markets",
-      value: topValueMetric 
-        ? `${topValueMetric.county_name}`
+      value: transformedValueMetrics[0] 
+        ? `${transformedValueMetrics[0].county_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topValueMetric ? (
+          {transformedValueMetrics[0] ? (
             <>
-              {`$${(topValueMetric.avg_revenue / 1000).toFixed(1)}K avg revenue, ${topValueMetric.growth_potential.toFixed(1)}% growth potential`}
+              {`$${(transformedValueMetrics[0].avg_revenue / 1000).toFixed(1)}K avg revenue, ${transformedValueMetrics[0].growth_potential.toFixed(1)}% growth potential`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -200,7 +181,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => navigate(`/market-report/${market.county_name}`)}
+                        onClick={() => handleNavigateToMarket(market.county_name, 'state')}
                       >
                         <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
@@ -221,14 +202,14 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Market Growth Leaders",
-      value: topGrowthMetric 
-        ? `${topGrowthMetric.county_name}, ${topGrowthMetric.state}`
+      value: marketGrowthMetrics[0] 
+        ? `${marketGrowthMetrics[0].county_name}, ${marketGrowthMetrics[0].state}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topGrowthMetric ? (
+          {marketGrowthMetrics[0] ? (
             <>
-              {`${topGrowthMetric.growth_rate_percentage.toFixed(1)}% growth rate, ${(topGrowthMetric.total_moves || 0).toLocaleString()} total moves`}
+              {`${marketGrowthMetrics[0].growth_rate_percentage.toFixed(1)}% growth rate, ${(marketGrowthMetrics[0].total_moves || 0).toLocaleString()} total moves`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -244,7 +225,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => navigate(`/market-report/${region.county_name}/${region.state}`)}
+                        onClick={() => handleNavigateToMarket(region.county_name, region.state)}
                       >
                         <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state}</h3>
                         <p className="text-sm text-gray-300">Growth Rate: {region.growth_rate_percentage.toFixed(1)}%</p>
@@ -264,14 +245,14 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Talent Availability",
-      value: topEmergingTalentMarket 
-        ? `${topEmergingTalentMarket.county_name}`
+      value: emergingTalentData[0] 
+        ? `${emergingTalentData[0].county_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topEmergingTalentMarket ? (
+          {emergingTalentData[0] ? (
             <>
-              {`${topEmergingTalentMarket.education_rate_percent.toFixed(1)}% education rate, ${topEmergingTalentMarket.total_educated.toLocaleString()} educated professionals`}
+              {`${emergingTalentData[0].education_rate_percent.toFixed(1)}% education rate, ${emergingTalentData[0].total_educated.toLocaleString()} educated professionals`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -307,14 +288,14 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Market Competition",
-      value: topCompetitiveMarket 
-        ? `${topCompetitiveMarket.COUNTYNAME}, ${topCompetitiveMarket["State Name"]}`
+      value: competitiveMarkets[0] 
+        ? `${competitiveMarkets[0].COUNTYNAME}, ${competitiveMarkets[0]["State Name"]}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topCompetitiveMarket ? (
+          {competitiveMarkets[0] ? (
             <>
-              {`${topCompetitiveMarket.employeeCount.toLocaleString()} employees, ${topCompetitiveMarket.followerCount.toLocaleString()} followers`}
+              {`${competitiveMarkets[0].employeeCount.toLocaleString()} employees, ${competitiveMarkets[0].followerCount.toLocaleString()} followers`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -330,7 +311,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => navigate(`/market-report/${market.COUNTYNAME}/${market["State Name"]}`)}
+                        onClick={() => handleNavigateToMarket(market.COUNTYNAME, market["State Name"])}
                       >
                         <h3 className="text-lg font-semibold text-white">{market.COUNTYNAME}, {market["State Name"]}</h3>
                         <p className="text-sm text-gray-300">Employees: {market.employeeCount.toLocaleString()}</p>
@@ -351,14 +332,14 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Growth Opportunities",
-      value: topUnderservedRegion 
-        ? `${topUnderservedRegion.county_name}, ${topUnderservedRegion.state_name}`
+      value: underservedRegions[0] 
+        ? `${underservedRegions[0].county_name}, ${underservedRegions[0].state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topUnderservedRegion ? (
+          {underservedRegions[0] ? (
             <>
-              {`${topUnderservedRegion.market_status}, ${topUnderservedRegion.opportunity_status}`}
+              {`${underservedRegions[0].market_status}, ${underservedRegions[0].opportunity_status}`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -374,7 +355,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => navigate(`/market-report/${region.county_name}/${region.state_name}`)}
+                        onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
                       >
                         <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state_name}</h3>
                         <p className="text-sm text-gray-300">Market Status: {region.market_status}</p>
@@ -395,14 +376,14 @@ export function KeyInsightsPanel() {
     },
     {
       title: "Market Saturation Risk",
-      value: topFutureSaturationRisk 
-        ? `${topFutureSaturationRisk.county_name}`
+      value: futureSaturationData[0] 
+        ? `${futureSaturationData[0].county_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {topFutureSaturationRisk ? (
+          {futureSaturationData[0] ? (
             <>
-              {`Current: ${topFutureSaturationRisk.current_firm_density.toFixed(1)} firms/10k, Projected: ${topFutureSaturationRisk.projected_firm_density.toFixed(1)} firms/10k`}
+              {`Current: ${futureSaturationData[0].current_firm_density.toFixed(1)} firms/10k, Projected: ${futureSaturationData[0].projected_firm_density.toFixed(1)} firms/10k`}
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
@@ -462,7 +443,8 @@ export function KeyInsightsPanel() {
         <h3 className="text-2xl font-bold mb-4">State Performance Comparison</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {stateComparison?.slice(0, 2).map((state, index) => (
-            <Card key={index} className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+            <Card key={index} className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
+                  onClick={() => handleNavigateToMarket('All Counties', state.STATEFP)}>
               <h4 className="text-lg font-semibold text-white mb-4">State {state.STATEFP}</h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
