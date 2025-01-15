@@ -117,10 +117,10 @@ export default function StateMarketReport() {
   const calculateNationalRank = () => {
     if (!stateRankings) return null;
     
-    // Average of density, growth, and market saturation ranks
+    // Average of density and growth ranks, and market saturation rank
     const avgRank = Math.round(
-      (stateRankings.national_density_rank + 
-       stateRankings.national_growth_rank + 
+      (stateRankings.density_rank + 
+       stateRankings.growth_rank + 
        stateRankings.market_saturation_rank) / 3
     );
     
