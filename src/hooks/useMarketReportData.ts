@@ -5,17 +5,7 @@ export const useMarketReportData = (countyName: string, stateFp: string) => {
   return useQuery({
     queryKey: ['marketReport', countyName, stateFp],
     queryFn: async () => {
-      // Get county data
-      const { data: countyData, error: countyError } = await supabase
-        .from('county_data')
-        .select('*')
-        .eq('STATEFP', stateFp)
-        .eq('COUNTYNAME', countyName)
-        .single();
-
-      if (countyError) throw countyError;
-
-      // Get state data for comparison
+      // First get the state data
       const { data: stateData, error: stateError } = await supabase
         .from('state_data')
         .select('*')
@@ -23,6 +13,16 @@ export const useMarketReportData = (countyName: string, stateFp: string) => {
         .single();
 
       if (stateError) throw stateError;
+
+      // Then, get the county data from the county_rankings table
+      const { data: countyData, error: countyError } = await supabase
+        .from('county_rankings') // Use county_rankings table
+        .select('*') // Fetch all columns
+        .eq('COUNTYNAME', countyName) // Filter by COUNTYNAME
+        .eq('STATEFP', stateData.STATEFP) // Filter by STATEFP
+        .maybeSingle(); // Ensure a single result is returned
+
+      if (countyError) throw countyError;
 
       // Get firms in county
       const { data: firms, error: firmsError } = await supabase
