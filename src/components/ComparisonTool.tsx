@@ -15,6 +15,10 @@ import { cn } from "@/lib/utils";
 import { ComparisonCharts } from "./comparison/ComparisonCharts";
 import { ScenarioModeling } from "./comparison/ScenarioModeling";
 
+interface ComparisonToolProps {
+  embedded?: boolean;
+}
+
 interface StateData {
   STATEFP: string;
   EMP: number | null;
@@ -69,7 +73,7 @@ const calculateGrowth = (current: number | null, previous: number | null) => {
   return ((current - previous) / previous) * 100;
 };
 
-export function ComparisonTool() {
+export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [scenarioData, setScenarioData] = useState<any[]>([]);
@@ -182,7 +186,7 @@ export function ComparisonTool() {
     );
   };
 
-  if (!isVisible) {
+  if (!embedded && !isVisible) {
     return (
       <Button
         onClick={() => setIsVisible(true)}
@@ -194,31 +198,34 @@ export function ComparisonTool() {
     );
   }
 
-  return (
-    <div className="fixed right-4 top-20 w-[800px] bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl animate-fade-in">
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h3 className="text-xl font-medium text-white">Compare States</h3>
-        <div className="flex items-center gap-2">
-          {stateData && stateData.length > 0 && (
+  const content = (
+    <div className={cn("bg-[#111111] backdrop-blur-md rounded-lg border border-white/10", 
+      !embedded && "fixed right-4 top-20 w-[800px]")}>
+      {!embedded && (
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <h3 className="text-xl font-medium text-white">Compare States</h3>
+          <div className="flex items-center gap-2">
+            {stateData && stateData.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExport}
+                className="text-white/60 hover:text-white"
+              >
+                <Download className="h-5 w-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleExport}
+              onClick={() => setIsVisible(false)}
               className="text-white/60 hover:text-white"
             >
-              <Download className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsVisible(false)}
-            className="text-white/60 hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="p-4 space-y-6">
         <div className="space-y-4">
@@ -299,6 +306,12 @@ export function ComparisonTool() {
           </div>
         )}
       </div>
+    </div>
+  );
+
+  return embedded ? content : (
+    <div className="animate-fade-in">
+      {content}
     </div>
   );
 }
