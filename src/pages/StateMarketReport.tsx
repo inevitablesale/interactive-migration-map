@@ -114,17 +114,25 @@ export default function StateMarketReport() {
   };
 
   // Calculate combined national rank
+
+  // Calculate combined national rank
   const calculateNationalRank = () => {
     if (!stateRankings) return null;
     
-    // Average of density and growth ranks, and market saturation rank
-    const avgRank = Math.round(
-      (stateRankings.density_rank + 
-       stateRankings.growth_rank + 
-       stateRankings.market_saturation_rank) / 3
+    // Get individual ranks, defaulting to the total number of states if rank is missing
+    const densityRank = stateRankings.density_rank || 50;
+    const growthRank = stateRankings.growth_rank || 50;
+    const marketSaturationRank = stateRankings.market_saturation_rank || 50;
+    
+    // Calculate weighted average of ranks
+    // Give more weight to density and growth as they are more indicative of market health
+    const weightedRank = Math.round(
+      (densityRank * 0.4) + 
+      (growthRank * 0.4) + 
+      (marketSaturationRank * 0.2)
     );
     
-    return avgRank;
+    return weightedRank;
   };
 
   if (isLoading) {
