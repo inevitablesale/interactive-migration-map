@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -9,167 +9,160 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+
+const growthLeaders = [
+  {
+    region: "Jefferson County",
+    growthRate: "+25%",
+    firmDensity: "5.5",
+    avgPayroll: "$1.8M",
+  },
+  {
+    region: "Helena, MT",
+    growthRate: "+22%",
+    firmDensity: "4.3",
+    avgPayroll: "$1.4M",
+  },
+  {
+    region: "Kalispell, MT",
+    growthRate: "+19%",
+    firmDensity: "3.8",
+    avgPayroll: "$1.2M",
+  },
+];
+
+const competitiveInsights = [
+  {
+    region: "Florida",
+    firmDensity: "6.5/10k",
+    growthRate: "+12%",
+    stability: "High",
+  },
+  {
+    region: "Tennessee",
+    firmDensity: "5.9/10k",
+    growthRate: "+10%",
+    stability: "Medium",
+  },
+  {
+    region: "California",
+    firmDensity: "4.3/10k",
+    growthRate: "+8%",
+    stability: "High",
+  },
+];
+
+const serviceSpecialization = [
+  {
+    region: "Nebraska",
+    service: "Tax Advisory",
+    firmDensity: "3.5",
+    growthRate: "+15%",
+  },
+  {
+    region: "Colorado",
+    service: "Bookkeeping Services",
+    firmDensity: "5.7",
+    growthRate: "+20%",
+  },
+  {
+    region: "Washington",
+    service: "Payroll Management",
+    firmDensity: "4.8",
+    growthRate: "+18%",
+  },
+];
 
 export function MarketHighlights() {
-  const navigate = useNavigate();
-
-  // Fetch top growth markets data
-  const { data: growthMarkets } = useQuery({
-    queryKey: ['topGrowthRegions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_top_growth_regions')
-        .limit(5);
-      
-      if (error) {
-        console.error('Error fetching growth markets:', error);
-        throw error;
-      }
-      return data;
-    }
-  });
-
-  // Fetch underserved markets data
-  const { data: underservedMarkets } = useQuery({
-    queryKey: ['underservedRegions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_underserved_regions')
-        .limit(5);
-      
-      if (error) {
-        console.error('Error fetching underserved markets:', error);
-        throw error;
-      }
-      return data;
-    }
-  });
-
-  // Fetch affordable talent hubs data
-  const { data: affordableHubs } = useQuery({
-    queryKey: ['affordableTalentHubs'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_affordable_talent_hubs')
-        .limit(5);
-      
-      if (error) {
-        console.error('Error fetching affordable hubs:', error);
-        throw error;
-      }
-      return data;
-    }
-  });
-
-  const handleRowClick = (region: string, state: string) => {
-    try {
-      if (!region || !state) {
-        toast.error("Invalid region data");
-        return;
-      }
-
-      // Clean up county name if needed
-      const countyName = region.endsWith(" County") ? region : `${region} County`;
-      navigate(`/market-report/${encodeURIComponent(countyName)}/${encodeURIComponent(state)}`);
-    } catch (error) {
-      console.error("Navigation error:", error);
-      toast.error("Unable to navigate to the selected market report");
-    }
-  };
+  const [activeTab, setActiveTab] = useState("growth");
 
   return (
-    <Card className="col-span-3">
-      <Tabs defaultValue="growth" className="p-6">
-        <TabsList className="mb-4">
-          <TabsTrigger value="growth">Growth Markets</TabsTrigger>
-          <TabsTrigger value="underserved">Underserved Markets</TabsTrigger>
-          <TabsTrigger value="affordable">Affordable Talent Hubs</TabsTrigger>
+    <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3 mb-6 bg-black/60">
+          <TabsTrigger 
+            value="growth"
+            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+          >
+            Growth Leaders
+          </TabsTrigger>
+          <TabsTrigger 
+            value="competitive"
+            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+          >
+            Competitive Insights
+          </TabsTrigger>
+          <TabsTrigger 
+            value="service"
+            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+          >
+            Service Specialization
+          </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="growth">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Region</TableHead>
-                <TableHead>Growth Rate</TableHead>
-                <TableHead>Firm Density</TableHead>
-                <TableHead>Total Firms</TableHead>
-                <TableHead>Population</TableHead>
+              <TableRow className="border-white/10">
+                <TableHead className="text-white/60">Region</TableHead>
+                <TableHead className="text-white/60">Growth Rate (YoY)</TableHead>
+                <TableHead className="text-white/60">Avg Firms/10k</TableHead>
+                <TableHead className="text-white/60">Avg Payroll</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {growthMarkets?.map((market) => (
-                <TableRow 
-                  key={`${market.county_name}-${market.state_name}`}
-                  className="cursor-pointer hover:bg-gray-100/5"
-                  onClick={() => handleRowClick(market.county_name, market.state_name)}
-                >
-                  <TableCell className="font-medium">{market.county_name}</TableCell>
-                  <TableCell>{market.growth_rate}%</TableCell>
-                  <TableCell>{market.firm_density}</TableCell>
-                  <TableCell>{market.total_firms}</TableCell>
-                  <TableCell>{market.total_population?.toLocaleString()}</TableCell>
+              {growthLeaders.map((item) => (
+                <TableRow key={item.region} className="border-white/10">
+                  <TableCell className="text-white">{item.region}</TableCell>
+                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
+                  <TableCell className="text-white/80">{item.firmDensity}</TableCell>
+                  <TableCell className="text-white/80">{item.avgPayroll}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TabsContent>
 
-        <TabsContent value="underserved">
+        <TabsContent value="competitive">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Region</TableHead>
-                <TableHead>Firms per 10k</TableHead>
-                <TableHead>Recent Movers</TableHead>
-                <TableHead>Market Status</TableHead>
-                <TableHead>Opportunity</TableHead>
+              <TableRow className="border-white/10">
+                <TableHead className="text-white/60">Region</TableHead>
+                <TableHead className="text-white/60">Firm Density</TableHead>
+                <TableHead className="text-white/60">Avg Growth Rate</TableHead>
+                <TableHead className="text-white/60">Economic Stability</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {underservedMarkets?.map((market) => (
-                <TableRow 
-                  key={`${market.county_name}-${market.state_name}`}
-                  className="cursor-pointer hover:bg-gray-100/5"
-                  onClick={() => handleRowClick(market.county_name, market.state_name)}
-                >
-                  <TableCell className="font-medium">{market.county_name}</TableCell>
-                  <TableCell>{market.firms_per_10k_population}</TableCell>
-                  <TableCell>{market.recent_movers?.toLocaleString()}</TableCell>
-                  <TableCell>{market.market_status}</TableCell>
-                  <TableCell>{market.opportunity_status}</TableCell>
+              {competitiveInsights.map((item) => (
+                <TableRow key={item.region} className="border-white/10">
+                  <TableCell className="text-white">{item.region}</TableCell>
+                  <TableCell>{item.firmDensity}</TableCell>
+                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
+                  <TableCell>{item.stability}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TabsContent>
 
-        <TabsContent value="affordable">
+        <TabsContent value="service">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Region</TableHead>
-                <TableHead>Median Rent</TableHead>
-                <TableHead>Accountant Density</TableHead>
-                <TableHead>Vacancy Rate</TableHead>
-                <TableHead>Score</TableHead>
+              <TableRow className="border-white/10">
+                <TableHead className="text-white/60">Region</TableHead>
+                <TableHead className="text-white/60">Specialized Service</TableHead>
+                <TableHead className="text-white/60">Avg Firms/10k</TableHead>
+                <TableHead className="text-white/60">Growth Rate (YoY)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {affordableHubs?.map((hub) => (
-                <TableRow 
-                  key={`${hub.county_name}`}
-                  className="cursor-pointer hover:bg-gray-100/5"
-                  onClick={() => handleRowClick(hub.county_name, 'MT')} // Assuming MT for now, should be dynamic
-                >
-                  <TableCell className="font-medium">{hub.county_name}</TableCell>
-                  <TableCell>${hub.median_rent?.toLocaleString()}</TableCell>
-                  <TableCell>{hub.accountant_density}</TableCell>
-                  <TableCell>{hub.vacancy_rate}%</TableCell>
-                  <TableCell>{Math.round(hub.affordability_score)}</TableCell>
+              {serviceSpecialization.map((item) => (
+                <TableRow key={item.region} className="border-white/10">
+                  <TableCell className="text-white">{item.region}</TableCell>
+                  <TableCell>{item.service}</TableCell>
+                  <TableCell>{item.firmDensity}</TableCell>
+                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

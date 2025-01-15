@@ -33,46 +33,41 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Found state FIPS:', stateData.fips_code); // Debug log
 
-      // Get county data first
-      const { data: countyData, error: countyError } = await supabase
-        .from('county_data')
-        .select('*')
-        .eq('COUNTYNAME', county)
-        .eq('STATEFP', stateData.fips_code)
-        .maybeSingle();
-
-      if (countyError) {
-        console.error('Error fetching county data:', countyError);
-        toast.error('Error fetching county data');
-        throw countyError;
-      }
-
-      // Then get the rankings data
+      // Then, get the county data using the FIPS code
       const { data: rankingData, error: rankingError } = await supabase
         .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', stateData.fips_code.toString())
+        .eq('STATEFP', stateData.fips_code.toString()) // Cast to string for comparison
         .maybeSingle();
 
       if (rankingError) {
-        console.error('Error fetching ranking data:', rankingError);
-        toast.error('Error fetching ranking data');
+        console.error('Error fetching market data:', rankingError);
+        toast.error('Error fetching market data');
         throw rankingError;
       }
+
+      if (!rankingData) {
+        console.log('No county data found for:', { county, stateName }); // Debug log
+        return null;
+      }
+
+      console.log('Raw ranking data:', rankingData); // Debug log
 
       // Get firms data from canary_firms_data
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
         .eq('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateData.fips_code));
+        .eq('STATEFP', parseInt(stateData.fips_code)); // Convert string to number for comparison
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
         toast.error('Error fetching firms data');
         throw firmsError;
       }
+
+      console.log('Raw firms data:', firmsData); // Debug log
 
       // Transform firms data to match TopFirm interface
       const transformedTopFirms: TopFirm[] = firmsData ? firmsData.map((firm: any) => ({
@@ -92,44 +87,41 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         Summary: firm.Summary
       })) : [];
 
-      if (!countyData || !rankingData) {
-        console.log('No data found for:', { county, stateName });
-        return null;
-      }
+      console.log('Transformed top firms:', transformedTopFirms); // Debug log
 
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: countyData.B01001_001E,
-        median_household_income: countyData.B19013_001E,
-        median_gross_rent: countyData.B25064_001E,
-        median_home_value: countyData.B25077_001E,
-        employed_population: countyData.B23025_004E,
-        private_sector_accountants: countyData.C24060_004E,
-        public_sector_accountants: countyData.C24060_007E,
-        firms_per_10k_population: rankingData.firm_density,
-        growth_rate_percentage: rankingData.growth_rate,
-        market_saturation_index: rankingData.market_saturation,
-        total_education_population: countyData.B15003_001E,
-        bachelors_degree_holders: countyData.B15003_022E,
-        masters_degree_holders: countyData.B15003_023E,
-        doctorate_degree_holders: countyData.B15003_025E,
-        payann: countyData.PAYANN,
-        total_establishments: countyData.ESTAB,
-        emp: countyData.EMP,
-        public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
-          ? countyData.C24060_007E / countyData.C24060_004E 
+        total_population: rankingData.B01001_001E,
+        median_household_income: rankingData.B19013_001E,
+        median_gross_rent: rankingData.B25064_001E,
+        median_home_value: rankingData.B25077_001E,
+        employed_population: rankingData.B23025_004E,
+        private_sector_accountants: rankingData.C24060_004E,
+        public_sector_accountants: rankingData.C24060_007E,
+        firms_per_10k_population: rankingData.firms_per_10k,
+        growth_rate_percentage: rankingData.population_growth_rate,
+        market_saturation_index: rankingData.firm_density_rank,
+        total_education_population: rankingData.B15003_001E,
+        bachelors_degree_holders: rankingData.B15003_022E,
+        masters_degree_holders: rankingData.B15003_023E,
+        doctorate_degree_holders: rankingData.B15003_025E,
+        payann: rankingData.PAYANN,
+        total_establishments: rankingData.ESTAB,
+        emp: rankingData.EMP,
+        public_to_private_ratio: rankingData.C24060_007E && rankingData.C24060_004E 
+          ? rankingData.C24060_007E / rankingData.C24060_004E 
           : null,
-        vacancy_rate: rankingData.market_saturation,
-        vacancy_rank: rankingData.density_rank,
-        income_rank: rankingData.density_rank,
-        population_rank: rankingData.density_rank,
-        rent_rank: rankingData.density_rank,
-        density_rank: rankingData.density_rank,
+        vacancy_rate: rankingData.vacancy_rate,
+        vacancy_rank: rankingData.vacancy_rank,
+        income_rank: rankingData.income_rank,
+        population_rank: rankingData.population_rank,
+        rent_rank: rankingData.rent_rank,
+        density_rank: rankingData.firm_density_rank,
         growth_rank: rankingData.growth_rank,
         top_firms: transformedTopFirms,
       };
 
-      console.log('Final transformed market data:', transformedData);
+      console.log('Final transformed market data:', transformedData); // Debug log
 
       return transformedData;
     },
@@ -137,7 +129,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('Market data available:', hasMarketData, 'Top firms count:', marketData?.top_firms?.length);
+  console.log('Market data available:', hasMarketData, 'Top firms count:', marketData?.top_firms?.length); // Debug log
 
   return { marketData, isLoading, hasMarketData };
 };

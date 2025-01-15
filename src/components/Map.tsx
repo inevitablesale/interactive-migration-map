@@ -3,7 +3,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
 import { getStateName } from '@/utils/stateUtils';
-import { toast } from "sonner";
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
@@ -143,23 +142,10 @@ const Map = () => {
 
       if (error) {
         console.error('Error fetching state data:', error);
-        toast.error('Error loading state data');
         return;
       }
 
-      // Filter out any records with null values for critical fields
-      const validData = data.filter(record => 
-        record.STATEFP && 
-        record.ESTAB !== null && 
-        record.EMP !== null
-      );
-
-      if (validData.length === 0) {
-        toast.error('No valid state data available');
-        return;
-      }
-
-      const serializedData = JSON.parse(JSON.stringify(validData));
+      const serializedData = JSON.parse(JSON.stringify(data));
       setStateData(serializedData);
 
       if (serializedData.length > 0) {
@@ -170,7 +156,6 @@ const Map = () => {
       }
     } catch (err) {
       console.error('Error in fetchStateData:', err);
-      toast.error('Failed to load state data');
     }
   };
 
