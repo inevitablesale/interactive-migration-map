@@ -24,18 +24,18 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     return { label: "Average", color: "bg-amber-500/90 hover:bg-amber-500/80" };
   };
 
-  // Calculate average payroll per firm using raw PAYANN value
-  const avgPayrollPerFirm = marketData.payann && marketData.total_establishments && marketData.total_establishments > 0
-    ? marketData.payann * 1000 / marketData.total_establishments  // Multiply by 1000 since PAYANN is in thousands
-    : null;
+  // Ensure we have valid numbers before calculations
+  const avgPayrollPerFirm = marketData.payann && marketData.total_establishments 
+    ? (marketData.payann * 1000) / marketData.total_establishments 
+    : 0;
 
-  // Calculate average salary per employee using raw PAYANN value
   const avgSalaryPerEmployee = marketData.payann && marketData.emp && marketData.emp > 0
-    ? marketData.payann * 1000 / marketData.emp  // Multiply by 1000 since PAYANN is in thousands
-    : null;
+    ? (marketData.payann * 1000) / marketData.emp
+    : 0;
 
   // Format currency with K/M/B suffixes
   const formatCurrency = (value: number): string => {
+    if (!value) return 'N/A';
     if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
     if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
     return `$${value.toLocaleString()}`;
@@ -47,7 +47,8 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     total_establishments: marketData.total_establishments,
     emp: marketData.emp,
     avgPayrollPerFirm,
-    avgSalaryPerEmployee
+    avgSalaryPerEmployee,
+    firms_per_10k_population: marketData.firms_per_10k_population
   });
 
   return (
@@ -74,14 +75,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {marketData.firms_per_10k_population && (
+            {marketData.firms_per_10k_population !== undefined && marketData.firms_per_10k_population !== null && (
               <Badge className={`${getMetricBadge(marketData.firms_per_10k_population, 'density').color} text-white font-medium px-3 py-1`}>
                 {getMetricBadge(marketData.firms_per_10k_population, 'density').label}
               </Badge>
             )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(marketData.firms_per_10k_population || 0, 'density')}`}>
-            {marketData.firms_per_10k_population?.toFixed(1) ?? 'N/A'} per 10k residents
+            {marketData.firms_per_10k_population ? `${marketData.firms_per_10k_population.toFixed(1)} per 10k residents` : 'N/A'}
           </p>
         </div>
 
@@ -100,14 +101,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {avgPayrollPerFirm && (
+            {avgPayrollPerFirm > 0 && (
               <Badge className={`${getMetricBadge(avgPayrollPerFirm, 'payroll').color} text-white font-medium px-3 py-1`}>
                 {getMetricBadge(avgPayrollPerFirm, 'payroll').label}
               </Badge>
             )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(avgPayrollPerFirm || 0, 'money')}`}>
-            {avgPayrollPerFirm ? formatCurrency(avgPayrollPerFirm) : 'N/A'}
+            {formatCurrency(avgPayrollPerFirm)}
           </p>
         </div>
 
@@ -126,14 +127,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {avgSalaryPerEmployee && (
+            {avgSalaryPerEmployee > 0 && (
               <Badge className={`${getMetricBadge(avgSalaryPerEmployee, 'payroll').color} text-white font-medium px-3 py-1`}>
                 {getMetricBadge(avgSalaryPerEmployee, 'payroll').label}
               </Badge>
             )}
           </div>
           <p className={`text-xl font-bold ${getMetricColor(avgSalaryPerEmployee || 0, 'money')}`}>
-            {avgSalaryPerEmployee ? formatCurrency(avgSalaryPerEmployee) : 'N/A'}
+            {formatCurrency(avgSalaryPerEmployee)}
           </p>
         </div>
       </CardContent>
