@@ -294,36 +294,23 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Education Demographics</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4 space-y-4">
-                    {emergingTalentData?.map((region, index) => {
-                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
-                      return (
-                        <div 
-                          key={index} 
-                          className="p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                          onClick={() => handleNavigateToMarket(countyName, stateName)}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="font-medium">{region.county_name}</h4>
-                              <p className="text-sm text-gray-400">State {region.state_fp}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-semibold">
-                                {region.education_rate_percent.toFixed(1)}%
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                Median Age: {Math.round(region.median_age)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {emergingTalentData?.map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(region.county_name, '')}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
+                        <p className="text-sm text-gray-300">Education Rate: {region.education_rate_percent.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Educated: {region.total_educated.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Median Age: {Math.round(region.median_age)}</p>
+                      </div>
+                    ))}
                   </div>
                 </DialogContent>
               </Dialog>
@@ -439,35 +426,23 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-black/95 border-white/10 text-white max-w-3xl">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4 space-y-4">
-                    {futureSaturationData?.map((region, index) => {
-                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
-                      return (
-                        <div 
-                          key={index} 
-                          className="p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                          onClick={() => handleNavigateToMarket(countyName, stateName)}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="font-medium">{region.county_name}</h4>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-semibold">
-                                {region.current_firm_density.toFixed(1)} → {region.projected_firm_density.toFixed(1)}
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                Growth Rate: {region.firm_growth_rate.toFixed(1)}%
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {futureSaturationData?.map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(region.county_name, '')}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
+                        <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} firms/10k</p>
+                        <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} firms/10k</p>
+                        <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
+                      </div>
+                    ))}
                   </div>
                 </DialogContent>
               </Dialog>
