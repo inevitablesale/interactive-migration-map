@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { ComprehensiveMarketData } from "@/types/rankings";
 
 export const useMarketReportData = (countyName: string, state: string) => {
   return useQuery({
@@ -25,15 +26,18 @@ export const useMarketReportData = (countyName: string, state: string) => {
       if (stateError) throw stateError;
       if (!stateData) throw new Error('State data not found');
 
-      // Then, get the county data from the county_rankings table
+      // Then, get the county data
       const { data: countyData, error: countyError } = await supabase
-        .from('county_rankings')
+        .from('county_data')
         .select('*')
         .eq('COUNTYNAME', countyName)
         .eq('STATEFP', stateFips.STATEFP)
         .maybeSingle();
 
       if (countyError) throw countyError;
+      if (!countyData) throw new Error('County data not found');
+
+      console.log('County Data:', countyData);
 
       // Get firms in county
       const { data: firms, error: firmsError } = await supabase
@@ -45,24 +49,53 @@ export const useMarketReportData = (countyName: string, state: string) => {
       if (firmsError) throw firmsError;
 
       // Calculate average salary per employee if both payann and emp exist
-      const avgSalaryPerEmployee = stateData.PAYANN && stateData.EMP 
-        ? stateData.PAYANN / stateData.EMP 
+      const avgSalaryPerEmployee = countyData.PAYANN && countyData.EMP 
+        ? countyData.PAYANN / countyData.EMP 
         : null;
 
-      // Transform the data to match our ComprehensiveMarketData type
-      const transformedCountyData = {
-        ...countyData,
-        firms_per_10k_population: countyData?.firms_per_10k || 0,
-        growth_rate_percentage: countyData?.avg_growth_rate || 0,
-        market_saturation_index: countyData?.market_saturation || 0,
-        total_education_population: countyData?.education_population || 0,
-        bachelors_degree_holders: countyData?.bachelors_holders || 0,
-        masters_degree_holders: countyData?.masters_holders || 0,
-        doctorate_degree_holders: countyData?.doctorate_holders || 0,
-        payann: stateData?.PAYANN || 0,
-        emp: stateData?.EMP || 0,
-        total_establishments: stateData?.ESTAB || 0,
+      // Calculate average payroll per firm
+      const avgPayrollPerFirm = countyData.PAYANN && countyData.ESTAB
+        ? countyData.PAYANN / countyData.ESTAB
+        : null;
+
+      console.log('Market Data:', {
+        payann: countyData.PAYANN,
+        total_establishments: countyData.ESTAB,
+        emp: countyData.EMP,
+        avgPayrollPerFirm,
         avgSalaryPerEmployee,
+        firms_per_10k_population: countyData.firms_per_10k_population
+      });
+
+      // Transform the data to match our ComprehensiveMarketData type
+      const transformedCountyData: ComprehensiveMarketData = {
+        total_population: countyData.B01001_001E,
+        median_household_income: countyData.B19013_001E,
+        median_gross_rent: countyData.B25064_001E,
+        median_home_value: countyData.B25077_001E,
+        employed_population: countyData.B23025_004E,
+        private_sector_accountants: countyData.C24060_004E,
+        public_sector_accountants: countyData.C24060_007E,
+        firms_per_10k_population: countyData.ESTAB && countyData.B01001_001E 
+          ? (countyData.ESTAB / countyData.B01001_001E) * 10000 
+          : 0,
+        growth_rate_percentage: countyData.MOVEDIN2022 && countyData.MOVEDIN2021
+          ? ((countyData.MOVEDIN2022 - countyData.MOVEDIN2021) / countyData.MOVEDIN2021) * 100
+          : 0,
+        market_saturation_index: countyData.ESTAB && countyData.B23025_004E
+          ? (countyData.ESTAB / countyData.B23025_004E) * 100
+          : 0,
+        total_education_population: countyData.B15003_001E,
+        bachelors_degree_holders: countyData.B15003_022E,
+        masters_degree_holders: countyData.B15003_023E,
+        doctorate_degree_holders: countyData.B15003_025E,
+        payann: countyData.PAYANN,
+        emp: countyData.EMP,
+        total_establishments: countyData.ESTAB,
+        avgSalaryPerEmployee,
+        vacancy_rate: countyData.B25002_002E && countyData.B25002_003E
+          ? (countyData.B25002_003E / countyData.B25002_002E) * 100
+          : 0,
         top_firms: firms?.map(firm => ({
           company_name: firm["Company Name"],
           employee_count: firm.employeeCount,
