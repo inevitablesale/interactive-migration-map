@@ -16,48 +16,64 @@ import { supabase } from "@/integrations/supabase/client";
 export function MarketHighlights() {
   const navigate = useNavigate();
 
-  // Fetch available counties from county_rankings
-  const { data: availableCounties } = useQuery({
-    queryKey: ['availableCounties'],
+  // Fetch top growth markets data
+  const { data: growthMarkets } = useQuery({
+    queryKey: ['topGrowthRegions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('county_rankings')
-        .select('COUNTYNAME, STATEFP')
-        .order('COUNTYNAME');
+        .rpc('get_top_growth_regions')
+        .limit(5);
       
       if (error) {
-        console.error('Error fetching available counties:', error);
+        console.error('Error fetching growth markets:', error);
         throw error;
       }
       return data;
     }
   });
 
-  const handleRowClick = (region: string) => {
-    try {
-      // Only proceed if we have the county data
-      const countyName = region.split(",")[0].trim();
-      const stateAbbr = region.split(",")[1].trim();
+  // Fetch underserved markets data
+  const { data: underservedMarkets } = useQuery({
+    queryKey: ['underservedRegions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .rpc('get_underserved_regions')
+        .limit(5);
       
-      const countyExists = availableCounties?.some(
-        county => county.COUNTYNAME === (countyName.endsWith(" County") ? countyName : `${countyName} County`)
-      );
+      if (error) {
+        console.error('Error fetching underserved markets:', error);
+        throw error;
+      }
+      return data;
+    }
+  });
 
-      if (!countyExists) {
-        toast.error("Market report not available for this region");
+  // Fetch affordable talent hubs data
+  const { data: affordableHubs } = useQuery({
+    queryKey: ['affordableTalentHubs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .rpc('get_affordable_talent_hubs')
+        .limit(5);
+      
+      if (error) {
+        console.error('Error fetching affordable hubs:', error);
+        throw error;
+      }
+      return data;
+    }
+  });
+
+  const handleRowClick = (region: string, state: string) => {
+    try {
+      if (!region || !state) {
+        toast.error("Invalid region data");
         return;
       }
 
-      if (region.includes(",")) {
-        const [city, stateAbbr] = region.split(",").map(s => s.trim());
-        const stateName = stateMap[stateAbbr] || stateAbbr;
-        navigate(`/market-report/${city}/${stateName}`);
-      } else if (region.includes("County")) {
-        navigate(`/market-report/${encodeURIComponent(region)}/${stateMap['MT']}`);
-      } else {
-        const stateName = stateMap[region] || region;
-        navigate(`/state-market-report/${stateName}`);
-      }
+      // Clean up county name if needed
+      const countyName = region.endsWith(" County") ? region : `${region} County`;
+      navigate(`/market-report/${encodeURIComponent(countyName)}/${encodeURIComponent(state)}`);
     } catch (error) {
       console.error("Navigation error:", error);
       toast.error("Unable to navigate to the selected market report");
@@ -72,6 +88,7 @@ export function MarketHighlights() {
           <TabsTrigger value="underserved">Underserved Markets</TabsTrigger>
           <TabsTrigger value="affordable">Affordable Talent Hubs</TabsTrigger>
         </TabsList>
+        
         <TabsContent value="growth">
           <Table>
             <TableHeader>
@@ -84,27 +101,23 @@ export function MarketHighlights() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {availableCounties?.some(county => county.COUNTYNAME === "Helena County") && (
-                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Helena, MT")}>
-                  <TableCell className="font-medium">Helena, MT</TableCell>
-                  <TableCell>8.2%</TableCell>
-                  <TableCell>12.3</TableCell>
-                  <TableCell>245</TableCell>
-                  <TableCell>85,000</TableCell>
+              {growthMarkets?.map((market) => (
+                <TableRow 
+                  key={`${market.county_name}-${market.state_name}`}
+                  className="cursor-pointer hover:bg-gray-100/5"
+                  onClick={() => handleRowClick(market.county_name, market.state_name)}
+                >
+                  <TableCell className="font-medium">{market.county_name}</TableCell>
+                  <TableCell>{market.growth_rate}%</TableCell>
+                  <TableCell>{market.firm_density}</TableCell>
+                  <TableCell>{market.total_firms}</TableCell>
+                  <TableCell>{market.total_population?.toLocaleString()}</TableCell>
                 </TableRow>
-              )}
-              {availableCounties?.some(county => county.COUNTYNAME === "Jefferson County") && (
-                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Jefferson County")}>
-                  <TableCell className="font-medium">Jefferson County</TableCell>
-                  <TableCell>7.5%</TableCell>
-                  <TableCell>10.8</TableCell>
-                  <TableCell>180</TableCell>
-                  <TableCell>65,000</TableCell>
-                </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TabsContent>
+
         <TabsContent value="underserved">
           <Table>
             <TableHeader>
@@ -117,27 +130,23 @@ export function MarketHighlights() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {availableCounties?.some(county => county.COUNTYNAME === "Gallatin County") && (
-                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Gallatin County")}>
-                  <TableCell className="font-medium">Gallatin County</TableCell>
-                  <TableCell>5.2</TableCell>
-                  <TableCell>12,500</TableCell>
-                  <TableCell>Underserved</TableCell>
-                  <TableCell>High</TableCell>
+              {underservedMarkets?.map((market) => (
+                <TableRow 
+                  key={`${market.county_name}-${market.state_name}`}
+                  className="cursor-pointer hover:bg-gray-100/5"
+                  onClick={() => handleRowClick(market.county_name, market.state_name)}
+                >
+                  <TableCell className="font-medium">{market.county_name}</TableCell>
+                  <TableCell>{market.firms_per_10k_population}</TableCell>
+                  <TableCell>{market.recent_movers?.toLocaleString()}</TableCell>
+                  <TableCell>{market.market_status}</TableCell>
+                  <TableCell>{market.opportunity_status}</TableCell>
                 </TableRow>
-              )}
-              {availableCounties?.some(county => county.COUNTYNAME === "Missoula County") && (
-                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Missoula County")}>
-                  <TableCell className="font-medium">Missoula County</TableCell>
-                  <TableCell>6.8</TableCell>
-                  <TableCell>8,900</TableCell>
-                  <TableCell>Growing</TableCell>
-                  <TableCell>Medium</TableCell>
-                </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TabsContent>
+
         <TabsContent value="affordable">
           <Table>
             <TableHeader>
@@ -150,24 +159,19 @@ export function MarketHighlights() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {availableCounties?.some(county => county.COUNTYNAME === "Lewis and Clark County") && (
-                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Lewis and Clark County")}>
-                  <TableCell className="font-medium">Lewis and Clark County</TableCell>
-                  <TableCell>$1,200</TableCell>
-                  <TableCell>8.5</TableCell>
-                  <TableCell>4.2%</TableCell>
-                  <TableCell>85</TableCell>
+              {affordableHubs?.map((hub) => (
+                <TableRow 
+                  key={`${hub.county_name}`}
+                  className="cursor-pointer hover:bg-gray-100/5"
+                  onClick={() => handleRowClick(hub.county_name, 'MT')} // Assuming MT for now, should be dynamic
+                >
+                  <TableCell className="font-medium">{hub.county_name}</TableCell>
+                  <TableCell>${hub.median_rent?.toLocaleString()}</TableCell>
+                  <TableCell>{hub.accountant_density}</TableCell>
+                  <TableCell>{hub.vacancy_rate}%</TableCell>
+                  <TableCell>{Math.round(hub.affordability_score)}</TableCell>
                 </TableRow>
-              )}
-              {availableCounties?.some(county => county.COUNTYNAME === "Flathead County") && (
-                <TableRow className="cursor-pointer hover:bg-gray-100/5" onClick={() => handleRowClick("Flathead County")}>
-                  <TableCell className="font-medium">Flathead County</TableCell>
-                  <TableCell>$1,350</TableCell>
-                  <TableCell>7.2</TableCell>
-                  <TableCell>3.8%</TableCell>
-                  <TableCell>82</TableCell>
-                </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TabsContent>
