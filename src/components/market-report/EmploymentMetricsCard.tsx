@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
-import { getMetricColor } from "@/utils/market-report/formatters";
 import type { ComprehensiveMarketData } from "@/types/rankings";
 
 interface EmploymentMetricsCardProps {
@@ -29,13 +28,6 @@ export function EmploymentMetricsCard({ marketData }: EmploymentMetricsCardProps
             <span className="text-sm text-white/60">Public Sector Accountants</span>
             <span className="text-white font-medium">
               {marketData.public_sector_accountants?.toLocaleString()}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-baseline">
-            <span className="text-sm text-white/60">Public/Private Ratio</span>
-            <span className={`text-white font-medium ${getMetricColor(marketData.public_to_private_ratio || 0, 'density')}`}>
-              {marketData.public_to_private_ratio?.toFixed(2)}
             </span>
           </div>
         </div>
