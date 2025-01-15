@@ -1,15 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Lightbulb, TrendingUp, AlertTriangle, Target } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 interface GeminiInsightsProps {
   marketData: any;
 }
 
 export function GeminiInsights({ marketData }: GeminiInsightsProps) {
-  const { data: insights, isLoading } = useQuery({
+  const [enabled, setEnabled] = useState(false);
+
+  const { data: insights, isLoading, refetch } = useQuery({
     queryKey: ['geminiInsights', marketData],
     queryFn: async () => {
       try {
@@ -25,8 +29,13 @@ export function GeminiInsights({ marketData }: GeminiInsightsProps) {
         throw error;
       }
     },
-    enabled: !!marketData
+    enabled: enabled // Only run when enabled is true
   });
+
+  const handleAnalyze = () => {
+    setEnabled(true);
+    refetch();
+  };
 
   if (isLoading) {
     return (
@@ -35,6 +44,22 @@ export function GeminiInsights({ marketData }: GeminiInsightsProps) {
           <div className="h-4 bg-white/10 rounded w-3/4"></div>
           <div className="h-4 bg-white/10 rounded w-1/2"></div>
           <div className="h-4 bg-white/10 rounded w-2/3"></div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!enabled) {
+    return (
+      <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-white mb-4">AI Market Analysis</h3>
+          <Button 
+            onClick={handleAnalyze}
+            className="bg-blue-500 hover:bg-blue-600"
+          >
+            Generate AI Insights
+          </Button>
         </div>
       </Card>
     );
