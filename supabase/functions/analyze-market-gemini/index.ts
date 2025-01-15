@@ -6,22 +6,88 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW = 3600000; // 1 hour in milliseconds
+const MAX_REQUESTS_PER_WINDOW = 50; // Maximum requests per hour
+const requestCounts = new Map<string, { count: number; timestamp: number }>();
+
+// Token count estimation (approximate)
+const ESTIMATED_TOKENS_PER_CHAR = 0.25;
+const MAX_TOKENS_PER_REQUEST = 30000; // Adjust based on your Gemini API plan
+
+function estimateTokenCount(text: string): number {
+  return Math.ceil(text.length * ESTIMATED_TOKENS_PER_CHAR);
+}
+
+function checkRateLimit(clientId: string): boolean {
+  const now = Date.now();
+  const clientRequests = requestCounts.get(clientId);
+
+  if (!clientRequests) {
+    requestCounts.set(clientId, { count: 1, timestamp: now });
+    return true;
+  }
+
+  if (now - clientRequests.timestamp > RATE_LIMIT_WINDOW) {
+    // Reset if window has passed
+    requestCounts.set(clientId, { count: 1, timestamp: now });
+    return true;
+  }
+
+  if (clientRequests.count >= MAX_REQUESTS_PER_WINDOW) {
+    return false;
+  }
+
+  clientRequests.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    // Extract client identifier (you might want to use auth token or IP)
+    const clientId = req.headers.get('x-client-info') || 'anonymous';
+
+    // Check rate limit
+    if (!checkRateLimit(clientId)) {
+      console.log(`Rate limit exceeded for client: ${clientId}`);
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const { marketData } = await req.json();
     const { filters, soldFirms, activeFirms, censusData } = marketData;
+
+    // Process and correlate data
+    const marketMetrics = processMarketData(soldFirms, activeFirms, censusData);
+    
+    // Estimate token count for the request
+    const metricsJson = JSON.stringify(marketMetrics, null, 2);
+    const estimatedTokens = estimateTokenCount(metricsJson);
+
+    if (estimatedTokens > MAX_TOKENS_PER_REQUEST) {
+      console.log(`Token limit exceeded. Estimated tokens: ${estimatedTokens}`);
+      return new Response(
+        JSON.stringify({ error: 'Request too large. Please reduce the data size.' }),
+        { 
+          status: 413,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY'));
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    // Process and correlate data
-    const marketMetrics = processMarketData(soldFirms, activeFirms, censusData);
-    
     // Create comprehensive analysis prompt with context
     const prompt = `You are a market analysis expert specializing in professional services firms, particularly accounting and advisory practices. Your task is to analyze market data and provide strategic insights.
 
@@ -82,6 +148,7 @@ Format your response with clear sections for:
 - Strategic Recommendations (actionable insights)`;
 
     console.log('Sending prompt to Gemini:', prompt);
+    console.log('Estimated token count:', estimatedTokens);
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
