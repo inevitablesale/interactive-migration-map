@@ -6,10 +6,12 @@ import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getStateName } from "@/utils/stateUtils";
+import { useEffect, useState } from "react";
 
 export default function StateMarketReport() {
   const { state } = useParams();
   const navigate = useNavigate();
+  const [stateName, setStateName] = useState<string>("");
 
   const { data: stateData, isLoading } = useQuery({
     queryKey: ['stateMarketReport', state],
@@ -42,6 +44,16 @@ export default function StateMarketReport() {
     },
     enabled: !!state
   });
+
+  useEffect(() => {
+    const loadStateName = async () => {
+      if (state) {
+        const name = await getStateName(state);
+        setStateName(name);
+      }
+    };
+    loadStateName();
+  }, [state]);
 
   if (isLoading) {
     return (
@@ -77,7 +89,7 @@ export default function StateMarketReport() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white">{getStateName(state || '')}</h1>
+            <h1 className="text-4xl font-bold text-white">{stateName}</h1>
             <p className="text-gray-400 mt-2">State Market Analysis</p>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
