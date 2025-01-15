@@ -66,6 +66,11 @@ export default function MarketReport() {
           </div>
         </div>
 
+        {/* Accounting Industry Metrics */}
+        <div className="mb-6">
+          <AccountingIndustryCard marketData={marketData} />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
           {/* Population Overview */}
           <MarketMetricsCard
@@ -87,45 +92,6 @@ export default function MarketReport() {
             ]}
           />
 
-          {/* Market Size */}
-          <MarketMetricsCard
-            title="Market Size"
-            icon={Building2}
-            metrics={[
-              {
-                label: "Total Firms",
-                value: marketData.total_establishments?.toLocaleString(),
-                type: 'population'
-              },
-              {
-                label: "Firms per 10k Population",
-                value: marketData.firms_per_10k_population?.toFixed(1),
-                type: 'density',
-                rank: marketData.density_rank
-              }
-            ]}
-          />
-
-          {/* Market Dynamics */}
-          <MarketMetricsCard
-            title="Market Dynamics"
-            icon={TrendingUp}
-            metrics={[
-              {
-                label: "Growth Rate",
-                value: `${marketData.growth_rate_percentage?.toFixed(1)}`,
-                type: 'growth',
-                rank: marketData.growth_rank
-              },
-              {
-                label: "Vacancy Rate",
-                value: `${marketData.vacancy_rate?.toFixed(1)}`,
-                type: 'saturation',
-                rank: marketData.vacancy_rank
-              }
-            ]}
-          />
-
           {/* Housing Metrics */}
           <MarketMetricsCard
             title="Housing Metrics"
@@ -138,33 +104,52 @@ export default function MarketReport() {
                 rank: marketData.rent_rank
               },
               {
-                label: "Median Home Value",
-                value: `$${marketData.median_home_value?.toLocaleString()}`,
-                type: 'money'
+                label: "Vacancy Rate",
+                value: `${marketData.vacancy_rate?.toFixed(1)}%`,
+                type: 'saturation',
+                rank: marketData.vacancy_rank
               }
             ]}
           />
-        </div>
 
-        {/* Education Distribution */}
-        <div className="mb-6">
+          {/* Market Dynamics */}
+          <MarketMetricsCard
+            title="Market Dynamics"
+            icon={TrendingUp}
+            metrics={[
+              {
+                label: "Firms per 10k Population",
+                value: marketData.firms_per_10k_population?.toFixed(1),
+                type: 'density',
+                rank: marketData.growth_rank
+              },
+              {
+                label: "Growth Rate",
+                value: `${marketData.growth_rate_percentage?.toFixed(1)}%`,
+                type: 'growth',
+                rank: marketData.growth_rank
+              }
+            ]}
+          />
+
+          {/* Education Distribution */}
           <MarketMetricsCard
             title="Education Distribution"
             icon={GraduationCap}
             metrics={[
               {
                 label: "Bachelor's Degree",
-                value: `${((marketData.bachelors_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}`,
+                value: `${((marketData.bachelors_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
                 type: 'density'
               },
               {
                 label: "Master's Degree",
-                value: `${((marketData.masters_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}`,
+                value: `${((marketData.masters_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
                 type: 'density'
               },
               {
                 label: "Doctorate Degree",
-                value: `${((marketData.doctorate_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}`,
+                value: `${((marketData.doctorate_degree_holders || 0) / (marketData.total_education_population || 1) * 100).toFixed(1)}%`,
                 type: 'density'
               }
             ]}
@@ -174,11 +159,6 @@ export default function MarketReport() {
         {/* Employment Distribution */}
         <div className="mb-6">
           <EmploymentMetricsCard marketData={marketData} />
-        </div>
-
-        {/* Accounting Industry Metrics */}
-        <div className="mb-6">
-          <AccountingIndustryCard marketData={marketData} />
         </div>
 
         {/* Top Firms Section */}
