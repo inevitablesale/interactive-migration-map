@@ -35,12 +35,12 @@ interface MarketGrowthMetric {
 }
 
 interface CompetitiveMarketMetric {
-  county_name: string;
-  state_fp: string;
-  county_fp: string;
-  total_population: number;
-  total_establishments: number;
-  establishments_per_1000_population: number;
+  "Company Name": string;
+  "State Name": string;
+  employeeCount: number;
+  followerCount: number;
+  COUNTYNAME: string;
+  STATEFP: string;
 }
 
 interface UnderservedRegionMetric {
@@ -93,7 +93,12 @@ async function fetchMarketGrowthMetrics() {
 }
 
 async function fetchCompetitiveMarketMetrics() {
-  const { data, error } = await supabase.rpc('get_competitive_market_metrics');
+  const { data, error } = await supabase
+    .from('canary_firms_data')
+    .select('*')
+    .order('employeeCount', { ascending: false })
+    .limit(5);
+  
   if (error) throw error;
   return data as CompetitiveMarketMetric[];
 }
@@ -218,13 +223,13 @@ export function KeyInsightsPanel() {
     {
       title: "Competitive Market",
       value: topCompetitiveMarket 
-        ? `${topCompetitiveMarket.county_name}, ${formatDensity(topCompetitiveMarket.establishments_per_1000_population)} firms/1k pop`
+        ? `${topCompetitiveMarket.COUNTYNAME}, ${topCompetitiveMarket["State Name"]}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topCompetitiveMarket ? (
             <>
-              {`${topCompetitiveMarket.total_establishments.toLocaleString()} establishments, ${formatPopulation(topCompetitiveMarket.total_population)} population`}
+              {`${topCompetitiveMarket.employeeCount.toLocaleString()} employees, ${topCompetitiveMarket.followerCount.toLocaleString()} followers`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -234,9 +239,9 @@ export function KeyInsightsPanel() {
                     <div className="space-y-2 p-1">
                       <p className="text-sm font-medium text-white">Market Details:</p>
                       <div className="text-sm text-gray-300">
-                        <p>Total Establishments: {topCompetitiveMarket.total_establishments.toLocaleString()}</p>
-                        <p>Population: {topCompetitiveMarket.total_population.toLocaleString()}</p>
-                        <p>Density: {formatDensity(topCompetitiveMarket.establishments_per_1000_population)} firms per 1,000 residents</p>
+                        <p>Company: {topCompetitiveMarket["Company Name"]}</p>
+                        <p>Employees: {topCompetitiveMarket.employeeCount.toLocaleString()}</p>
+                        <p>Followers: {topCompetitiveMarket.followerCount.toLocaleString()}</p>
                       </div>
                     </div>
                   </TooltipContent>
