@@ -71,18 +71,18 @@ interface FutureSaturationRisk {
 }
 
 interface CountyRanking {
-  statefp: string;
-  countyfp: string;
+  STATEFP: string;
+  COUNTYFP: string;
   COUNTYNAME: string;
   total_firms: number;
-  population: number;
-  firm_density: number;
-  growth_rate: number;
-  density_rank: number;
+  B01001_001E: number;
+  firms_per_10k: number;
+  population_growth_rate: number;
+  firm_density_rank: number;
   growth_rank: number;
   state_density_avg: number;
   state_growth_avg: number;
-  B01001_001E: number;
+  vacancy_rate: number;
 }
 
 async function fetchMarketGrowthMetrics() {
@@ -212,7 +212,7 @@ export function KeyInsightsPanel() {
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthCounty ? (
             <>
-              {`${((topGrowthCounty.growth_rate || 0) * 100).toFixed(1)}% growth rate, ${(topGrowthCounty.total_firms || 0).toLocaleString()} firms`}
+              {`${((topGrowthCounty.population_growth_rate || 0) * 100).toFixed(1)}% growth rate, ${(topGrowthCounty.total_firms || 0).toLocaleString()} firms`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -223,7 +223,7 @@ export function KeyInsightsPanel() {
                       <p className="text-sm font-medium text-white">Region Details:</p>
                       <div className="text-sm text-gray-300">
                         <p>Population: {(topGrowthCounty.B01001_001E || 0).toLocaleString()}</p>
-                        <p>Firm Density: {(topGrowthCounty.firm_density || 0).toFixed(2)} per capita</p>
+                        <p>Firm Density: {(topGrowthCounty.firms_per_10k || 0).toFixed(2)} per 10k residents</p>
                         <p>Growth Rank: #{topGrowthCounty.growth_rank || 'N/A'}</p>
                       </div>
                     </div>
