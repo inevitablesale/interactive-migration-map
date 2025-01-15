@@ -178,23 +178,31 @@ export function KeyInsightsPanel() {
           {topCompetitiveMarket ? (
             <>
               {`${topCompetitiveMarket.employeeCount.toLocaleString()} employees, ${topCompetitiveMarket.followerCount.toLocaleString()} followers`}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
-                    <div className="space-y-2 p-1">
-                      <p className="text-sm font-medium text-white">Market Details:</p>
-                      <div className="text-sm text-gray-300">
-                        <p>Company: {topCompetitiveMarket["Company Name"]}</p>
-                        <p>Employees: {topCompetitiveMarket.employeeCount.toLocaleString()}</p>
-                        <p>Followers: {topCompetitiveMarket.followerCount.toLocaleString()}</p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Top Competitive Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {competitiveMarkets?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => navigate(`/market-report/${market.COUNTYNAME}/${market["State Name"]}`)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.COUNTYNAME}, {market["State Name"]}</h3>
+                        <p className="text-sm text-gray-300">Employees: {market.employeeCount.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Followers: {market.followerCount.toLocaleString()}</p>
                       </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </>
           ) : (
             "Analyzing market data..."
@@ -213,24 +221,32 @@ export function KeyInsightsPanel() {
           {topUnderservedRegion ? (
             <>
               {`${topUnderservedRegion.market_status}, ${topUnderservedRegion.opportunity_status}`}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
-                    <div className="space-y-2 p-1">
-                      <p className="text-sm font-medium text-white">Region Details:</p>
-                      <div className="text-sm text-gray-300">
-                        <p>County: {topUnderservedRegion.county_name}</p>
-                        <p>Population: {topUnderservedRegion.population.toLocaleString()}</p>
-                        <p>Total Establishments: {topUnderservedRegion.total_establishments}</p>
-                        <p>Recent Movers: {topUnderservedRegion.recent_movers.toLocaleString()}</p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Underserved Regions</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {underservedRegions?.slice(0, 5).map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => navigate(`/market-report/${region.county_name}/${region.state_name}`)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state_name}</h3>
+                        <p className="text-sm text-gray-300">Market Status: {region.market_status}</p>
+                        <p className="text-sm text-gray-300">Opportunity: {region.opportunity_status}</p>
+                        <p className="text-sm text-gray-300">Firms per 10k: {region.firms_per_10k_population}</p>
                       </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </>
           ) : (
             "Analyzing market data"
@@ -249,22 +265,31 @@ export function KeyInsightsPanel() {
           {topEmergingTalentMarket ? (
             <>
               {`${topEmergingTalentMarket.education_rate_percent.toFixed(1)}% education rate`}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
-                    <div className="space-y-2 p-1">
-                      <p className="text-sm font-medium text-white">Education Details:</p>
-                      <div className="text-sm text-gray-300">
-                        <p>Growth Rate: {topEmergingTalentMarket.education_growth_rate.toFixed(1)}%</p>
-                        <p>Median Age: {topEmergingTalentMarket.median_age}</p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Emerging Talent Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {emergingTalentData?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
                       </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </>
           ) : (
             "Analyzing talent data..."
@@ -283,22 +308,31 @@ export function KeyInsightsPanel() {
           {topFutureSaturationRisk ? (
             <>
               {`${topFutureSaturationRisk.county_name}, ${(topFutureSaturationRisk.firm_growth_rate || 0).toFixed(1)}% growth`}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
-                    <div className="space-y-2 p-1">
-                      <p className="text-sm font-medium text-white">Saturation Details:</p>
-                      <div className="text-sm text-gray-300">
-                        <p>Current Density: {topFutureSaturationRisk.current_firm_density?.toFixed(1) || '0'} per 10k</p>
-                        <p>Population Growth: {(topFutureSaturationRisk.population_growth_rate || 0).toFixed(1)}%</p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Future Saturation Risk Analysis</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {futureSaturationData?.slice(0, 5).map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                      >
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
+                        <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
+                        <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
+                        <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
                       </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </>
           ) : (
             "Analyzing market data..."
