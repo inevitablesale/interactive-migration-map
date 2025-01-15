@@ -5,17 +5,17 @@ import { Card } from '@/components/ui/card';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
 
-interface Connection {
-  from: [number, number];
-  to: [number, number];
-  strength: number;
-}
-
 interface Props {
   soldFirms: any[];
   activeFirms: any[];
   censusData: any[];
   activeLayer: 'all' | 'sold' | 'active' | 'census';
+}
+
+interface Connection {
+  from: [number, number];
+  to: [number, number];
+  strength: number;
 }
 
 export function MarketOpportunityMap({ soldFirms, activeFirms, censusData, activeLayer }: Props) {
