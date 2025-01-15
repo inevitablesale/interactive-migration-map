@@ -48,7 +48,7 @@ export const useMarketReportData = (countyName: string, state: string) => {
       const transformedCountyData = {
         ...countyData,
         firms_per_10k_population: countyData?.firms_per_10k || 0,
-        growth_rate_percentage: countyData?.growth_rate || 0,
+        growth_rate_percentage: countyData?.avg_growth_rate || 0,
         market_saturation_index: countyData?.market_saturation || 0,
         total_education_population: countyData?.education_population || 0,
         bachelors_degree_holders: countyData?.bachelors_holders || 0,
@@ -56,7 +56,6 @@ export const useMarketReportData = (countyName: string, state: string) => {
         doctorate_degree_holders: countyData?.doctorate_holders || 0,
         payann: stateData?.PAYANN || 0,
         emp: stateData?.EMP || 0,
-        public_to_private_ratio: countyData?.public_to_private_ratio || 0,
         density_rank: countyData?.firm_density_rank || 0,
         top_firms: firms?.map(firm => ({
           company_name: firm["Company Name"],
