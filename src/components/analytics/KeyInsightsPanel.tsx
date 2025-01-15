@@ -125,6 +125,18 @@ export function KeyInsightsPanel() {
     },
   });
 
+  const { data: stateComparison } = useQuery({
+    queryKey: ['stateComparison'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_data')
+        .select('*')
+        .limit(2);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: countyRankings } = useQuery({
     queryKey: ['countyRankings'],
     queryFn: async () => {
@@ -141,10 +153,10 @@ export function KeyInsightsPanel() {
       .filter(county => county.total_firms > 0)
       .map(county => ({
         county_name: county.countyname,
-        median_income: county.state_density_avg * 50000, // Estimated based on density
-        median_home_value: county.state_growth_avg * 100000, // Estimated based on growth
+        median_income: county.state_density_avg * 50000,
+        median_home_value: county.state_growth_avg * 100000,
         total_firms: county.total_firms,
-        avg_revenue: county.firm_density * 10000, // Estimated based on density
+        avg_revenue: county.firm_density * 10000,
         growth_potential: county.growth_rate
       }))
       .sort((a, b) => b.avg_revenue - a.avg_revenue)
@@ -158,12 +170,12 @@ export function KeyInsightsPanel() {
   const insights = [
     {
       title: "High-Value Markets",
-      value: transformedValueMetrics[0] 
+      value: transformedValueMetrics?.[0] 
         ? `${transformedValueMetrics[0].county_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
-          {transformedValueMetrics[0] ? (
+          {transformedValueMetrics?.[0] ? (
             <>
               {`$${(transformedValueMetrics[0].avg_revenue / 1000).toFixed(1)}K avg revenue, ${transformedValueMetrics[0].growth_potential.toFixed(1)}% growth potential`}
               <Dialog>
@@ -443,8 +455,11 @@ export function KeyInsightsPanel() {
         <h3 className="text-2xl font-bold mb-4">State Performance Comparison</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {stateComparison?.slice(0, 2).map((state, index) => (
-            <Card key={index} className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
-                  onClick={() => handleNavigateToMarket('All Counties', state.STATEFP)}>
+            <Card 
+              key={index} 
+              className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
+              onClick={() => handleNavigateToMarket('All Counties', state.STATEFP)}
+            >
               <h4 className="text-lg font-semibold text-white mb-4">State {state.STATEFP}</h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
