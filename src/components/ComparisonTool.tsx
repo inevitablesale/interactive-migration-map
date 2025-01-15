@@ -114,7 +114,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
     if (!data) return;
 
     const formattedData = data.map(state => ({
-      State: statesList?.find(s => s.STATEFP === state.STATEFP)?.state,
+      State: statesList?.find(s => s.fips_code === state.STATEFP)?.state,
       Employment: state.EMP,
       'Annual Payroll': state.PAYANN,
       Establishments: state.ESTAB,
@@ -171,7 +171,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
                 onClick={() => handleStateClick(state.STATEFP)}
               >
                 <div className="text-sm text-white/70 mb-1">
-                  {statesList?.find(s => s.STATEFP === state.STATEFP)?.state || `State ${index + 1}`}
+                  {statesList?.find(s => s.fips_code === state.STATEFP)?.state || `State ${index + 1}`}
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-2xl font-medium text-white">
@@ -240,8 +240,8 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
             <SelectContent className="bg-[#1A1A1A] border-white/10">
               {statesList?.map((state) => (
                 <SelectItem 
-                  key={state.STATEFP} 
-                  value={state.STATEFP}
+                  key={state.fips_code} 
+                  value={state.fips_code}
                   className="text-white hover:bg-white/10"
                 >
                   {state.state}
@@ -259,7 +259,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
                 onClick={() => handleStateSelect(stateFp)}
                 className="bg-[#1A1A1A] hover:bg-[#252525] text-blue-400 border border-white/10 px-4 py-2"
               >
-                {statesList?.find(s => s.STATEFP === stateFp)?.state}
+                {statesList?.find(s => s.fips_code === stateFp)?.state}
                 <X className="h-4 w-4 ml-2" />
               </Button>
             ))}
