@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { 
   TrendingUp, 
   Users, 
@@ -27,7 +26,7 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_enhanced_market_scores');
       if (error) throw error;
-      return data;
+      return data as EnhancedMarketScore[];
     }
   });
 
@@ -36,7 +35,7 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_trends');
       if (error) throw error;
-      return data;
+      return data as MarketTrend[];
     }
   });
 
@@ -45,7 +44,7 @@ export function EnhancedAnalytics() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_competitive_analysis');
       if (error) throw error;
-      return data;
+      return data as CompetitiveAnalysis[];
     }
   });
 
