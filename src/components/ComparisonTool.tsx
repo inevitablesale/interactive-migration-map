@@ -159,19 +159,19 @@ export function ComparisonTool() {
               <div 
                 key={index} 
                 className={cn(
-                  "bg-white/5 p-3 rounded transition-colors",
-                  isHighest && "bg-white/10 border border-white/20"
+                  "bg-[#1A1A1A] p-4 rounded-lg transition-colors",
+                  isHighest && "bg-[#252525] border border-white/10"
                 )}
               >
-                <div className="text-xs text-white/60">
+                <div className="text-sm text-white/70 mb-1">
                   {statesList?.find(s => s.fips_code === state.STATEFP)?.state || `State ${index + 1}`}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-sm font-medium text-white">
+                  <div className="text-2xl font-medium text-white">
                     {formatFn(value)}{suffix}
                   </div>
                   {isHighest && (
-                    <ArrowUpRight className="h-4 w-4 text-green-400" />
+                    <ArrowUpRight className="h-5 w-5 text-green-400" />
                   )}
                 </div>
               </div>
@@ -195,9 +195,9 @@ export function ComparisonTool() {
   }
 
   return (
-    <div className="fixed right-4 top-20 w-[800px] bg-black/60 backdrop-blur-md rounded-lg border border-white/10 shadow-xl animate-fade-in">
-      <div className="flex items-center justify-between p-3 border-b border-white/10">
-        <h3 className="text-sm font-medium text-white">Compare States</h3>
+    <div className="fixed right-4 top-20 w-[800px] bg-[#111111] backdrop-blur-md rounded-lg border border-white/10 shadow-xl animate-fade-in">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <h3 className="text-xl font-medium text-white">Compare States</h3>
         <div className="flex items-center gap-2">
           {stateData && stateData.length > 0 && (
             <Button
@@ -206,7 +206,7 @@ export function ComparisonTool() {
               onClick={handleExport}
               className="text-white/60 hover:text-white"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-5 w-5" />
             </Button>
           )}
           <Button
@@ -215,19 +215,19 @@ export function ComparisonTool() {
             onClick={() => setIsVisible(false)}
             className="text-white/60 hover:text-white"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
       </div>
       
       <div className="p-4 space-y-6">
-        <div className="space-y-2">
-          <label className="text-sm text-white/60">Select States to Compare</label>
+        <div className="space-y-4">
+          <h4 className="text-lg text-white/90">Select States to Compare</h4>
           <Select onValueChange={handleStateSelect}>
-            <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+            <SelectTrigger className="w-full bg-[#1A1A1A] border-white/10 text-white h-12 text-lg">
               <SelectValue placeholder="Choose a state" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-white/10">
+            <SelectContent className="bg-[#1A1A1A] border-white/10">
               {statesList?.map((state) => (
                 <SelectItem 
                   key={state.fips_code} 
@@ -240,17 +240,17 @@ export function ComparisonTool() {
             </SelectContent>
           </Select>
           
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-3 flex-wrap">
             {selectedStates.map((stateFp) => (
               <Button
                 key={stateFp}
                 variant="secondary"
                 size="sm"
                 onClick={() => handleStateSelect(stateFp)}
-                className="bg-white/10 hover:bg-white/20"
+                className="bg-[#1A1A1A] hover:bg-[#252525] text-blue-400 border border-white/10 px-4 py-2"
               >
                 {statesList?.find(s => s.fips_code === stateFp)?.state}
-                <X className="h-3 w-3 ml-1" />
+                <X className="h-4 w-4 ml-2" />
               </Button>
             ))}
           </div>
