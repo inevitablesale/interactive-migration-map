@@ -21,6 +21,15 @@ interface MarketGrowthMetric {
   total_moves: number;
 }
 
+interface ValueMetric {
+  county_name: string;
+  median_income: number;
+  median_home_value: number;
+  total_firms: number;
+  avg_revenue: number;
+  growth_potential: number;
+}
+
 interface CompetitiveMarketMetric {
   "Company Name": string;
   "State Name": string;
@@ -60,15 +69,6 @@ interface FutureSaturationRisk {
   firm_growth_rate: number;
   population_growth_rate: number;
   median_income?: number;
-}
-
-interface ValueMetric {
-  county_name: string;
-  median_income: number;
-  median_home_value: number;
-  total_firms: number;
-  avg_revenue: number;
-  growth_potential: number;
 }
 
 export function KeyInsightsPanel() {
@@ -132,6 +132,33 @@ export function KeyInsightsPanel() {
       return data as ValueMetric[];
     },
   });
+
+  // Transform existing county rankings data for value metrics
+  const { data: countyRankings } = useQuery({
+    queryKey: ['countyRankings'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_county_rankings');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const valueMetrics: ValueMetric[] = useMemo(() => {
+    if (!countyRankings) return [];
+    
+    return countyRankings
+      .filter(county => county.total_firms > 0)
+      .map(county => ({
+        county_name: county.countyname,
+        median_income: county.median_income || 0,
+        median_home_value: county.median_home_value || 0,
+        total_firms: county.total_firms,
+        avg_revenue: county.total_firms > 0 ? (county.payann || 0) / county.total_firms : 0,
+        growth_potential: county.growth_rate || 0
+      }))
+      .sort((a, b) => b.avg_revenue - a.avg_revenue)
+      .slice(0, 5);
+  }, [countyRankings]);
 
   const topGrowthMetric = marketGrowthMetrics?.[0];
   const topCompetitiveMarket = competitiveMarkets?.[0];
