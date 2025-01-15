@@ -32,6 +32,7 @@ interface ValueMetric {
   avg_revenue: number;
   growth_potential: number;
   rank?: number;
+  national_rank?: number;
 }
 
 interface CompetitiveMarketMetric {
@@ -115,7 +116,6 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      // Filter out duplicates based on county_name
       return data.filter((region, index, self) =>
         index === self.findIndex(r => r.county_name === region.county_name)
       );
@@ -127,7 +127,6 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_future_saturation_risk');
       if (error) throw error;
-      // Filter out duplicates based on county_name
       return data.filter((region, index, self) =>
         index === self.findIndex(r => r.county_name === region.county_name)
       );
@@ -175,7 +174,8 @@ export function KeyInsightsPanel() {
         total_firms: county.total_establishments || 0,
         avg_revenue: (county.total_payroll || 0) / (county.total_establishments || 1),
         growth_potential: county.population_growth_rate || 0,
-        rank: county.density_rank
+        rank: county.density_rank,
+        national_rank: county.national_density_rank
       }))
       .sort((a, b) => b.avg_revenue - a.avg_revenue)
       .slice(0, 5);
@@ -232,10 +232,20 @@ export function KeyInsightsPanel() {
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
-                        {market.rank && (
-                          <div className="text-right mt-2">
-                            <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
-                            <p className="text-2xl text-white/90 font-medium">{market.rank.toLocaleString()}</p>
+                        {(market.rank || market.national_rank) && (
+                          <div className="flex justify-between items-center mt-2">
+                            {market.rank && (
+                              <div className="text-right">
+                                <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                                <p className="text-2xl text-white/90 font-medium">{market.rank.toLocaleString()}</p>
+                              </div>
+                            )}
+                            {market.national_rank && (
+                              <div className="text-right">
+                                <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                                <p className="text-2xl text-blue-400/90 font-medium">{market.national_rank.toLocaleString()}</p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
