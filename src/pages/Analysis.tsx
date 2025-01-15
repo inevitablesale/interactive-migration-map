@@ -1,4 +1,4 @@
-import { ChartBar, Users, TrendingUp, Brain, Robot } from "lucide-react";
+import { ChartBar, Users, TrendingUp, Brain, Bot } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
@@ -116,7 +116,7 @@ export default function Analysis() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Robot className="w-5 h-5 text-blue-400" />
+              <Bot className="w-5 h-5 text-blue-400" />
               <h2 className="text-xl font-semibold text-white">AI-Powered Alerts</h2>
             </div>
             <AlertsPanel />
@@ -151,13 +151,15 @@ export default function Analysis() {
           </div>
         </div>
 
-        <GeminiInsights marketData={{
-          stateData,
-          scenarioData
+        <MarketSimilarityAnalysis filters={{
+          employeeCountMin: "0",
+          employeeCountMax: "1000+",
+          revenueMin: "0",
+          revenueMax: "10M+",
+          region: "all"
         }} />
         
         <KeyInsightsPanel />
-        <MarketSimilarityAnalysis />
         
         {stateData && statesList && (
           <ScenarioModeling 

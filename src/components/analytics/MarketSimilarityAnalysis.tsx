@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { 
   TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
-  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
-  DollarSign, Briefcase, LineChart, Building
+  Users2, Home, GraduationCap, BarChart2, BookOpen, Coins,
+  DollarSign, Briefcase, LineChart, Building, Scale2
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -66,7 +66,7 @@ export function MarketSimilarityAnalysis({ filters }: Props) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <Scale className="w-5 h-5 text-gray-400" />
+              <Scale2 className="w-5 h-5 text-gray-400" />
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-sm">Analysis based on historical deals and current market conditions</p>
@@ -115,7 +115,7 @@ export function MarketSimilarityAnalysis({ filters }: Props) {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-purple-400" />
+                  <BarChart2 className="w-4 h-4 text-purple-400" />
                   <span className="text-sm text-white/60">Market Density</span>
                 </div>
                 <span className="text-sm font-medium text-white">{analysis.market_density.toFixed(2)} per 100k</span>
