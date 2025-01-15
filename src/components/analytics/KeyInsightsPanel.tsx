@@ -196,7 +196,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">High-Value Markets</DialogTitle>
                   </DialogHeader>
@@ -240,7 +240,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Growth Leaders</DialogTitle>
                   </DialogHeader>
@@ -283,7 +283,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Talent Markets</DialogTitle>
                   </DialogHeader>
@@ -326,7 +326,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Competition</DialogTitle>
                   </DialogHeader>
@@ -370,7 +370,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Growth Opportunities</DialogTitle>
                   </DialogHeader>
@@ -414,7 +414,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
                   </DialogHeader>
@@ -560,4 +560,3 @@ function getStateNameFromFIPS(fips: string): string {
   };
   return stateMap[fips] || fips;
 }
-
