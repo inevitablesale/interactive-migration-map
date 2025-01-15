@@ -4,14 +4,14 @@ import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
 import { toast } from "sonner";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
-  console.log('useMarketReportData called with:', { county, stateName }); // Debug log
+  console.log('useMarketReportData called with:', { county, stateName });
 
   const { data: marketData, isLoading, error } = useQuery({
     queryKey: ['comprehensiveMarketData', county, stateName],
     queryFn: async () => {
       if (!stateName || !county) return null;
 
-      console.log('Fetching market data for:', { county, stateName }); // Debug log
+      console.log('Fetching market data for:', { county, stateName });
 
       // First, get the state FIPS code
       const { data: stateData, error: stateError } = await supabase
@@ -31,32 +31,36 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
-      console.log('Found state FIPS:', stateData.fips_code); // Debug log
+      console.log('Found state FIPS:', stateData.fips_code);
 
       // Then, get the county data using the FIPS code
-      const { data: countyData, error: countyError } = await supabase
+      const countyResponse = await supabase
         .from('county_data')
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
         .single();
 
-      if (countyError) {
-        console.error('Error fetching county data:', countyError);
+      if (countyResponse.error) {
+        console.error('Error fetching county data:', countyResponse.error);
         toast.error('Error fetching county data');
-        throw countyError;
+        throw countyResponse.error;
       }
 
+      const countyData = countyResponse.data;
+
       // Get rankings data
-      const { data: rankingData, error: rankingError } = await supabase
+      const rankingResponse = await supabase
         .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
         .single();
 
-      if (rankingError) {
-        console.error('Error fetching ranking data:', rankingError);
+      const rankingData = rankingResponse.error ? null : rankingResponse.data;
+
+      if (rankingResponse.error) {
+        console.error('Error fetching ranking data:', rankingResponse.error);
         // Don't throw here, we can still show other data
       }
 
@@ -66,14 +70,16 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       // Get firms data
-      const { data: firmsData, error: firmsError } = await supabase
+      const firmsResponse = await supabase
         .from('canary_firms_data')
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code);
 
-      if (firmsError) {
-        console.error('Error fetching firms data:', firmsError);
+      const firmsData = firmsResponse.error ? [] : firmsResponse.data;
+
+      if (firmsResponse.error) {
+        console.error('Error fetching firms data:', firmsResponse.error);
         // Don't throw, we can still show other data
       }
 
@@ -117,17 +123,17 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
           ? countyData.C24060_007E / countyData.C24060_004E 
           : null,
-        vacancy_rate: (countyData.B25002_003E / countyData.B25002_002E) * 100 || null,
-        vacancy_rank: rankingData?.density_rank || null,
-        income_rank: rankingData?.growth_rank || null,
-        population_rank: rankingData?.population || null,
-        rent_rank: rankingData?.density_rank || null,
+        vacancy_rate: (countyData.B25002_003E / countyData.B25002_001E) * 100 || null,
+        vacancy_rank: rankingData?.vacancy_rank || null,
+        income_rank: rankingData?.income_rank || null,
+        population_rank: rankingData?.population_rank || null,
+        rent_rank: rankingData?.rent_rank || null,
         density_rank: rankingData?.density_rank || null,
         growth_rank: rankingData?.growth_rank || null,
         top_firms: transformedTopFirms,
       };
 
-      console.log('Transformed market data:', transformedData); // Debug log
+      console.log('Transformed market data:', transformedData);
 
       return transformedData;
     },
@@ -135,7 +141,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('Market data available:', hasMarketData, 'Top firms count:', marketData?.top_firms?.length); // Debug log
+  console.log('Market data available:', hasMarketData, 'Top firms count:', marketData?.top_firms?.length);
 
   return { marketData, isLoading, hasMarketData };
 };
