@@ -44,6 +44,11 @@ export const useMarketReportData = (countyName: string, state: string) => {
 
       if (firmsError) throw firmsError;
 
+      // Calculate average salary per employee if both payann and emp exist
+      const avgSalaryPerEmployee = stateData.PAYANN && stateData.EMP 
+        ? stateData.PAYANN / stateData.EMP 
+        : null;
+
       // Transform the data to match our ComprehensiveMarketData type
       const transformedCountyData = {
         ...countyData,
@@ -56,8 +61,8 @@ export const useMarketReportData = (countyName: string, state: string) => {
         doctorate_degree_holders: countyData?.doctorate_holders || 0,
         payann: stateData?.PAYANN || 0,
         emp: stateData?.EMP || 0,
-        public_to_private_ratio: 0,
-        density_rank: countyData?.firm_density_rank || 0,
+        total_establishments: stateData?.ESTAB || 0,
+        avgSalaryPerEmployee,
         top_firms: firms?.map(firm => ({
           company_name: firm["Company Name"],
           employee_count: firm.employeeCount,
