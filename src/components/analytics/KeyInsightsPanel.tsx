@@ -82,6 +82,7 @@ interface CountyRanking {
   growth_rank: number;
   state_density_avg: number;
   state_growth_avg: number;
+  B01001_001E: number;
 }
 
 async function fetchMarketGrowthMetrics() {
@@ -214,8 +215,8 @@ export function KeyInsightsPanel() {
               {`${((topGrowthCounty.growth_rate || 0) * 100).toFixed(1)}% growth rate, ${(topGrowthCounty.total_firms || 0).toLocaleString()} firms`}
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors" />
+                  <TooltipTrigger asChild>
+                    <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-300 transition-colors cursor-pointer" />
                   </TooltipTrigger>
                   <TooltipContent className="bg-black/90 border-white/10 backdrop-blur-md">
                     <div className="space-y-2 p-1">
