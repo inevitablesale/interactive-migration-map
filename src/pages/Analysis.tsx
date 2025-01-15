@@ -11,6 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
 import { ScenarioModeling } from "@/components/scenario/ScenarioModeling";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -38,6 +43,13 @@ async function fetchStats() {
 export default function Analysis() {
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [scenarioData, setScenarioData] = useState<any[]>([]);
+  const [analysisFilters, setAnalysisFilters] = useState({
+    employeeCountMin: '',
+    employeeCountMax: '',
+    revenueMin: '',
+    revenueMax: '',
+    region: 'all'
+  });
   
   const { data: stats } = useQuery({
     queryKey: ['analysisStats'],
@@ -68,6 +80,33 @@ export default function Analysis() {
 
   const handleUpdateScenario = (updatedData: any[]) => {
     setScenarioData(updatedData);
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setAnalysisFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    // Validate filters
+    const numericFields = {
+      employeeCountMin: 'Minimum Employee Count',
+      employeeCountMax: 'Maximum Employee Count',
+      revenueMin: 'Minimum Revenue',
+      revenueMax: 'Maximum Revenue'
+    };
+
+    for (const [key, label] of Object.entries(numericFields)) {
+      const value = analysisFilters[key as keyof typeof analysisFilters];
+      if (value && isNaN(Number(value))) {
+        toast.error(`${label} must be a valid number`);
+        return;
+      }
+    }
+
+    toast.success("Filters applied successfully");
   };
 
   const statsData = [
@@ -117,6 +156,80 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
+        {/* Analysis Filters */}
+        <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+          <h2 className="text-xl font-semibold text-white mb-4">Analysis Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div>
+              <Label htmlFor="employeeCountMin" className="text-white">Min Employees</Label>
+              <Input
+                id="employeeCountMin"
+                placeholder="0"
+                value={analysisFilters.employeeCountMin}
+                onChange={(e) => handleFilterChange('employeeCountMin', e.target.value)}
+                className="bg-black/40 border-white/10 text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="employeeCountMax" className="text-white">Max Employees</Label>
+              <Input
+                id="employeeCountMax"
+                placeholder="1000+"
+                value={analysisFilters.employeeCountMax}
+                onChange={(e) => handleFilterChange('employeeCountMax', e.target.value)}
+                className="bg-black/40 border-white/10 text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="revenueMin" className="text-white">Min Revenue</Label>
+              <Input
+                id="revenueMin"
+                placeholder="$0"
+                value={analysisFilters.revenueMin}
+                onChange={(e) => handleFilterChange('revenueMin', e.target.value)}
+                className="bg-black/40 border-white/10 text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="revenueMax" className="text-white">Max Revenue</Label>
+              <Input
+                id="revenueMax"
+                placeholder="$10M+"
+                value={analysisFilters.revenueMax}
+                onChange={(e) => handleFilterChange('revenueMax', e.target.value)}
+                className="bg-black/40 border-white/10 text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="region" className="text-white">Region</Label>
+              <Select 
+                value={analysisFilters.region} 
+                onValueChange={(value) => handleFilterChange('region', value)}
+              >
+                <SelectTrigger className="bg-black/40 border-white/10 text-white">
+                  <SelectValue placeholder="Select region" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Regions</SelectItem>
+                  <SelectItem value="northeast">Northeast</SelectItem>
+                  <SelectItem value="southeast">Southeast</SelectItem>
+                  <SelectItem value="midwest">Midwest</SelectItem>
+                  <SelectItem value="southwest">Southwest</SelectItem>
+                  <SelectItem value="west">West</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-full">
+              <Button 
+                onClick={handleApplyFilters}
+                className="w-full md:w-auto bg-blue-500 hover:bg-blue-600"
+              >
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AlertsPanel />
           <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
@@ -143,7 +256,7 @@ export default function Analysis() {
           </div>
         </div>
         <KeyInsightsPanel />
-        <MarketSimilarityAnalysis />
+        <MarketSimilarityAnalysis filters={analysisFilters} />
         {stateData && statesList && (
           <ScenarioModeling 
             stateData={stateData}
