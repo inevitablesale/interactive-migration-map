@@ -16,18 +16,6 @@ export const useMarketReportData = (countyName: string, state: string) => {
       if (stateFipsError) throw stateFipsError;
       if (!stateFips) throw new Error('State not found');
 
-      // Get state data
-      const { data: stateData, error: stateError } = await supabase
-        .from('state_data')
-        .select('*')
-        .eq('STATEFP', stateFips.STATEFP)
-        .maybeSingle();
-
-      if (stateError) throw stateError;
-      if (!stateData) throw new Error('State data not found');
-
-      console.log('State Data:', stateData);
-
       // Get county data for detailed census information
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
@@ -132,7 +120,6 @@ export const useMarketReportData = (countyName: string, state: string) => {
 
       return {
         countyData: transformedCountyData,
-        stateData,
         firms: firms || []
       };
     }
