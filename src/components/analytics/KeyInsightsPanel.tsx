@@ -24,6 +24,8 @@ interface MarketGrowthMetric {
 
 interface ValueMetric {
   county_name: string;
+  state: string;
+  state_name: string; // Add this for full state name
   median_income: number;
   median_home_value: number;
   total_firms: number;
@@ -32,13 +34,10 @@ interface ValueMetric {
 }
 
 interface CompetitiveMarketMetric {
-  "Company Name": string;
+  COUNTYNAME: string;
   "State Name": string;
   employeeCount: number;
   followerCount: number;
-  COUNTYNAME: string;
-  STATEFP: number;
-  revenue_per_employee?: number;
   market_saturation?: number;
 }
 
@@ -69,7 +68,6 @@ interface FutureSaturationRisk {
   projected_firm_density: number;
   firm_growth_rate: number;
   population_growth_rate: number;
-  median_income?: number;
 }
 
 export function KeyInsightsPanel() {
@@ -89,12 +87,16 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('COUNTYNAME, "State Name", employeeCount, followerCount, market_saturation')
+        .select('COUNTYNAME, "State Name", employeeCount, followerCount')
         .order('employeeCount', { ascending: false })
         .limit(5);
       
       if (error) throw error;
-      return data;
+      
+      return data.map(market => ({
+        ...market,
+        market_saturation: (market.employeeCount / 1000) * 100 // Example calculation
+      }));
     },
   });
 
@@ -155,8 +157,9 @@ export function KeyInsightsPanel() {
       )
       .filter(county => county.total_firms > 0)
       .map(county => ({
-        county_name: county.countyname,
+        county_name: county.countyname.endsWith(" County") ? county.countyname : `${county.countyname} County`,
         state: county.statefp,
+        state_name: getStateNameFromFIPS(county.statefp),
         median_income: county.state_density_avg * 50000,
         median_home_value: county.state_growth_avg * 100000,
         total_firms: county.total_firms,
@@ -168,7 +171,12 @@ export function KeyInsightsPanel() {
   }, [countyRankings]);
 
   const handleNavigateToMarket = (county: string, state: string) => {
-    navigate(`/market-report/${county}/${state}`);
+    if (!state) {
+      console.error('State is undefined for county:', county);
+      return;
+    }
+    const formattedCounty = county.endsWith(" County") ? county : `${county} County`;
+    navigate(`/market-report/${formattedCounty}/${state}`);
   };
 
   const insights = [
@@ -188,7 +196,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">High-Value Markets</DialogTitle>
                   </DialogHeader>
@@ -197,9 +205,9 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(market.county_name, market.state)}
+                        onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
@@ -232,7 +240,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Growth Leaders</DialogTitle>
                   </DialogHeader>
@@ -275,22 +283,26 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Talent Markets</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
-                    {emergingTalentData?.slice(0, 5).map((market, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                      >
-                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
-                        <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
-                        <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
-                        <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
-                      </div>
-                    ))}
+                    {emergingTalentData?.slice(0, 5).map((market, index) => {
+                      const [countyName, stateName] = market.county_name.split(',').map(s => s.trim());
+                      return (
+                        <div 
+                          key={index} 
+                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                          onClick={() => handleNavigateToMarket(countyName, stateName)}
+                        >
+                          <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}</h3>
+                          <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
+                          <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
+                          <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </DialogContent>
               </Dialog>
@@ -318,7 +330,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Competition</DialogTitle>
                   </DialogHeader>
@@ -362,7 +374,7 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Growth Opportunities</DialogTitle>
                   </DialogHeader>
@@ -406,22 +418,26 @@ export function KeyInsightsPanel() {
                     View Details <ArrowUpRight className="h-4 w-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10">
+                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
-                    {futureSaturationData?.slice(0, 5).map((region, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                      >
-                        <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
-                        <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
-                        <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
-                        <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
-                      </div>
-                    ))}
+                    {futureSaturationData?.slice(0, 5).map((region, index) => {
+                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
+                      return (
+                        <div 
+                          key={index} 
+                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                          onClick={() => handleNavigateToMarket(countyName, stateName)}
+                        >
+                          <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{region.county_name}</h3>
+                          <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
+                          <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
+                          <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </DialogContent>
               </Dialog>
@@ -437,7 +453,7 @@ export function KeyInsightsPanel() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-3xl font-bold">Market Insights at a Glance</h2>
+      <h2 className="text-3xl font-bold text-white">Market Insights at a Glance</h2>
       <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
         {insights.map((insight) => (
           <Card
@@ -448,44 +464,68 @@ export function KeyInsightsPanel() {
               <insight.icon className="w-5 h-5 text-yellow-400" />
               <h3 className="font-semibold text-lg text-white">{insight.title}</h3>
             </div>
-            <p className="text-2xl font-bold text-white mb-2">{insight.value}</p>
+            <p className="text-2xl font-bold text-white mb-2 min-h-[4rem] flex items-center">{insight.value}</p>
             <div className="text-sm text-white/80">{insight.insight}</div>
           </Card>
         ))}
       </div>
-
-      <div className="mt-8">
-        <h3 className="text-2xl font-bold mb-4">State Performance Comparison</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {stateData?.map((state, index) => (
-            <Card 
-              key={index} 
-              className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
-              onClick={() => handleNavigateToMarket('All Counties', state.STATEFP)}
-            >
-              <h4 className="text-lg font-semibold text-white mb-4">State {state.STATEFP}</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Total Establishments</span>
-                  <span className="text-white font-medium">{state.ESTAB?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Total Employment</span>
-                  <span className="text-white font-medium">{state.EMP?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Annual Payroll</span>
-                  <span className="text-white font-medium">${(state.PAYANN / 1000000).toFixed(1)}M</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Median Income</span>
-                  <span className="text-white font-medium">${state.B19013_001E?.toLocaleString()}</span>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
     </section>
   );
+}
+
+function getStateNameFromFIPS(fips: string): string {
+  const stateMap: { [key: string]: string } = {
+    '01': 'Alabama',
+    '02': 'Alaska',
+    '04': 'Arizona',
+    '05': 'Arkansas',
+    '06': 'California',
+    '08': 'Colorado',
+    '09': 'Connecticut',
+    '10': 'Delaware',
+    '11': 'District of Columbia',
+    '12': 'Florida',
+    '13': 'Georgia',
+    '15': 'Hawaii',
+    '16': 'Idaho',
+    '17': 'Illinois',
+    '18': 'Indiana',
+    '19': 'Iowa',
+    '20': 'Kansas',
+    '21': 'Kentucky',
+    '22': 'Louisiana',
+    '23': 'Maine',
+    '24': 'Maryland',
+    '25': 'Massachusetts',
+    '26': 'Michigan',
+    '27': 'Minnesota',
+    '28': 'Mississippi',
+    '29': 'Missouri',
+    '30': 'Montana',
+    '31': 'Nebraska',
+    '32': 'Nevada',
+    '33': 'New Hampshire',
+    '34': 'New Jersey',
+    '35': 'New Mexico',
+    '36': 'New York',
+    '37': 'North Carolina',
+    '38': 'North Dakota',
+    '39': 'Ohio',
+    '40': 'Oklahoma',
+    '41': 'Oregon',
+    '42': 'Pennsylvania',
+    '44': 'Rhode Island',
+    '45': 'South Carolina',
+    '46': 'South Dakota',
+    '47': 'Tennessee',
+    '48': 'Texas',
+    '49': 'Utah',
+    '50': 'Vermont',
+    '51': 'Virginia',
+    '53': 'Washington',
+    '54': 'West Virginia',
+    '55': 'Wisconsin',
+    '56': 'Wyoming'
+  };
+  return stateMap[fips] || fips;
 }

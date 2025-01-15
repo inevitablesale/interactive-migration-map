@@ -45,13 +45,13 @@ export default function Opportunities() {
   const [filters, setFilters] = useState<FirmFilters>({});
   const [employeeRange, setEmployeeRange] = useState([0, 100]);
 
-  // Query to fetch states
+  // Updated query to use correct column name
   const { data: states } = useQuery({
     queryKey: ['states'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('State Name')
+        .select('"State Name"')
         .not('State Name', 'is', null)
         .order('State Name');
       
