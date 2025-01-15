@@ -35,8 +35,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
         .select('*')
-        .ilike('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
+        .ilike('COUNTYNAME', county)
         .maybeSingle();
 
       if (countyError) {
@@ -44,9 +44,14 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         throw countyError;
       }
 
+      if (!countyData) {
+        console.error('No county data found');
+        return null;
+      }
+
       // Get rankings data using the function
       const { data: rankingsData, error: rankingsError } = await supabase
-        .rpc('get_county_rankings')
+        .rpc('get_county_rankings', {})
         .eq('statefp', stateData.fips_code)
         .eq('countyname', county)
         .maybeSingle();
@@ -60,8 +65,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .ilike('COUNTYNAME', county)
-        .eq('STATEFP', parseInt(stateData.fips_code));
+        .eq('STATEFP', parseInt(stateData.fips_code))
+        .ilike('COUNTYNAME', county);
 
       if (firmsError) {
         console.error('Error fetching firms data:', firmsError);
@@ -69,7 +74,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       // Calculate vacancy rate
-      const vacancyRate = countyData?.B25002_003E && countyData?.B25002_002E
+      const vacancyRate = countyData.B25002_003E && countyData.B25002_002E
         ? (countyData.B25002_003E / countyData.B25002_002E) * 100
         : null;
 
@@ -93,28 +98,28 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Transform the data
       const transformedData: ComprehensiveMarketData = {
-        total_population: countyData?.B01001_001E || null,
-        median_household_income: countyData?.B19013_001E || null,
-        median_gross_rent: countyData?.B25064_001E || null,
-        median_home_value: countyData?.B25077_001E || null,
-        employed_population: countyData?.B23025_004E || null,
-        private_sector_accountants: countyData?.C24060_004E || null,
-        public_sector_accountants: countyData?.C24060_007E || null,
+        total_population: countyData.B01001_001E || null,
+        median_household_income: countyData.B19013_001E || null,
+        median_gross_rent: countyData.B25064_001E || null,
+        median_home_value: countyData.B25077_001E || null,
+        employed_population: countyData.B23025_004E || null,
+        private_sector_accountants: countyData.C24060_004E || null,
+        public_sector_accountants: countyData.C24060_007E || null,
         firms_per_10k_population: rankingsData?.firm_density || null,
         growth_rate_percentage: rankingsData?.growth_rate || null,
         market_saturation_index: rankingsData?.market_saturation || null,
-        total_education_population: countyData?.B15003_001E || null,
-        bachelors_degree_holders: countyData?.B15003_022E || null,
-        masters_degree_holders: countyData?.B15003_023E || null,
-        doctorate_degree_holders: countyData?.B15003_025E || null,
-        payann: countyData?.PAYANN || null,
-        total_establishments: countyData?.ESTAB || null,
-        emp: countyData?.EMP || null,
-        public_to_private_ratio: countyData?.C24060_007E && countyData?.C24060_004E 
+        total_education_population: countyData.B15003_001E || null,
+        bachelors_degree_holders: countyData.B15003_022E || null,
+        masters_degree_holders: countyData.B15003_023E || null,
+        doctorate_degree_holders: countyData.B15003_025E || null,
+        payann: countyData.PAYANN || null,
+        total_establishments: countyData.ESTAB || null,
+        emp: countyData.EMP || null,
+        public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
           ? countyData.C24060_007E / countyData.C24060_004E 
           : null,
         vacancy_rate: vacancyRate,
-        vacancy_rank: null, // These ranks would need to be calculated or fetched
+        vacancy_rank: null,
         income_rank: null,
         population_rank: null,
         rent_rank: null,
@@ -123,7 +128,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         top_firms: transformedTopFirms,
       };
 
-      console.log('Final transformed market data:', transformedData); // Debug log
+      console.log('Transformed market data:', transformedData); // Debug log
 
       return transformedData;
     },
@@ -133,5 +138,5 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   const hasMarketData = !!marketData;
   console.log('Market data available:', hasMarketData, 'Top firms count:', marketData?.top_firms?.length); // Debug log
 
-  return { marketData, isLoading, hasMarketData };
+  return { marketData, isLoading, hasMarketData, error };
 };
