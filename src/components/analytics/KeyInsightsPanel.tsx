@@ -93,7 +93,6 @@ export function KeyInsightsPanel() {
       
       if (error) throw error;
       
-      // Add market saturation calculation here since it's not a column
       return data.map(market => ({
         ...market,
         market_saturation: (market.employeeCount / 1000) * 100 // Example calculation
@@ -158,7 +157,7 @@ export function KeyInsightsPanel() {
       )
       .filter(county => county.total_firms > 0)
       .map(county => ({
-        county_name: county.countyname,
+        county_name: county.countyname.endsWith(" County") ? county.countyname : `${county.countyname} County`,
         state: county.statefp,
         median_income: county.state_density_avg * 50000,
         median_home_value: county.state_growth_avg * 100000,
@@ -171,7 +170,8 @@ export function KeyInsightsPanel() {
   }, [countyRankings]);
 
   const handleNavigateToMarket = (county: string, state: string) => {
-    navigate(`/market-report/${county}/${state}`);
+    const formattedCounty = county.endsWith(" County") ? county : `${county} County`;
+    navigate(`/market-report/${formattedCounty}/${state}`);
   };
 
   const insights = [
