@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ComprehensiveMarketData } from "@/types/rankings";
+import type { ComprehensiveMarketData, TopFirm } from "@/types/rankings";
 
 export const useMarketReportData = (county: string | undefined, stateName: string | undefined) => {
   console.log('1. useMarketReportData called with:', { county, stateName });
@@ -54,11 +54,11 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Fetch top firms data
       console.log('10. Fetching top firms data');
-      const { data: topFirms, error: firmsError } = await supabase
+      const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('STATEFP', stateFips.STATEFP)
-        .eq('COUNTYFP', countyData.COUNTYFP)
+        .eq('STATEFP', parseInt(stateFips.STATEFP))
+        .eq('COUNTYFP', parseInt(countyData.COUNTYFP))
         .order('employeeCount', { ascending: false })
         .limit(5);
 
@@ -66,6 +66,24 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         console.error('11. Error fetching top firms:', firmsError.message);
         throw new Error('Error fetching top firms');
       }
+
+      // Transform firms data to match TopFirm interface
+      const transformedFirms: TopFirm[] = (firmsData || []).map(firm => ({
+        company_name: firm["Company Name"] || "",
+        employee_count: firm.employeeCount || 0,
+        follower_count: firm.followerCount || 0,
+        follower_ratio: firm.followerCount && firm.employeeCount ? firm.followerCount / firm.employeeCount : 0,
+        logoResolutionResult: firm.logoResolutionResult,
+        originalCoverImage: firm.originalCoverImage,
+        primarySubtitle: firm["Primary Subtitle"],
+        employeeCountRangeLow: firm.employeeCountRangeLow,
+        employeeCountRangeHigh: firm.employeeCountRangeHigh,
+        foundedOn: firm.foundedOn?.toString(),
+        specialities: firm.specialities,
+        websiteUrl: firm.websiteUrl,
+        Location: firm.Location,
+        Summary: firm.Summary
+      }));
 
       // Transform the data to match ComprehensiveMarketData interface
       const transformedData: ComprehensiveMarketData = {
@@ -96,7 +114,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         vacancy_rate: countyData.B25002_003E && countyData.B25002_002E 
           ? (countyData.B25002_003E / countyData.B25002_002E) * 100 
           : null,
-        top_firms: topFirms || [],
+        top_firms: transformedFirms
       };
 
       console.log('12. Transformed data:', transformedData);
