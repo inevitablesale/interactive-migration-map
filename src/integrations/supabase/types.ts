@@ -633,6 +633,42 @@ export type Database = {
         }
         Relationships: []
       }
+      scenario_models: {
+        Row: {
+          base_data: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          projected_results: Json
+          scenario_parameters: Json
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          base_data: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          projected_results: Json
+          scenario_parameters: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          base_data?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          projected_results?: Json
+          scenario_parameters?: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sold_firms_data: {
         Row: {
           annual_revenue: number | null
@@ -872,6 +908,19 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_scenario_metrics: {
+        Args: {
+          base_revenue: number
+          growth_rate: number
+          market_saturation: number
+          competition_level: number
+        }
+        Returns: {
+          projected_revenue: number
+          market_opportunity_score: number
+          risk_score: number
+        }[]
+      }
       get_affordable_talent_hubs: {
         Args: Record<PropertyKey, never>
         Returns: {
