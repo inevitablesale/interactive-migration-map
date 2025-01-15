@@ -270,18 +270,30 @@ export function MarketInsightsPanel() {
                   <div className="mt-4 space-y-4">
                     {educationData?.map((region, index) => (
                       <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{region.county_name}</h4>
-                            <p className="text-sm text-gray-400">State {region.state_fp}</p>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-medium text-lg">{region.county_name}</h4>
+                              <p className="text-sm text-gray-400">State {region.state_fp}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-semibold">
+                                {region.masters_degree_percent.toFixed(1)}%
+                              </p>
+                              <p className="text-sm text-gray-400">
+                                Masters Degree Rate
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold">
-                              {region.masters_degree_percent.toFixed(1)}%
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Median Age: {Math.round(region.median_age)}
-                            </p>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                              <p className="text-sm text-gray-400">Total Educated</p>
+                              <p className="text-lg font-medium">{region.firm_count.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-400">Median Age</p>
+                              <p className="text-lg font-medium">{Math.round(region.median_age)}</p>
+                            </div>
                           </div>
                         </div>
                       </div>
