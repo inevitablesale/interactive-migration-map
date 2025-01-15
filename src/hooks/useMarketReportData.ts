@@ -38,8 +38,8 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
-        .eq('statefp', stateData.fips_code)
-        .ilike('countyname', county)
+        .eq('STATEFP', stateData.fips_code)
+        .ilike('COUNTYNAME', county)
         .maybeSingle();
 
       if (countyError) {
@@ -92,7 +92,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       // Transform the data using the county_rankings view data
       const transformedData: ComprehensiveMarketData = {
         total_population: countyData.population || null,
-        median_household_income: null, // We'll need to add this from county_data if needed
+        median_household_income: null,
         median_gross_rent: null,
         median_home_value: null,
         employed_population: null,
