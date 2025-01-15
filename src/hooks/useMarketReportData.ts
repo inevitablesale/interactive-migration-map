@@ -13,30 +13,50 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         return null;
       }
 
+      // First get the state FIPS code
+      console.log('3. Getting state FIPS code for:', stateName);
+      const { data: stateFips, error: stateFipsError } = await supabase
+        .from('state_fips_codes')
+        .select('fips_code')
+        .ilike('state', stateName)
+        .maybeSingle();
+
+      if (stateFipsError) {
+        console.error('Error fetching state FIPS:', stateFipsError);
+        throw stateFipsError;
+      }
+
+      if (!stateFips) {
+        console.log('4. No state FIPS found for:', stateName);
+        return null;
+      }
+
+      console.log('5. Found state FIPS:', stateFips.fips_code);
+
       // Get data from county_rankings materialized view
-      console.log('3. Fetching county rankings data for:', { county, stateName });
+      console.log('6. Fetching county rankings data for:', { county, stateFips: stateFips.fips_code });
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
-        .eq('state_name', stateName)
+        .eq('statefp', stateFips.fips_code)
         .ilike('countyname', county)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (countyError) {
-        console.error('4. Error fetching county data:', countyError);
+        console.error('7. Error fetching county data:', countyError);
         throw countyError;
       }
 
       if (!countyData) {
-        console.log('5. No county data found for:', { county, stateName });
+        console.log('8. No county data found for:', { county, stateName });
         return null;
       }
 
-      console.log('6. Retrieved county data:', countyData);
+      console.log('9. Retrieved county data:', countyData);
 
       // Get firms data
-      console.log('7. Fetching firms data');
+      console.log('10. Fetching firms data');
       const { data: firmsData, error: firmsError } = await supabase
         .from('canary_firms_data')
         .select('*')
@@ -44,11 +64,11 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .ilike('COUNTYNAME', county);
 
       if (firmsError) {
-        console.error('8. Error fetching firms data:', firmsError);
+        console.error('11. Error fetching firms data:', firmsError);
         throw firmsError;
       }
 
-      console.log('9. Retrieved firms data:', firmsData);
+      console.log('12. Retrieved firms data:', firmsData);
 
       // Transform firms data
       const transformedTopFirms = firmsData ? firmsData.map((firm: any) => ({
@@ -68,7 +88,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         Summary: firm.Summary
       })) : [];
 
-      console.log('10. Transformed firms data. Count:', transformedTopFirms.length);
+      console.log('13. Transformed firms data. Count:', transformedTopFirms.length);
 
       // Transform the data using the county_rankings view data
       const transformedData: ComprehensiveMarketData = {
@@ -100,7 +120,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         top_firms: transformedTopFirms,
       };
 
-      console.log('11. Final transformed data:', transformedData);
+      console.log('14. Final transformed data:', transformedData);
 
       return transformedData;
     },
@@ -108,7 +128,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
   });
 
   const hasMarketData = !!marketData;
-  console.log('12. Query complete:', { 
+  console.log('15. Query complete:', { 
     hasData: hasMarketData, 
     isLoading, 
     hasError: !!error,
