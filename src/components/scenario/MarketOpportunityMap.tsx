@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaW5ldml0YWJsZXNhbGUiLCJhIjoiY200dWtvaXZzMG10cTJzcTVjMGJ0bG14MSJ9.1bPoVxBRnR35MQGsGQgvQw";
@@ -13,32 +11,17 @@ interface Connection {
   strength: number;
 }
 
-export function MarketOpportunityMap() {
+interface Props {
+  soldFirms: any[];
+  activeFirms: any[];
+  censusData: any[];
+  activeLayer: 'all' | 'sold' | 'active' | 'census';
+}
+
+export function MarketOpportunityMap({ soldFirms, activeFirms, censusData, activeLayer }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
-
-  const { data: soldFirms } = useQuery({
-    queryKey: ['soldFirmsData'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sold_firms_data')
-        .select('*');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: activeFirms } = useQuery({
-    queryKey: ['canaryFirmsData'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('canary_firms_data')
-        .select('*');
-      if (error) throw error;
-      return data;
-    }
-  });
 
   // Calculate connections between firms based on similarity
   useEffect(() => {
@@ -97,62 +80,129 @@ export function MarketOpportunityMap() {
     };
   }, []);
 
-  // Draw connections when map is loaded and connections are calculated
+  // Update layers based on activeLayer selection
   useEffect(() => {
     if (!map.current || !connections.length) return;
 
     map.current.on('load', () => {
       // Remove existing layers if they exist
-      if (map.current?.getLayer('connections')) {
-        map.current.removeLayer('connections');
-      }
-      if (map.current?.getSource('connections')) {
-        map.current.removeSource('connections');
-      }
-
-      // Add connections as a new layer
-      map.current?.addSource('connections', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: connections.map(conn => ({
-            type: 'Feature',
-            geometry: {
-              type: 'LineString',
-              coordinates: [conn.from, conn.to]
-            },
-            properties: {
-              strength: conn.strength
-            }
-          }))
+      ['connections', 'sold-points', 'active-points', 'census-regions'].forEach(layer => {
+        if (map.current?.getLayer(layer)) {
+          map.current.removeLayer(layer);
+        }
+        if (map.current?.getSource(layer)) {
+          map.current.removeSource(layer);
         }
       });
 
-      map.current?.addLayer({
-        id: 'connections',
-        type: 'line',
-        source: 'connections',
-        paint: {
-          'line-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'strength'],
-            0, '#ff0000',
-            0.5, '#ffff00',
-            1, '#00ff00'
-          ],
-          'line-width': [
-            'interpolate',
-            ['linear'],
-            ['get', 'strength'],
-            0, 1,
-            1, 3
-          ],
-          'line-opacity': 0.6
-        }
-      });
+      // Add layers based on activeLayer selection
+      if (activeLayer === 'all' || activeLayer === 'sold') {
+        // Add sold firms points
+        map.current.addSource('sold-points', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: soldFirms.map(firm => ({
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [firm.Longitude, firm.Latitude]
+              },
+              properties: {
+                ...firm
+              }
+            }))
+          }
+        });
+
+        map.current.addLayer({
+          id: 'sold-points',
+          type: 'circle',
+          source: 'sold-points',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#ff0000',
+            'circle-opacity': 0.7
+          }
+        });
+      }
+
+      if (activeLayer === 'all' || activeLayer === 'active') {
+        // Add active firms points
+        map.current.addSource('active-points', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: activeFirms.map(firm => ({
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [firm.longitude, firm.latitude]
+              },
+              properties: {
+                ...firm
+              }
+            }))
+          }
+        });
+
+        map.current.addLayer({
+          id: 'active-points',
+          type: 'circle',
+          source: 'active-points',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#00ff00',
+            'circle-opacity': 0.7
+          }
+        });
+      }
+
+      if (activeLayer === 'all') {
+        // Add connections between firms
+        map.current.addSource('connections', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: connections.map(conn => ({
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: [conn.from, conn.to]
+              },
+              properties: {
+                strength: conn.strength
+              }
+            }))
+          }
+        });
+
+        map.current.addLayer({
+          id: 'connections',
+          type: 'line',
+          source: 'connections',
+          paint: {
+            'line-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'strength'],
+              0, '#ff0000',
+              0.5, '#ffff00',
+              1, '#00ff00'
+            ],
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['get', 'strength'],
+              0, 1,
+              1, 3
+            ],
+            'line-opacity': 0.6
+          }
+        });
+      }
     });
-  }, [connections]);
+  }, [connections, activeLayer]);
 
   return (
     <Card className="p-4">
