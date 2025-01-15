@@ -89,7 +89,7 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('DISTINCT ON (COUNTYNAME, "State Name") *')
+        .select('COUNTYNAME, "State Name", employeeCount, followerCount, market_saturation')
         .order('employeeCount', { ascending: false })
         .limit(5);
       
@@ -125,12 +125,12 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: stateComparison = [] } = useQuery({
+  const { data: stateData = [] } = useQuery({
     queryKey: ['stateComparison'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('state_data')
-        .select('DISTINCT ON (STATEFP) *')
+        .select('STATEFP, ESTAB, EMP, PAYANN, B19013_001E')
         .limit(2);
       if (error) throw error;
       return data;
@@ -156,6 +156,7 @@ export function KeyInsightsPanel() {
       .filter(county => county.total_firms > 0)
       .map(county => ({
         county_name: county.countyname,
+        state: county.statefp,
         median_income: county.state_density_avg * 50000,
         median_home_value: county.state_growth_avg * 100000,
         total_firms: county.total_firms,
@@ -196,7 +197,7 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(market.county_name, 'state')}
+                        onClick={() => handleNavigateToMarket(market.county_name, market.state)}
                       >
                         <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
@@ -456,7 +457,7 @@ export function KeyInsightsPanel() {
       <div className="mt-8">
         <h3 className="text-2xl font-bold mb-4">State Performance Comparison</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {stateComparison?.slice(0, 2).map((state, index) => (
+          {stateData?.map((state, index) => (
             <Card 
               key={index} 
               className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
