@@ -9,7 +9,9 @@ import {
   BarChart3, 
   ArrowUpRight,
   ArrowDownRight,
-  Minus
+  Minus,
+  Globe,
+  MapPin
 } from "lucide-react";
 import type { EnhancedMarketScore, MarketTrend, CompetitiveAnalysis } from "@/types/analytics";
 import {
@@ -20,7 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export function EnhancedAnalytics() {
-  const { data: marketScores } = useQuery<EnhancedMarketScore[]>({
+  const { data: marketScores } = useQuery({
     queryKey: ['enhancedMarketScores'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_enhanced_market_scores');
@@ -29,7 +31,7 @@ export function EnhancedAnalytics() {
     }
   });
 
-  const { data: marketTrends } = useQuery<MarketTrend[]>({
+  const { data: marketTrends } = useQuery({
     queryKey: ['marketTrends'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_market_trends');
@@ -38,7 +40,7 @@ export function EnhancedAnalytics() {
     }
   });
 
-  const { data: competitiveAnalysis } = useQuery<CompetitiveAnalysis[]>({
+  const { data: competitiveAnalysis } = useQuery({
     queryKey: ['competitiveAnalysis'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_competitive_analysis');
@@ -73,8 +75,19 @@ export function EnhancedAnalytics() {
               <div key={index} className="bg-black/20 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-white font-medium">State {score.statefp}</div>
-                  <div className="text-sm text-white/60">
-                    Total Score: {Math.round(score.total_score * 100)}%
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm text-white/60">
+                        State Rank: {score.density_rank}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-white/60">
+                        National Rank: {score.national_density_rank}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
@@ -178,11 +191,19 @@ export function EnhancedAnalytics() {
               <div key={index} className="bg-black/20 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-white font-medium">State {trend.statefp}</div>
-                  <div className="flex items-center gap-2">
-                    {getTrendIcon(trend.trend_direction)}
-                    <span className="text-sm text-white/60">
-                      {trend.growth_rate > 0 ? '+' : ''}{Math.round(trend.growth_rate)}% Growth
-                    </span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm text-white/60">
+                        State Rank: {trend.growth_rank}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-white/60">
+                        National Rank: {trend.national_growth_rank}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 

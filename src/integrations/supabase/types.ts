@@ -964,6 +964,8 @@ export type Database = {
           growth_rate: number
           density_rank: number
           growth_rank: number
+          national_density_rank: number
+          national_growth_rank: number
           state_density_avg: number
           state_growth_avg: number
           market_saturation: number
