@@ -440,9 +440,9 @@ export function KeyInsightsPanel() {
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(region.county_name, '')}
+                        onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state_name}</h3>
                         <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} firms/10k</p>
                         <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} firms/10k</p>
                         <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
