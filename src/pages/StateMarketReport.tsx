@@ -48,8 +48,9 @@ export default function StateMarketReport() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('county_data')
-        .select('*')
+        .select('DISTINCT ON (COUNTYNAME) *')
         .eq('STATEFP', state)
+        .order('COUNTYNAME')
         .order('B01001_001E', { ascending: false })
         .limit(6);
 
@@ -187,7 +188,7 @@ export default function StateMarketReport() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {countyData.map((county) => (
                 <Card 
-                  key={county.COUNTYFP}
+                  key={`${county.COUNTYFP}-${county.STATEFP}`}
                   className="bg-black/40 backdrop-blur-md border-white/10 p-6 cursor-pointer hover:bg-black/60 transition-colors"
                   onClick={() => handleCountyClick(county.COUNTYNAME)}
                 >
