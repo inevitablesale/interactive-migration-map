@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 import { 
   TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
   Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
@@ -124,16 +125,6 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: valueMetrics } = useQuery({
-    queryKey: ['valueMetrics'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_value_metrics');
-      if (error) throw error;
-      return data as ValueMetric[];
-    },
-  });
-
-  // Transform existing county rankings data for value metrics
   const { data: countyRankings } = useQuery({
     queryKey: ['countyRankings'],
     queryFn: async () => {
@@ -143,7 +134,7 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const valueMetrics: ValueMetric[] = useMemo(() => {
+  const transformedValueMetrics: ValueMetric[] = useMemo(() => {
     if (!countyRankings) return [];
     
     return countyRankings
@@ -165,7 +156,7 @@ export function KeyInsightsPanel() {
   const topUnderservedRegion = underservedRegions?.[0];
   const topEmergingTalentMarket = emergingTalentData?.[0];
   const topFutureSaturationRisk = futureSaturationData?.[0];
-  const topValueMetric = valueMetrics?.[0];
+  const topValueMetric = transformedValueMetrics?.[0];
 
   const insights = [
     {
@@ -189,7 +180,7 @@ export function KeyInsightsPanel() {
                     <DialogTitle className="text-xl font-bold text-white">High-Value Markets</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
-                    {valueMetrics?.slice(0, 5).map((market, index) => (
+                    {transformedValueMetrics?.slice(0, 5).map((market, index) => (
                       <div 
                         key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
