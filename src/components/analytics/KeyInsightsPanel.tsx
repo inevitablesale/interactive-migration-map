@@ -166,6 +166,12 @@ export function KeyInsightsPanel() {
     },
   });
 
+  // Restore the top metrics declarations
+  const topGrowthMetric = marketGrowthMetrics?.[0];
+  const topCompetitiveMarket = competitiveMarkets?.[0];
+  const topUnderservedRegion = underservedRegions?.[0];
+  const topEmergingTalentMarket = emergingTalentData?.[0];
+  const topFutureSaturationRisk = futureSaturationData?.[0];
   const topValueMetric = transformedValueMetrics?.[0];
 
   const insights = [
