@@ -33,13 +33,13 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('6. Found state FIPS:', stateData.fips_code);
 
-      // Get county data
+      // Get county data from the county_rankings view
       console.log('7. Fetching county data for:', { county, stateFips: stateData.fips_code });
       const { data: countyData, error: countyError } = await supabase
-        .from('county_data')
+        .from('county_rankings')
         .select('*')
-        .eq('STATEFP', stateData.fips_code)
-        .ilike('COUNTYNAME', county)
+        .eq('statefp', stateData.fips_code)
+        .ilike('countyname', county)
         .maybeSingle();
 
       if (countyError) {
@@ -53,21 +53,6 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       }
 
       console.log('10. Retrieved county data:', countyData);
-
-      // Get rankings data using the function
-      console.log('11. Fetching rankings data');
-      const { data: rankingsData, error: rankingsError } = await supabase
-        .rpc('get_county_rankings')
-        .eq('statefp', stateData.fips_code)
-        .eq('countyname', county)
-        .maybeSingle();
-
-      if (rankingsError) {
-        console.error('12. Error fetching rankings:', rankingsError);
-        throw rankingsError;
-      }
-
-      console.log('13. Retrieved rankings data:', rankingsData);
 
       // Get firms data
       console.log('14. Fetching firms data');
@@ -104,35 +89,33 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('17. Transformed firms data. Count:', transformedTopFirms.length);
 
-      // Transform the data
+      // Transform the data using the county_rankings view data
       const transformedData: ComprehensiveMarketData = {
-        total_population: countyData.B01001_001E || null,
-        median_household_income: countyData.B19013_001E || null,
-        median_gross_rent: countyData.B25064_001E || null,
-        median_home_value: countyData.B25077_001E || null,
-        employed_population: countyData.B23025_004E || null,
-        private_sector_accountants: countyData.C24060_004E || null,
-        public_sector_accountants: countyData.C24060_007E || null,
-        firms_per_10k_population: rankingsData?.firm_density || null,
-        growth_rate_percentage: rankingsData?.growth_rate || null,
-        market_saturation_index: rankingsData?.market_saturation || null,
-        total_education_population: countyData.B15003_001E || null,
-        bachelors_degree_holders: countyData.B15003_022E || null,
-        masters_degree_holders: countyData.B15003_023E || null,
-        doctorate_degree_holders: countyData.B15003_025E || null,
-        payann: countyData.PAYANN || null,
-        total_establishments: countyData.ESTAB || null,
-        emp: countyData.EMP || null,
-        public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
-          ? countyData.C24060_007E / countyData.C24060_004E 
-          : null,
+        total_population: countyData.population || null,
+        median_household_income: null, // We'll need to add this from county_data if needed
+        median_gross_rent: null,
+        median_home_value: null,
+        employed_population: null,
+        private_sector_accountants: null,
+        public_sector_accountants: null,
+        firms_per_10k_population: countyData.firm_density || null,
+        growth_rate_percentage: countyData.growth_rate || null,
+        market_saturation_index: countyData.market_saturation || null,
+        total_education_population: null,
+        bachelors_degree_holders: null,
+        masters_degree_holders: null,
+        doctorate_degree_holders: null,
+        payann: null,
+        total_establishments: countyData.total_firms || null,
+        emp: null,
+        public_to_private_ratio: null,
         vacancy_rate: null,
         vacancy_rank: null,
         income_rank: null,
         population_rank: null,
         rent_rank: null,
-        density_rank: rankingsData?.density_rank || null,
-        growth_rank: rankingsData?.growth_rank || null,
+        density_rank: countyData.density_rank || null,
+        growth_rank: countyData.growth_rank || null,
         top_firms: transformedTopFirms,
       };
 
