@@ -1,190 +1,562 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRight, Building2, TrendingUp, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
+  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
+  DollarSign, Briefcase, LineChart, Building
+} from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
 
-interface MarketMetric {
-  id: number;
-  title: string;
-  value: string;
-  change: number;
-  icon: typeof Building2 | typeof Users | typeof TrendingUp;
-  details?: {
-    label: string;
-    value: string;
-  }[];
+interface MarketGrowthMetric {
+  county_name: string;
+  state: string;
+  population_growth: number;
+  growth_rate_percentage: number;
+  total_movedin_2022: number;
+  total_movedin_2021: number;
+  total_movedin_2020: number;
+  total_moves: number;
 }
 
-interface StatePerformance {
+interface ValueMetric {
+  county_name: string;
   state: string;
-  rank: number;
-  score: number;
-  metrics: {
-    label: string;
-    value: string;
-    trend: 'up' | 'down' | 'neutral';
-  }[];
+  state_name: string; // Add this for full state name
+  median_income: number;
+  median_home_value: number;
+  total_firms: number;
+  avg_revenue: number;
+  growth_potential: number;
+}
+
+interface CompetitiveMarketMetric {
+  COUNTYNAME: string;
+  "State Name": string;
+  employeeCount: number;
+  followerCount: number;
+  market_saturation?: number;
+}
+
+interface UnderservedRegionMetric {
+  county_name: string;
+  state_name: string;
+  total_establishments: number;
+  population: number;
+  firms_per_10k_population: number;
+  recent_movers: number;
+  market_status: string;
+  opportunity_status: string;
+  median_income?: number;
+}
+
+interface EmergingTalentMarket {
+  county_name: string;
+  education_rate_percent: number;
+  total_educated: number;
+  education_growth_rate: number;
+  median_age: number;
+  private_to_public_ratio?: number;
+}
+
+interface FutureSaturationRisk {
+  county_name: string;
+  current_firm_density: number;
+  projected_firm_density: number;
+  firm_growth_rate: number;
+  population_growth_rate: number;
 }
 
 export function KeyInsightsPanel() {
-  const [selectedMetric, setSelectedMetric] = useState<MarketMetric | null>(null);
   const navigate = useNavigate();
 
-  const { data: marketOpportunities } = useQuery({
-    queryKey: ['marketMetrics'],
+  const { data: marketGrowthMetrics = [] } = useQuery({
+    queryKey: ['marketGrowthMetrics'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_market_opportunities');
+      const { data, error } = await supabase.rpc('get_market_growth_metrics');
       if (error) throw error;
-
-      // Transform the data to match MarketMetric interface
-      const transformedData: MarketMetric[] = [
-        {
-          id: 1,
-          title: "Market Growth",
-          value: `${data[0]?.migration_score.toFixed(1)}%`,
-          change: data[0]?.migration_score || 0,
-          icon: TrendingUp,
-          details: [
-            { label: "Migration Score", value: `${data[0]?.migration_score.toFixed(1)}%` },
-            { label: "Business Density", value: `${data[0]?.business_density_score.toFixed(1)}` }
-          ]
-        },
-        {
-          id: 2,
-          title: "Service Coverage",
-          value: `${data[0]?.service_coverage_score.toFixed(1)}%`,
-          change: data[0]?.service_coverage_score || 0,
-          icon: Building2,
-          details: [
-            { label: "Coverage Score", value: `${data[0]?.service_coverage_score.toFixed(1)}%` }
-          ]
-        }
-      ];
-
-      return transformedData;
-    }
+      return data;
+    },
   });
 
-  const { data: stateRankings } = useQuery({
-    queryKey: ['statePerformance'],
+  const { data: competitiveMarkets = [] } = useQuery({
+    queryKey: ['competitiveMarkets'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_state_rankings');
+      const { data, error } = await supabase
+        .from('canary_firms_data')
+        .select('COUNTYNAME, "State Name", employeeCount, followerCount')
+        .order('employeeCount', { ascending: false })
+        .limit(5);
+      
       if (error) throw error;
-
-      // Transform the data to match StatePerformance interface
-      const transformedData: StatePerformance[] = data.map(state => ({
-        state: state.statefp,
-        rank: state.density_rank,
-        score: state.total_firms,
-        metrics: [
-          {
-            label: "Firm Density",
-            value: state.firm_density.toFixed(1),
-            trend: state.growth_rate > 0 ? 'up' : state.growth_rate < 0 ? 'down' : 'neutral'
-          },
-          {
-            label: "Growth Rate",
-            value: `${state.growth_rate.toFixed(1)}%`,
-            trend: state.growth_rate > 0 ? 'up' : state.growth_rate < 0 ? 'down' : 'neutral'
-          },
-          {
-            label: "Market Saturation",
-            value: state.market_saturation.toFixed(1),
-            trend: 'neutral'
-          }
-        ]
+      
+      return data.map(market => ({
+        ...market,
+        market_saturation: (market.employeeCount / 1000) * 100 // Example calculation
       }));
-
-      return transformedData;
-    }
+    },
   });
 
-  useEffect(() => {
-    if (!marketOpportunities || !stateRankings) return;
-    // Additional initialization logic if needed
-  }, [marketOpportunities, stateRankings]);
+  const { data: underservedRegions = [] } = useQuery({
+    queryKey: ['underservedRegions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_underserved_regions');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: emergingTalentData = [] } = useQuery({
+    queryKey: ['emergingTalentMarkets'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_emerging_talent_markets');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: futureSaturationData = [] } = useQuery({
+    queryKey: ['futureSaturationRisk'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_future_saturation_risk');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: stateData = [] } = useQuery({
+    queryKey: ['stateComparison'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('state_data')
+        .select('STATEFP, ESTAB, EMP, PAYANN, B19013_001E')
+        .limit(2);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: countyRankings } = useQuery({
+    queryKey: ['countyRankings'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_county_rankings');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const transformedValueMetrics: ValueMetric[] = useMemo(() => {
+    if (!countyRankings) return [];
+    
+    return countyRankings
+      .filter((county, index, self) => 
+        index === self.findIndex(c => c.countyname === county.countyname)
+      )
+      .filter(county => county.total_firms > 0)
+      .map(county => ({
+        county_name: county.countyname.endsWith(" County") ? county.countyname : `${county.countyname} County`,
+        state: county.statefp,
+        state_name: getStateNameFromFIPS(county.statefp), // Add function to get full state name
+        median_income: county.state_density_avg * 50000,
+        median_home_value: county.state_growth_avg * 100000,
+        total_firms: county.total_firms,
+        avg_revenue: county.firm_density * 10000,
+        growth_potential: county.growth_rate
+      }))
+      .sort((a, b) => b.avg_revenue - a.avg_revenue)
+      .slice(0, 5);
+  }, [countyRankings]);
+
+  const handleNavigateToMarket = (county: string, state: string) => {
+    if (!state) {
+      console.error('State is undefined for county:', county);
+      return;
+    }
+    const formattedCounty = county.endsWith(" County") ? county : `${county} County`;
+    navigate(`/market-report/${formattedCounty}/${state}`);
+  };
+
+  const insights = [
+    {
+      title: "High-Value Markets",
+      value: transformedValueMetrics?.[0] 
+        ? `${transformedValueMetrics[0].county_name}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {transformedValueMetrics?.[0] ? (
+            <>
+              {`$${(transformedValueMetrics[0].avg_revenue / 1000).toFixed(1)}K avg revenue, ${transformedValueMetrics[0].growth_potential.toFixed(1)}% growth potential`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">High-Value Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {transformedValueMetrics?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
+                        <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data"
+          )}
+        </div>
+      ),
+      icon: DollarSign,
+    },
+    {
+      title: "Market Growth Leaders",
+      value: marketGrowthMetrics?.[0] 
+        ? `${marketGrowthMetrics[0].county_name}, ${marketGrowthMetrics[0].state}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {marketGrowthMetrics?.[0] ? (
+            <>
+              {`${marketGrowthMetrics[0].growth_rate_percentage.toFixed(1)}% growth rate, ${(marketGrowthMetrics[0].total_moves || 0).toLocaleString()} total moves`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Market Growth Leaders</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {marketGrowthMetrics?.slice(0, 5).map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(region.county_name, region.state)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state}</h3>
+                        <p className="text-sm text-gray-300">Growth Rate: {region.growth_rate_percentage.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Moves: {region.total_moves.toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing regional data"
+          )}
+        </div>
+      ),
+      icon: TrendingUp,
+    },
+    {
+      title: "Talent Availability",
+      value: emergingTalentData[0] 
+        ? `${emergingTalentData[0].county_name}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {emergingTalentData[0] ? (
+            <>
+              {`${emergingTalentData[0].education_rate_percent.toFixed(1)}% education rate, ${emergingTalentData[0].total_educated.toLocaleString()} educated professionals`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Talent Markets</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {emergingTalentData?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.county_name}</h3>
+                        <p className="text-sm text-gray-300">Education Rate: {market.education_rate_percent.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-300">Total Educated: {market.total_educated.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Median Age: {market.median_age}</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing talent data..."
+          )}
+        </div>
+      ),
+      icon: GraduationCap,
+    },
+    {
+      title: "Market Competition",
+      value: competitiveMarkets[0] 
+        ? `${competitiveMarkets[0].COUNTYNAME}, ${competitiveMarkets[0]["State Name"]}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {competitiveMarkets[0] ? (
+            <>
+              {`${competitiveMarkets[0].employeeCount.toLocaleString()} employees, ${competitiveMarkets[0].followerCount.toLocaleString()} followers`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Market Competition</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {competitiveMarkets?.slice(0, 5).map((market, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(market.COUNTYNAME, market["State Name"])}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{market.COUNTYNAME}, {market["State Name"]}</h3>
+                        <p className="text-sm text-gray-300">Employees: {market.employeeCount.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Followers: {market.followerCount.toLocaleString()}</p>
+                        <p className="text-sm text-gray-300">Market Saturation: {(market.market_saturation || 0).toFixed(1)}%</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data..."
+          )}
+        </div>
+      ),
+      icon: Users,
+    },
+    {
+      title: "Growth Opportunities",
+      value: underservedRegions[0] 
+        ? `${underservedRegions[0].county_name}, ${underservedRegions[0].state_name}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {underservedRegions[0] ? (
+            <>
+              {`${underservedRegions[0].market_status}, ${underservedRegions[0].opportunity_status}`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Growth Opportunities</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {underservedRegions?.slice(0, 5).map((region, index) => (
+                      <div 
+                        key={index} 
+                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
+                      >
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state_name}</h3>
+                        <p className="text-sm text-gray-300">Market Status: {region.market_status}</p>
+                        <p className="text-sm text-gray-300">Opportunity: {region.opportunity_status}</p>
+                        <p className="text-sm text-gray-300">Firms per 10k: {region.firms_per_10k_population}</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data"
+          )}
+        </div>
+      ),
+      icon: Target,
+    },
+    {
+      title: "Market Saturation Risk",
+      value: futureSaturationData[0] 
+        ? `${futureSaturationData[0].county_name}`
+        : "Loading...",
+      insight: (
+        <div className="flex items-center gap-2 text-sm text-white/80">
+          {futureSaturationData[0] ? (
+            <>
+              {`Current: ${futureSaturationData[0].current_firm_density.toFixed(1)} firms/10k, Projected: ${futureSaturationData[0].projected_firm_density.toFixed(1)} firms/10k`}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
+                    View Details <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Market Saturation Risk Analysis</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {futureSaturationData?.slice(0, 5).map((region, index) => {
+                      // Extract state name from the county_name (assuming format "County Name, State")
+                      const [countyName, stateName] = region.county_name.split(',').map(s => s.trim());
+                      return (
+                        <div 
+                          key={index} 
+                          className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
+                          onClick={() => handleNavigateToMarket(countyName, stateName)}
+                        >
+                          <h3 className="text-lg font-semibold text-white">{region.county_name}</h3>
+                          <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} per 10k</p>
+                          <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} per 10k</p>
+                          <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            "Analyzing market data..."
+          )}
+        </div>
+      ),
+      icon: ChartBarIcon,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Market Insights at a Glance</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {marketOpportunities?.map((metric) => (
+    <section className="space-y-6">
+      <h2 className="text-3xl font-bold">Market Insights at a Glance</h2>
+      <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
+        {insights.map((insight) => (
           <Card
-            key={metric.id}
-            className="p-6 cursor-pointer hover:bg-gray-50/5 transition-colors"
-            onClick={() => setSelectedMetric(metric)}
+            key={insight.title}
+            className="p-6 bg-black/40 backdrop-blur-md border-white/10"
           >
-            <div className="flex items-center justify-between mb-4">
-              <metric.icon className="w-5 h-5 text-blue-500" />
-              <span className={`text-sm ${metric.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {metric.change > 0 ? '+' : ''}{metric.change}%
-              </span>
+            <div className="flex items-center gap-3 mb-4">
+              <insight.icon className="w-5 h-5 text-yellow-400" />
+              <h3 className="font-semibold text-lg text-white">{insight.title}</h3>
             </div>
-            <h3 className="text-lg font-medium text-gray-200 mb-2">{metric.title}</h3>
-            <p className="text-2xl font-bold text-white">{metric.value}</p>
+            <p className="text-2xl font-bold text-white mb-2">{insight.value}</p>
+            <div className="text-sm text-white/80">{insight.insight}</div>
           </Card>
         ))}
       </div>
 
       <div className="mt-8">
-        <h2 className="text-2xl font-bold text-white mb-6">State Performance Comparison</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stateRankings?.map((state) => (
-            <Card key={state.state} className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-200">{state.state}</h3>
-                <span className="text-sm text-gray-400">Rank #{state.rank}</span>
+        <h3 className="text-2xl font-bold mb-4">State Performance Comparison</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {stateData?.map((state, index) => (
+            <Card 
+              key={index} 
+              className="p-6 bg-black/40 backdrop-blur-md border-white/10 cursor-pointer hover:bg-black/50 transition-colors"
+              onClick={() => handleNavigateToMarket('All Counties', state.STATEFP)}
+            >
+              <h4 className="text-lg font-semibold text-white mb-4">State {state.STATEFP}</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Total Establishments</span>
+                  <span className="text-white font-medium">{state.ESTAB?.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Total Employment</span>
+                  <span className="text-white font-medium">{state.EMP?.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Annual Payroll</span>
+                  <span className="text-white font-medium">${(state.PAYANN / 1000000).toFixed(1)}M</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Median Income</span>
+                  <span className="text-white font-medium">${state.B19013_001E?.toLocaleString()}</span>
+                </div>
               </div>
-              <div className="space-y-4">
-                {state.metrics.map((metric, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">{metric.label}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white">{metric.value}</span>
-                      <ArrowUpRight
-                        className={`w-4 h-4 ${
-                          metric.trend === 'up'
-                            ? 'text-green-500'
-                            : metric.trend === 'down'
-                            ? 'text-red-500'
-                            : 'text-gray-500'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button
-                className="w-full mt-4"
-                variant="outline"
-                onClick={() => navigate(`/market-report/${state.state}`)}
-              >
-                View Full Report
-              </Button>
             </Card>
           ))}
         </div>
       </div>
-
-      <Dialog open={!!selectedMetric} onOpenChange={() => setSelectedMetric(null)}>
-        <DialogContent className="bg-gray-900 border-gray-800">
-          <DialogHeader>
-            <DialogTitle className="text-xl text-white">{selectedMetric?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 space-y-4">
-            {selectedMetric?.details?.map((detail, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <span className="text-gray-400">{detail.label}</span>
-                <span className="text-white font-medium">{detail.value}</span>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </section>
   );
+}
+
+// Helper function to get full state name from FIPS code
+function getStateNameFromFIPS(fips: string): string {
+  const stateMap: { [key: string]: string } = {
+    '01': 'Alabama',
+    '02': 'Alaska',
+    '04': 'Arizona',
+    '05': 'Arkansas',
+    '06': 'California',
+    '08': 'Colorado',
+    '09': 'Connecticut',
+    '10': 'Delaware',
+    '11': 'District of Columbia',
+    '12': 'Florida',
+    '13': 'Georgia',
+    '15': 'Hawaii',
+    '16': 'Idaho',
+    '17': 'Illinois',
+    '18': 'Indiana',
+    '19': 'Iowa',
+    '20': 'Kansas',
+    '21': 'Kentucky',
+    '22': 'Louisiana',
+    '23': 'Maine',
+    '24': 'Maryland',
+    '25': 'Massachusetts',
+    '26': 'Michigan',
+    '27': 'Minnesota',
+    '28': 'Mississippi',
+    '29': 'Missouri',
+    '30': 'Montana',
+    '31': 'Nebraska',
+    '32': 'Nevada',
+    '33': 'New Hampshire',
+    '34': 'New Jersey',
+    '35': 'New Mexico',
+    '36': 'New York',
+    '37': 'North Carolina',
+    '38': 'North Dakota',
+    '39': 'Ohio',
+    '40': 'Oklahoma',
+    '41': 'Oregon',
+    '42': 'Pennsylvania',
+    '44': 'Rhode Island',
+    '45': 'South Carolina',
+    '46': 'South Dakota',
+    '47': 'Tennessee',
+    '48': 'Texas',
+    '49': 'Utah',
+    '50': 'Vermont',
+    '51': 'Virginia',
+    '53': 'Washington',
+    '54': 'West Virginia',
+    '55': 'Wisconsin',
+    '56': 'Wyoming'
+  };
+  return stateMap[fips] || fips;
 }
