@@ -18,7 +18,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .from('state_fips_codes')
         .select('fips_code')
         .eq('state', stateName)
-        .maybeSingle();
+        .single();
 
       if (stateError) {
         console.error('Error fetching state FIPS:', stateError);
@@ -39,7 +39,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.fips_code)
-        .maybeSingle();
+        .single();
 
       if (countyError) {
         console.error('Error fetching county data:', countyError);
