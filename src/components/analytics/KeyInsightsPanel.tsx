@@ -83,6 +83,7 @@ interface CountyRanking {
   state_density_avg: number;
   state_growth_avg: number;
   vacancy_rate: number;
+  top_firms: any[];
 }
 
 async function fetchMarketGrowthMetrics() {
@@ -212,7 +213,7 @@ export function KeyInsightsPanel() {
         <div className="flex items-center gap-2 text-sm text-white/80">
           {topGrowthCounty ? (
             <>
-              {`${((topGrowthCounty.population_growth_rate || 0) * 100).toFixed(1)}% growth rate, ${(topGrowthCounty.total_firms || 0).toLocaleString()} firms`}
+              {`${((topGrowthCounty.population_growth_rate || 0) * 100).toFixed(1)}% growth rate, ${((topGrowthCounty.top_firms || []).length || 0).toLocaleString()} firms`}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
