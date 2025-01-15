@@ -35,7 +35,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       // Then, get the county data using the FIPS code
       const { data: countyData, error: countyError } = await supabase
-        .from('county_data')
+        .from('county_rankings')
         .select('*')
         .eq('COUNTYNAME', county)
         .eq('STATEFP', stateData.STATEFP)
@@ -70,7 +70,7 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
       console.log('Raw firms data:', firmsData);
 
       // Transform firms data to match TopFirm interface
-      const transformedTopFirms: TopFirm[] = firmsData ? firmsData.map((firm) => ({
+      const transformedTopFirms: TopFirm[] = firmsData ? firmsData.map((firm: any) => ({
         company_name: firm['Company Name'] || '',
         employee_count: firm.employeeCount || 0,
         follower_count: firm.followerCount || 0,
@@ -89,45 +89,33 @@ export const useMarketReportData = (county: string | undefined, stateName: strin
 
       console.log('Transformed top firms:', transformedTopFirms);
 
-      // Calculate firms per 10k population
-      const firmsPerTenK = countyData.B01001_001E > 0 
-        ? (countyData.ESTAB / countyData.B01001_001E) * 10000 
-        : 0;
-
-      // Calculate growth rate
-      const growthRate = countyData.MOVEDIN2021 > 0
-        ? ((countyData.MOVEDIN2022 - countyData.MOVEDIN2021) / countyData.MOVEDIN2021) * 100
-        : 0;
-
       // Transform the data to match ComprehensiveMarketData type
       const transformedData: ComprehensiveMarketData = {
-        total_population: countyData.B01001_001E,
-        median_household_income: countyData.B19013_001E,
-        median_gross_rent: countyData.B25064_001E,
-        median_home_value: countyData.B25077_001E,
-        employed_population: countyData.B23025_004E,
-        private_sector_accountants: countyData.C24060_004E,
-        public_sector_accountants: countyData.C24060_007E,
-        firms_per_10k_population: firmsPerTenK,
-        growth_rate_percentage: growthRate,
-        market_saturation_index: null, // This will need to be calculated if needed
-        total_education_population: countyData.B15003_001E,
-        bachelors_degree_holders: countyData.B15003_022E,
-        masters_degree_holders: countyData.B15003_023E,
-        doctorate_degree_holders: countyData.B15003_025E,
-        payann: countyData.PAYANN,
-        total_establishments: countyData.ESTAB,
-        emp: countyData.EMP,
-        public_to_private_ratio: countyData.C24060_007E && countyData.C24060_004E 
-          ? countyData.C24060_007E / countyData.C24060_004E 
-          : null,
-        vacancy_rate: null, // This will need to be calculated if needed
-        vacancy_rank: null, // This will need to be calculated if needed
-        income_rank: null, // This will need to be calculated if needed
-        population_rank: null, // This will need to be calculated if needed
-        rent_rank: null, // This will need to be calculated if needed
-        density_rank: null, // This will need to be calculated if needed
-        growth_rank: null, // This will need to be calculated if needed
+        total_population: countyData.total_population,
+        median_household_income: countyData.median_household_income,
+        median_gross_rent: countyData.median_gross_rent,
+        median_home_value: countyData.median_home_value,
+        employed_population: countyData.employed_population,
+        private_sector_accountants: countyData.private_sector_accountants,
+        public_sector_accountants: countyData.public_sector_accountants,
+        firms_per_10k_population: countyData.firms_per_10k_population,
+        growth_rate_percentage: countyData.growth_rate_percentage,
+        market_saturation_index: countyData.market_saturation_index,
+        total_education_population: countyData.total_education_population,
+        bachelors_degree_holders: countyData.bachelors_degree_holders,
+        masters_degree_holders: countyData.masters_degree_holders,
+        doctorate_degree_holders: countyData.doctorate_degree_holders,
+        payann: countyData.payann,
+        total_establishments: countyData.total_establishments,
+        emp: countyData.emp,
+        public_to_private_ratio: countyData.public_to_private_ratio,
+        vacancy_rate: countyData.vacancy_rate,
+        vacancy_rank: countyData.vacancy_rank,
+        income_rank: countyData.income_rank,
+        population_rank: countyData.population_rank,
+        rent_rank: countyData.rent_rank,
+        density_rank: countyData.density_rank,
+        growth_rank: countyData.growth_rank,
         top_firms: transformedTopFirms,
       };
 
