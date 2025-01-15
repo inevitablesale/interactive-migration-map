@@ -83,7 +83,7 @@ export default function Analysis() {
             ))}
           </div>
           
-          <div className="mt-12">
+          <div className="mt-12 flex justify-center gap-4">
             <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
               <Button 
                 onClick={() => setShowProfileForm(true)}
@@ -104,7 +104,25 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        <AlertsPanel />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AlertsPanel />
+          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
+            <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+              <Button 
+                onClick={() => setShowProfileForm(true)}
+                className="w-full bg-blue-500 hover:bg-blue-600"
+              >
+                Create Buyer Profile
+              </Button>
+              <DialogContent className="bg-black/90 border-white/10">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Create Buyer Profile</DialogTitle>
+                </DialogHeader>
+                <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
         <KeyInsightsPanel />
         <MarketHighlights />
         <ComparisonTool />
