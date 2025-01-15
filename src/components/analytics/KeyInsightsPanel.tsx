@@ -24,6 +24,7 @@ interface MarketGrowthMetric {
 
 interface ValueMetric {
   county_name: string;
+  state: string;
   median_income: number;
   median_home_value: number;
   total_firms: number;
@@ -32,13 +33,10 @@ interface ValueMetric {
 }
 
 interface CompetitiveMarketMetric {
-  "Company Name": string;
+  COUNTYNAME: string;
   "State Name": string;
   employeeCount: number;
   followerCount: number;
-  COUNTYNAME: string;
-  STATEFP: number;
-  revenue_per_employee?: number;
   market_saturation?: number;
 }
 
@@ -89,12 +87,17 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('COUNTYNAME, "State Name", employeeCount, followerCount, market_saturation')
+        .select('COUNTYNAME, "State Name", employeeCount, followerCount')
         .order('employeeCount', { ascending: false })
         .limit(5);
       
       if (error) throw error;
-      return data;
+      
+      // Add market saturation calculation here since it's not a column
+      return data.map(market => ({
+        ...market,
+        market_saturation: (market.employeeCount / 1000) * 100 // Example calculation
+      }));
     },
   });
 
