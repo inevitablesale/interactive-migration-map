@@ -14,7 +14,10 @@ export default function MarketReport() {
   const navigate = useNavigate();
   
   const formattedCounty = county?.endsWith(" County") ? county : `${county} County`;
-  const { marketData, isLoading, hasMarketData } = useMarketReportData(formattedCounty, state);
+  const { data, isLoading } = useMarketReportData(formattedCounty, state);
+
+  const marketData = data?.countyData;
+  const hasMarketData = !!marketData;
 
   if (isLoading) {
     return (
