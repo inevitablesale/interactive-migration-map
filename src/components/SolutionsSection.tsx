@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { AIDealSourcer } from "./analytics/AIDealSourcer";
 import { useNavigate } from "react-router-dom";
 import { AccountingIndustryCard } from "./market-report/AccountingIndustryCard";
+import { getStateName } from "@/utils/stateUtils";
 
   const solutions = {
     analyze: {
@@ -111,18 +112,24 @@ export const SolutionsSection = () => {
     queryFn: async () => {
       const { data: stateData, error } = await supabase
         .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E')
-        .order('EMP', { ascending: false })
+        .select('STATEFP, EMP, PAYANN, ESTAB, B01001_001E')
+        .order('ESTAB', { ascending: false })
         .limit(10);
       
       if (error) throw error;
-      return stateData?.map(state => ({
-        name: `State ${state.STATEFP}`,
-        employees: state.EMP || 0,
-        firms: state.ESTAB || 0,
-        payroll: state.PAYANN || 0,
-        income: state.B19013_001E || 0
-      }));
+
+      // Transform the data with state names and calculate market density
+      const transformedData = await Promise.all(stateData?.map(async state => {
+        const stateName = await getStateName(state.STATEFP);
+        const marketDensity = state.B01001_001E ? (state.ESTAB / state.B01001_001E) * 10000 : 0;
+        return {
+          name: stateName,
+          marketDensity: Math.round(marketDensity * 100) / 100,
+          statefp: state.STATEFP
+        };
+      }) || []);
+
+      return transformedData;
     }
   });
 
@@ -141,7 +148,24 @@ export const SolutionsSection = () => {
         total_establishments: countyData.ESTAB,
         emp: countyData.EMP,
         payann: countyData.PAYANN,
-        firms_per_10k_population: (countyData.ESTAB / countyData.B01001_001E) * 10000
+        firms_per_10k_population: (countyData.ESTAB / countyData.B01001_001E) * 10000,
+        total_population: countyData.B01001_001E,
+        median_household_income: countyData.B19013_001E,
+        median_gross_rent: countyData.B25064_001E,
+        median_home_value: countyData.B25077_001E,
+        total_housing_units: countyData.B25001_001E,
+        occupied_housing_units: countyData.B25002_002E,
+        vacant_housing_units: countyData.B25002_003E,
+        total_employed: countyData.B23025_004E,
+        total_unemployed: countyData.B23025_005E,
+        total_households: countyData.B11001_001E,
+        family_households: countyData.B11003_001E,
+        education_total: countyData.B15003_001E,
+        bachelors_degree: countyData.B15003_022E,
+        masters_degree: countyData.B15003_023E,
+        doctorate_degree: countyData.B15003_025E,
+        poverty_total: countyData.B17001_001E,
+        poverty_count: countyData.B17001_002E
       };
     }
   });
@@ -177,7 +201,9 @@ export const SolutionsSection = () => {
                     {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
                     {key === "assess" && <ShieldCheck className="w-5 h-5 text-yellow-400" />}
                     {key === "plan" && <LineChart className="w-5 h-5 text-yellow-400" />}
-                    <h3 className="text-lg font-semibold text-white">{solution.title}</h3>
+                    <h3 className="text-lg font-semibold text-white">
+                      {key === "plan" ? "Prospect with Confidence" : solution.title}
+                    </h3>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-4">
@@ -218,7 +244,7 @@ export const SolutionsSection = () => {
                   )}
                   {key === "plan" && (
                     <div className="h-full flex flex-col animate-fade-in">
-                      <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
+                      <h4 className="text-sm font-medium text-gray-300 mb-4">Market Density Overview</h4>
                       {marketData && (
                         <div className="flex-1">
                           <ResponsiveContainer width="100%" height={300}>
@@ -233,10 +259,11 @@ export const SolutionsSection = () => {
                                 }}
                               />
                               <Bar 
-                                dataKey="firms"
+                                dataKey="marketDensity"
+                                name="Market Density (per 10k population)"
                                 fill="#EAB308"
                                 radius={[4, 4, 0, 0]}
-                                onClick={(data) => handleStateClick(data.name.split(' ')[1])}
+                                onClick={(data) => handleStateClick(data.statefp)}
                                 style={{ cursor: 'pointer' }}
                               />
                             </BarChart>
