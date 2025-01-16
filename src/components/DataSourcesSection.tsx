@@ -41,10 +41,10 @@ export const DataSourcesSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-            How Canary Works
+            Your Market Intelligence Partner
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Transforming complex market data into clear, actionable acquisition strategies
+            Tracking over 2,000 accounting firms with 500+ new opportunities added monthly. We help buyers find their perfect acquisition match.
           </p>
         </div>
 
