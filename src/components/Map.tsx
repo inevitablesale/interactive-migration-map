@@ -138,9 +138,7 @@ const Map = () => {
         .from('state_data')
         .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E, B23025_004E, B25077_001E')
         .not('STATEFP', 'is', null)
-        .not('ESTAB', 'is', null)
-        .order('STATEFP', { ascending: true, nullsLast: true })
-        .or('STATEFP.eq.48,STATEFP.neq.48');  // This puts Texas (48) first, then all other states
+        .not('ESTAB', 'is', null);
 
       if (error) {
         console.error('Error fetching state data:', error);
