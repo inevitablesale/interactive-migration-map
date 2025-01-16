@@ -5,6 +5,7 @@ import { BottomPanel } from "@/components/BottomPanel";
 import { DataSourcesSection } from "@/components/DataSourcesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
 import { TimeCalculator } from "@/components/TimeCalculator";
+import { Card } from "@/components/ui/card";
 
 const Index = () => {
   return (
@@ -29,9 +30,24 @@ const Index = () => {
           <Hero />
         </div>
 
-        {/* Time Calculator Section */}
+        {/* Stats Section */}
         <div className="py-20 px-4">
-          <TimeCalculator />
+          <Card className="w-full max-w-4xl mx-auto bg-white/90 backdrop-blur-sm shadow-lg p-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-2">493</div>
+                <div className="text-gray-600">Regions Analyzed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-2">2,297+</div>
+                <div className="text-gray-600">Firms Monitored</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary mb-2">872</div>
+                <div className="text-gray-600">Cities Tracked</div>
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* Data Sources Section */}
@@ -39,6 +55,11 @@ const Index = () => {
 
         {/* Solutions Section */}
         <SolutionsSection />
+
+        {/* Time Calculator Section */}
+        <div className="py-20 px-4">
+          <TimeCalculator />
+        </div>
       </div>
 
       {/* Fixed UI Elements */}
