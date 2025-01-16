@@ -6,9 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { AIDealSourcer } from "./analytics/AIDealSourcer";
+import { useNavigate } from "react-router-dom";
 
 export const SolutionsSection = () => {
   const [activeTab, setActiveTab] = useState("analyze");
+  const navigate = useNavigate();
 
   const { data: marketData } = useQuery({
     queryKey: ['marketMetrics'],
@@ -97,10 +99,10 @@ export const SolutionsSection = () => {
       metrics: [
         {
           title: "Market Validation",
-          value: "Multi-Layer",
+          value: "State-Level",
           icon: Target,
-          description: "Census + Economic + Industry",
-          trend: "Comprehensive data",
+          description: "Detailed state market analysis",
+          trend: "Deep insights",
           color: "bg-teal-500/10 text-teal-500"
         },
         {
@@ -121,6 +123,10 @@ export const SolutionsSection = () => {
         }
       ]
     }
+  };
+
+  const handleStateClick = (statefp: string) => {
+    navigate(`/state-market-report/${statefp}`);
   };
 
   return (
@@ -209,6 +215,8 @@ export const SolutionsSection = () => {
                                 dataKey="firms"
                                 fill="#EAB308"
                                 radius={[4, 4, 0, 0]}
+                                onClick={(data) => handleStateClick(data.name.split(' ')[1])}
+                                style={{ cursor: 'pointer' }}
                               />
                             </BarChart>
                           </ResponsiveContainer>
