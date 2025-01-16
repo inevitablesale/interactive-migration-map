@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, Plus, Settings, Star, Bookmark, X } from "lucide-react";
+import { Brain, Plus, Settings, Star, Bookmark, X, Bell } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ export const AIDealSourcer = () => {
   const { toast } = useToast();
   const [opportunities, setOpportunities] = useState([]);
   const [savedDeals, setSavedDeals] = useState<string[]>([]);
+  const [unreviewedCount, setUnreviewedCount] = useState(0);
 
   const fetchOpportunities = async () => {
     try {
@@ -29,6 +30,9 @@ export const AIDealSourcer = () => {
 
       if (error) throw error;
       setOpportunities(data || []);
+      // Count unreviewed opportunities (those not in savedDeals)
+      const unreviewed = (data || []).filter(opp => !savedDeals.includes(opp.id)).length;
+      setUnreviewedCount(unreviewed);
     } catch (error) {
       console.error("Error fetching opportunities:", error);
     } finally {
@@ -38,6 +42,7 @@ export const AIDealSourcer = () => {
 
   const handleSaveDeal = (dealId: string) => {
     setSavedDeals(prev => [...prev, dealId]);
+    setUnreviewedCount(prev => Math.max(0, prev - 1));
     toast({
       title: "Deal saved! 🎯",
       description: "I'll keep an eye on this one for you.",
@@ -46,6 +51,7 @@ export const AIDealSourcer = () => {
 
   const handleDismissDeal = (dealId: string) => {
     setOpportunities(prev => prev.filter((opp: any) => opp.id !== dealId));
+    setUnreviewedCount(prev => Math.max(0, prev - 1));
     toast({
       title: "Deal dismissed",
       description: "I'll find you better matches!",
@@ -60,6 +66,14 @@ export const AIDealSourcer = () => {
           <h3 className="text-lg font-semibold text-white">AI Deal Sourcer</h3>
         </div>
         <div className="flex gap-2">
+          {unreviewedCount > 0 && (
+            <div className="relative animate-fade-in">
+              <Bell className="w-5 h-5 text-blue-400" />
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white animate-bounce">
+                {unreviewedCount}
+              </span>
+            </div>
+          )}
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="hover:bg-white/10">
