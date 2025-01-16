@@ -1,6 +1,6 @@
 import { ChartBar, Users, TrendingUp } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
-import { AlertsPanel } from "@/components/analytics/AlertsPanel";
+import { AIDealSourcer } from "@/components/analytics/AIDealSourcer";
 import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,32 +86,8 @@ export default function Analysis() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AlertsPanel />
-          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md border border-white/10 rounded-lg p-6">
-            <div className="space-y-4">
-              <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
-                <Button 
-                  onClick={() => setShowProfileForm(true)}
-                  className="w-full bg-blue-500 hover:bg-blue-600"
-                >
-                  Create Buyer Profile
-                </Button>
-                <DialogContent className="bg-gray-900 border-white/10">
-                  <DialogHeader>
-                    <DialogTitle className="text-white text-xl">Create Buyer Profile</DialogTitle>
-                    <DialogDescription className="text-gray-300">
-                      Set up your buyer profile to receive personalized market insights and opportunities that match your investment criteria.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <BuyerProfileForm onSuccess={() => setShowProfileForm(false)} />
-                </DialogContent>
-              </Dialog>
-              <p className="text-sm text-gray-300">
-                Create a buyer profile to get personalized recommendations, market insights, and notifications about opportunities that match your criteria.
-              </p>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 gap-6">
+          <AIDealSourcer />
         </div>
         <KeyInsightsPanel />
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
