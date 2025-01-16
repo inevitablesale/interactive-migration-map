@@ -43,13 +43,15 @@ export const PricingSection = () => {
                 Weekly insights newsletter
               </li>
             </ul>
-            <button 
-              className="w-full py-2 px-4 bg-gray-200 text-gray-600 rounded flex items-center justify-center gap-2 cursor-not-allowed"
-              disabled
-            >
-              <Clock className="w-4 h-4" />
-              <span>Coming Soon</span>
-            </button>
+            <div className="flex items-center gap-2 justify-center">
+              <button 
+                className="py-2 px-4 bg-gray-200 text-gray-600 rounded flex items-center justify-center gap-2 cursor-not-allowed"
+                disabled
+              >
+                <Clock className="w-4 h-4" />
+                <span>Coming Soon</span>
+              </button>
+            </div>
           </Card>
 
           <Card className="p-6 bg-white/90 backdrop-blur-md">
@@ -87,13 +89,15 @@ export const PricingSection = () => {
                 Downloadable reports
               </li>
             </ul>
-            <button 
-              className="w-full py-2 px-4 bg-gray-200 text-gray-600 rounded flex items-center justify-center gap-2 cursor-not-allowed"
-              disabled
-            >
-              <Clock className="w-4 h-4" />
-              <span>Coming Soon</span>
-            </button>
+            <div className="flex items-center gap-2 justify-center">
+              <button 
+                className="py-2 px-4 bg-gray-200 text-gray-600 rounded flex items-center justify-center gap-2 cursor-not-allowed"
+                disabled
+              >
+                <Clock className="w-4 h-4" />
+                <span>Coming Soon</span>
+              </button>
+            </div>
           </Card>
         </div>
       </div>

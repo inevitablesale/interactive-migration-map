@@ -9,16 +9,16 @@ export const BetaAccessSection = () => {
           <div className="mb-6">
             <Sparkles className="w-12 h-12 text-yellow-500" />
           </div>
-          <h2 className="text-3xl font-bold mb-4">Join Our Beta Program</h2>
+          <h2 className="text-3xl font-bold mb-4">Join Our Beta Launch</h2>
           <p className="text-gray-600 mb-8 max-w-2xl">
-            Get early access to our market intelligence platform. Connect with your LinkedIn account to start discovering opportunities ahead of the curve.
+            Be among the first to access this groundbreaking market intelligence platform. Serious buyers and industry leaders will gain exclusive insights and opportunities that put them ahead of the competition.
           </p>
           <div className="flex items-center gap-4">
             <button 
               className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
               disabled
             >
-              <span>Connect with LinkedIn</span>
+              <span>Sign Up with LinkedIn</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <p className="text-sm text-gray-500">Coming Soon</p>
