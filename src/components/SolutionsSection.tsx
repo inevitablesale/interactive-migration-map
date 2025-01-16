@@ -7,30 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { AIDealSourcer } from "./analytics/AIDealSourcer";
 import { useNavigate } from "react-router-dom";
-
-export const SolutionsSection = () => {
-  const [activeTab, setActiveTab] = useState("analyze");
-  const navigate = useNavigate();
-
-  const { data: marketData } = useQuery({
-    queryKey: ['marketMetrics'],
-    queryFn: async () => {
-      const { data: stateData, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E')
-        .order('EMP', { ascending: false })
-        .limit(10);
-      
-      if (error) throw error;
-      return stateData?.map(state => ({
-        name: `State ${state.STATEFP}`,
-        employees: state.EMP || 0,
-        firms: state.ESTAB || 0,
-        payroll: state.PAYANN || 0,
-        income: state.B19013_001E || 0
-      }));
-    }
-  });
+import { AccountingIndustryCard } from "./market-report/AccountingIndustryCard";
 
   const solutions = {
     analyze: {
@@ -125,6 +102,50 @@ export const SolutionsSection = () => {
     }
   };
 
+export const SolutionsSection = () => {
+  const [activeTab, setActiveTab] = useState("analyze");
+  const navigate = useNavigate();
+
+  const { data: marketData } = useQuery({
+    queryKey: ['marketMetrics'],
+    queryFn: async () => {
+      const { data: stateData, error } = await supabase
+        .from('state_data')
+        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E')
+        .order('EMP', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return stateData?.map(state => ({
+        name: `State ${state.STATEFP}`,
+        employees: state.EMP || 0,
+        firms: state.ESTAB || 0,
+        payroll: state.PAYANN || 0,
+        income: state.B19013_001E || 0
+      }));
+    }
+  });
+
+  // Query for accounting industry metrics
+  const { data: accountingMetrics } = useQuery({
+    queryKey: ['accountingMetrics'],
+    queryFn: async () => {
+      const { data: countyData, error } = await supabase
+        .from('county_data')
+        .select('*')
+        .limit(1)
+        .single();
+      
+      if (error) throw error;
+      return {
+        total_establishments: countyData.ESTAB,
+        emp: countyData.EMP,
+        payann: countyData.PAYANN,
+        firms_per_10k_population: (countyData.ESTAB / countyData.B01001_001E) * 10000
+      };
+    }
+  });
+
   const handleStateClick = (statefp: string) => {
     navigate(`/state-market-report/${statefp}`);
   };
@@ -190,9 +211,9 @@ export const SolutionsSection = () => {
                       <AIDealSourcer embedded={true} />
                     </div>
                   )}
-                  {key === "assess" && (
+                  {key === "assess" && accountingMetrics && (
                     <div className="h-full animate-fade-in">
-                      <AIDealSourcer embedded={true} />
+                      <AccountingIndustryCard marketData={accountingMetrics} />
                     </div>
                   )}
                   {key === "plan" && (
