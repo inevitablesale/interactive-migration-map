@@ -12,6 +12,7 @@ import {
 import { AIDealSourcerForm } from "./AIDealSourcerForm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { DealMap } from "./deal-sourcer/DealMap";
 
 export const AIDealSourcer = () => {
   const [showForm, setShowForm] = useState(false);
@@ -20,6 +21,7 @@ export const AIDealSourcer = () => {
   const [opportunities, setOpportunities] = useState([]);
   const [savedDeals, setSavedDeals] = useState<string[]>([]);
   const [unreviewedCount, setUnreviewedCount] = useState(0);
+  const [matchingFirms, setMatchingFirms] = useState([]);
 
   const fetchOpportunities = async () => {
     try {
@@ -48,6 +50,18 @@ export const AIDealSourcer = () => {
       }, 0);
       
       setUnreviewedCount(unreviewed);
+
+      // Fetch matching firms based on the first profile's preferences
+      if (opportunities.length > 0) {
+        const firstProfile = opportunities[0];
+        const { data: firms } = await supabase
+          .from('canary_firms_data')
+          .select('*')
+          .gte('employeeCount', firstProfile.employee_count_min || 0)
+          .lte('employeeCount', firstProfile.employee_count_max || 999999);
+        
+        setMatchingFirms(firms || []);
+      }
     } catch (error) {
       console.error("Error fetching opportunities:", error);
     } finally {
@@ -141,8 +155,9 @@ export const AIDealSourcer = () => {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4 animate-fade-in">
-            {opportunities.map((opportunity: any) => (
+          <>
+            <div className="space-y-4 animate-fade-in">
+              {opportunities.map((opportunity: any) => (
               <div 
                 key={opportunity.id} 
                 className="bg-white/5 p-4 rounded-lg border border-white/10 hover:border-blue-500/50 transition-all duration-200"
@@ -199,8 +214,12 @@ export const AIDealSourcer = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className="mt-8 h-[400px] rounded-lg overflow-hidden">
+              <DealMap firms={matchingFirms} />
+            </div>
+          </>
         )}
       </div>
     </Card>
