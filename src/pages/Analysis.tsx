@@ -1,6 +1,5 @@
 import { ChartBar, Users, TrendingUp } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
-import { MarketHighlights } from "@/components/analytics/MarketHighlights";
 import { AlertsPanel } from "@/components/analytics/AlertsPanel";
 import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
@@ -121,7 +120,6 @@ export default function Analysis() {
             <ComparisonTool embedded={true} />
           </div>
         </div>
-        <MarketHighlights />
       </div>
     </div>
   );
