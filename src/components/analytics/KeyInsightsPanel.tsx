@@ -1,30 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  TrendingUp, Users, Target, InfoIcon, ArrowUpRight, Building2, 
-  Users2, Home, GraduationCap, ChartBarIcon, BookOpen, Coins,
-  DollarSign, Briefcase, LineChart, Building
-} from "lucide-react";
+import { ChartBar, Users, Target, InfoIcon, ArrowUpRight, Building2, Users2, Home, GraduationCap, ChartBarIcon, Coins,
+  DollarSign, Briefcase, LineChart, Building } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
-
-interface MarketGrowthMetric {
-  county_name: string;
-  state: string;
-  population_growth: number;
-  growth_rate_percentage: number;
-  total_movedin_2022: number;
-  total_movedin_2021: number;
-  total_movedin_2020: number;
-  total_moves: number;
-}
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface ValueMetric {
   county_name: string;
-  state: string;
   state_name: string;
   median_income: number;
   median_home_value: number;
@@ -35,12 +19,27 @@ interface ValueMetric {
   national_rank?: number;
 }
 
+interface MarketGrowthMetric {
+  county_name: string;
+  state: string;
+  population_growth: number;
+  growth_rate_percentage: number;
+  total_movedin_2022: number;
+  total_movedin_2021: number;
+  total_movedin_2020: number;
+  total_moves: number;
+  state_rank?: number;
+  national_rank?: number;
+}
+
 interface CompetitiveMarketMetric {
   COUNTYNAME: string;
   "State Name": string;
   employeeCount: number;
   followerCount: number;
   market_saturation?: number;
+  state_rank?: number;
+  national_rank?: number;
 }
 
 interface UnderservedRegionMetric {
@@ -52,6 +51,8 @@ interface UnderservedRegionMetric {
   recent_movers: number;
   market_status: string;
   opportunity_status: string;
+  state_rank?: number;
+  national_rank?: number;
   median_income?: number;
 }
 
@@ -62,6 +63,8 @@ interface EmergingTalentMarket {
   total_educated: number;
   education_growth_rate: number;
   median_age: number;
+  state_rank?: number;
+  national_rank?: number;
 }
 
 interface FutureSaturationRisk {
@@ -71,6 +74,8 @@ interface FutureSaturationRisk {
   firm_growth_rate: number;
   population_growth_rate: number;
   state_name?: string;
+  state_rank?: number;
+  national_rank?: number;
 }
 
 export function KeyInsightsPanel() {
@@ -137,73 +142,6 @@ export function KeyInsightsPanel() {
     },
   });
 
-  const { data: stateData = [] } = useQuery({
-    queryKey: ['stateComparison'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, ESTAB, EMP, PAYANN, B19013_001E')
-        .limit(2);
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: countyRankings } = useQuery({
-    queryKey: ['countyRankings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('county_rankings')
-        .select('*')
-        .order('firms_per_10k', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const transformedValueMetrics: ValueMetric[] = useMemo(() => {
-    if (!countyRankings) return [];
-    
-    return countyRankings
-      .filter((county, index, self) => 
-        index === self.findIndex(c => c.COUNTYNAME === county.COUNTYNAME)
-      )
-      .filter(county => county.total_establishments > 0)
-      .map(county => ({
-        county_name: county.COUNTYNAME.endsWith(" County") ? county.COUNTYNAME : `${county.COUNTYNAME} County`,
-        state: county.STATEFP,
-        state_name: county.state_name || getStateNameFromFIPS(county.STATEFP),
-        median_income: county.median_household_income || 0,
-        median_home_value: county.median_home_value || 0,
-        total_firms: county.total_establishments || 0,
-        avg_revenue: (county.total_payroll || 0) / (county.total_establishments || 1),
-        growth_potential: county.population_growth_rate || 0,
-        rank: county.firm_density_rank,
-        national_rank: county.national_firm_density_rank
-      }))
-      .sort((a, b) => b.avg_revenue - a.avg_revenue)
-      .slice(0, 5);
-  }, [countyRankings]);
-
-  const handleNavigateToMarket = (county: string, state: string) => {
-    let finalState = state;
-    let finalCounty = county;
-    
-    if (!finalState && county.includes(',')) {
-      const [countyPart, statePart] = county.split(',').map(s => s.trim());
-      finalCounty = countyPart;
-      finalState = statePart;
-    }
-
-    if (!finalState) {
-      console.error('State is undefined for county:', county);
-      return;
-    }
-
-    const formattedCounty = finalCounty.endsWith(" County") ? finalCounty : `${finalCounty} County`;
-    navigate(`/market-report/${formattedCounty}/${finalState}`);
-  };
-
   const insights = [
     {
       title: "High-Value Markets",
@@ -232,26 +170,24 @@ export function KeyInsightsPanel() {
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
                         onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}, {market.state_name}</h3>
+                        <h3 className="text-lg font-semibold text-white">{market.county_name}, {market.state_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
-                        {(market.rank || market.national_rank) && (
-                          <div className="flex justify-between items-center mt-2">
-                            {market.rank && (
-                              <div className="text-right">
-                                <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
-                                <p className="text-2xl text-white/90 font-medium">{market.rank.toLocaleString()}</p>
-                              </div>
-                            )}
-                            {market.national_rank && (
-                              <div className="text-right">
-                                <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
-                                <p className="text-2xl text-blue-400/90 font-medium">{market.national_rank.toLocaleString()}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex justify-between items-center mt-2">
+                          {market.rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                              <p className="text-2xl text-white/90 font-medium">{market.rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                          {market.national_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                              <p className="text-2xl text-blue-400/90 font-medium">{market.national_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -295,6 +231,20 @@ export function KeyInsightsPanel() {
                         <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state}</h3>
                         <p className="text-sm text-gray-300">Growth Rate: {region.growth_rate_percentage.toFixed(1)}%</p>
                         <p className="text-sm text-gray-300">Total Moves: {region.total_moves.toLocaleString()}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          {region.state_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                              <p className="text-2xl text-white/90 font-medium">{region.state_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                          {region.national_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                              <p className="text-2xl text-blue-400/90 font-medium">{region.national_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -331,16 +281,28 @@ export function KeyInsightsPanel() {
                   <div className="mt-4 space-y-4">
                     {emergingTalentData?.map((region, index) => (
                       <div 
-                        key={`${region.county_name}-${region.state_name}-${index}`}
+                        key={index} 
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
                         onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white">
-                          {region.county_name}, {region.state_name}
-                        </h3>
+                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state_name}</h3>
                         <p className="text-sm text-gray-300">Education Rate: {region.education_rate_percent.toFixed(1)}%</p>
                         <p className="text-sm text-gray-300">Total Educated: {region.total_educated.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Median Age: {Math.round(region.median_age)}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          {region.state_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                              <p className="text-2xl text-white/90 font-medium">{region.state_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                          {region.national_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                              <p className="text-2xl text-blue-400/90 font-medium">{region.national_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -385,6 +347,20 @@ export function KeyInsightsPanel() {
                         <p className="text-sm text-gray-300">Employees: {market.employeeCount.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Followers: {market.followerCount.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Market Saturation: {(market.market_saturation || 0).toFixed(1)}%</p>
+                        <div className="flex justify-between items-center mt-2">
+                          {market.state_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                              <p className="text-2xl text-white/90 font-medium">{market.state_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                          {market.national_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                              <p className="text-2xl text-blue-400/90 font-medium">{market.national_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -429,6 +405,20 @@ export function KeyInsightsPanel() {
                         <p className="text-sm text-gray-300">Market Status: {region.market_status}</p>
                         <p className="text-sm text-gray-300">Opportunity: {region.opportunity_status}</p>
                         <p className="text-sm text-gray-300">Firms per 10k: {region.firms_per_10k_population}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          {region.state_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                              <p className="text-2xl text-white/90 font-medium">{region.state_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                          {region.national_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                              <p className="text-2xl text-blue-400/90 font-medium">{region.national_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -473,6 +463,20 @@ export function KeyInsightsPanel() {
                         <p className="text-sm text-gray-300">Current Density: {region.current_firm_density.toFixed(1)} firms/10k</p>
                         <p className="text-sm text-gray-300">Projected Density: {region.projected_firm_density.toFixed(1)} firms/10k</p>
                         <p className="text-sm text-gray-300">Growth Rate: {region.firm_growth_rate.toFixed(1)}%</p>
+                        <div className="flex justify-between items-center mt-2">
+                          {region.state_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">State Rank:</p>
+                              <p className="text-2xl text-white/90 font-medium">{region.state_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                          {region.national_rank && (
+                            <div className="text-right">
+                              <p className="text-gray-500 text-xs mb-0.5">National Rank:</p>
+                              <p className="text-2xl text-blue-400/90 font-medium">{region.national_rank.toLocaleString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -508,61 +512,4 @@ export function KeyInsightsPanel() {
       </div>
     </section>
   );
-}
-
-function getStateNameFromFIPS(fips: string): string {
-  const stateMap: { [key: string]: string } = {
-    '01': 'Alabama',
-    '02': 'Alaska',
-    '04': 'Arizona',
-    '05': 'Arkansas',
-    '06': 'California',
-    '08': 'Colorado',
-    '09': 'Connecticut',
-    '10': 'Delaware',
-    '11': 'District of Columbia',
-    '12': 'Florida',
-    '13': 'Georgia',
-    '15': 'Hawaii',
-    '16': 'Idaho',
-    '17': 'Illinois',
-    '18': 'Indiana',
-    '19': 'Iowa',
-    '20': 'Kansas',
-    '21': 'Kentucky',
-    '22': 'Louisiana',
-    '23': 'Maine',
-    '24': 'Maryland',
-    '25': 'Massachusetts',
-    '26': 'Michigan',
-    '27': 'Minnesota',
-    '28': 'Mississippi',
-    '29': 'Missouri',
-    '30': 'Montana',
-    '31': 'Nebraska',
-    '32': 'Nevada',
-    '33': 'New Hampshire',
-    '34': 'New Jersey',
-    '35': 'New Mexico',
-    '36': 'New York',
-    '37': 'North Carolina',
-    '38': 'North Dakota',
-    '39': 'Ohio',
-    '40': 'Oklahoma',
-    '41': 'Oregon',
-    '42': 'Pennsylvania',
-    '44': 'Rhode Island',
-    '45': 'South Carolina',
-    '46': 'South Dakota',
-    '47': 'Tennessee',
-    '48': 'Texas',
-    '49': 'Utah',
-    '50': 'Vermont',
-    '51': 'Virginia',
-    '53': 'Washington',
-    '54': 'West Virginia',
-    '55': 'Wisconsin',
-    '56': 'Wyoming'
-  };
-  return stateMap[fips] || fips;
 }
