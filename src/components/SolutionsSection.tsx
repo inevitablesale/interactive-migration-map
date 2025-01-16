@@ -5,11 +5,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComparisonTool } from "./ComparisonTool";
+import { AIDealSourcer } from "./analytics/AIDealSourcer";
 
 export const SolutionsSection = () => {
-  const [activeTab, setActiveTab] = useState("discover");
+  const [activeTab, setActiveTab] = useState("analyze");
 
-  // Fetch aggregated data for visualization
   const { data: marketData } = useQuery({
     queryKey: ['marketMetrics'],
     queryFn: async () => {
@@ -31,33 +32,33 @@ export const SolutionsSection = () => {
   });
 
   const solutions = {
-    discover: {
-      title: "Market Intelligence",
-      description: "Identify high-potential markets with comprehensive data analysis",
+    analyze: {
+      title: "State Market Comparison",
+      description: "Compare key metrics across states to identify optimal markets",
       metrics: [
         {
           title: "Markets Analyzed",
           value: "872",
           icon: Users,
-          description: "Cities tracked across the US"
+          description: "Markets analyzed via AI"
         },
         {
           title: "Market Coverage",
           value: "493",
           icon: Target,
-          description: "Regions with detailed insights"
+          description: "Regions with competitive analysis"
         },
         {
           title: "Monthly Growth",
           value: "500+",
           icon: TrendingUp,
-          description: "New firms added monthly"
+          description: "New acquisition opportunities"
         }
       ]
     },
     assess: {
-      title: "Risk Assessment",
-      description: "Make informed decisions with comprehensive market analysis",
+      title: "AI Deal Sourcing",
+      description: "Let AI find your ideal acquisition targets",
       metrics: [
         {
           title: "Market Stability",
@@ -79,7 +80,7 @@ export const SolutionsSection = () => {
         }
       ]
     },
-    decide: {
+    plan: {
       title: "Strategic Planning",
       description: "Transform market insights into actionable acquisition strategies",
       metrics: [
@@ -117,11 +118,11 @@ export const SolutionsSection = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="discover" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="analyze" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8">
-            <TabsTrigger value="discover">Analyze</TabsTrigger>
+            <TabsTrigger value="analyze">Analyze</TabsTrigger>
             <TabsTrigger value="assess">Assess</TabsTrigger>
-            <TabsTrigger value="decide">Plan</TabsTrigger>
+            <TabsTrigger value="plan">Plan</TabsTrigger>
           </TabsList>
 
           {Object.entries(solutions).map(([key, solution]) => (
@@ -129,9 +130,9 @@ export const SolutionsSection = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                   <div className="flex items-center gap-3 mb-6">
-                    {key === "discover" && <Brain className="w-5 h-5 text-yellow-400" />}
+                    {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
                     {key === "assess" && <ShieldCheck className="w-5 h-5 text-yellow-400" />}
-                    {key === "decide" && <LineChart className="w-5 h-5 text-yellow-400" />}
+                    {key === "plan" && <LineChart className="w-5 h-5 text-yellow-400" />}
                     <h3 className="text-lg font-semibold text-white">{solution.title}</h3>
                   </div>
                   
@@ -152,31 +153,39 @@ export const SolutionsSection = () => {
                 </Card>
 
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  <div className="h-full flex flex-col">
-                    <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
-                    {marketData && (
-                      <div className="flex-1">
-                        <ResponsiveContainer width="100%" height={300}>
-                          <BarChart data={marketData}>
-                            <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
-                            <YAxis stroke="#9CA3AF" fontSize={12} />
-                            <Tooltip 
-                              contentStyle={{ 
-                                background: 'rgba(0,0,0,0.8)', 
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '4px'
-                              }}
-                            />
-                            <Bar 
-                              dataKey={key === "discover" ? "firms" : key === "assess" ? "employees" : "payroll"}
-                              fill="#EAB308"
-                              radius={[4, 4, 0, 0]}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )}
-                  </div>
+                  {key === "analyze" && (
+                    <ComparisonTool embedded={true} />
+                  )}
+                  {key === "assess" && (
+                    <AIDealSourcer embedded={true} />
+                  )}
+                  {key === "plan" && (
+                    <div className="h-full flex flex-col">
+                      <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
+                      {marketData && (
+                        <div className="flex-1">
+                          <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={marketData}>
+                              <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
+                              <YAxis stroke="#9CA3AF" fontSize={12} />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  background: 'rgba(0,0,0,0.8)', 
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '4px'
+                                }}
+                              />
+                              <Bar 
+                                dataKey="firms"
+                                fill="#EAB308"
+                                radius={[4, 4, 0, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </Card>
               </div>
             </TabsContent>
