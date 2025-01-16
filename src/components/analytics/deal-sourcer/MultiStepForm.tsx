@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   WelcomeStep,
@@ -14,6 +15,7 @@ import {
 
 export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     buyer_name: "",
@@ -110,6 +112,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       });
 
       onSuccess?.();
+      navigate("/thank-you");
     } catch (error) {
       console.error('Error creating profile:', error);
       toast({

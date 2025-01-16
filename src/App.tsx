@@ -4,6 +4,7 @@ import Analysis from "@/pages/Analysis";
 import Opportunities from "@/pages/Opportunities";
 import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
+import ThankYou from "@/pages/ThankYou";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/market-report/:county/:state" element={<MarketReport />} />
         <Route path="/state-market-report/:state" element={<StateMarketReport />} />
+        <Route path="/thank-you" element={<ThankYou />} />
       </Routes>
     </Router>
   );
