@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Brain, Plus, Settings, Star, Bookmark, X, Bell } from "lucide-react";
@@ -23,15 +23,30 @@ export const AIDealSourcer = () => {
 
   const fetchOpportunities = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from("buyer_profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select(`
+          *,
+          ai_opportunities (*)
+        `)
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setOpportunities(data || []);
-      // Count unreviewed opportunities (those not in savedDeals)
-      const unreviewed = (data || []).filter(opp => !savedDeals.includes(opp.id)).length;
+      if (profilesError) throw profilesError;
+
+      const opportunities = profiles?.map(profile => ({
+        ...profile,
+        opportunities: profile.ai_opportunities || []
+      })) || [];
+
+      setOpportunities(opportunities);
+      
+      // Count unreviewed opportunities
+      const unreviewed = opportunities.reduce((count, profile) => {
+        return count + (profile.ai_opportunities || [])
+          .filter(opp => !savedDeals.includes(opp.id))
+          .length;
+      }, 0);
+      
       setUnreviewedCount(unreviewed);
     } catch (error) {
       console.error("Error fetching opportunities:", error);
@@ -39,6 +54,10 @@ export const AIDealSourcer = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOpportunities();
+  }, []);
 
   const handleSaveDeal = (dealId: string) => {
     setSavedDeals(prev => [...prev, dealId]);

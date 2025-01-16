@@ -19,6 +19,7 @@ import {
 interface AIDealSourcerFormData {
   buyer_name: string;
   contact_email: string;
+  team_emails: string;
   revenueRange: string;
   geography: string[];
   dealTypes: string[];
@@ -64,7 +65,8 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
   const onSubmit = async (data: AIDealSourcerFormData) => {
     setLoading(true);
     try {
-      const { error } = await supabase.from("buyer_profiles").insert({
+      // First create the buyer profile
+      const { data: profile, error: profileError } = await supabase.from("buyer_profiles").insert({
         buyer_name: data.buyer_name,
         contact_email: data.contact_email,
         target_geography: data.geography,
@@ -78,15 +80,29 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
           attractiveFeatures: data.attractiveFeatures,
           postAcquisitionGoals: data.postAcquisitionGoals,
           additionalNotes: data.additionalNotes,
+          team_emails: data.team_emails?.split(',').map(email => email.trim()).filter(Boolean) || [],
         },
         alert_frequency: data.alertFrequency,
+      }).select().single();
+
+      if (profileError) throw profileError;
+
+      // Then create an initial AI opportunity for tracking
+      const { error: opportunityError } = await supabase.from("ai_opportunities").insert({
+        buyer_profile_id: profile.id,
+        opportunity_data: {
+          status: 'active',
+          created_at: new Date().toISOString(),
+          last_checked: new Date().toISOString(),
+        },
+        status: 'new',
       });
 
-      if (error) throw error;
+      if (opportunityError) throw opportunityError;
 
       toast({
-        title: "AI Deal Profile Created",
-        description: "You'll start receiving personalized opportunities soon.",
+        title: "AI Deal Profile Created! 🎯",
+        description: "I'll start hunting for your perfect opportunities right away.",
       });
 
       onSuccess?.();
@@ -139,6 +155,21 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
                   {...field}
                   type="email"
                   placeholder="Enter your email"
+                  className="mt-1.5 bg-white/5 border-white/10"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <Label>Team Member Emails (comma-separated)</Label>
+            <Controller
+              name="team_emails"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  placeholder="team@example.com, analyst@example.com"
                   className="mt-1.5 bg-white/5 border-white/10"
                 />
               )}
