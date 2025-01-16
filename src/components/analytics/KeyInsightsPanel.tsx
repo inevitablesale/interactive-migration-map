@@ -117,7 +117,6 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      // Filter out duplicates based on county_name and state_name combination
       return data.filter((region, index, self) =>
         index === self.findIndex(r => 
           r.county_name === region.county_name && 
@@ -209,7 +208,7 @@ export function KeyInsightsPanel() {
     {
       title: "High-Value Markets",
       value: transformedValueMetrics?.[0] 
-        ? `${transformedValueMetrics[0].county_name}`
+        ? `${transformedValueMetrics[0].county_name}, ${transformedValueMetrics[0].state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -233,7 +232,7 @@ export function KeyInsightsPanel() {
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
                         onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}</h3>
+                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}, {market.state_name}</h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
@@ -446,7 +445,7 @@ export function KeyInsightsPanel() {
     {
       title: "Market Saturation Risk",
       value: futureSaturationData[0] 
-        ? `${futureSaturationData[0].county_name}`
+        ? `${futureSaturationData[0].county_name}, ${futureSaturationData[0].state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -567,4 +566,3 @@ function getStateNameFromFIPS(fips: string): string {
   };
   return stateMap[fips] || fips;
 }
-
