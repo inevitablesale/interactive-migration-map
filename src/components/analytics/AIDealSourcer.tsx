@@ -115,7 +115,7 @@ export const AIDealSourcer = () => {
             </DialogTrigger>
             <DialogContent className="bg-gray-900 border-white/10 text-white max-w-3xl">
               <DialogHeader>
-                <DialogTitle>Let's Find Your Perfect Match 🎯</DialogTitle>
+                <DialogTitle>Set up your Canary 🎯</DialogTitle>
               </DialogHeader>
               <AIDealSourcerForm onSuccess={() => {
                 setShowForm(false);
@@ -147,13 +147,13 @@ export const AIDealSourcer = () => {
                 <div className="bg-yellow-300/90 py-3 px-6 rounded-lg shadow-xl max-w-md mx-4 text-center">
                   <Bird className="w-8 h-8 text-yellow-700 mx-auto mb-2 animate-pulse" />
                   <p className="text-sm font-medium text-yellow-900">
-                    Results will be available after setting up your deal agent
+                    Results will be available after setting up your Canary
                   </p>
                   <Button
                     onClick={() => setShowForm(true)}
                     className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-yellow-900 hover:text-yellow-50 transition-colors"
                   >
-                    Create Your Deal Agent
+                    Set up your Canary
                   </Button>
                 </div>
               </div>
