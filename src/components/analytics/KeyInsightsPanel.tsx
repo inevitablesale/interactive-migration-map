@@ -117,7 +117,6 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      // Filter out duplicates based on county_name and state_name combination
       return data.filter((region, index, self) =>
         index === self.findIndex(r => 
           r.county_name === region.county_name && 
@@ -135,18 +134,6 @@ export function KeyInsightsPanel() {
       return data.filter((region, index, self) =>
         index === self.findIndex(r => r.county_name === region.county_name)
       );
-    },
-  });
-
-  const { data: stateData = [] } = useQuery({
-    queryKey: ['stateComparison'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, ESTAB, EMP, PAYANN, B19013_001E')
-        .limit(2);
-      if (error) throw error;
-      return data;
     },
   });
 
@@ -186,30 +173,11 @@ export function KeyInsightsPanel() {
       .slice(0, 5);
   }, [countyRankings]);
 
-  const handleNavigateToMarket = (county: string, state: string) => {
-    let finalState = state;
-    let finalCounty = county;
-    
-    if (!finalState && county.includes(',')) {
-      const [countyPart, statePart] = county.split(',').map(s => s.trim());
-      finalCounty = countyPart;
-      finalState = statePart;
-    }
-
-    if (!finalState) {
-      console.error('State is undefined for county:', county);
-      return;
-    }
-
-    const formattedCounty = finalCounty.endsWith(" County") ? finalCounty : `${finalCounty} County`;
-    navigate(`/market-report/${formattedCounty}/${finalState}`);
-  };
-
   const insights = [
     {
       title: "High-Value Markets",
       value: transformedValueMetrics?.[0] 
-        ? `${transformedValueMetrics[0].county_name}`
+        ? `${transformedValueMetrics[0].county_name}, ${transformedValueMetrics[0].state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -233,7 +201,9 @@ export function KeyInsightsPanel() {
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
                         onClick={() => handleNavigateToMarket(market.county_name, market.state_name)}
                       >
-                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">{market.county_name}</h3>
+                        <h3 className="text-lg font-semibold text-white min-h-[3rem] flex items-center">
+                          {market.county_name}, {market.state_name}
+                        </h3>
                         <p className="text-sm text-gray-300">Median Income: ${market.median_income.toLocaleString()}</p>
                         <p className="text-sm text-gray-300">Average Revenue: ${(market.avg_revenue / 1000).toFixed(1)}K</p>
                         <p className="text-sm text-gray-300">Growth Potential: {market.growth_potential.toFixed(1)}%</p>
@@ -267,186 +237,9 @@ export function KeyInsightsPanel() {
       icon: DollarSign,
     },
     {
-      title: "Market Growth Leaders",
-      value: marketGrowthMetrics?.[0] 
-        ? `${marketGrowthMetrics[0].county_name}, ${marketGrowthMetrics[0].state}`
-        : "Loading...",
-      insight: (
-        <div className="flex items-center gap-2 text-sm text-white/80">
-          {marketGrowthMetrics?.[0] ? (
-            <>
-              {`${marketGrowthMetrics[0].growth_rate_percentage.toFixed(1)}% growth rate, ${(marketGrowthMetrics[0].total_moves || 0).toLocaleString()} total moves`}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
-                    View Details <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Market Growth Leaders</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {marketGrowthMetrics?.slice(0, 5).map((region, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(region.county_name, region.state)}
-                      >
-                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state}</h3>
-                        <p className="text-sm text-gray-300">Growth Rate: {region.growth_rate_percentage.toFixed(1)}%</p>
-                        <p className="text-sm text-gray-300">Total Moves: {region.total_moves.toLocaleString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            "Analyzing regional data"
-          )}
-        </div>
-      ),
-      icon: TrendingUp,
-    },
-    {
-      title: "Talent Availability",
-      value: emergingTalentData[0] 
-        ? `${emergingTalentData[0].county_name}, ${emergingTalentData[0].state_name}`
-        : "Loading...",
-      insight: (
-        <div className="flex items-center gap-2 text-sm text-white/80">
-          {emergingTalentData[0] ? (
-            <>
-              {`${emergingTalentData[0].education_rate_percent.toFixed(1)}% education rate, ${emergingTalentData[0].total_educated.toLocaleString()} educated professionals`}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
-                    View Details <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Education Demographics</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {emergingTalentData?.map((region, index) => (
-                      <div 
-                        key={`${region.county_name}-${region.state_name}-${index}`}
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
-                      >
-                        <h3 className="text-lg font-semibold text-white">
-                          {region.county_name}, {region.state_name}
-                        </h3>
-                        <p className="text-sm text-gray-300">Education Rate: {region.education_rate_percent.toFixed(1)}%</p>
-                        <p className="text-sm text-gray-300">Total Educated: {region.total_educated.toLocaleString()}</p>
-                        <p className="text-sm text-gray-300">Median Age: {Math.round(region.median_age)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            "Analyzing education data..."
-          )}
-        </div>
-      ),
-      icon: GraduationCap,
-    },
-    {
-      title: "Market Competition",
-      value: competitiveMarkets[0] 
-        ? `${competitiveMarkets[0].COUNTYNAME}, ${competitiveMarkets[0]["State Name"]}`
-        : "Loading...",
-      insight: (
-        <div className="flex items-center gap-2 text-sm text-white/80">
-          {competitiveMarkets[0] ? (
-            <>
-              {`${competitiveMarkets[0].employeeCount.toLocaleString()} employees, ${competitiveMarkets[0].followerCount.toLocaleString()} followers`}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
-                    View Details <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Market Competition</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {competitiveMarkets?.slice(0, 5).map((market, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(market.COUNTYNAME, market["State Name"])}
-                      >
-                        <h3 className="text-lg font-semibold text-white">{market.COUNTYNAME}, {market["State Name"]}</h3>
-                        <p className="text-sm text-gray-300">Employees: {market.employeeCount.toLocaleString()}</p>
-                        <p className="text-sm text-gray-300">Followers: {market.followerCount.toLocaleString()}</p>
-                        <p className="text-sm text-gray-300">Market Saturation: {(market.market_saturation || 0).toFixed(1)}%</p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            "Analyzing market data..."
-          )}
-        </div>
-      ),
-      icon: Users,
-    },
-    {
-      title: "Growth Opportunities",
-      value: underservedRegions[0] 
-        ? `${underservedRegions[0].county_name}, ${underservedRegions[0].state_name}`
-        : "Loading...",
-      insight: (
-        <div className="flex items-center gap-2 text-sm text-white/80">
-          {underservedRegions[0] ? (
-            <>
-              {`${underservedRegions[0].market_status}, ${underservedRegions[0].opportunity_status}`}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors">
-                    View Details <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-white/10 max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Growth Opportunities</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-4">
-                    {underservedRegions?.slice(0, 5).map((region, index) => (
-                      <div 
-                        key={index} 
-                        className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
-                        onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
-                      >
-                        <h3 className="text-lg font-semibold text-white">{region.county_name}, {region.state_name}</h3>
-                        <p className="text-sm text-gray-300">Market Status: {region.market_status}</p>
-                        <p className="text-sm text-gray-300">Opportunity: {region.opportunity_status}</p>
-                        <p className="text-sm text-gray-300">Firms per 10k: {region.firms_per_10k_population}</p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            "Analyzing market data"
-          )}
-        </div>
-      ),
-      icon: Target,
-    },
-    {
       title: "Market Saturation Risk",
       value: futureSaturationData[0] 
-        ? `${futureSaturationData[0].county_name}`
+        ? `${futureSaturationData[0].county_name}, ${futureSaturationData[0].state_name}`
         : "Loading...",
       insight: (
         <div className="flex items-center gap-2 text-sm text-white/80">
@@ -567,4 +360,3 @@ function getStateNameFromFIPS(fips: string): string {
   };
   return stateMap[fips] || fips;
 }
-
