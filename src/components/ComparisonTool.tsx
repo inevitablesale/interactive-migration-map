@@ -74,6 +74,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [scenarioData, setScenarioData] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("metrics");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -144,6 +145,15 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
     navigate(`/state-market-report/${stateFp}`);
   };
 
+  const handleApplyScenario = (updatedData: any[]) => {
+    setScenarioData(updatedData);
+    setActiveTab("charts");
+    toast({
+      title: "Scenario Applied",
+      description: "Charts updated with scenario projections",
+    });
+  };
+
   const renderMetricComparison = (metric: keyof StateData, label: string, icon: React.ReactNode, formatFn = formatNumber, suffix = '') => {
     if (!stateData?.length) return null;
     const data = scenarioData.length ? scenarioData : stateData;
@@ -160,6 +170,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
           {data.map((state, index) => {
             const value = state[metric];
             const isHighest = value === max;
+            const stateName = statesList?.find(s => s.STATEFP === state.STATEFP)?.state || `State ${index + 1}`;
             
             return (
               <div 
@@ -170,15 +181,15 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
                 )}
                 onClick={() => handleStateClick(state.STATEFP)}
               >
-                <div className="text-sm text-white/70 mb-1">
-                  {statesList?.find(s => s.STATEFP === state.STATEFP)?.state || `State ${index + 1}`}
+                <div className="text-sm text-white/70 mb-1 truncate">
+                  {stateName}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-2xl font-medium text-white">
+                  <div className="text-2xl font-medium text-white truncate">
                     {formatFn(value)}{suffix}
                   </div>
                   {isHighest && (
-                    <ArrowUpRight className="h-5 w-5 text-green-400" />
+                    <ArrowUpRight className="h-5 w-5 text-green-400 flex-shrink-0" />
                   )}
                 </div>
               </div>
@@ -270,7 +281,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
         </div>
 
         {stateData && stateData.length > 0 ? (
-          <Tabs defaultValue="metrics" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-3 bg-[#1A1A1A]">
               <TabsTrigger value="metrics" className="data-[state=active]:bg-blue-500/20">
                 Key Metrics
@@ -314,7 +325,7 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
               <ScenarioModeling 
                 stateData={stateData} 
                 statesList={statesList || []} 
-                onUpdateScenario={setScenarioData}
+                onUpdateScenario={handleApplyScenario}
               />
             </TabsContent>
           </Tabs>
