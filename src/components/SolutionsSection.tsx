@@ -99,10 +99,10 @@ export const SolutionsSection = () => {
       metrics: [
         {
           title: "Market Validation",
-          value: "State-Level",
+          value: "Multi-Level",
           icon: Target,
-          description: "Detailed state market analysis",
-          trend: "Deep insights",
+          description: "National & State-County Rankings",
+          trend: "Comprehensive analysis",
           color: "bg-teal-500/10 text-teal-500"
         },
         {
