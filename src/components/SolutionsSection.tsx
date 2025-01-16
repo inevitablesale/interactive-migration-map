@@ -39,20 +39,26 @@ export const SolutionsSection = () => {
         {
           title: "Markets Analyzed",
           value: "872",
-          icon: Users,
-          description: "Markets analyzed via AI"
+          icon: Brain,
+          description: "Markets analyzed via AI",
+          trend: "+12% this month",
+          color: "bg-blue-500/10 text-blue-500"
         },
         {
           title: "Market Coverage",
           value: "493",
           icon: Target,
-          description: "Regions with competitive analysis"
+          description: "Regions with competitive analysis",
+          trend: "92% accuracy",
+          color: "bg-amber-500/10 text-amber-500"
         },
         {
-          title: "Monthly Growth",
+          title: "Growth Opportunities",
           value: "500+",
           icon: TrendingUp,
-          description: "New acquisition opportunities"
+          description: "New acquisition opportunities",
+          trend: "Updated daily",
+          color: "bg-green-500/10 text-green-500"
         }
       ]
     },
@@ -64,19 +70,25 @@ export const SolutionsSection = () => {
           title: "Market Stability",
           value: marketData?.length ? "High" : "Loading...",
           icon: ShieldCheck,
-          description: "Based on economic indicators"
+          description: "Based on economic indicators",
+          trend: "Strong outlook",
+          color: "bg-purple-500/10 text-purple-500"
         },
         {
           title: "Average Deal Size",
           value: "$2.1M",
           icon: DollarSign,
-          description: "Typical transaction value"
+          description: "Typical transaction value",
+          trend: "+5% YoY",
+          color: "bg-pink-500/10 text-pink-500"
         },
         {
           title: "Market Density",
           value: "Medium",
           icon: Users,
-          description: "Current market saturation"
+          description: "Current market saturation",
+          trend: "Optimal entry point",
+          color: "bg-orange-500/10 text-orange-500"
         }
       ]
     },
@@ -88,19 +100,25 @@ export const SolutionsSection = () => {
           title: "Success Rate",
           value: "92%",
           icon: Target,
-          description: "Matches meeting buyer criteria"
+          description: "Matches meeting buyer criteria",
+          trend: "Industry leading",
+          color: "bg-teal-500/10 text-teal-500"
         },
         {
           title: "ROI Potential",
           value: "24%",
           icon: TrendingUp,
-          description: "Average growth opportunity"
+          description: "Average growth opportunity",
+          trend: "Above market avg",
+          color: "bg-indigo-500/10 text-indigo-500"
         },
         {
           title: "Market Position",
           value: "Top 10%",
           icon: LineChart,
-          description: "Competitive ranking"
+          description: "Competitive ranking",
+          trend: "Strong momentum",
+          color: "bg-rose-500/10 text-rose-500"
         }
       ]
     }
@@ -138,15 +156,18 @@ export const SolutionsSection = () => {
                   
                   <div className="grid grid-cols-1 gap-4">
                     {solution.metrics.map((metric, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
+                      <div key={index} className={`${metric.color} p-4 rounded-lg backdrop-blur-sm`}>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <metric.icon className="w-4 h-4 text-yellow-400" />
-                            <span className="text-sm text-gray-300">{metric.title}</span>
+                            <metric.icon className="w-4 h-4" />
+                            <span className="text-sm font-medium">{metric.title}</span>
                           </div>
-                          <span className="text-lg font-semibold text-white">{metric.value}</span>
+                          <span className="text-lg font-semibold">{metric.value}</span>
                         </div>
-                        <p className="text-xs text-gray-400">{metric.description}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs opacity-80">{metric.description}</p>
+                          <span className="text-xs font-medium">{metric.trend}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
