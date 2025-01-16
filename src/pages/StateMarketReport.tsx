@@ -127,6 +127,31 @@ export default function StateMarketReport() {
     loadStateName();
   }, [state, isValidState]);
 
+  const calculateNationalRank = () => {
+    if (!stateRankings) return null;
+    return stateRankings.density_rank;
+  };
+
+  const calculateEducationPercentages = (stateData: any) => {
+    if (!stateData) return {
+      bachelors: 0,
+      masters: 0,
+      doctorate: 0
+    };
+
+    const total = stateData.B15003_001E || 1; // Total population 25 years and over
+    return {
+      bachelors: ((stateData.B15003_022E || 0) / total * 100).toFixed(1),
+      masters: ((stateData.B15003_023E || 0) / total * 100).toFixed(1),
+      doctorate: ((stateData.B15003_025E || 0) / total * 100).toFixed(1)
+    };
+  };
+
+  const handleCountyClick = (countyName: string) => {
+    if (!stateAbbr) return;
+    navigate(`/market-report/${countyName}/${stateAbbr}`);
+  };
+
   // Handle invalid state parameter
   if (!isValidState) {
     return (
@@ -165,31 +190,6 @@ export default function StateMarketReport() {
       </div>
     );
   }
-
-  const calculateNationalRank = () => {
-    if (!stateRankings) return null;
-    return stateRankings.density_rank;
-  };
-
-  const calculateEducationPercentages = (stateData: any) => {
-    if (!stateData) return {
-      bachelors: 0,
-      masters: 0,
-      doctorate: 0
-    };
-
-    const total = stateData.B15003_001E || 1; // Total population 25 years and over
-    return {
-      bachelors: ((stateData.B15003_022E || 0) / total * 100).toFixed(1),
-      masters: ((stateData.B15003_023E || 0) / total * 100).toFixed(1),
-      doctorate: ((stateData.B15003_025E || 0) / total * 100).toFixed(1)
-    };
-  };
-
-  const handleCountyClick = (countyName: string) => {
-    if (!stateAbbr) return;
-    navigate(`/market-report/${countyName}/${stateAbbr}`);
-  };
 
   const nationalRank = calculateNationalRank();
   const educationPercentages = calculateEducationPercentages(stateData);
