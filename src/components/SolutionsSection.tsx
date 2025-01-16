@@ -8,29 +8,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 
-export const SolutionsSection = () => {
-  const [activeTab, setActiveTab] = useState("analyze");
-
-  const { data: marketData } = useQuery({
-    queryKey: ['marketMetrics'],
-    queryFn: async () => {
-      const { data: stateData, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E')
-        .order('EMP', { ascending: false })
-        .limit(10);
-      
-      if (error) throw error;
-      return stateData?.map(state => ({
-        name: `State ${state.STATEFP}`,
-        employees: state.EMP || 0,
-        firms: state.ESTAB || 0,
-        payroll: state.PAYANN || 0,
-        income: state.B19013_001E || 0
-      }));
-    }
-  });
-
   const solutions = {
     analyze: {
       title: "Set up your Canary",
@@ -104,6 +81,29 @@ export const SolutionsSection = () => {
     }
   };
 
+export const SolutionsSection = () => {
+  const [activeTab, setActiveTab] = useState("analyze");
+
+  const { data: marketData } = useQuery({
+    queryKey: ['marketMetrics'],
+    queryFn: async () => {
+      const { data: stateData, error } = await supabase
+        .from('state_data')
+        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E')
+        .order('EMP', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return stateData?.map(state => ({
+        name: `State ${state.STATEFP}`,
+        employees: state.EMP || 0,
+        firms: state.ESTAB || 0,
+        payroll: state.PAYANN || 0,
+        income: state.B19013_001E || 0
+      }));
+    }
+  });
+
   return (
     <div className="min-h-screen bg-black/95 relative z-20 px-4 py-16">
       <div className="max-w-6xl mx-auto">
@@ -136,7 +136,10 @@ export const SolutionsSection = () => {
                   <div className="flex-1">
                     <h3 className="text-2xl font-semibold text-white mb-4">{solutions.analyze.title}</h3>
                     <p className="text-gray-400 mb-8">{solutions.analyze.description}</p>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-not-allowed opacity-50" 
+                      disabled={true}
+                    >
                       Get Started
                     </Button>
                   </div>
