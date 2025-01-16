@@ -32,74 +32,74 @@ export const SolutionsSection = () => {
 
   const solutions = {
     discover: {
-      title: "Market Analysis",
-      description: "Identify untapped opportunities with data-driven insights",
+      title: "Market Intelligence",
+      description: "Identify high-potential markets with comprehensive data analysis",
       metrics: [
         {
-          title: "Total Firms",
-          value: marketData?.reduce((sum, state) => sum + state.firms, 0)?.toLocaleString() || "Loading...",
+          title: "Markets Analyzed",
+          value: "872",
           icon: Users,
-          description: "Active accounting firms in target markets"
+          description: "Cities tracked across the US"
         },
         {
-          title: "Market Potential",
-          value: marketData?.reduce((sum, state) => sum + state.payroll, 0)?.toLocaleString() || "Loading...",
+          title: "Market Coverage",
+          value: "493",
           icon: Target,
-          description: "Annual payroll volume ($)"
+          description: "Regions with detailed insights"
         },
         {
-          title: "Growth Rate",
-          value: "+12.3%",
+          title: "Monthly Growth",
+          value: "500+",
           icon: TrendingUp,
-          description: "Year-over-year market growth"
+          description: "New firms added monthly"
         }
       ]
     },
     assess: {
       title: "Risk Assessment",
-      description: "Make data-driven decisions with confidence",
+      description: "Make informed decisions with comprehensive market analysis",
       metrics: [
         {
           title: "Market Stability",
-          value: "8.7/10",
+          value: marketData?.length ? "High" : "Loading...",
           icon: ShieldCheck,
           description: "Based on economic indicators"
         },
         {
-          title: "Revenue Potential",
+          title: "Average Deal Size",
           value: "$2.1M",
           icon: DollarSign,
-          description: "Average per firm"
+          description: "Typical transaction value"
         },
         {
-          title: "Competition Index",
+          title: "Market Density",
           value: "Medium",
           icon: Users,
-          description: "Market saturation level"
+          description: "Current market saturation"
         }
       ]
     },
     decide: {
-      title: "Decision Support",
-      description: "Transform insights into actionable decisions",
+      title: "Strategic Planning",
+      description: "Transform market insights into actionable acquisition strategies",
       metrics: [
         {
-          title: "Opportunity Score",
-          value: "92/100",
+          title: "Success Rate",
+          value: "92%",
           icon: Target,
-          description: "Composite market rating"
+          description: "Matches meeting buyer criteria"
         },
         {
-          title: "ROI Forecast",
+          title: "ROI Potential",
           value: "24%",
           icon: TrendingUp,
-          description: "Projected 3-year return"
+          description: "Average growth opportunity"
         },
         {
           title: "Market Position",
           value: "Top 10%",
           icon: LineChart,
-          description: "Relative to competitors"
+          description: "Competitive ranking"
         }
       ]
     }
@@ -110,10 +110,10 @@ export const SolutionsSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-            From Insights to Action
+            Data-Driven Market Intelligence
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Turn market intelligence into your competitive advantage. Find the perfect acquisition target with data-driven precision.
+            Make confident acquisition decisions with comprehensive market analysis and real-time insights.
           </p>
         </div>
 
@@ -121,7 +121,7 @@ export const SolutionsSection = () => {
           <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8">
             <TabsTrigger value="discover">Analyze</TabsTrigger>
             <TabsTrigger value="assess">Assess</TabsTrigger>
-            <TabsTrigger value="decide">Decide</TabsTrigger>
+            <TabsTrigger value="decide">Plan</TabsTrigger>
           </TabsList>
 
           {Object.entries(solutions).map(([key, solution]) => (
