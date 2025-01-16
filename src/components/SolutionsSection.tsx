@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, TrendingUp, DollarSign, Building2, Info } from "lucide-react";
+import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, TrendingUp, DollarSign, Building2, Info, UserPlus } from "lucide-react";
 import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useState } from "react";
@@ -69,6 +69,38 @@ export const SolutionsSection = () => {
           bgColor: "bg-orange-950/40"
         }
       ]
+    },
+    prospect: {
+      title: "Prospect Management",
+      items: [
+        {
+          title: "Lead Generation",
+          description: "AI-powered prospect identification",
+          tag: "Smart",
+          tagDetail: "ML-driven",
+          icon: Target,
+          color: "text-blue-400",
+          bgColor: "bg-blue-950/40"
+        },
+        {
+          title: "Contact Management",
+          description: "Centralized prospect tracking",
+          tag: "Organized",
+          tagDetail: "Real-time",
+          icon: UserPlus,
+          color: "text-green-400",
+          bgColor: "bg-green-950/40"
+        },
+        {
+          title: "Engagement Analytics",
+          description: "Track prospect interactions",
+          tag: "Insights",
+          tagDetail: "Data-driven",
+          icon: TrendingUp,
+          color: "text-yellow-400",
+          bgColor: "bg-yellow-950/40"
+        }
+      ]
     }
   };
 
@@ -85,9 +117,10 @@ export const SolutionsSection = () => {
         </div>
 
         <Tabs defaultValue="analyze" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto mb-8 bg-white/5">
+          <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8 bg-white/5">
             <TabsTrigger value="analyze">Analyze</TabsTrigger>
             <TabsTrigger value="assess">Assess</TabsTrigger>
+            <TabsTrigger value="prospect">Prospect</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analyze" className="space-y-8">
@@ -203,6 +236,65 @@ export const SolutionsSection = () => {
                           <Bar 
                             dataKey="firms"
                             fill="#EAB308"
+                            radius={[4, 4, 0, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="prospect" className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <h3 className="flex items-center gap-2 text-2xl font-semibold text-white mb-6">
+                  <UserPlus className="w-6 h-6 text-blue-400" />
+                  {solutions.prospect.title}
+                </h3>
+                <div className="space-y-4">
+                  {solutions.prospect.items.map((item, index) => (
+                    <div key={index} className={`p-4 rounded-lg ${item.bgColor}`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <item.icon className={`w-5 h-5 ${item.color}`} />
+                          <span className={`font-medium ${item.color}`}>{item.title}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-sm font-medium ${item.color}`}>{item.tag}</span>
+                          <div className="flex items-center gap-1 mt-1">
+                            <ArrowRight className={`w-3 h-3 ${item.color}`} />
+                            <span className="text-xs text-gray-400">{item.tagDetail}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-400">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="h-full flex flex-col">
+                  <h4 className="text-lg font-medium text-white mb-4">Prospect Distribution</h4>
+                  {marketData && (
+                    <div className="flex-1">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={marketData}>
+                          <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
+                          <YAxis stroke="#9CA3AF" fontSize={12} />
+                          <Tooltip 
+                            contentStyle={{ 
+                              background: 'rgba(0,0,0,0.8)', 
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '4px'
+                            }}
+                          />
+                          <Bar 
+                            dataKey="firms"
+                            fill="#3B82F6"
                             radius={[4, 4, 0, 0]}
                           />
                         </BarChart>
