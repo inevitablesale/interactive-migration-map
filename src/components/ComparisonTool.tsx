@@ -9,7 +9,7 @@ import { useToast } from "./ui/use-toast";
 import { ComparisonCharts } from "./comparison/ComparisonCharts";
 import { ScenarioModeling } from "./comparison/ScenarioModeling";
 
-interface ComparisonToolProps {
+export interface ComparisonToolProps {
   embedded?: boolean;
 }
 

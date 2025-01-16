@@ -182,12 +182,12 @@ export const SolutionsSection = () => {
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10 overflow-hidden">
                   {key === "analyze" && (
                     <div className="h-full animate-fade-in">
-                      <ComparisonTool embedded />
+                      <ComparisonTool embedded={true} />
                     </div>
                   )}
                   {key === "assess" && (
                     <div className="h-full animate-fade-in">
-                      <AIDealSourcer embedded />
+                      <AIDealSourcer embedded={true} />
                     </div>
                   )}
                   {key === "plan" && (
