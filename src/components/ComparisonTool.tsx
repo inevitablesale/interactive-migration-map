@@ -1,13 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUpRight, Users, Building2, DollarSign } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { ComparisonCharts } from "./comparison/ComparisonCharts";
-import { ScenarioModeling } from "./comparison/ScenarioModeling";
 
 export interface ComparisonToolProps {
   embedded?: boolean;
@@ -24,9 +19,7 @@ interface StateData {
 export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
   const [stateData, setStateData] = useState<StateData[]>([]);
   const [statesList, setStatesList] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("charts");
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const { data: marketData, isLoading } = useQuery({
     queryKey: ['marketData'],
@@ -47,26 +40,12 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
     },
   });
 
-  const handleUpdateScenario = (updatedData: StateData[]) => {
-    setStateData(updatedData);
-  };
-
   return (
     <div className={`p-4 ${embedded ? "max-w-4xl" : "max-w-6xl"} mx-auto`}>
-      <Tabs defaultValue="charts" className="mb-4" onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="charts">Comparison Charts</TabsTrigger>
-          <TabsTrigger value="scenario">Scenario Modeling</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="charts">
-          <ComparisonCharts stateData={stateData} statesList={statesList} />
-        </TabsContent>
-
-        <TabsContent value="scenario">
-          <ScenarioModeling stateData={stateData} statesList={statesList} onUpdateScenario={handleUpdateScenario} />
-        </TabsContent>
-      </Tabs>
+      <div className="bg-black/40 backdrop-blur-md rounded-lg border border-white/10 p-6">
+        <h2 className="text-2xl font-semibold text-white mb-6">State Comparison Tool</h2>
+        <ComparisonCharts stateData={stateData} statesList={statesList} />
+      </div>
     </div>
   );
 }
