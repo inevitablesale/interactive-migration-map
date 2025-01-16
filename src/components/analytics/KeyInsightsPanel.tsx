@@ -15,8 +15,8 @@ interface ValueMetric {
   total_firms: number;
   avg_revenue: number;
   growth_potential: number;
-  state_rank: number;
-  national_rank: number;
+  state_rank?: number;
+  national_rank?: number;
 }
 
 interface MarketGrowthMetric {
