@@ -10,10 +10,10 @@ export const useMarketReportData = (countyName: string, state: string) => {
         .from('state_fips_codes')
         .select('STATEFP')
         .eq('state', state)
-        .maybeSingle();  // Using maybeSingle instead of single
+        .single();
 
       if (stateFipsError) throw stateFipsError;
-      if (!stateFips) throw new Error(`State not found: ${state}`);
+      if (!stateFips) throw new Error('State not found');
 
       // Then get the state data using the FIPS code
       const { data: stateData, error: stateError } = await supabase
@@ -23,7 +23,7 @@ export const useMarketReportData = (countyName: string, state: string) => {
         .maybeSingle();
 
       if (stateError) throw stateError;
-      if (!stateData) throw new Error(`State data not found for: ${state}`);
+      if (!stateData) throw new Error('State data not found');
 
       // Then, get the county data from the county_rankings table
       const { data: countyData, error: countyError } = await supabase
