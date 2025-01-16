@@ -41,7 +41,7 @@ export const DataSourcesSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-            The First Accounting Firm Market Intelligence Platform
+            Turning Market Data Into Deal Flow
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Tracking over 2,000 accounting firms with 500+ new opportunities added monthly. We help buyers discover their perfect acquisition matches before they ever hit the market.
