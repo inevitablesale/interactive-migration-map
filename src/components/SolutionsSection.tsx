@@ -114,7 +114,7 @@ export const SolutionsSection = () => {
             Data-Driven Market Intelligence
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Make confident acquisition decisions with comprehensive market analysis and real-time insights.
+            Unlock acquisition opportunities by combining comprehensive census data, public deal analytics, and proprietary off-market insights. Our unique three-pronged approach helps you discover high-potential markets before they become competitive.
           </p>
         </div>
 
