@@ -69,11 +69,11 @@ interface EmergingTalentMarket {
 
 interface FutureSaturationRisk {
   county_name: string;
+  state_name: string;
   current_firm_density: number;
   projected_firm_density: number;
   firm_growth_rate: number;
   population_growth_rate: number;
-  state_name?: string;
   state_rank?: number;
   national_rank?: number;
 }
