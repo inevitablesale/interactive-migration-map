@@ -13,25 +13,27 @@ export const DataSourcesSection = () => {
       steps: [
         "Census Bureau demographic data",
         "Bureau of Labor Statistics employment metrics",
-        "County Business Patterns statistics"
+        "County Business Patterns statistics",
+        "LinkedIn business data points"
       ]
     },
     analyze: {
       title: "Smart Analysis",
-      description: "Advanced analytics to extract meaningful insights",
+      description: "Data-driven market intelligence and opportunity scoring",
       steps: [
-        "Market penetration metrics",
-        "Growth potential indicators",
-        "Competitive landscape analysis"
+        "Market density and saturation analysis",
+        "Growth rate and migration trends",
+        "Education and talent metrics",
+        "Economic health indicators"
       ]
     },
     decide: {
       title: "Decision Support",
-      description: "Turn insights into actionable strategies",
+      description: "Strategic insights for market entry and expansion",
       steps: [
-        "Opportunity scoring",
-        "Risk assessment metrics",
-        "Investment case builder"
+        "Market opportunity scoring",
+        "Competitive landscape mapping",
+        "Regional performance benchmarking"
       ]
     }
   };
@@ -86,15 +88,15 @@ export const DataSourcesSection = () => {
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    State-level economic indicators
+                    County-level market analysis
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    MSA (Metropolitan Statistical Area) analysis
+                    State-by-state comparison metrics
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    County-level demographic insights
+                    Metropolitan Statistical Area (MSA) insights
                   </li>
                 </ul>
               </Card>
@@ -107,15 +109,15 @@ export const DataSourcesSection = () => {
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Real-time data aggregation
+                    Comprehensive firm profiling
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Advanced filtering options
+                    Market trend validation
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Predictive analytics
+                    Growth projection modeling
                   </li>
                 </ul>
               </Card>
