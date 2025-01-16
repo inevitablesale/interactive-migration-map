@@ -92,31 +92,31 @@ export const SolutionsSection = () => {
       ]
     },
     plan: {
-      title: "Execution Strategy",
-      description: "Transform insights into actionable acquisition plans",
+      title: "Market Entry Strategy",
+      description: "Make data-driven decisions with comprehensive market intelligence",
       metrics: [
         {
-          title: "Deal Execution",
-          value: "Guided",
+          title: "Market Validation",
+          value: "Multi-Layer",
           icon: Target,
-          description: "Step-by-step approach",
-          trend: "Proven process",
+          description: "Census + Economic + Industry",
+          trend: "Comprehensive data",
           color: "bg-teal-500/10 text-teal-500"
         },
         {
-          title: "Growth Planning",
-          value: "Integrated",
+          title: "Growth Analysis",
+          value: "Predictive",
           icon: TrendingUp,
-          description: "Comprehensive roadmap",
-          trend: "Long-term vision",
+          description: "Future market potential",
+          trend: "Forward-looking",
           color: "bg-indigo-500/10 text-indigo-500"
         },
         {
-          title: "Success Tracking",
-          value: "Real-time",
+          title: "Opportunity Score",
+          value: "Dynamic",
           icon: LineChart,
-          description: "Performance monitoring",
-          trend: "Continuous optimization",
+          description: "Market attractiveness rating",
+          trend: "Data-driven insights",
           color: "bg-rose-500/10 text-rose-500"
         }
       ]
