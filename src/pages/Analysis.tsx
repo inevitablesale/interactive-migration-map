@@ -63,7 +63,7 @@ export default function Analysis() {
       <section className="relative py-20 px-4 bg-black/40">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-            Real-Time Market Intelligence That Evolves With Every New Firm
+            Accounting Firm Market Analyst
           </h1>
           <p className="text-xl text-white/80 max-w-3xl mx-auto">
             Our AI continuously analyzes new accounting firms and market data, delivering fresh insights and opportunities as they emerge
