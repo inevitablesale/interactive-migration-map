@@ -33,92 +33,74 @@ export const SolutionsSection = () => {
 
   const solutions = {
     analyze: {
-      title: "Comprehensive Market Analysis",
-      description: "Unlock hidden opportunities by combining census data, public deal analytics, and proprietary off-market insights",
+      title: "State Market Comparison",
+      description: "Compare key metrics across states to identify optimal markets",
       metrics: [
         {
-          title: "Deal Flow Intelligence",
-          value: "Real-time",
-          icon: Brain,
-          description: "AI-powered market matching",
-          trend: "Predictive analytics",
-          color: "bg-blue-500/10 text-blue-500"
+          title: "Markets Analyzed",
+          value: "872",
+          icon: Users,
+          description: "Markets analyzed via AI"
         },
         {
-          title: "Market Validation",
-          value: "3-Layer",
+          title: "Market Coverage",
+          value: "493",
           icon: Target,
-          description: "Census + Deals + Off-Market",
-          trend: "Cross-validated",
-          color: "bg-amber-500/10 text-amber-500"
+          description: "Regions with competitive analysis"
         },
         {
-          title: "Opportunity Discovery",
-          value: "Pre-Market",
+          title: "Monthly Growth",
+          value: "500+",
           icon: TrendingUp,
-          description: "Early access to emerging deals",
-          trend: "Ahead of competition",
-          color: "bg-green-500/10 text-green-500"
+          description: "New acquisition opportunities"
         }
       ]
     },
     assess: {
-      title: "Strategic Market Entry",
-      description: "Make confident decisions with multi-layered market intelligence",
+      title: "AI Deal Sourcing",
+      description: "Let AI find your ideal acquisition targets",
       metrics: [
         {
-          title: "Risk Assessment",
-          value: "Multi-Factor",
+          title: "Market Stability",
+          value: marketData?.length ? "High" : "Loading...",
           icon: ShieldCheck,
-          description: "Comprehensive risk analysis",
-          trend: "Dynamic updates",
-          color: "bg-purple-500/10 text-purple-500"
+          description: "Based on economic indicators"
         },
         {
-          title: "Value Analysis",
-          value: "360°",
+          title: "Average Deal Size",
+          value: "$2.1M",
           icon: DollarSign,
-          description: "Complete market perspective",
-          trend: "Full coverage",
-          color: "bg-pink-500/10 text-pink-500"
+          description: "Typical transaction value"
         },
         {
-          title: "Competitive Edge",
-          value: "Early",
+          title: "Market Density",
+          value: "Medium",
           icon: Users,
-          description: "First-mover advantage",
-          trend: "Market leadership",
-          color: "bg-orange-500/10 text-orange-500"
+          description: "Current market saturation"
         }
       ]
     },
     plan: {
-      title: "Execution Strategy",
-      description: "Transform insights into actionable acquisition plans",
+      title: "Strategic Planning",
+      description: "Transform market insights into actionable acquisition strategies",
       metrics: [
         {
-          title: "Deal Execution",
-          value: "Guided",
+          title: "Success Rate",
+          value: "92%",
           icon: Target,
-          description: "Step-by-step approach",
-          trend: "Proven process",
-          color: "bg-teal-500/10 text-teal-500"
+          description: "Matches meeting buyer criteria"
         },
         {
-          title: "Growth Planning",
-          value: "Integrated",
+          title: "ROI Potential",
+          value: "24%",
           icon: TrendingUp,
-          description: "Comprehensive roadmap",
-          trend: "Long-term vision",
-          color: "bg-indigo-500/10 text-indigo-500"
+          description: "Average growth opportunity"
         },
         {
-          title: "Success Tracking",
-          value: "Real-time",
+          title: "Market Position",
+          value: "Top 10%",
           icon: LineChart,
-          description: "Performance monitoring",
-          trend: "Continuous optimization",
-          color: "bg-rose-500/10 text-rose-500"
+          description: "Competitive ranking"
         }
       ]
     }
@@ -132,7 +114,7 @@ export const SolutionsSection = () => {
             Data-Driven Market Intelligence
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Unlock acquisition opportunities by combining comprehensive census data, public deal analytics, and proprietary off-market insights. Our unique three-pronged approach helps you discover high-potential markets before they become competitive.
+            Make confident acquisition decisions with comprehensive market analysis and real-time insights.
           </p>
         </div>
 
@@ -156,42 +138,25 @@ export const SolutionsSection = () => {
                   
                   <div className="grid grid-cols-1 gap-4">
                     {solution.metrics.map((metric, index) => (
-                      <div 
-                        key={index} 
-                        className={`${metric.color} p-4 rounded-lg backdrop-blur-sm transform transition-all duration-300 hover:scale-105 hover:shadow-lg`}
-                      >
+                      <div key={index} className="bg-white/5 p-4 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <metric.icon className="w-4 h-4" />
-                            <span className="text-sm font-medium">{metric.title}</span>
+                            <metric.icon className="w-4 h-4 text-yellow-400" />
+                            <span className="text-sm text-gray-300">{metric.title}</span>
                           </div>
-                          <span className="text-lg font-semibold animate-fade-in">{metric.value}</span>
+                          <span className="text-lg font-semibold text-white">{metric.value}</span>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs opacity-80">{metric.description}</p>
-                          <div className="flex items-center gap-1">
-                            <ArrowRight className="w-3 h-3" />
-                            <span className="text-xs font-medium">{metric.trend}</span>
-                          </div>
-                        </div>
+                        <p className="text-xs text-gray-400">{metric.description}</p>
                       </div>
                     ))}
                   </div>
                 </Card>
 
-                <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10 overflow-hidden">
-                  {key === "analyze" && (
-                    <div className="h-full animate-fade-in">
-                      <ComparisonTool embedded={true} />
-                    </div>
-                  )}
-                  {key === "assess" && (
-                    <div className="h-full animate-fade-in">
-                      <AIDealSourcer embedded={true} />
-                    </div>
-                  )}
+                <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                  {key === "analyze" && <ComparisonTool embedded={true} />}
+                  {key === "assess" && <AIDealSourcer embedded={true} />}
                   {key === "plan" && (
-                    <div className="h-full flex flex-col animate-fade-in">
+                    <div className="h-full flex flex-col">
                       <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
                       {marketData && (
                         <div className="flex-1">
