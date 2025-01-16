@@ -22,7 +22,7 @@ export const AIDealSourcer = () => {
   const fetchOpportunities = async () => {
     try {
       const { data, error } = await supabase
-        .from("ai_opportunities")
+        .from("buyer_profiles")
         .select("*")
         .order("created_at", { ascending: false });
 

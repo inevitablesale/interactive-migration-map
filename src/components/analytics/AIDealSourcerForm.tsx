@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 
 interface AIDealSourcerFormData {
+  buyer_name: string;
+  contact_email: string;
   revenueRange: string;
   geography: string[];
   dealTypes: string[];
@@ -63,19 +65,18 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
     setLoading(true);
     try {
       const { error } = await supabase.from("buyer_profiles").insert({
-        deal_preferences: {
-          revenueRange: data.revenueRange,
-          geography: data.geography,
-          dealTypes: data.dealTypes,
-          paymentStructures: data.paymentStructures,
-        },
+        buyer_name: data.buyer_name,
+        contact_email: data.contact_email,
+        target_geography: data.geography,
         ai_preferences: {
-          complexStructures: data.complexStructures,
           timeline: data.timeline,
-          postAcquisitionGoals: data.postAcquisitionGoals,
+          dealTypes: data.dealTypes,
           preferredRole: data.preferredRole,
-          attractiveFeatures: data.attractiveFeatures,
           dealRequirements: data.dealRequirements,
+          complexStructures: data.complexStructures,
+          paymentStructures: data.paymentStructures,
+          attractiveFeatures: data.attractiveFeatures,
+          postAcquisitionGoals: data.postAcquisitionGoals,
           additionalNotes: data.additionalNotes,
         },
         alert_frequency: data.alertFrequency,
@@ -105,6 +106,45 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-4">
+          <div>
+            <Label>Full Name</Label>
+            <Controller
+              name="buyer_name"
+              control={control}
+              rules={{ required: "Name is required" }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  placeholder="Enter your full name"
+                  className="mt-1.5 bg-white/5 border-white/10"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <Label>Email</Label>
+            <Controller
+              name="contact_email"
+              control={control}
+              rules={{ 
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="email"
+                  placeholder="Enter your email"
+                  className="mt-1.5 bg-white/5 border-white/10"
+                />
+              )}
+            />
+          </div>
+
           <div>
             <Label>Revenue Range</Label>
             <Controller

@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_opportunities: {
+        Row: {
+          buyer_profile_id: string | null
+          created_at: string | null
+          id: string
+          opportunity_data: Json
+          score: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          buyer_profile_id?: string | null
+          created_at?: string | null
+          id?: string
+          opportunity_data: Json
+          score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          buyer_profile_id?: string | null
+          created_at?: string | null
+          id?: string
+          opportunity_data?: Json
+          score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_opportunities_buyer_profile_id_fkey"
+            columns: ["buyer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alerts: {
         Row: {
           created_at: string | null
@@ -54,15 +95,19 @@ export type Database = {
       buyer_profiles: {
         Row: {
           acquisition_purpose: string | null
+          ai_preferences: Json | null
+          alert_frequency: string | null
           buyer_name: string
           contact_email: string
           contact_phone: string | null
           created_at: string | null
+          deal_preferences: Json | null
           employee_count_max: number | null
           employee_count_min: number | null
           engagement_frequency: string | null
           growth_priorities: string[] | null
           id: string
+          last_ai_interaction: string | null
           preferred_communication: string | null
           preferred_insights: string[] | null
           price_max: number | null
@@ -78,15 +123,19 @@ export type Database = {
         }
         Insert: {
           acquisition_purpose?: string | null
+          ai_preferences?: Json | null
+          alert_frequency?: string | null
           buyer_name: string
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
+          deal_preferences?: Json | null
           employee_count_max?: number | null
           employee_count_min?: number | null
           engagement_frequency?: string | null
           growth_priorities?: string[] | null
           id?: string
+          last_ai_interaction?: string | null
           preferred_communication?: string | null
           preferred_insights?: string[] | null
           price_max?: number | null
@@ -102,15 +151,19 @@ export type Database = {
         }
         Update: {
           acquisition_purpose?: string | null
+          ai_preferences?: Json | null
+          alert_frequency?: string | null
           buyer_name?: string
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
+          deal_preferences?: Json | null
           employee_count_max?: number | null
           employee_count_min?: number | null
           engagement_frequency?: string | null
           growth_priorities?: string[] | null
           id?: string
+          last_ai_interaction?: string | null
           preferred_communication?: string | null
           preferred_insights?: string[] | null
           price_max?: number | null
