@@ -62,18 +62,21 @@ const Map = () => {
       
       setActiveState(stateWithName);
       
-      // Create a simple serializable object for the event
+      // Create a simple serializable object with primitive values only
       const eventData = {
         STATEFP: state.STATEFP,
         displayName: stateName,
-        EMP: state.EMP || 0,
-        PAYANN: state.PAYANN || 0,
-        ESTAB: state.ESTAB || 0
+        EMP: state.EMP ? Number(state.EMP) : 0,
+        PAYANN: state.PAYANN ? Number(state.PAYANN) : 0,
+        ESTAB: state.ESTAB ? Number(state.ESTAB) : 0
       };
       
-      // Dispatch the event with the serializable data
+      // Stringify and parse to ensure we have a clean serializable object
+      const cleanEventData = JSON.parse(JSON.stringify(eventData));
+      
+      // Create and dispatch the event with the clean data
       window.dispatchEvent(new CustomEvent('stateChanged', { 
-        detail: eventData
+        detail: cleanEventData
       }));
     } catch (error) {
       console.error('Error updating active state:', error);
