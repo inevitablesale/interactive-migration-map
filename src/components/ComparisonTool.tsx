@@ -320,9 +320,6 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
           </Tabs>
         ) : (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-white/60">
-              <span className="text-sm">Select states to compare</span>
-            </div>
             <p className="text-xs text-white/60">
               Compare states side by side with detailed metrics and insights
             </p>
