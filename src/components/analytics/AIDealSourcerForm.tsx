@@ -4,9 +4,10 @@ interface AIDealSourcerFormProps {
   onSubmit?: (data: any) => Promise<void>;
   isLoading?: boolean;
   onSuccess?: () => void;
+  embedded?: boolean;
 }
 
-export const AIDealSourcerForm = ({ onSubmit, isLoading, onSuccess }: AIDealSourcerFormProps) => {
+export const AIDealSourcerForm = ({ onSubmit, isLoading, onSuccess, embedded }: AIDealSourcerFormProps) => {
   const handleSubmit = async (data: any) => {
     if (onSubmit) {
       await onSubmit(data);
@@ -16,5 +17,5 @@ export const AIDealSourcerForm = ({ onSubmit, isLoading, onSuccess }: AIDealSour
     }
   };
 
-  return <MultiStepForm onSuccess={handleSubmit} />;
+  return <MultiStepForm onSuccess={handleSubmit} embedded={embedded} />;
 };
