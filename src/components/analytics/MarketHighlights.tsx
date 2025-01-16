@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
   TableBody,
@@ -10,71 +12,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const growthLeaders = [
-  {
-    region: "Jefferson County",
-    growthRate: "+25%",
-    firmDensity: "5.5",
-    avgPayroll: "$1.8M",
-  },
-  {
-    region: "Helena, MT",
-    growthRate: "+22%",
-    firmDensity: "4.3",
-    avgPayroll: "$1.4M",
-  },
-  {
-    region: "Kalispell, MT",
-    growthRate: "+19%",
-    firmDensity: "3.8",
-    avgPayroll: "$1.2M",
-  },
-];
-
-const competitiveInsights = [
-  {
-    region: "Florida",
-    firmDensity: "6.5/10k",
-    growthRate: "+12%",
-    stability: "High",
-  },
-  {
-    region: "Tennessee",
-    firmDensity: "5.9/10k",
-    growthRate: "+10%",
-    stability: "Medium",
-  },
-  {
-    region: "California",
-    firmDensity: "4.3/10k",
-    growthRate: "+8%",
-    stability: "High",
-  },
-];
-
-const serviceSpecialization = [
-  {
-    region: "Nebraska",
-    service: "Tax Advisory",
-    firmDensity: "3.5",
-    growthRate: "+15%",
-  },
-  {
-    region: "Colorado",
-    service: "Bookkeeping Services",
-    firmDensity: "5.7",
-    growthRate: "+20%",
-  },
-  {
-    region: "Washington",
-    service: "Payroll Management",
-    firmDensity: "4.8",
-    growthRate: "+18%",
-  },
-];
-
 export function MarketHighlights() {
   const [activeTab, setActiveTab] = useState("growth");
+
+  const { data: growthLeaders } = useQuery({
+    queryKey: ['growthLeaders'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_top_growth_regions');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: competitiveInsights } = useQuery({
+    queryKey: ['competitiveInsights'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_competitive_analysis');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: serviceSpecialization } = useQuery({
+    queryKey: ['serviceSpecialization'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_service_distribution');
+      if (error) throw error;
+      return data;
+    }
+  });
 
   return (
     <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
@@ -105,18 +71,18 @@ export function MarketHighlights() {
             <TableHeader>
               <TableRow className="border-white/10">
                 <TableHead className="text-white/60">Region</TableHead>
-                <TableHead className="text-white/60">Growth Rate (YoY)</TableHead>
-                <TableHead className="text-white/60">Avg Firms/10k</TableHead>
-                <TableHead className="text-white/60">Avg Payroll</TableHead>
+                <TableHead className="text-white/60">Growth Rate</TableHead>
+                <TableHead className="text-white/60">Firms/10k Population</TableHead>
+                <TableHead className="text-white/60">Total Population</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {growthLeaders.map((item) => (
-                <TableRow key={item.region} className="border-white/10">
-                  <TableCell className="text-white">{item.region}</TableCell>
-                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
-                  <TableCell className="text-white/80">{item.firmDensity}</TableCell>
-                  <TableCell className="text-white/80">{item.avgPayroll}</TableCell>
+              {growthLeaders?.map((item) => (
+                <TableRow key={`${item.county_name}-${item.state_name}`} className="border-white/10">
+                  <TableCell className="text-white">{`${item.county_name}, ${item.state_name}`}</TableCell>
+                  <TableCell className="text-blue-400">{`${item.growth_rate}%`}</TableCell>
+                  <TableCell className="text-white/80">{item.firm_density.toFixed(1)}</TableCell>
+                  <TableCell className="text-white/80">{item.total_population.toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -129,17 +95,17 @@ export function MarketHighlights() {
               <TableRow className="border-white/10">
                 <TableHead className="text-white/60">Region</TableHead>
                 <TableHead className="text-white/60">Firm Density</TableHead>
-                <TableHead className="text-white/60">Avg Growth Rate</TableHead>
-                <TableHead className="text-white/60">Economic Stability</TableHead>
+                <TableHead className="text-white/60">Market Concentration</TableHead>
+                <TableHead className="text-white/60">Competition Level</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {competitiveInsights.map((item) => (
-                <TableRow key={item.region} className="border-white/10">
-                  <TableCell className="text-white">{item.region}</TableCell>
-                  <TableCell>{item.firmDensity}</TableCell>
-                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
-                  <TableCell>{item.stability}</TableCell>
+              {competitiveInsights?.map((item) => (
+                <TableRow key={item.statefp} className="border-white/10">
+                  <TableCell className="text-white">State {item.statefp}</TableCell>
+                  <TableCell>{(item.total_firms / 10000).toFixed(1)}/10k</TableCell>
+                  <TableCell className="text-blue-400">{`${item.market_concentration.toFixed(1)}%`}</TableCell>
+                  <TableCell>{item.competition_level}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -151,18 +117,18 @@ export function MarketHighlights() {
             <TableHeader>
               <TableRow className="border-white/10">
                 <TableHead className="text-white/60">Region</TableHead>
-                <TableHead className="text-white/60">Specialized Service</TableHead>
-                <TableHead className="text-white/60">Avg Firms/10k</TableHead>
-                <TableHead className="text-white/60">Growth Rate (YoY)</TableHead>
+                <TableHead className="text-white/60">Service Type</TableHead>
+                <TableHead className="text-white/60">Specialty Count</TableHead>
+                <TableHead className="text-white/60">Market Share</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {serviceSpecialization.map((item) => (
-                <TableRow key={item.region} className="border-white/10">
-                  <TableCell className="text-white">{item.region}</TableCell>
-                  <TableCell>{item.service}</TableCell>
-                  <TableCell>{item.firmDensity}</TableCell>
-                  <TableCell className="text-blue-400">{item.growthRate}</TableCell>
+              {serviceSpecialization?.map((item, index) => (
+                <TableRow key={`${item.statefp}-${index}`} className="border-white/10">
+                  <TableCell className="text-white">State {item.statefp}</TableCell>
+                  <TableCell>{item.specialities}</TableCell>
+                  <TableCell className="text-white/80">{item.specialty_count.toLocaleString()}</TableCell>
+                  <TableCell className="text-blue-400">{`${item.specialty_percentage.toFixed(1)}%`}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
