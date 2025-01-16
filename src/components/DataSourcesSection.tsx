@@ -43,7 +43,7 @@ export const DataSourcesSection = () => {
             Turning Market Data Into Deal Flow
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Tracking over 2,000 accounting firms with 500+ new opportunities added monthly. We help buyers discover their perfect acquisition matches before they ever hit the market.
+            Tracking 872 cities with 500+ new firms added monthly. Canary helps buyers discover their perfect acquisition matches before they ever hit the market.
           </p>
         </div>
 
