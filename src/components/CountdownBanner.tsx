@@ -31,7 +31,7 @@ const CountdownBanner = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-primary text-primary-foreground py-2 px-4 z-50 text-center text-sm md:text-base">
+    <div className="fixed bottom-0 left-0 w-full bg-primary text-primary-foreground py-2 px-4 z-50 text-center text-sm md:text-base">
       <span className="font-medium">
         New firms added in: {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m{" "}
         {timeLeft.seconds}s
