@@ -13,35 +13,47 @@ export default function StateMarketReport() {
   const navigate = useNavigate();
   const [stateName, setStateName] = useState<string>("");
 
+  // Validate state parameter before querying
+  const isValidState = state && !isNaN(Number(state)) && state.length <= 2;
+
   // Query the materialized view for state rankings
   const { data: stateRankings, isLoading: rankingsLoading } = useQuery({
     queryKey: ['stateRankings', state],
     queryFn: async () => {
+      if (!isValidState) {
+        throw new Error('Invalid state parameter');
+      }
+
       const { data, error } = await supabase
         .from('state_rankings')
         .select('*')
         .eq('STATEFP', state)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
     },
-    enabled: !!state
+    enabled: isValidState
   });
 
   // Get state data
   const { data: stateData, isLoading: stateLoading } = useQuery({
     queryKey: ['stateData', state],
     queryFn: async () => {
+      if (!isValidState) {
+        throw new Error('Invalid state parameter');
+      }
+
       const { data, error } = await supabase
         .from('state_data')
         .select('*')
         .eq('STATEFP', state)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: isValidState
   });
 
   // First get state abbreviation
@@ -107,45 +119,28 @@ export default function StateMarketReport() {
 
   useEffect(() => {
     const loadStateName = async () => {
-      if (state) {
+      if (isValidState && state) {
         const name = await getStateName(state);
         setStateName(name);
       }
     };
     loadStateName();
-  }, [state]);
+  }, [state, isValidState]);
 
-  const handleCountyClick = (countyName: string) => {
-    const formattedCounty = countyName.endsWith(" County") ? countyName : `${countyName} County`;
-    navigate(`/market-report/${formattedCounty}/${stateName}`);
-  };
-
-  // Calculate combined national rank using the materialized view data
-  const calculateNationalRank = () => {
-    if (!stateRankings) return null;
-    
-    // Get individual ranks, defaulting to 50 if missing
-    const densityRank = stateRankings.density_rank || 50;
-    const growthRank = stateRankings.growth_rank || 50;
-    const marketSaturationRank = stateRankings.market_saturation_rank || 50;
-    
-    // Calculate weighted average of ranks (40% density, 40% growth, 20% market saturation)
-    const weightedRank = Math.round(
-      (densityRank * 0.4) + 
-      (growthRank * 0.4) + 
-      (marketSaturationRank * 0.2)
+  // Handle invalid state parameter
+  if (!isValidState) {
+    return (
+      <div className="min-h-screen bg-[#222222] p-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl font-bold text-white mb-4">Invalid state parameter</h1>
+          <Button onClick={() => navigate(-1)} variant="outline" className="text-white">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Analysis
+          </Button>
+        </div>
+      </div>
     );
-    
-    return weightedRank;
-  };
-
-  const calculateEducationPercentages = (stateData: any) => {
-    const total = stateData.B15003_001E || 1;
-    const bachelors = ((stateData.B15003_022E || 0) / total * 100).toFixed(1);
-    const masters = ((stateData.B15003_023E || 0) / total * 100).toFixed(1);
-    const doctorate = ((stateData.B15003_025E || 0) / total * 100).toFixed(1);
-    return { bachelors, masters, doctorate };
-  };
+  }
 
   if (stateLoading || rankingsLoading) {
     return (
