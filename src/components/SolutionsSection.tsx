@@ -5,10 +5,31 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComparisonTool } from "./ComparisonTool";
 import { AIDealSourcer } from "./analytics/AIDealSourcer";
-import { useNavigate } from "react-router-dom";
-import { AccountingIndustryCard } from "./market-report/AccountingIndustryCard";
-import { getStateName } from "@/utils/stateUtils";
+
+export const SolutionsSection = () => {
+  const [activeTab, setActiveTab] = useState("analyze");
+
+  const { data: marketData } = useQuery({
+    queryKey: ['marketMetrics'],
+    queryFn: async () => {
+      const { data: stateData, error } = await supabase
+        .from('state_data')
+        .select('STATEFP, EMP, PAYANN, ESTAB, B19013_001E')
+        .order('EMP', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return stateData?.map(state => ({
+        name: `State ${state.STATEFP}`,
+        employees: state.EMP || 0,
+        firms: state.ESTAB || 0,
+        payroll: state.PAYANN || 0,
+        income: state.B19013_001E || 0
+      }));
+    }
+  });
 
   const solutions = {
     analyze: {
@@ -72,120 +93,34 @@ import { getStateName } from "@/utils/stateUtils";
       ]
     },
     plan: {
-      title: "Market Entry Strategy",
-      description: "Make data-driven decisions with comprehensive market intelligence",
+      title: "Execution Strategy",
+      description: "Transform insights into actionable acquisition plans",
       metrics: [
         {
-          title: "Market Validation",
-          value: "Multi-Level",
+          title: "Deal Execution",
+          value: "Guided",
           icon: Target,
-          description: "National & State-County Rankings",
-          trend: "Comprehensive analysis",
+          description: "Step-by-step approach",
+          trend: "Proven process",
           color: "bg-teal-500/10 text-teal-500"
         },
         {
-          title: "Growth Analysis",
-          value: "Predictive",
+          title: "Growth Planning",
+          value: "Integrated",
           icon: TrendingUp,
-          description: "Future market potential",
-          trend: "Forward-looking",
+          description: "Comprehensive roadmap",
+          trend: "Long-term vision",
           color: "bg-indigo-500/10 text-indigo-500"
         },
         {
-          title: "Opportunity Score",
-          value: "Dynamic",
+          title: "Success Tracking",
+          value: "Real-time",
           icon: LineChart,
-          description: "Market attractiveness rating",
-          trend: "Data-driven insights",
+          description: "Performance monitoring",
+          trend: "Continuous optimization",
           color: "bg-rose-500/10 text-rose-500"
         }
       ]
-    }
-  };
-
-export const SolutionsSection = () => {
-  const [activeTab, setActiveTab] = useState("analyze");
-  const navigate = useNavigate();
-
-  const { data: marketData } = useQuery({
-    queryKey: ['marketMetrics'],
-    queryFn: async () => {
-      const { data: stateData, error } = await supabase
-        .from('state_data')
-        .select('STATEFP, EMP, PAYANN, ESTAB, B01001_001E')
-        .order('ESTAB', { ascending: false })
-        .limit(10);
-      
-      if (error) throw error;
-
-      // Transform the data with state names and calculate market density
-      const transformedData = await Promise.all(stateData?.map(async state => {
-        const stateName = await getStateName(state.STATEFP);
-        const marketDensity = state.B01001_001E ? (state.ESTAB / state.B01001_001E) * 10000 : 0;
-        return {
-          name: stateName,
-          marketDensity: Math.round(marketDensity * 100) / 100,
-          statefp: state.STATEFP
-        };
-      }) || []);
-
-      return transformedData;
-    }
-  });
-
-  // Query for accounting industry metrics
-  const { data: accountingMetrics } = useQuery({
-    queryKey: ['accountingMetrics'],
-    queryFn: async () => {
-      const { data: countyData, error } = await supabase
-        .from('county_data')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
-      
-      if (error) throw error;
-      if (!countyData) return null;
-
-      return {
-        total_establishments: countyData.ESTAB || 0,
-        emp: countyData.EMP || 0,
-        payann: countyData.PAYANN || 0,
-        firms_per_10k_population: countyData.B01001_001E ? (countyData.ESTAB / countyData.B01001_001E) * 10000 : 0,
-        total_population: countyData.B01001_001E || 0,
-        median_household_income: countyData.B19013_001E || 0,
-        median_gross_rent: countyData.B25064_001E || 0,
-        median_home_value: countyData.B25077_001E || 0,
-        total_housing_units: countyData.B25001_001E || 0,
-        occupied_housing_units: countyData.B25002_002E || 0,
-        vacant_housing_units: countyData.B25002_003E || 0,
-        total_employed: countyData.B23025_004E || 0,
-        total_unemployed: countyData.B23025_005E || 0,
-        employed_population: countyData.B23025_004E || 0,
-        private_sector_accountants: countyData.C24010_033E || 0,
-        public_sector_accountants: countyData.C24010_034E || 0,
-        total_households: countyData.B11001_001E || 0,
-        family_households: countyData.B11003_001E || 0,
-        total_education_population: countyData.B15003_001E || 0,
-        bachelors_degree_holders: countyData.B15003_022E || 0,
-        masters_degree_holders: countyData.B15003_023E || 0,
-        doctorate_degree_holders: countyData.B15003_025E || 0,
-        growth_rate_percentage: 0,
-        market_saturation_index: 0,
-        avgSalaryPerEmployee: countyData.PAYANN && countyData.EMP ? countyData.PAYANN / countyData.EMP : 0,
-        vacancy_rate: countyData.B25001_001E ? (countyData.B25002_003E / countyData.B25001_001E) * 100 : 0,
-        vacancy_rank: 0,
-        income_rank: 0,
-        population_rank: 0,
-        rent_rank: 0,
-        growth_rank: 0,
-        top_firms: []
-      };
-    }
-  });
-
-  const handleStateClick = (statefp: string) => {
-    if (statefp) {
-      navigate(`/state-market-report/${statefp}`);
     }
   };
 
@@ -216,9 +151,7 @@ export const SolutionsSection = () => {
                     {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
                     {key === "assess" && <ShieldCheck className="w-5 h-5 text-yellow-400" />}
                     {key === "plan" && <LineChart className="w-5 h-5 text-yellow-400" />}
-                    <h3 className="text-lg font-semibold text-white">
-                      {key === "plan" ? "Prospect with Confidence" : solution.title}
-                    </h3>
+                    <h3 className="text-lg font-semibold text-white">{solution.title}</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-4">
@@ -249,17 +182,17 @@ export const SolutionsSection = () => {
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10 overflow-hidden">
                   {key === "analyze" && (
                     <div className="h-full animate-fade-in">
-                      <AIDealSourcer embedded={true} />
+                      <ComparisonTool embedded={true} />
                     </div>
                   )}
-                  {key === "assess" && accountingMetrics && (
+                  {key === "assess" && (
                     <div className="h-full animate-fade-in">
-                      <AccountingIndustryCard marketData={accountingMetrics} />
+                      <AIDealSourcer embedded={true} />
                     </div>
                   )}
                   {key === "plan" && (
                     <div className="h-full flex flex-col animate-fade-in">
-                      <h4 className="text-sm font-medium text-gray-300 mb-4">Market Density Overview</h4>
+                      <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
                       {marketData && (
                         <div className="flex-1">
                           <ResponsiveContainer width="100%" height={300}>
@@ -274,12 +207,9 @@ export const SolutionsSection = () => {
                                 }}
                               />
                               <Bar 
-                                dataKey="marketDensity"
-                                name="Market Density (per 10k population)"
+                                dataKey="firms"
                                 fill="#EAB308"
                                 radius={[4, 4, 0, 0]}
-                                onClick={(data) => handleStateClick(data.statefp)}
-                                style={{ cursor: 'pointer' }}
                               />
                             </BarChart>
                           </ResponsiveContainer>
