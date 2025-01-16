@@ -137,23 +137,28 @@ export const AIDealSourcer = () => {
             <p className="text-sm text-blue-100/60">Scanning the market for opportunities...</p>
           </div>
         ) : opportunities.length === 0 ? (
-          <div className="text-center py-8">
-            <Brain className="w-12 h-12 text-blue-400/20 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-white mb-2">
-              Hey there! 👋 Let's Find Your Next Big Thing
-            </h4>
-            <p className="text-sm text-blue-100/60 mb-6 max-w-md mx-auto">
-              I'm your AI deal scout! Tell me what you're looking for, and I'll analyze 
-              the market 24/7 to find perfect matches. Click the + button to set up 
-              your first deal search profile.
-            </p>
-            <Button
-              onClick={() => setShowForm(true)}
-              className="bg-blue-500 hover:bg-blue-600 animate-fade-in"
-            >
-              Create Your First Deal Profile
-            </Button>
-          </div>
+          <>
+            <div className="text-center py-8">
+              <Brain className="w-12 h-12 text-blue-400/20 mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-white mb-2">
+                Hey there! 👋 Let's Find Your Next Big Thing
+              </h4>
+              <p className="text-sm text-blue-100/60 mb-6 max-w-md mx-auto">
+                I'm your AI deal scout! Tell me what you're looking for, and I'll analyze 
+                the market 24/7 to find perfect matches. Click the + button to set up 
+                your first deal search profile.
+              </p>
+              <Button
+                onClick={() => setShowForm(true)}
+                className="bg-blue-500 hover:bg-blue-600 animate-fade-in"
+              >
+                Create Your First Deal Profile
+              </Button>
+            </div>
+            <div className="mt-8 h-[400px] rounded-lg overflow-hidden">
+              <DealMap firms={[]} />
+            </div>
+          </>
         ) : (
           <>
             <div className="space-y-4 animate-fade-in">

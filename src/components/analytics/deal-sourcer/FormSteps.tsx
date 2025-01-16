@@ -66,9 +66,8 @@ export const FirmPreferencesStep = ({
         ))}
       </div>
     </div>
-
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack}>Back</Button>
+      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
       <Button onClick={onNext}>Next</Button>
     </div>
   </div>
@@ -140,7 +139,7 @@ export const PaymentTimingStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack}>Back</Button>
+      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
       <Button onClick={onNext}>Next</Button>
     </div>
   </div>
@@ -206,7 +205,7 @@ export const PostAcquisitionStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack}>Back</Button>
+      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
       <Button onClick={onNext}>Next</Button>
     </div>
   </div>
@@ -307,7 +306,7 @@ export const AdditionalNotesStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack}>Back</Button>
+      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
       <Button onClick={onNext}>Next</Button>
     </div>
   </div>
@@ -346,7 +345,6 @@ export const ReviewStep = ({
         <p className="text-white/60">{data.team_emails}</p>
       </div>
     </div>
-
     <div className="flex justify-between">
       <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
       <Button onClick={onSubmit}>Create Deal Agent</Button>
