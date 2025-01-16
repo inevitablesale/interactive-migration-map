@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, TrendingUp, DollarSign, Building2, Info, UserPlus } from "lucide-react";
+import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, FileText, List, FileDownload, Building2, Info, UserPlus } from "lucide-react";
 import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useState } from "react";
@@ -71,32 +71,32 @@ export const SolutionsSection = () => {
       ]
     },
     prospect: {
-      title: "Prospect Management",
+      title: "Smart Firm Lists & Reports",
       items: [
         {
-          title: "Lead Generation",
-          description: "AI-powered prospect identification",
+          title: "Curated Firm Lists",
+          description: "AI-powered firm discovery and filtering",
           tag: "Smart",
           tagDetail: "ML-driven",
-          icon: Target,
+          icon: List,
           color: "text-blue-400",
           bgColor: "bg-blue-950/40"
         },
         {
-          title: "Contact Management",
-          description: "Centralized prospect tracking",
-          tag: "Organized",
-          tagDetail: "Real-time",
-          icon: UserPlus,
+          title: "Market Reports",
+          description: "Downloadable local market insights",
+          tag: "Reports",
+          tagDetail: "PDF & Excel",
+          icon: FileDownload,
           color: "text-green-400",
           bgColor: "bg-green-950/40"
         },
         {
-          title: "Engagement Analytics",
-          description: "Track prospect interactions",
-          tag: "Insights",
-          tagDetail: "Data-driven",
-          icon: TrendingUp,
+          title: "Firm Analytics",
+          description: "Detailed firm performance metrics",
+          tag: "Analytics",
+          tagDetail: "Real-time",
+          icon: FileText,
           color: "text-yellow-400",
           bgColor: "bg-yellow-950/40"
         }
@@ -251,7 +251,7 @@ export const SolutionsSection = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <h3 className="flex items-center gap-2 text-2xl font-semibold text-white mb-6">
-                  <UserPlus className="w-6 h-6 text-blue-400" />
+                  <List className="w-6 h-6 text-blue-400" />
                   {solutions.prospect.title}
                 </h3>
                 <div className="space-y-4">
@@ -278,29 +278,50 @@ export const SolutionsSection = () => {
 
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="h-full flex flex-col">
-                  <h4 className="text-lg font-medium text-white mb-4">Prospect Distribution</h4>
-                  {marketData && (
-                    <div className="flex-1">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={marketData}>
-                          <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
-                          <YAxis stroke="#9CA3AF" fontSize={12} />
-                          <Tooltip 
-                            contentStyle={{ 
-                              background: 'rgba(0,0,0,0.8)', 
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              borderRadius: '4px'
-                            }}
-                          />
-                          <Bar 
-                            dataKey="firms"
-                            fill="#3B82F6"
-                            radius={[4, 4, 0, 0]}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  <h4 className="text-lg font-medium text-white mb-4">Available Reports</h4>
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-lg bg-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-400" />
+                          <span className="text-white">Market Analysis Report</span>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
+                          <FileDownload className="w-4 h-4 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-400">Comprehensive local market insights and trends</p>
                     </div>
-                  )}
+                    
+                    <div className="p-4 rounded-lg bg-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-green-400" />
+                          <span className="text-white">Firm Performance Report</span>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-green-400 hover:text-green-300">
+                          <FileDownload className="w-4 h-4 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-400">Detailed metrics on local accounting firms</p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-yellow-400" />
+                          <span className="text-white">Growth Opportunities Report</span>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-yellow-400 hover:text-yellow-300">
+                          <FileDownload className="w-4 h-4 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-400">Analysis of high-potential acquisition targets</p>
+                    </div>
+                  </div>
                 </div>
               </Card>
             </div>
