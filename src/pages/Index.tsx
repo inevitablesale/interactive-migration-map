@@ -1,7 +1,6 @@
 import Map from "@/components/Map";
 import { Hero } from "@/components/Hero";
 import { Bird } from "lucide-react";
-import { BottomPanel } from "@/components/BottomPanel";
 import { DataSourcesSection } from "@/components/DataSourcesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
 import { TimeCalculator } from "@/components/TimeCalculator";
@@ -60,11 +59,6 @@ const Index = () => {
         <div className="py-20 px-4">
           <TimeCalculator />
         </div>
-      </div>
-
-      {/* Fixed UI Elements */}
-      <div className="fixed bottom-0 left-0 right-0 z-20">
-        <BottomPanel />
       </div>
     </div>
   );
