@@ -155,8 +155,25 @@ export const AIDealSourcer = () => {
                 Create Your First Deal Agent
               </Button>
             </div>
-            <div className="mt-8 h-[400px] rounded-lg overflow-hidden">
+            <div className="mt-8 h-[400px] rounded-lg overflow-hidden relative">
               <DealMap firms={[]} />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-yellow-300/90 p-6 rounded-lg shadow-xl max-w-md mx-4 text-center">
+                  <Brain className="w-12 h-12 text-yellow-700 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+                    Your Deal Scout is Ready!
+                  </h3>
+                  <p className="text-sm text-yellow-800 mb-4">
+                    Set up your deal agent to see matching firms appear on this map. I'll help you find the perfect opportunities!
+                  </p>
+                  <Button
+                    onClick={() => setShowForm(true)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 hover:text-yellow-50 transition-colors"
+                  >
+                    Create Your Deal Agent
+                  </Button>
+                </div>
+              </div>
             </div>
           </>
         ) : (
