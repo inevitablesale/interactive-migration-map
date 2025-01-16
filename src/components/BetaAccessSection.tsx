@@ -1,4 +1,4 @@
-import { Beta, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
 
 export const BetaAccessSection = () => {
@@ -7,7 +7,7 @@ export const BetaAccessSection = () => {
       <Card className="max-w-4xl mx-auto bg-white/90 backdrop-blur-sm p-8">
         <div className="flex flex-col items-center text-center">
           <div className="mb-6">
-            <Beta className="w-12 h-12 text-yellow-500" />
+            <Sparkles className="w-12 h-12 text-yellow-500" />
           </div>
           <h2 className="text-3xl font-bold mb-4">Join Our Beta Program</h2>
           <p className="text-gray-600 mb-8 max-w-2xl">
