@@ -1,5 +1,5 @@
 import { ChartBar, Users, Target, InfoIcon, ArrowUpRight, Building2, Users2, Home, GraduationCap, ChartBarIcon, Coins,
-  DollarSign, Briefcase, LineChart, Building } from "lucide-react";
+  DollarSign, Briefcase, LineChart, Building, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -81,6 +81,19 @@ interface FutureSaturationRisk {
 export function KeyInsightsPanel() {
   const navigate = useNavigate();
 
+  const handleNavigateToMarket = (county: string, state: string) => {
+    navigate(`/market-report/${state}/${county}`);
+  };
+
+  const { data: valueMetrics = [] } = useQuery({
+    queryKey: ['valueMetrics'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_value_metrics');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: marketGrowthMetrics = [] } = useQuery({
     queryKey: ['marketGrowthMetrics'],
     queryFn: async () => {
@@ -141,6 +154,12 @@ export function KeyInsightsPanel() {
       );
     },
   });
+
+  const transformedValueMetrics = valueMetrics?.map(metric => ({
+    ...metric,
+    state_rank: metric.state_rank || undefined,
+    national_rank: metric.national_rank || undefined
+  }));
 
   const insights = [
     {
