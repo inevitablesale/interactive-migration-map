@@ -21,10 +21,7 @@ const ThankYou = () => {
           
           <div className="space-y-4">
             <p className="text-gray-600">
-              We're currently in beta, and we'll notify you as soon as we launch.
-            </p>
-            <p className="text-gray-600">
-              In the meantime, subscribe to our{" "}
+              We're currently in beta, and we'll notify you as soon as we launch. In the meantime, subscribe to our{" "}
               <a 
                 href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7259300749644357632" 
                 target="_blank" 
