@@ -110,10 +110,10 @@ export const SolutionsSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-            Transform Data into Decisions
+            From Insights to Action
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Don't just collect data - use it to drive meaningful change in your acquisition strategy
+            Turn market intelligence into your competitive advantage. Find the perfect acquisition target with data-driven precision.
           </p>
         </div>
 
