@@ -62,20 +62,21 @@ const Map = () => {
       
       setActiveState(stateWithName);
       
+      // Create a simple serializable object for the event
       const eventData = {
         STATEFP: state.STATEFP,
         displayName: stateName,
-        EMP: state.EMP,
-        PAYANN: state.PAYANN,
-        ESTAB: state.ESTAB
+        EMP: state.EMP || 0,
+        PAYANN: state.PAYANN || 0,
+        ESTAB: state.ESTAB || 0
       };
       
-      const event = new CustomEvent('stateChanged', { 
-        detail: JSON.parse(JSON.stringify(eventData))
-      });
-      window.dispatchEvent(event);
+      // Dispatch the event with the serializable data
+      window.dispatchEvent(new CustomEvent('stateChanged', { 
+        detail: eventData
+      }));
     } catch (error) {
-      console.error('Error dispatching state change event:', error);
+      console.error('Error updating active state:', error);
     }
   }, []);
 
