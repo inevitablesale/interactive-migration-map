@@ -156,28 +156,42 @@ export const SolutionsSection = () => {
                   
                   <div className="grid grid-cols-1 gap-4">
                     {solution.metrics.map((metric, index) => (
-                      <div key={index} className={`${metric.color} p-4 rounded-lg backdrop-blur-sm`}>
+                      <div 
+                        key={index} 
+                        className={`${metric.color} p-4 rounded-lg backdrop-blur-sm transform transition-all duration-300 hover:scale-105 hover:shadow-lg`}
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <metric.icon className="w-4 h-4" />
                             <span className="text-sm font-medium">{metric.title}</span>
                           </div>
-                          <span className="text-lg font-semibold">{metric.value}</span>
+                          <span className="text-lg font-semibold animate-fade-in">{metric.value}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <p className="text-xs opacity-80">{metric.description}</p>
-                          <span className="text-xs font-medium">{metric.trend}</span>
+                          <div className="flex items-center gap-1">
+                            <ArrowRight className="w-3 h-3" />
+                            <span className="text-xs font-medium">{metric.trend}</span>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </Card>
 
-                <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  {key === "analyze" && <ComparisonTool embedded={true} />}
-                  {key === "assess" && <AIDealSourcer embedded={true} />}
+                <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10 overflow-hidden">
+                  {key === "analyze" && (
+                    <div className="h-full animate-fade-in">
+                      <ComparisonTool embedded />
+                    </div>
+                  )}
+                  {key === "assess" && (
+                    <div className="h-full animate-fade-in">
+                      <AIDealSourcer embedded />
+                    </div>
+                  )}
                   {key === "plan" && (
-                    <div className="h-full flex flex-col">
+                    <div className="h-full flex flex-col animate-fade-in">
                       <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
                       {marketData && (
                         <div className="flex-1">
