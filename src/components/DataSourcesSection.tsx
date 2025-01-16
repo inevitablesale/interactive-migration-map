@@ -33,7 +33,8 @@ export const DataSourcesSection = () => {
       steps: [
         "Market opportunity scoring",
         "Competitive landscape mapping",
-        "Regional performance benchmarking"
+        "Regional performance benchmarking",
+        "500 new firms added monthly"
       ]
     }
   };
