@@ -41,7 +41,7 @@ export function Hero() {
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
             className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"
           >
-            <span className="text-sm uppercase tracking-wider mb-2">Explore the Map</span>
+            <span className="text-sm uppercase tracking-wider mb-2">Sign Up for Early Access</span>
             <ChevronDown className="w-6 h-6 animate-bounce" />
           </button>
         </div>

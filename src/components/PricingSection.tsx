@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import { Card } from "./ui/card";
 
 export const PricingSection = () => {
@@ -25,7 +25,7 @@ export const PricingSection = () => {
             <p className="text-sm text-gray-600 mb-4">
               Essential tools for market exploration
             </p>
-            <ul className="space-y-3 text-gray-600">
+            <ul className="space-y-3 text-gray-600 mb-6">
               <li className="flex items-start gap-2">
                 <ArrowRight className="w-4 h-4 text-yellow-600 mt-1 shrink-0" />
                 Basic market insights
@@ -43,6 +43,13 @@ export const PricingSection = () => {
                 Weekly insights newsletter
               </li>
             </ul>
+            <button 
+              className="w-full py-2 px-4 bg-gray-200 text-gray-600 rounded flex items-center justify-center gap-2 cursor-not-allowed"
+              disabled
+            >
+              <Clock className="w-4 h-4" />
+              <span>Coming Soon</span>
+            </button>
           </Card>
 
           <Card className="p-6 bg-white/90 backdrop-blur-md">
@@ -58,7 +65,7 @@ export const PricingSection = () => {
             <p className="text-sm text-gray-600 mb-4">
               Complete suite for serious buyers
             </p>
-            <ul className="space-y-3 text-gray-600">
+            <ul className="space-y-3 text-gray-600 mb-6">
               <li className="flex items-start gap-2">
                 <ArrowRight className="w-4 h-4 text-yellow-600 mt-1 shrink-0" />
                 Detailed county-level insights
@@ -80,6 +87,13 @@ export const PricingSection = () => {
                 Downloadable reports
               </li>
             </ul>
+            <button 
+              className="w-full py-2 px-4 bg-gray-200 text-gray-600 rounded flex items-center justify-center gap-2 cursor-not-allowed"
+              disabled
+            >
+              <Clock className="w-4 h-4" />
+              <span>Coming Soon</span>
+            </button>
           </Card>
         </div>
       </div>

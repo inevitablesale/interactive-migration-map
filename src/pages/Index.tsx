@@ -6,6 +6,7 @@ import { SolutionsSection } from "@/components/SolutionsSection";
 import { TimeCalculator } from "@/components/TimeCalculator";
 import { Card } from "@/components/ui/card";
 import { PricingSection } from "@/components/PricingSection";
+import { BetaAccessSection } from "@/components/BetaAccessSection";
 
 const Index = () => {
   return (
@@ -49,6 +50,9 @@ const Index = () => {
             </div>
           </Card>
         </div>
+
+        {/* Beta Access Section */}
+        <BetaAccessSection />
 
         {/* Data Sources Section */}
         <DataSourcesSection />
