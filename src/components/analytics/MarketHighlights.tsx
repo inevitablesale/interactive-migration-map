@@ -15,32 +15,54 @@ import {
 export function MarketHighlights() {
   const [activeTab, setActiveTab] = useState("growth");
 
-  const { data: growthLeaders } = useQuery({
+  const { data: growthLeaders, isLoading: isLoadingGrowth } = useQuery({
     queryKey: ['growthLeaders'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_top_growth_regions');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching growth leaders:', error);
+        throw error;
+      }
       return data;
     }
   });
 
-  const { data: competitiveInsights } = useQuery({
+  const { data: competitiveInsights, isLoading: isLoadingCompetitive } = useQuery({
     queryKey: ['competitiveInsights'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_competitive_analysis');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching competitive insights:', error);
+        throw error;
+      }
       return data;
     }
   });
 
-  const { data: serviceSpecialization } = useQuery({
+  const { data: serviceSpecialization, isLoading: isLoadingService } = useQuery({
     queryKey: ['serviceSpecialization'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_service_distribution');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching service distribution:', error);
+        throw error;
+      }
       return data;
     }
   });
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(1)}%`;
+  };
 
   return (
     <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
@@ -80,7 +102,7 @@ export function MarketHighlights() {
               {growthLeaders?.map((item) => (
                 <TableRow key={`${item.county_name}-${item.state_name}`} className="border-white/10">
                   <TableCell className="text-white">{`${item.county_name}, ${item.state_name}`}</TableCell>
-                  <TableCell className="text-blue-400">{`${item.growth_rate}%`}</TableCell>
+                  <TableCell className="text-blue-400">{formatPercentage(item.growth_rate)}</TableCell>
                   <TableCell className="text-white/80">{item.firm_density.toFixed(1)}</TableCell>
                   <TableCell className="text-white/80">{item.total_population.toLocaleString()}</TableCell>
                 </TableRow>
@@ -104,7 +126,7 @@ export function MarketHighlights() {
                 <TableRow key={item.statefp} className="border-white/10">
                   <TableCell className="text-white">State {item.statefp}</TableCell>
                   <TableCell>{(item.total_firms / 10000).toFixed(1)}/10k</TableCell>
-                  <TableCell className="text-blue-400">{`${item.market_concentration.toFixed(1)}%`}</TableCell>
+                  <TableCell className="text-blue-400">{formatPercentage(item.market_concentration)}</TableCell>
                   <TableCell>{item.competition_level}</TableCell>
                 </TableRow>
               ))}
@@ -128,7 +150,7 @@ export function MarketHighlights() {
                   <TableCell className="text-white">State {item.statefp}</TableCell>
                   <TableCell>{item.specialities}</TableCell>
                   <TableCell className="text-white/80">{item.specialty_count.toLocaleString()}</TableCell>
-                  <TableCell className="text-blue-400">{`${item.specialty_percentage.toFixed(1)}%`}</TableCell>
+                  <TableCell className="text-blue-400">{formatPercentage(item.specialty_percentage)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
