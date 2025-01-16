@@ -141,7 +141,7 @@ export const AIDealSourcer = () => {
             <div className="text-center py-8">
               <Brain className="w-12 h-12 text-blue-400/20 mx-auto mb-4" />
               <h4 className="text-lg font-medium text-white mb-2">
-                Hey there! 👋 Let's Find Your Next Big Thing
+                Hey there! 👋 Let's Find Your Future Firm
               </h4>
               <p className="text-sm text-blue-100/60 mb-6 max-w-md mx-auto">
                 I'm your AI deal scout! Tell me what you're looking for, and I'll analyze 
@@ -152,7 +152,7 @@ export const AIDealSourcer = () => {
                 onClick={() => setShowForm(true)}
                 className="bg-blue-500 hover:bg-blue-600 animate-fade-in"
               >
-                Create Your First Deal Profile
+                Create Your First Deal Agent
               </Button>
             </div>
             <div className="mt-8 h-[400px] rounded-lg overflow-hidden">
