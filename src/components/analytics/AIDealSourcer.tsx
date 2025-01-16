@@ -138,14 +138,10 @@ export const AIDealSourcer = () => {
           </div>
         ) : opportunities.length === 0 ? (
           <>
-            <div className="text-center py-8">
-              <Bird className="w-12 h-12 text-blue-400/20 mx-auto mb-4" />
-            </div>
             <div className="mt-8 h-[400px] rounded-lg overflow-hidden relative">
               <DealMap firms={[]} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-yellow-300/90 py-3 px-6 rounded-lg shadow-xl max-w-md mx-4 text-center">
-                  <Bird className="w-8 h-8 text-yellow-700 mx-auto mb-2 animate-pulse" />
                   <p className="text-sm font-medium text-yellow-900">
                     Results will be available after setting up your Canary
                   </p>
