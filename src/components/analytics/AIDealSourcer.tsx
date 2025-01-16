@@ -94,9 +94,6 @@ export const AIDealSourcer = () => {
               }} />
             </DialogContent>
           </Dialog>
-          <Button variant="ghost" size="icon" className="hover:bg-white/10">
-            <Settings className="w-4 h-4 text-white" />
-          </Button>
         </div>
       </div>
 
@@ -113,14 +110,15 @@ export const AIDealSourcer = () => {
               Hey there! 👋 Let's Find Your Next Big Thing
             </h4>
             <p className="text-sm text-blue-100/60 mb-6 max-w-md mx-auto">
-              Tell me what you're looking for, and I'll be your personal deal scout.
-              I'll analyze the market 24/7 and alert you when I find something exciting!
+              I'm your AI deal scout! Tell me what you're looking for, and I'll analyze 
+              the market 24/7 to find perfect matches. Click the + button to set up 
+              your first deal search profile.
             </p>
             <Button
               onClick={() => setShowForm(true)}
               className="bg-blue-500 hover:bg-blue-600 animate-fade-in"
             >
-              Create Your Deal Profile
+              Create Your First Deal Profile
             </Button>
           </div>
         ) : (
@@ -140,6 +138,15 @@ export const AIDealSourcer = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowForm(true)}
+                      className="hover:bg-white/10"
+                      title="Edit profile settings"
+                    >
+                      <Settings className="w-4 h-4 text-blue-400" />
+                    </Button>
                     {!savedDeals.includes(opportunity.id) ? (
                       <Button
                         variant="ghost"
