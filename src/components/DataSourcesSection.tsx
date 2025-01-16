@@ -1,11 +1,7 @@
-import { Database, Globe, Info, Server, Brain, LineChart, ShieldCheck, ArrowRight } from "lucide-react";
+import { Database, Globe, Server, Brain, LineChart, ShieldCheck, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { useState } from "react";
 
 export const DataSourcesSection = () => {
-  const [activeTab, setActiveTab] = useState("transform");
-
   const transformations = {
     collect: {
       title: "Data Collection",
@@ -51,148 +47,73 @@ export const DataSourcesSection = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="transform" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto mb-8">
-            <TabsTrigger value="transform">Data Journey</TabsTrigger>
-            <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="transform" className="space-y-8">
-            <div className="grid md:grid-cols-3 gap-6">
-              {Object.entries(transformations).map(([key, transform]) => (
-                <Card key={key} className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  <div className="flex items-center gap-3 mb-4">
-                    {key === "collect" && <Database className="w-5 h-5 text-yellow-400" />}
-                    {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
-                    {key === "decide" && <LineChart className="w-5 h-5 text-yellow-400" />}
-                    <h3 className="text-lg font-semibold text-white">{transform.title}</h3>
-                  </div>
-                  <p className="text-gray-300 mb-4">{transform.description}</p>
-                  <ul className="space-y-3">
-                    {transform.steps.map((step, index) => (
-                      <li key={index} className="flex items-start gap-2 text-gray-300">
-                        <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                        {step}
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              ))}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+        <div className="space-y-8">
+          <div className="grid md:grid-cols-3 gap-6">
+            {Object.entries(transformations).map(([key, transform]) => (
+              <Card key={key} className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="flex items-center gap-3 mb-4">
-                  <Globe className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Geographic Coverage</h3>
+                  {key === "collect" && <Database className="w-5 h-5 text-yellow-400" />}
+                  {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
+                  {key === "decide" && <LineChart className="w-5 h-5 text-yellow-400" />}
+                  <h3 className="text-lg font-semibold text-white">{transform.title}</h3>
                 </div>
-                <ul className="space-y-3 text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    County-level market analysis
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    State-by-state comparison metrics
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Metropolitan Statistical Area (MSA) insights
-                  </li>
+                <p className="text-gray-300 mb-4">{transform.description}</p>
+                <ul className="space-y-3">
+                  {transform.steps.map((step, index) => (
+                    <li key={index} className="flex items-start gap-2 text-gray-300">
+                      <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                      {step}
+                    </li>
+                  ))}
                 </ul>
               </Card>
+            ))}
+          </div>
 
-              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <ShieldCheck className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Data Quality</h3>
-                </div>
-                <ul className="space-y-3 text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Comprehensive firm profiling
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Market trend validation
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Growth projection modeling
-                  </li>
-                </ul>
-              </Card>
-            </div>
-          </TabsContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+              <div className="flex items-center gap-3 mb-4">
+                <Globe className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-lg font-semibold text-white">Geographic Coverage</h3>
+              </div>
+              <ul className="space-y-3 text-gray-300">
+                <li className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                  County-level market analysis
+                </li>
+                <li className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                  State-by-state comparison metrics
+                </li>
+                <li className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                  Metropolitan Statistical Area (MSA) insights
+                </li>
+              </ul>
+            </Card>
 
-          <TabsContent value="pricing" className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <h3 className="text-lg font-semibold text-white">Strategic Scout</h3>
-                  <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-400 rounded">
-                    $50/month
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400 mb-4">
-                  Essential tools for market exploration
-                </p>
-                <ul className="space-y-3 text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Basic market insights
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Manual state and county level browsing
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    State and national rankings across 25 data points
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Weekly insights newsletter
-                  </li>
-                </ul>
-              </Card>
-
-              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <h3 className="text-lg font-semibold text-white">Executive Advantage</h3>
-                  <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-400 rounded">
-                    $99/month
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400 mb-4">
-                  Complete suite for serious buyers
-                </p>
-                <ul className="space-y-3 text-gray-300">
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Detailed county-level insights
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Access to off-market firm listings
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    State comparison tool
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Canary Deal Sourcer
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Downloadable reports
-                  </li>
-                </ul>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+            <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+              <div className="flex items-center gap-3 mb-4">
+                <ShieldCheck className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-lg font-semibold text-white">Data Quality</h3>
+              </div>
+              <ul className="space-y-3 text-gray-300">
+                <li className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                  Comprehensive firm profiling
+                </li>
+                <li className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                  Market trend validation
+                </li>
+                <li className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                  Growth projection modeling
+                </li>
+              </ul>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

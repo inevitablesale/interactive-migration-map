@@ -5,6 +5,7 @@ import { DataSourcesSection } from "@/components/DataSourcesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
 import { TimeCalculator } from "@/components/TimeCalculator";
 import { Card } from "@/components/ui/card";
+import { PricingSection } from "@/components/PricingSection";
 
 const Index = () => {
   return (
@@ -54,6 +55,9 @@ const Index = () => {
 
         {/* Solutions Section */}
         <SolutionsSection />
+
+        {/* Pricing Section */}
+        <PricingSection />
 
         {/* Time Calculator Section */}
         <div className="py-20 px-4">
