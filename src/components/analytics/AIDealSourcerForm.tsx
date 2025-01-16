@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AIDealSourcerFormData {
   buyer_name: string;
@@ -36,7 +37,7 @@ interface AIDealSourcerFormData {
 
 const revenueRanges = [
   { value: "below_1m", label: "Below $1M" },
-  { value: "1m_5m", label: "1M - $5M" },
+  { value: "1m_5m", label: "$1M - $5M" },
   { value: "5m_10m", label: "$5M - $10M" },
   { value: "above_10m", label: "Above $10M" },
 ];
@@ -54,6 +55,41 @@ const dealTypeOptions = [
   { value: "full", label: "Full Buyout" },
   { value: "strategic", label: "Strategic Partnership" },
   { value: "franchise", label: "Potential Franchisee" },
+];
+
+const paymentStructureOptions = [
+  { value: "cash", label: "Cash Upfront" },
+  { value: "seller_financing", label: "Seller Financing" },
+  { value: "earnouts", label: "Earnouts" },
+  { value: "equity_rollover", label: "Equity Rollovers" },
+];
+
+const timelineOptions = [
+  { value: "immediate", label: "Immediate (1-3 months)" },
+  { value: "short", label: "Short-Term (3-6 months)" },
+  { value: "long", label: "Long-Term (6+ months)" },
+];
+
+const postAcquisitionGoalOptions = [
+  { value: "retain_leadership", label: "Retain Existing Leadership" },
+  { value: "streamline", label: "Streamline Operations" },
+  { value: "expand", label: "Expand Service Offerings" },
+  { value: "profitability", label: "Increase Profitability" },
+  { value: "culture", label: "Cultural Alignment" },
+];
+
+const preferredRoleOptions = [
+  { value: "hands_on", label: "Hands-On Operational" },
+  { value: "advisory", label: "Advisory/Strategic" },
+];
+
+const attractiveFeatureOptions = [
+  { value: "earnings", label: "Earnings Stability" },
+  { value: "management", label: "Existing Management" },
+  { value: "culture", label: "Cultural Alignment" },
+  { value: "growth", label: "Growth Potential" },
+  { value: "technology", label: "Technology Adoption" },
+  { value: "scalability", label: "Scalability" },
 ];
 
 export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => {
@@ -256,9 +292,189 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
               ))}
             </div>
           </div>
+
+          <div>
+            <Label>Payment Structures</Label>
+            <div className="mt-1.5 space-y-2">
+              {paymentStructureOptions.map(option => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <Controller
+                    name="paymentStructures"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          const current = field.value || [];
+                          const updated = checked
+                            ? [...current, option.value]
+                            : current.filter(v => v !== option.value);
+                          field.onChange(updated);
+                        }}
+                      />
+                    )}
+                  />
+                  <Label>{option.label}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-4">
+          <div>
+            <Label>Complex Deal Structures</Label>
+            <Controller
+              name="complexStructures"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center space-x-2 mt-1.5">
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <Label>Open to complex deal structures</Label>
+                </div>
+              )}
+            />
+          </div>
+
+          <div>
+            <Label>Timeline</Label>
+            <Controller
+              name="timeline"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="mt-1.5 bg-white/5 border-white/10">
+                    <SelectValue placeholder="Select timeline" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-white/10">
+                    {timelineOptions.map(option => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="text-white hover:bg-white/10"
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div>
+            <Label>Post-Acquisition Goals</Label>
+            <div className="mt-1.5 space-y-2">
+              {postAcquisitionGoalOptions.map(option => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <Controller
+                    name="postAcquisitionGoals"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          const current = field.value || [];
+                          const updated = checked
+                            ? [...current, option.value]
+                            : current.filter(v => v !== option.value);
+                          field.onChange(updated);
+                        }}
+                      />
+                    )}
+                  />
+                  <Label>{option.label}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Preferred Role</Label>
+            <Controller
+              name="preferredRole"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="mt-1.5 bg-white/5 border-white/10">
+                    <SelectValue placeholder="Select preferred role" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-white/10">
+                    {preferredRoleOptions.map(option => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="text-white hover:bg-white/10"
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div>
+            <Label>Attractive Features</Label>
+            <div className="mt-1.5 space-y-2">
+              {attractiveFeatureOptions.map(option => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <Controller
+                    name="attractiveFeatures"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          const current = field.value || [];
+                          const updated = checked
+                            ? [...current, option.value]
+                            : current.filter(v => v !== option.value);
+                          field.onChange(updated);
+                        }}
+                      />
+                    )}
+                  />
+                  <Label>{option.label}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Specific Deal Requirements</Label>
+            <Controller
+              name="dealRequirements"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  {...field}
+                  placeholder="Enter any specific requirements or criteria"
+                  className="mt-1.5 bg-white/5 border-white/10"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <Label>Additional Notes</Label>
+            <Controller
+              name="additionalNotes"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  {...field}
+                  placeholder="Any additional notes or preferences"
+                  className="mt-1.5 bg-white/5 border-white/10"
+                />
+              )}
+            />
+          </div>
+
           <div>
             <Label>Alert Frequency</Label>
             <Controller
@@ -284,21 +500,6 @@ export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => 
                     <Label htmlFor="weekly">Weekly Summary</Label>
                   </div>
                 </RadioGroup>
-              )}
-            />
-          </div>
-
-          <div>
-            <Label>Additional Requirements</Label>
-            <Controller
-              name="dealRequirements"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  placeholder="Any specific requirements or criteria"
-                  className="mt-1.5 bg-white/5 border-white/10"
-                />
               )}
             />
           </div>
