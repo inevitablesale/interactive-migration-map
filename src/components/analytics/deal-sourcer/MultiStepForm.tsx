@@ -49,10 +49,23 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
   const handleSubmit = async () => {
     try {
-      // First create the buyer profile
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to create a profile.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First create the buyer profile with user_id
       const { data: profile, error: profileError } = await supabase
         .from("buyer_profiles")
         .insert({
+          user_id: user.id, // Add the user_id here
           buyer_name: formData.buyer_name,
           contact_email: formData.contact_email,
           target_geography: formData.geography,
@@ -79,6 +92,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       const { error: opportunityError } = await supabase
         .from("ai_opportunities")
         .insert({
+          user_id: user.id, // Add the user_id here as well
           buyer_profile_id: profile.id,
           opportunity_data: {
             status: 'active',
