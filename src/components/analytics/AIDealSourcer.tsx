@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Brain, Plus, Settings, Star, Bookmark, X, Bell } from "lucide-react";
+import { Bird, Plus, Settings, Star, Bookmark, X, Bell } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -95,7 +95,7 @@ export const AIDealSourcer = () => {
     <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Brain className="w-5 h-5 text-blue-400 animate-pulse" />
+          <Bird className="w-5 h-5 text-blue-400 animate-pulse" />
           <h3 className="text-lg font-semibold text-white">AI Deal Sourcer</h3>
         </div>
         <div className="flex gap-2">
@@ -133,13 +133,13 @@ export const AIDealSourcer = () => {
       <div className="space-y-4">
         {loading ? (
           <div className="text-center py-8">
-            <Brain className="w-12 h-12 text-blue-400 animate-pulse mx-auto mb-4" />
+            <Bird className="w-12 h-12 text-blue-400 animate-pulse mx-auto mb-4" />
             <p className="text-sm text-blue-100/60">Scanning the market for opportunities...</p>
           </div>
         ) : opportunities.length === 0 ? (
           <>
             <div className="text-center py-8">
-              <Brain className="w-12 h-12 text-blue-400/20 mx-auto mb-4" />
+              <Bird className="w-12 h-12 text-blue-400/20 mx-auto mb-4" />
               <h4 className="text-lg font-medium text-white mb-2">
                 Hey there! 👋 Let's Find Your Future Firm
               </h4>
@@ -158,17 +158,14 @@ export const AIDealSourcer = () => {
             <div className="mt-8 h-[400px] rounded-lg overflow-hidden relative">
               <DealMap firms={[]} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-yellow-300/90 p-6 rounded-lg shadow-xl max-w-md mx-4 text-center">
-                  <Brain className="w-12 h-12 text-yellow-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-                    Your Deal Scout is Ready!
-                  </h3>
-                  <p className="text-sm text-yellow-800 mb-4">
-                    Set up your deal agent to see matching firms appear on this map. I'll help you find the perfect opportunities!
+                <div className="bg-yellow-300/90 py-3 px-6 rounded-lg shadow-xl max-w-md mx-4 text-center">
+                  <Bird className="w-8 h-8 text-yellow-700 mx-auto mb-2 animate-pulse" />
+                  <p className="text-sm font-medium text-yellow-900">
+                    Results will be available after setting up your deal agent
                   </p>
                   <Button
                     onClick={() => setShowForm(true)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 hover:text-yellow-50 transition-colors"
+                    className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-yellow-900 hover:text-yellow-50 transition-colors"
                   >
                     Create Your Deal Agent
                   </Button>
