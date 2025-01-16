@@ -5,12 +5,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { ComparisonTool } from "./ComparisonTool";
-import { AIDealSourcer } from "./analytics/AIDealSourcer";
 
 export const SolutionsSection = () => {
-  const [activeTab, setActiveTab] = useState("analyze");
+  const [activeTab, setActiveTab] = useState("discover");
 
+  // Fetch aggregated data for visualization
   const { data: marketData } = useQuery({
     queryKey: ['marketMetrics'],
     queryFn: async () => {
@@ -32,75 +31,75 @@ export const SolutionsSection = () => {
   });
 
   const solutions = {
-    analyze: {
-      title: "State Market Comparison",
-      description: "Compare key metrics across states to identify optimal markets",
+    discover: {
+      title: "Market Analysis",
+      description: "Identify untapped opportunities with data-driven insights",
       metrics: [
         {
-          title: "Markets Analyzed",
-          value: "872",
+          title: "Total Firms",
+          value: marketData?.reduce((sum, state) => sum + state.firms, 0)?.toLocaleString() || "Loading...",
           icon: Users,
-          description: "Markets analyzed via AI"
+          description: "Active accounting firms in target markets"
         },
         {
-          title: "Market Coverage",
-          value: "493",
+          title: "Market Potential",
+          value: marketData?.reduce((sum, state) => sum + state.payroll, 0)?.toLocaleString() || "Loading...",
           icon: Target,
-          description: "Regions with competitive analysis"
+          description: "Annual payroll volume ($)"
         },
         {
-          title: "Monthly Growth",
-          value: "500+",
+          title: "Growth Rate",
+          value: "+12.3%",
           icon: TrendingUp,
-          description: "New acquisition opportunities"
+          description: "Year-over-year market growth"
         }
       ]
     },
     assess: {
-      title: "AI Deal Sourcing",
-      description: "Let AI find your ideal acquisition targets",
+      title: "Risk Assessment",
+      description: "Make data-driven decisions with confidence",
       metrics: [
         {
           title: "Market Stability",
-          value: marketData?.length ? "High" : "Loading...",
+          value: "8.7/10",
           icon: ShieldCheck,
           description: "Based on economic indicators"
         },
         {
-          title: "Average Deal Size",
+          title: "Revenue Potential",
           value: "$2.1M",
           icon: DollarSign,
-          description: "Typical transaction value"
+          description: "Average per firm"
         },
         {
-          title: "Market Density",
+          title: "Competition Index",
           value: "Medium",
           icon: Users,
-          description: "Current market saturation"
+          description: "Market saturation level"
         }
       ]
     },
-    plan: {
-      title: "Strategic Planning",
-      description: "Transform market insights into actionable acquisition strategies",
+    decide: {
+      title: "Decision Support",
+      description: "Transform insights into actionable decisions",
       metrics: [
         {
-          title: "Success Rate",
-          value: "92%",
+          title: "Opportunity Score",
+          value: "92/100",
           icon: Target,
-          description: "Matches meeting buyer criteria"
+          description: "Composite market rating"
         },
         {
-          title: "ROI Potential",
+          title: "ROI Forecast",
           value: "24%",
           icon: TrendingUp,
-          description: "Average growth opportunity"
+          description: "Projected 3-year return"
         },
         {
           title: "Market Position",
           value: "Top 10%",
           icon: LineChart,
-          description: "Competitive ranking"
+          description: "Relative to competitors"
         }
       ]
     }
@@ -111,18 +110,18 @@ export const SolutionsSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-            Data-Driven Market Intelligence
+            From Insights to Action
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Make confident acquisition decisions with comprehensive market analysis and real-time insights.
+            Turn market intelligence into your competitive advantage. Find the perfect acquisition target with data-driven precision.
           </p>
         </div>
 
-        <Tabs defaultValue="analyze" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="discover" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8">
-            <TabsTrigger value="analyze">Analyze</TabsTrigger>
+            <TabsTrigger value="discover">Analyze</TabsTrigger>
             <TabsTrigger value="assess">Assess</TabsTrigger>
-            <TabsTrigger value="plan">Plan</TabsTrigger>
+            <TabsTrigger value="decide">Decide</TabsTrigger>
           </TabsList>
 
           {Object.entries(solutions).map(([key, solution]) => (
@@ -130,9 +129,9 @@ export const SolutionsSection = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                   <div className="flex items-center gap-3 mb-6">
-                    {key === "analyze" && <Brain className="w-5 h-5 text-yellow-400" />}
+                    {key === "discover" && <Brain className="w-5 h-5 text-yellow-400" />}
                     {key === "assess" && <ShieldCheck className="w-5 h-5 text-yellow-400" />}
-                    {key === "plan" && <LineChart className="w-5 h-5 text-yellow-400" />}
+                    {key === "decide" && <LineChart className="w-5 h-5 text-yellow-400" />}
                     <h3 className="text-lg font-semibold text-white">{solution.title}</h3>
                   </div>
                   
@@ -153,39 +152,31 @@ export const SolutionsSection = () => {
                 </Card>
 
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  {key === "analyze" && (
-                    <ComparisonTool embedded={true} />
-                  )}
-                  {key === "assess" && (
-                    <AIDealSourcer embedded={true} />
-                  )}
-                  {key === "plan" && (
-                    <div className="h-full flex flex-col">
-                      <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
-                      {marketData && (
-                        <div className="flex-1">
-                          <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={marketData}>
-                              <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
-                              <YAxis stroke="#9CA3AF" fontSize={12} />
-                              <Tooltip 
-                                contentStyle={{ 
-                                  background: 'rgba(0,0,0,0.8)', 
-                                  border: '1px solid rgba(255,255,255,0.1)',
-                                  borderRadius: '4px'
-                                }}
-                              />
-                              <Bar 
-                                dataKey="firms"
-                                fill="#EAB308"
-                                radius={[4, 4, 0, 0]}
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="h-full flex flex-col">
+                    <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
+                    {marketData && (
+                      <div className="flex-1">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={marketData}>
+                            <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
+                            <YAxis stroke="#9CA3AF" fontSize={12} />
+                            <Tooltip 
+                              contentStyle={{ 
+                                background: 'rgba(0,0,0,0.8)', 
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '4px'
+                              }}
+                            />
+                            <Bar 
+                              dataKey={key === "discover" ? "firms" : key === "assess" ? "employees" : "payroll"}
+                              fill="#EAB308"
+                              radius={[4, 4, 0, 0]}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
+                  </div>
                 </Card>
               </div>
             </TabsContent>
