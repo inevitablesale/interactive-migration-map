@@ -153,8 +153,12 @@ export const SolutionsSection = () => {
                 </Card>
 
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  {key === "analyze" && <ComparisonTool embedded={true} />}
-                  {key === "assess" && <AIDealSourcer embedded={true} />}
+                  {key === "analyze" && (
+                    <ComparisonTool embedded={true} />
+                  )}
+                  {key === "assess" && (
+                    <AIDealSourcer embedded={true} />
+                  )}
                   {key === "plan" && (
                     <div className="h-full flex flex-col">
                       <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
