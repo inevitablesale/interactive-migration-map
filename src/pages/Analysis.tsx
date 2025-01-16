@@ -1,4 +1,4 @@
-import { ChartBar, Users, TrendingUp } from "lucide-react";
+import { ChartBar, Users, TrendingUp, Lock } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { AIDealSourcer } from "@/components/analytics/AIDealSourcer";
 import { ComparisonTool } from "@/components/ComparisonTool";
@@ -92,7 +92,10 @@ export default function Analysis() {
         <KeyInsightsPanel />
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
-            <h2 className="text-2xl font-semibold text-white mb-6">Compare States</h2>
+            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
+              Compare States
+              <Lock className="h-4 w-4 text-yellow-400" />
+            </h2>
             <ComparisonTool embedded={true} />
           </div>
         </div>

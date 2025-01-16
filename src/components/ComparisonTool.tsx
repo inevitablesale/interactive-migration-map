@@ -206,7 +206,10 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
       !embedded && "fixed right-4 top-20 w-[800px]")}>
       {!embedded && (
         <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h3 className="text-xl font-medium text-white flex items-center gap-2">Compare States <Lock className="h-4 w-4 text-yellow-400" /></h3>
+          <h3 className="text-xl font-medium text-white flex items-center gap-2">
+            Compare States 
+            <Lock className="h-4 w-4 text-yellow-400" />
+          </h3>
           <div className="flex items-center gap-2">
             {stateData && stateData.length > 0 && (
               <Button
@@ -318,7 +321,6 @@ export function ComparisonTool({ embedded = false }: ComparisonToolProps) {
         ) : (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white/60">
-              <Lock className="h-4 w-4 text-yellow-400" />
               <span className="text-sm">Select states to compare</span>
             </div>
             <p className="text-xs text-white/60">
