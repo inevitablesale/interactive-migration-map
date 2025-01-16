@@ -39,7 +39,7 @@ const Index = () => {
                 <div className="text-gray-600">Regions Analyzed</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">2,297+</div>
+                <div className="text-4xl font-bold text-primary mb-2">2,297</div>
                 <div className="text-gray-600">Firms Monitored</div>
               </div>
               <div className="text-center">

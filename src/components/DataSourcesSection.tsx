@@ -126,13 +126,13 @@ export const DataSourcesSection = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="flex items-center gap-3 mb-4">
-                  <h3 className="text-lg font-semibold text-white">Free Tier</h3>
+                  <h3 className="text-lg font-semibold text-white">Strategic Scout</h3>
                   <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-400 rounded">
-                    $0
+                    $50/month
                   </span>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">
-                  Perfect for exploring basic insights
+                  Essential tools for market exploration
                 </p>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
@@ -152,13 +152,13 @@ export const DataSourcesSection = () => {
 
               <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
                 <div className="flex items-center gap-3 mb-4">
-                  <h3 className="text-lg font-semibold text-white">All Access</h3>
+                  <h3 className="text-lg font-semibold text-white">Executive Advantage</h3>
                   <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-400 rounded">
-                    $250 one-time
+                    $99/month
                   </span>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">
-                  For active buyers needing detailed insights
+                  Complete suite for serious buyers
                 </p>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
@@ -171,7 +171,7 @@ export const DataSourcesSection = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Custom filters and alerts
+                    Canary Deal Sourcer
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
