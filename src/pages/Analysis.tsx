@@ -63,7 +63,7 @@ export default function Analysis() {
       <section className="relative py-20 px-4 bg-black/40">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-            Transform Market Data into Clear, Actionable Insights
+            Discover High-Value Accounting Firms with AI-Powered Market Intelligence
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
             {statsData.map((stat) => (
