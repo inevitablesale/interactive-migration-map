@@ -1,14 +1,37 @@
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const BetaAccessSection = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleLinkedInSignup = () => {
-    // TODO: Implement actual LinkedIn authentication
-    // For now, we'll just redirect to the thank you page
-    navigate("/thank-you");
+  const handleLinkedInSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/thank-you`,
+        },
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+      }
+    } catch (error) {
+      console.error('LinkedIn auth error:', error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Failed to connect with LinkedIn. Please try again.",
+      });
+    }
   };
 
   return (
@@ -36,16 +59,13 @@ export const BetaAccessSection = () => {
               <p className="text-sm text-gray-600">Be among the first to discover and evaluate opportunities before they hit the open market.</p>
             </div>
           </div>
-          <div className="flex items-center justify-center gap-4">
-            <button 
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
-              onClick={handleLinkedInSignup}
-            >
-              <span>Sign Up with LinkedIn</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <p className="text-sm text-gray-500">Coming Soon</p>
-          </div>
+          <button 
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors mx-auto"
+            onClick={handleLinkedInSignup}
+          >
+            <span>Sign Up with LinkedIn</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </Card>
     </div>
