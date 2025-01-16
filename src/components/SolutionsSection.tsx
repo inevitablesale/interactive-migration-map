@@ -33,91 +33,91 @@ export const SolutionsSection = () => {
 
   const solutions = {
     analyze: {
-      title: "State Market Comparison",
-      description: "Compare key metrics across states to identify optimal markets",
+      title: "Comprehensive Market Analysis",
+      description: "Unlock hidden opportunities by combining census data, public deal analytics, and proprietary off-market insights",
       metrics: [
         {
-          title: "Markets Analyzed",
-          value: "872",
+          title: "Deal Flow Intelligence",
+          value: "Real-time",
           icon: Brain,
-          description: "Markets analyzed via AI",
-          trend: "+12% this month",
+          description: "AI-powered market matching",
+          trend: "Predictive analytics",
           color: "bg-blue-500/10 text-blue-500"
         },
         {
-          title: "Market Coverage",
-          value: "493",
+          title: "Market Validation",
+          value: "3-Layer",
           icon: Target,
-          description: "Regions with competitive analysis",
-          trend: "92% accuracy",
+          description: "Census + Deals + Off-Market",
+          trend: "Cross-validated",
           color: "bg-amber-500/10 text-amber-500"
         },
         {
-          title: "Growth Opportunities",
-          value: "500+",
+          title: "Opportunity Discovery",
+          value: "Pre-Market",
           icon: TrendingUp,
-          description: "New acquisition opportunities",
-          trend: "Updated daily",
+          description: "Early access to emerging deals",
+          trend: "Ahead of competition",
           color: "bg-green-500/10 text-green-500"
         }
       ]
     },
     assess: {
-      title: "AI Deal Sourcing",
-      description: "Let AI find your ideal acquisition targets",
+      title: "Strategic Market Entry",
+      description: "Make confident decisions with multi-layered market intelligence",
       metrics: [
         {
-          title: "Market Stability",
-          value: marketData?.length ? "High" : "Loading...",
+          title: "Risk Assessment",
+          value: "Multi-Factor",
           icon: ShieldCheck,
-          description: "Based on economic indicators",
-          trend: "Strong outlook",
+          description: "Comprehensive risk analysis",
+          trend: "Dynamic updates",
           color: "bg-purple-500/10 text-purple-500"
         },
         {
-          title: "Average Deal Size",
-          value: "$2.1M",
+          title: "Value Analysis",
+          value: "360°",
           icon: DollarSign,
-          description: "Typical transaction value",
-          trend: "+5% YoY",
+          description: "Complete market perspective",
+          trend: "Full coverage",
           color: "bg-pink-500/10 text-pink-500"
         },
         {
-          title: "Market Density",
-          value: "Medium",
+          title: "Competitive Edge",
+          value: "Early",
           icon: Users,
-          description: "Current market saturation",
-          trend: "Optimal entry point",
+          description: "First-mover advantage",
+          trend: "Market leadership",
           color: "bg-orange-500/10 text-orange-500"
         }
       ]
     },
     plan: {
-      title: "Strategic Planning",
-      description: "Transform market insights into actionable acquisition strategies",
+      title: "Execution Strategy",
+      description: "Transform insights into actionable acquisition plans",
       metrics: [
         {
-          title: "Success Rate",
-          value: "92%",
+          title: "Deal Execution",
+          value: "Guided",
           icon: Target,
-          description: "Matches meeting buyer criteria",
-          trend: "Industry leading",
+          description: "Step-by-step approach",
+          trend: "Proven process",
           color: "bg-teal-500/10 text-teal-500"
         },
         {
-          title: "ROI Potential",
-          value: "24%",
+          title: "Growth Planning",
+          value: "Integrated",
           icon: TrendingUp,
-          description: "Average growth opportunity",
-          trend: "Above market avg",
+          description: "Comprehensive roadmap",
+          trend: "Long-term vision",
           color: "bg-indigo-500/10 text-indigo-500"
         },
         {
-          title: "Market Position",
-          value: "Top 10%",
+          title: "Success Tracking",
+          value: "Real-time",
           icon: LineChart,
-          description: "Competitive ranking",
-          trend: "Strong momentum",
+          description: "Performance monitoring",
+          trend: "Continuous optimization",
           color: "bg-rose-500/10 text-rose-500"
         }
       ]
