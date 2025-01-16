@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, FileText, List, FileDownload, Building2, Info, UserPlus } from "lucide-react";
+import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, FileText, List, Download, Building2, Info, UserPlus } from "lucide-react";
 import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useState } from "react";
@@ -87,7 +87,7 @@ export const SolutionsSection = () => {
           description: "Downloadable local market insights",
           tag: "Reports",
           tagDetail: "PDF & Excel",
-          icon: FileDownload,
+          icon: Download,
           color: "text-green-400",
           bgColor: "bg-green-950/40"
         },
@@ -287,7 +287,7 @@ export const SolutionsSection = () => {
                           <span className="text-white">Market Analysis Report</span>
                         </div>
                         <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
-                          <FileDownload className="w-4 h-4 mr-1" />
+                          <Download className="w-4 h-4 mr-1" />
                           Download
                         </Button>
                       </div>
@@ -301,7 +301,7 @@ export const SolutionsSection = () => {
                           <span className="text-white">Firm Performance Report</span>
                         </div>
                         <Button variant="ghost" size="sm" className="text-green-400 hover:text-green-300">
-                          <FileDownload className="w-4 h-4 mr-1" />
+                          <Download className="w-4 h-4 mr-1" />
                           Download
                         </Button>
                       </div>
@@ -315,7 +315,7 @@ export const SolutionsSection = () => {
                           <span className="text-white">Growth Opportunities Report</span>
                         </div>
                         <Button variant="ghost" size="sm" className="text-yellow-400 hover:text-yellow-300">
-                          <FileDownload className="w-4 h-4 mr-1" />
+                          <Download className="w-4 h-4 mr-1" />
                           Download
                         </Button>
                       </div>
