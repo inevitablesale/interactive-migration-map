@@ -62,7 +62,6 @@ interface EmergingTalentMarket {
   total_educated: number;
   education_growth_rate: number;
   median_age: number;
-  private_to_public_ratio?: number;
 }
 
 interface FutureSaturationRisk {
