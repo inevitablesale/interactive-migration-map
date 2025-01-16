@@ -491,7 +491,7 @@ export function KeyInsightsPanel() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-3xl font-bold text-white">Market Insights at a Glance</h2>
+      <h2 className="text-3xl font-bold text-white">Trending Insights</h2>
       <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
         {insights.map((insight) => (
           <Card
@@ -567,3 +567,4 @@ function getStateNameFromFIPS(fips: string): string {
   };
   return stateMap[fips] || fips;
 }
+
