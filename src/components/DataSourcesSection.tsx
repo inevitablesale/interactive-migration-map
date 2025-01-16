@@ -137,11 +137,15 @@ export const DataSourcesSection = () => {
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Access to anonymized data
+                    Basic market insights
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Basic MSA-level heatmaps
+                    Manual state and county level browsing
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    State and national rankings across 25 data points
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
@@ -163,11 +167,15 @@ export const DataSourcesSection = () => {
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Detailed city-level insights
+                    Detailed county-level insights
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                    Access to firm listings
+                    Access to off-market firm listings
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                    State comparison tool
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
