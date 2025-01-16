@@ -24,10 +24,14 @@ const CountdownBanner = () => {
       }
     };
 
+    // Calculate immediately
     calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
+    
+    // Set up interval and store its ID
+    const timerId = setInterval(calculateTimeLeft, 1000);
 
-    return () => clearInterval(timer);
+    // Cleanup function to clear the interval
+    return () => clearInterval(timerId);
   }, []);
 
   return (
