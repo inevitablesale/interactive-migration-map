@@ -141,37 +141,55 @@ export const SolutionsSection = () => {
         .from('county_data')
         .select('*')
         .limit(1)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!countyData) return null;
+
       return {
-        total_establishments: countyData.ESTAB,
-        emp: countyData.EMP,
-        payann: countyData.PAYANN,
-        firms_per_10k_population: (countyData.ESTAB / countyData.B01001_001E) * 10000,
-        total_population: countyData.B01001_001E,
-        median_household_income: countyData.B19013_001E,
-        median_gross_rent: countyData.B25064_001E,
-        median_home_value: countyData.B25077_001E,
-        total_housing_units: countyData.B25001_001E,
-        occupied_housing_units: countyData.B25002_002E,
-        vacant_housing_units: countyData.B25002_003E,
-        total_employed: countyData.B23025_004E,
-        total_unemployed: countyData.B23025_005E,
-        total_households: countyData.B11001_001E,
-        family_households: countyData.B11003_001E,
-        education_total: countyData.B15003_001E,
-        bachelors_degree: countyData.B15003_022E,
-        masters_degree: countyData.B15003_023E,
-        doctorate_degree: countyData.B15003_025E,
-        poverty_total: countyData.B17001_001E,
-        poverty_count: countyData.B17001_002E
+        total_establishments: countyData.ESTAB || 0,
+        emp: countyData.EMP || 0,
+        payann: countyData.PAYANN || 0,
+        firms_per_10k_population: countyData.B01001_001E ? (countyData.ESTAB / countyData.B01001_001E) * 10000 : 0,
+        total_population: countyData.B01001_001E || 0,
+        median_household_income: countyData.B19013_001E || 0,
+        median_gross_rent: countyData.B25064_001E || 0,
+        median_home_value: countyData.B25077_001E || 0,
+        total_housing_units: countyData.B25001_001E || 0,
+        occupied_housing_units: countyData.B25002_002E || 0,
+        vacant_housing_units: countyData.B25002_003E || 0,
+        total_employed: countyData.B23025_004E || 0,
+        total_unemployed: countyData.B23025_005E || 0,
+        employed_population: countyData.B23025_004E || 0,
+        private_sector_accountants: countyData.C24010_033E || 0,
+        public_sector_accountants: countyData.C24010_034E || 0,
+        total_households: countyData.B11001_001E || 0,
+        family_households: countyData.B11003_001E || 0,
+        education_total: countyData.B15003_001E || 0,
+        bachelors_degree: countyData.B15003_022E || 0,
+        masters_degree: countyData.B15003_023E || 0,
+        doctorate_degree: countyData.B15003_025E || 0,
+        poverty_total: countyData.B17001_001E || 0,
+        poverty_count: countyData.B17001_002E || 0,
+        growth_rate_percentage: 0,
+        market_saturation_index: 0,
+        total_education_population: countyData.B15003_001E || 0,
+        avgSalaryPerEmployee: countyData.PAYANN && countyData.EMP ? countyData.PAYANN / countyData.EMP : 0,
+        vacancy_rate: countyData.B25001_001E ? (countyData.B25002_003E / countyData.B25001_001E) * 100 : 0,
+        vacancy_rank: 0,
+        income_rank: 0,
+        population_rank: 0,
+        rent_rank: 0,
+        growth_rank: 0,
+        top_firms: []
       };
     }
   });
 
   const handleStateClick = (statefp: string) => {
-    navigate(`/state-market-report/${statefp}`);
+    if (statefp) {
+      navigate(`/state-market-report/${statefp}`);
+    }
   };
 
   return (
