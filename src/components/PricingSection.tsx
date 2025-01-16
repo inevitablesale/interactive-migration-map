@@ -19,7 +19,7 @@ export const PricingSection = () => {
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Strategic Scout</h3>
               <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-600 rounded">
-                $50/month
+                $49/month
               </span>
             </div>
             <p className="text-sm text-gray-600 mb-4">
@@ -50,6 +50,9 @@ export const PricingSection = () => {
               <h3 className="text-lg font-semibold text-gray-900">Executive Advantage</h3>
               <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-600 rounded">
                 $99/month
+              </span>
+              <span className="px-2 py-1 text-xs font-medium bg-green-400/10 text-green-600 rounded ml-2">
+                Launch Price
               </span>
             </div>
             <p className="text-sm text-gray-600 mb-4">
