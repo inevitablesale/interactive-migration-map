@@ -117,7 +117,13 @@ export function KeyInsightsPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_emerging_talent_markets');
       if (error) throw error;
-      return data;
+      // Filter out duplicates based on county_name and state_name combination
+      return data.filter((region, index, self) =>
+        index === self.findIndex(r => 
+          r.county_name === region.county_name && 
+          r.state_name === region.state_name
+        )
+      );
     },
   });
 
@@ -326,7 +332,7 @@ export function KeyInsightsPanel() {
                   <div className="mt-4 space-y-4">
                     {emergingTalentData?.map((region, index) => (
                       <div 
-                        key={index} 
+                        key={`${region.county_name}-${region.state_name}-${index}`}
                         className="p-4 bg-black/40 rounded-lg cursor-pointer hover:bg-black/60 transition-colors"
                         onClick={() => handleNavigateToMarket(region.county_name, region.state_name)}
                       >
