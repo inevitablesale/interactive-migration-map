@@ -31,7 +31,24 @@ const Index = () => {
           <Hero />
         </div>
 
-        {/* Stats Section */}
+        {/* Beta Access Section */}
+        <BetaAccessSection />
+
+        {/* Data Sources Section */}
+        <DataSourcesSection />
+
+        {/* Solutions Section */}
+        <SolutionsSection />
+
+        {/* Pricing Section */}
+        <PricingSection />
+
+        {/* Time Calculator Section */}
+        <div className="py-20 px-4">
+          <TimeCalculator />
+        </div>
+
+        {/* Stats Section - Moved to bottom */}
         <div className="py-20 px-4">
           <Card className="w-full max-w-4xl mx-auto bg-white/90 backdrop-blur-sm shadow-lg p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -49,23 +66,6 @@ const Index = () => {
               </div>
             </div>
           </Card>
-        </div>
-
-        {/* Beta Access Section */}
-        <BetaAccessSection />
-
-        {/* Data Sources Section */}
-        <DataSourcesSection />
-
-        {/* Solutions Section */}
-        <SolutionsSection />
-
-        {/* Pricing Section */}
-        <PricingSection />
-
-        {/* Time Calculator Section */}
-        <div className="py-20 px-4">
-          <TimeCalculator />
         </div>
       </div>
     </div>
