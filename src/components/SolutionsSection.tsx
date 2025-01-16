@@ -5,7 +5,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { ListingsPanel } from "./analytics/ListingsPanel";
+import { ComparisonTool } from "./ComparisonTool";
+import { AIDealSourcer } from "./analytics/AIDealSourcer";
 
 export const SolutionsSection = () => {
   const [activeTab, setActiveTab] = useState("analyze");
@@ -181,12 +182,12 @@ export const SolutionsSection = () => {
                 <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10 overflow-hidden">
                   {key === "analyze" && (
                     <div className="h-full animate-fade-in">
-                      <ListingsPanel />
+                      <ComparisonTool embedded={true} />
                     </div>
                   )}
                   {key === "assess" && (
                     <div className="h-full animate-fade-in">
-                      <ListingsPanel />
+                      <AIDealSourcer embedded={true} />
                     </div>
                   )}
                   {key === "plan" && (
