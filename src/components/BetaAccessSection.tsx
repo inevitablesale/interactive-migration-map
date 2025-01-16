@@ -1,7 +1,16 @@
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
+import { useNavigate } from "react-router-dom";
 
 export const BetaAccessSection = () => {
+  const navigate = useNavigate();
+
+  const handleLinkedInSignup = () => {
+    // TODO: Implement actual LinkedIn authentication
+    // For now, we'll just redirect to the thank you page
+    navigate("/thank-you");
+  };
+
   return (
     <div className="py-20 px-4">
       <Card className="max-w-4xl mx-auto p-12 bg-white/90 backdrop-blur-sm">
@@ -30,7 +39,7 @@ export const BetaAccessSection = () => {
           <div className="flex items-center justify-center gap-4">
             <button 
               className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
-              disabled
+              onClick={handleLinkedInSignup}
             >
               <span>Sign Up with LinkedIn</span>
               <ArrowRight className="w-4 h-4" />
