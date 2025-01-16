@@ -23,6 +23,18 @@ const ThankYou = () => {
             <p className="text-gray-600">
               We're currently in beta, and we'll notify you as soon as we launch.
             </p>
+            <p className="text-gray-600">
+              In the meantime, subscribe to our{" "}
+              <a 
+                href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7259300749644357632" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                newsletter
+              </a>
+              {" "}for insights generated from our database.
+            </p>
             <p className="text-gray-600 mt-6">
               Are you an investor interested in Canary? Connect with me on{" "}
               <a 
