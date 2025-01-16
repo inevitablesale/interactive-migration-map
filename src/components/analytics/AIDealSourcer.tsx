@@ -94,10 +94,7 @@ export const AIDealSourcer = () => {
   return (
     <Card className="bg-black/40 backdrop-blur-md border-white/10 p-6">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Bird className="w-5 h-5 text-blue-400 animate-pulse" />
-          <h3 className="text-lg font-semibold text-white">AI Deal Sourcer</h3>
-        </div>
+        <h3 className="text-lg font-semibold text-white">AI Deal Sourcer</h3>
         <div className="flex gap-2">
           {unreviewedCount > 0 && (
             <div className="relative animate-fade-in">
