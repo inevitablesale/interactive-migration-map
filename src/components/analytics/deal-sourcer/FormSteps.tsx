@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 
 export const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
   <div className="space-y-6 animate-fade-in">
-    <h2 className="text-2xl font-semibold text-white">Welcome to AI Deal Sourcing</h2>
+    <h2 className="text-2xl font-semibold text-white">Create Your Deal Agent</h2>
     <p className="text-white/60">
       We're here to tailor acquisition opportunities to your unique preferences. Let's get started by understanding your goals and requirements.
     </p>
@@ -265,7 +265,7 @@ export const DealAttractivenessStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack}>Back</Button>
+      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
       <Button onClick={onNext}>Next</Button>
     </div>
   </div>
@@ -348,8 +348,8 @@ export const ReviewStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack}>Back</Button>
-      <Button onClick={onSubmit}>Create Profile</Button>
+      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
+      <Button onClick={onSubmit}>Create Deal Agent</Button>
     </div>
   </div>
 );
