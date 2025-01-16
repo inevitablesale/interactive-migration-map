@@ -13,7 +13,7 @@ export const BetaAccessSection = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/opportunities`
+          redirectTo: `${window.location.origin}/thank-you`
         }
       });
 
