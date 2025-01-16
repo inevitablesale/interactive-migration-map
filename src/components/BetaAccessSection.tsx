@@ -1,7 +1,38 @@
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "./ui/use-toast";
 
 export const BetaAccessSection = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLinkedInSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/thank-you`
+        }
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again."
+      });
+    }
+  };
+
   return (
     <div className="py-20 px-4">
       <Card className="max-w-4xl mx-auto p-12 bg-white/90 backdrop-blur-sm">
@@ -30,12 +61,11 @@ export const BetaAccessSection = () => {
           <div className="flex items-center justify-center gap-4">
             <button 
               className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
-              disabled
+              onClick={handleLinkedInSignIn}
             >
               <span>Sign Up with LinkedIn</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-            <p className="text-sm text-gray-500">Coming Soon</p>
           </div>
         </div>
       </Card>

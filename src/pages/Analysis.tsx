@@ -99,10 +99,10 @@ export default function Analysis() {
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
             <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
-              Accounting Firm Market Analyst
+              State Comparison Tool
               <Lock className="h-4 w-4 text-yellow-400" />
             </h2>
-            <ComparisonTool embedded={true} />
+            <ComparisonTool />
           </div>
         </div>
       </div>

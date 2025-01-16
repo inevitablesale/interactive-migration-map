@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Index from "@/pages/Index";
-import Analysis from "@/pages/Analysis";
-import Opportunities from "@/pages/Opportunities";
-import MarketReport from "@/pages/MarketReport";
-import StateMarketReport from "@/pages/StateMarketReport";
-import ThankYou from "@/pages/ThankYou";
+import Index from "./pages/Index";
+import Analysis from "./pages/Analysis";
+import Opportunities from "./pages/Opportunities";
+import MarketReport from "./pages/MarketReport";
+import StateMarketReport from "./pages/StateMarketReport";
+import ThankYou from "./pages/ThankYou";
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
         <Route path="/analysis" element={<Analysis />} />
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/market-report/:county/:state" element={<MarketReport />} />
-        <Route path="/state-market-report/:state" element={<StateMarketReport />} />
+        <Route path="/state-market-report/:statefp" element={<StateMarketReport />} />
         <Route path="/thank-you" element={<ThankYou />} />
       </Routes>
     </Router>

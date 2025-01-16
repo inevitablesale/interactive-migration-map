@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   WelcomeStep,
@@ -13,9 +12,8 @@ import {
   FormProgress
 } from "./FormSteps";
 
-export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
+export const MultiStepForm = ({ onSuccess, embedded }: { onSuccess?: (data: any) => void, embedded?: boolean }) => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     buyer_name: "",
@@ -34,8 +32,6 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     additionalNotes: "",
     alertFrequency: "daily" as "realtime" | "daily" | "weekly",
   });
-
-  const totalSteps = 7;
 
   const handleFieldChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -67,7 +63,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       const { data: profile, error: profileError } = await supabase
         .from("buyer_profiles")
         .insert({
-          user_id: user.id, // Add the user_id here
+          user_id: user.id,
           buyer_name: formData.buyer_name,
           contact_email: formData.contact_email,
           target_geography: formData.geography,
@@ -94,7 +90,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       const { error: opportunityError } = await supabase
         .from("ai_opportunities")
         .insert({
-          user_id: user.id, // Add the user_id here as well
+          user_id: user.id,
           buyer_profile_id: profile.id,
           opportunity_data: {
             status: 'active',
@@ -111,8 +107,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         description: "We'll start finding opportunities that match your preferences.",
       });
 
-      onSuccess?.();
-      navigate("/thank-you");
+      onSuccess?.(formData);
     } catch (error) {
       console.error('Error creating profile:', error);
       toast({
@@ -123,10 +118,12 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     }
   };
 
+  const totalSteps = 7;
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <WelcomeStep onNext={handleNext} />;
+        return <WelcomeStep onNext={handleNext} embedded={embedded} />;
       case 1:
         return (
           <FirmPreferencesStep

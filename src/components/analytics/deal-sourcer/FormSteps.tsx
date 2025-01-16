@@ -7,13 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 
-export const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
+export const WelcomeStep = ({ onNext, embedded }: { onNext: () => void, embedded?: boolean }) => (
   <div className="space-y-6 animate-fade-in">
     <h2 className="text-2xl font-semibold text-white">Set up your Canary</h2>
     <p className="text-white/60">
       We're here to tailor acquisition opportunities to your unique preferences. Let's get started by understanding your goals and requirements.
     </p>
-    <Button onClick={onNext} className="w-full">Get Started</Button>
+    <Button 
+      onClick={onNext} 
+      className="w-full"
+      disabled={embedded}
+    >
+      Get Started
+    </Button>
   </div>
 );
 
@@ -358,3 +364,4 @@ export const FormProgress = ({ currentStep, totalSteps }: { currentStep: number;
     <p className="text-sm text-white/60 text-center">Step {currentStep} of {totalSteps}</p>
   </div>
 );
+
