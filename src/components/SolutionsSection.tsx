@@ -1,15 +1,16 @@
-import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, TrendingUp, DollarSign } from "lucide-react";
+import { ArrowRight, Brain, LineChart, ShieldCheck, Users, Target, TrendingUp, DollarSign, Building2, Info } from "lucide-react";
 import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Button } from "./ui/button";
+import { Progress } from "./ui/progress";
 
 export const SolutionsSection = () => {
-  const [activeTab, setActiveTab] = useState("discover");
+  const [activeTab, setActiveTab] = useState("analyze");
 
-  // Fetch aggregated data for visualization
   const { data: marketData } = useQuery({
     queryKey: ['marketMetrics'],
     queryFn: async () => {
@@ -31,77 +32,75 @@ export const SolutionsSection = () => {
   });
 
   const solutions = {
-    discover: {
-      title: "Market Analysis",
-      description: "Identify untapped opportunities with data-driven insights",
-      metrics: [
+    analyze: {
+      title: "Comprehensive Market Analysis",
+      items: [
         {
-          title: "Total Firms",
-          value: marketData?.reduce((sum, state) => sum + state.firms, 0)?.toLocaleString() || "Loading...",
-          icon: Users,
-          description: "Active accounting firms in target markets"
+          title: "Deal Flow Intelligence",
+          description: "AI-powered market matching",
+          tag: "Real-time",
+          tagDetail: "Predictive analytics",
+          icon: Brain,
+          color: "text-blue-400",
+          bgColor: "bg-blue-950/40"
         },
         {
-          title: "Market Potential",
-          value: marketData?.reduce((sum, state) => sum + state.payroll, 0)?.toLocaleString() || "Loading...",
+          title: "Market Validation",
+          description: "Census + Deals + Off-Market",
+          tag: "3-Layer",
+          tagDetail: "Cross-validated",
           icon: Target,
-          description: "Annual payroll volume ($)"
+          color: "text-yellow-400",
+          bgColor: "bg-yellow-950/40"
         },
         {
-          title: "Growth Rate",
-          value: "+12.3%",
+          title: "Opportunity Discovery",
+          description: "Early access to emerging deals",
+          tag: "Pre-Market",
+          tagDetail: "Ahead of competition",
           icon: TrendingUp,
-          description: "Year-over-year market growth"
+          color: "text-emerald-400",
+          bgColor: "bg-emerald-950/40"
         }
       ]
     },
     assess: {
-      title: "Risk Assessment",
-      description: "Make data-driven decisions with confidence",
-      metrics: [
+      title: "Strategic Market Entry",
+      items: [
         {
-          title: "Market Stability",
-          value: "8.7/10",
+          title: "Risk Assessment",
+          description: "Comprehensive risk analysis",
+          tag: "Multi-Factor",
+          tagDetail: "Dynamic updates",
           icon: ShieldCheck,
-          description: "Based on economic indicators"
+          color: "text-purple-400",
+          bgColor: "bg-purple-950/40"
         },
         {
-          title: "Revenue Potential",
-          value: "$2.1M",
-          icon: DollarSign,
-          description: "Average per firm"
+          title: "Value Analysis",
+          description: "Complete market perspective",
+          tag: "360°",
+          tagDetail: "Full coverage",
+          icon: LineChart,
+          color: "text-pink-400",
+          bgColor: "bg-pink-950/40"
         },
         {
-          title: "Competition Index",
-          value: "Medium",
+          title: "Competitive Edge",
+          description: "First-mover advantage",
+          tag: "Early",
+          tagDetail: "Market leadership",
           icon: Users,
-          description: "Market saturation level"
+          color: "text-orange-400",
+          bgColor: "bg-orange-950/40"
         }
       ]
     },
-    decide: {
-      title: "Decision Support",
-      description: "Transform insights into actionable decisions",
-      metrics: [
-        {
-          title: "Opportunity Score",
-          value: "92/100",
-          icon: Target,
-          description: "Composite market rating"
-        },
-        {
-          title: "ROI Forecast",
-          value: "24%",
-          icon: TrendingUp,
-          description: "Projected 3-year return"
-        },
-        {
-          title: "Market Position",
-          value: "Top 10%",
-          icon: LineChart,
-          description: "Relative to competitors"
-        }
-      ]
+    plan: {
+      title: "Set up your Canary",
+      description: "We're here to tailor acquisition opportunities to your unique preferences. Let's get started by understanding your goals and requirements.",
+      step: 1,
+      totalSteps: 7
     }
   };
 
@@ -110,77 +109,174 @@ export const SolutionsSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-            From Insights to Action
+            Data-Driven Market Intelligence
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Turn market intelligence into your competitive advantage. Find the perfect acquisition target with data-driven precision.
+          <p className="text-gray-400 max-w-3xl mx-auto">
+            Unlock acquisition opportunities by combining comprehensive census data, public deal analytics, and proprietary off-market insights. Our unique three-pronged approach helps you discover high-potential markets before they become competitive.
           </p>
         </div>
 
-        <Tabs defaultValue="discover" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8">
-            <TabsTrigger value="discover">Analyze</TabsTrigger>
+        <Tabs defaultValue="analyze" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto mb-8 bg-white/5">
+            <TabsTrigger value="analyze">Analyze</TabsTrigger>
             <TabsTrigger value="assess">Assess</TabsTrigger>
-            <TabsTrigger value="decide">Decide</TabsTrigger>
+            <TabsTrigger value="plan">Plan</TabsTrigger>
           </TabsList>
 
-          {Object.entries(solutions).map(([key, solution]) => (
-            <TabsContent key={key} value={key} className="space-y-8">
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  <div className="flex items-center gap-3 mb-6">
-                    {key === "discover" && <Brain className="w-5 h-5 text-yellow-400" />}
-                    {key === "assess" && <ShieldCheck className="w-5 h-5 text-yellow-400" />}
-                    {key === "decide" && <LineChart className="w-5 h-5 text-yellow-400" />}
-                    <h3 className="text-lg font-semibold text-white">{solution.title}</h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 gap-4">
-                    {solution.metrics.map((metric, index) => (
-                      <div key={index} className="bg-white/5 p-4 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <metric.icon className="w-4 h-4 text-yellow-400" />
-                            <span className="text-sm text-gray-300">{metric.title}</span>
-                          </div>
-                          <span className="text-lg font-semibold text-white">{metric.value}</span>
+          <TabsContent value="analyze" className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <h3 className="flex items-center gap-2 text-2xl font-semibold text-white mb-6">
+                  <Brain className="w-6 h-6 text-yellow-400" />
+                  {solutions.analyze.title}
+                </h3>
+                <div className="space-y-4">
+                  {solutions.analyze.items.map((item, index) => (
+                    <div key={index} className={`p-4 rounded-lg ${item.bgColor}`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <item.icon className={`w-5 h-5 ${item.color}`} />
+                          <span className={`font-medium ${item.color}`}>{item.title}</span>
                         </div>
-                        <p className="text-xs text-gray-400">{metric.description}</p>
+                        <div className="text-right">
+                          <span className={`text-sm font-medium ${item.color}`}>{item.tag}</span>
+                          <div className="flex items-center gap-1 mt-1">
+                            <ArrowRight className={`w-3 h-3 ${item.color}`} />
+                            <span className="text-xs text-gray-400">{item.tagDetail}</span>
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </Card>
+                      <p className="text-sm text-gray-400">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
 
-                <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-                  <div className="h-full flex flex-col">
-                    <h4 className="text-sm font-medium text-gray-300 mb-4">Market Overview</h4>
-                    {marketData && (
-                      <div className="flex-1">
-                        <ResponsiveContainer width="100%" height={300}>
-                          <BarChart data={marketData}>
-                            <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
-                            <YAxis stroke="#9CA3AF" fontSize={12} />
-                            <Tooltip 
-                              contentStyle={{ 
-                                background: 'rgba(0,0,0,0.8)', 
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '4px'
-                              }}
-                            />
-                            <Bar 
-                              dataKey={key === "discover" ? "firms" : key === "assess" ? "employees" : "payroll"}
-                              fill="#EAB308"
-                              radius={[4, 4, 0, 0]}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="h-full flex flex-col">
+                  <h4 className="text-lg font-medium text-white mb-4">Market Density Overview</h4>
+                  {marketData && (
+                    <div className="flex-1">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={marketData}>
+                          <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
+                          <YAxis stroke="#9CA3AF" fontSize={12} />
+                          <Tooltip 
+                            contentStyle={{ 
+                              background: 'rgba(0,0,0,0.8)', 
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '4px'
+                            }}
+                          />
+                          <Bar 
+                            dataKey="firms"
+                            fill="#EAB308"
+                            radius={[4, 4, 0, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="assess" className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <h3 className="flex items-center gap-2 text-2xl font-semibold text-white mb-6">
+                  <ShieldCheck className="w-6 h-6 text-yellow-400" />
+                  {solutions.assess.title}
+                </h3>
+                <div className="space-y-4">
+                  {solutions.assess.items.map((item, index) => (
+                    <div key={index} className={`p-4 rounded-lg ${item.bgColor}`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <item.icon className={`w-5 h-5 ${item.color}`} />
+                          <span className={`font-medium ${item.color}`}>{item.title}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-sm font-medium ${item.color}`}>{item.tag}</span>
+                          <div className="flex items-center gap-1 mt-1">
+                            <ArrowRight className={`w-3 h-3 ${item.color}`} />
+                            <span className="text-xs text-gray-400">{item.tagDetail}</span>
+                          </div>
+                        </div>
                       </div>
-                    )}
+                      <p className="text-sm text-gray-400">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="h-full flex flex-col">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="flex items-center gap-2 text-xl font-semibold text-white">
+                      <Building2 className="w-5 h-5" />
+                      Accounting Industry Metrics
+                    </h3>
                   </div>
-                </Card>
-              </div>
-            </TabsContent>
-          ))}
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400">Total Establishments</span>
+                          <Info className="w-4 h-4 text-gray-500" />
+                        </div>
+                        <span className="text-xs font-medium px-2 py-1 rounded bg-amber-500/20 text-amber-400">Average</span>
+                      </div>
+                      <p className="text-2xl font-bold text-blue-400">4.6 per 10k residents</p>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400">Average Annual Payroll per Firm</span>
+                          <Info className="w-4 h-4 text-gray-500" />
+                        </div>
+                        <span className="text-xs font-medium px-2 py-1 rounded bg-emerald-500/20 text-emerald-400">High Performance</span>
+                      </div>
+                      <p className="text-2xl font-bold text-emerald-400">$560.7K</p>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400">Average Salary per Employee</span>
+                          <Info className="w-4 h-4 text-gray-500" />
+                        </div>
+                        <span className="text-xs font-medium px-2 py-1 rounded bg-amber-500/20 text-amber-400">Average</span>
+                      </div>
+                      <p className="text-2xl font-bold text-blue-400">$59.4K</p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="plan" className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+                <div className="flex flex-col h-full">
+                  <div className="mb-8">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-400">Step {solutions.plan.step} of {solutions.plan.totalSteps}</span>
+                    </div>
+                    <Progress value={(solutions.plan.step / solutions.plan.totalSteps) * 100} className="h-1 bg-gray-800" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-semibold text-white mb-4">{solutions.plan.title}</h3>
+                    <p className="text-gray-400 mb-8">{solutions.plan.description}</p>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Get Started
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
