@@ -8,7 +8,6 @@ import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { ComparisonCharts } from "./comparison/ComparisonCharts";
 import { ScenarioModeling } from "./comparison/ScenarioModeling";
-import { formatNumber, formatCurrency } from "@/utils/formatters";
 
 interface ComparisonToolProps {
   embedded?: boolean;
