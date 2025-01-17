@@ -88,60 +88,10 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         throw formError;
       }
 
-      // Create buyer profile
-      console.log("📊 Creating buyer profile...");
-      const { data: profile, error: profileError } = await supabase
-        .from("buyer_profiles")
-        .insert({
-          user_id: user.id,
-          buyer_name: "Anonymous",
-          contact_email: user.email || "anonymous@example.com",
-          target_geography: [formData.preferredState || "US"],
-          buyer_type: formData.buyerType,
-          remote_preference: formData.remotePreference,
-          service_lines: formData.services,
-          ai_preferences: {
-            timeline: formData.timeline,
-            practiceSize: formData.practiceSize,
-            services: formData.services,
-            additionalDetails: formData.additionalDetails,
-            dealPreferences: formData.dealPreferences,
-          },
-        })
-        .select()
-        .single();
-
-      if (profileError) {
-        console.error("❌ Error creating profile:", profileError);
-        throw profileError;
-      }
-
-      console.log("✅ Profile created successfully:", profile);
-
-      // Create AI opportunity
-      console.log("🎯 Creating AI opportunity...");
-      const { error: opportunityError } = await supabase
-        .from("ai_opportunities")
-        .insert({
-          user_id: user.id,
-          buyer_profile_id: profile.id,
-          opportunity_data: {
-            status: 'active',
-            created_at: new Date().toISOString(),
-            last_checked: new Date().toISOString(),
-          },
-          status: 'new',
-        });
-
-      if (opportunityError) {
-        console.error("❌ Error creating opportunity:", opportunityError);
-        throw opportunityError;
-      }
-
       console.log("✅ Form submission completed successfully");
       toast({
         title: "Success! 🎯",
-        description: "Your preferences have been saved. We'll start finding opportunities that match your criteria.",
+        description: "Your preferences have been saved.",
       });
 
       onSuccess?.();
