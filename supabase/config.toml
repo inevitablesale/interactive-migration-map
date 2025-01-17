@@ -26,5 +26,6 @@ enabled = true
 enabled = true
 
 [[functions]]
+[functions.match-deals]
 name = "match-deals"
 verify_jwt = true
