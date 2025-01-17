@@ -98,6 +98,7 @@ export type Database = {
           ai_preferences: Json | null
           alert_frequency: string | null
           buyer_name: string
+          buyer_type: string | null
           contact_email: string
           contact_phone: string | null
           created_at: string | null
@@ -112,6 +113,7 @@ export type Database = {
           preferred_insights: string[] | null
           price_max: number | null
           price_min: number | null
+          remote_preference: string | null
           retention_risk: string | null
           revenue_max: number | null
           revenue_min: number | null
@@ -126,6 +128,7 @@ export type Database = {
           ai_preferences?: Json | null
           alert_frequency?: string | null
           buyer_name: string
+          buyer_type?: string | null
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
@@ -140,6 +143,7 @@ export type Database = {
           preferred_insights?: string[] | null
           price_max?: number | null
           price_min?: number | null
+          remote_preference?: string | null
           retention_risk?: string | null
           revenue_max?: number | null
           revenue_min?: number | null
@@ -154,6 +158,7 @@ export type Database = {
           ai_preferences?: Json | null
           alert_frequency?: string | null
           buyer_name?: string
+          buyer_type?: string | null
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
@@ -168,6 +173,7 @@ export type Database = {
           preferred_insights?: string[] | null
           price_max?: number | null
           price_min?: number | null
+          remote_preference?: string | null
           retention_risk?: string | null
           revenue_max?: number | null
           revenue_min?: number | null
