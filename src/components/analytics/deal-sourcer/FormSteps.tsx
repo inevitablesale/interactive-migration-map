@@ -111,72 +111,81 @@ export const LocationStep = ({
   onChange: (field: string, value: any) => void;
   onBack: () => void;
   onNext: () => void;
-}) => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex items-center gap-2 mb-4">
-      <MapPin className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Location Preferences</h3>
-    </div>
+}) => {
+  // Initialize remotePreference if it's not set
+  React.useEffect(() => {
+    if (!data.remotePreference) {
+      onChange('remotePreference', 'no');
+    }
+  }, []);
 
-    <div className="space-y-6">
-      <div>
-        <Label className="text-white mb-2">State Preference</Label>
-        <Select
-          value={data.preferredState || ''}
-          onValueChange={(value) => onChange('preferredState', value)}
-        >
-          <SelectTrigger className="h-12 bg-black/60 border-white/10 text-white">
-            <SelectValue placeholder="Select preferred state" />
-          </SelectTrigger>
-          <SelectContent className="bg-black/95 border-white/10">
-            <SelectItem value="any" className="text-white">Any State</SelectItem>
-            {[
-              "California", "New York", "Texas", "Florida", "Illinois",
-              "Pennsylvania", "Ohio", "Michigan", "Georgia", "North Carolina",
-            ].map(state => (
-              <SelectItem key={state} value={state} className="text-white">
-                {state}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center gap-2 mb-4">
+        <MapPin className="w-5 h-5 text-accent" />
+        <h3 className="text-lg font-semibold text-white">Location Preferences</h3>
       </div>
 
-      <div>
-        <Label className="text-white mb-2">Remote Practice Consideration</Label>
-        <RadioGroup
-          value={data.remotePreference || 'no'}
-          onValueChange={(value) => onChange('remotePreference', value)}
-          className="grid gap-3"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="yes" id="remote-yes" />
-            <Label htmlFor="remote-yes" className="text-white">
-              Open to remote practice opportunities
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="no" id="remote-no" />
-            <Label htmlFor="remote-no" className="text-white">
-              Prefer traditional in-person practice
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="hybrid" id="remote-hybrid" />
-            <Label htmlFor="remote-hybrid" className="text-white">
-              Interested in hybrid model
-            </Label>
-          </div>
-        </RadioGroup>
+      <div className="space-y-6">
+        <div>
+          <Label className="text-white mb-2">State Preference</Label>
+          <Select
+            value={data.preferredState || ''}
+            onValueChange={(value) => onChange('preferredState', value)}
+          >
+            <SelectTrigger className="h-12 bg-black/60 border-white/10 text-white">
+              <SelectValue placeholder="Select preferred state" />
+            </SelectTrigger>
+            <SelectContent className="bg-black/95 border-white/10">
+              <SelectItem value="any" className="text-white">Any State</SelectItem>
+              {[
+                "California", "New York", "Texas", "Florida", "Illinois",
+                "Pennsylvania", "Ohio", "Michigan", "Georgia", "North Carolina",
+              ].map(state => (
+                <SelectItem key={state} value={state} className="text-white">
+                  {state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-white mb-2">Remote Practice Consideration</Label>
+          <RadioGroup
+            value={data.remotePreference || 'no'}
+            onValueChange={(value) => onChange('remotePreference', value)}
+            className="grid gap-3"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="remote-yes" />
+              <Label htmlFor="remote-yes" className="text-white">
+                Open to remote practice opportunities
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id="remote-no" />
+              <Label htmlFor="remote-no" className="text-white">
+                Prefer traditional in-person practice
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="hybrid" id="remote-hybrid" />
+              <Label htmlFor="remote-hybrid" className="text-white">
+                Interested in hybrid model
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+      </div>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
+        <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
       </div>
     </div>
-
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
-      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
-    </div>
-  </div>
-);
+  );
+};
 
 export const PracticeSizeStep = ({
   data,
@@ -463,3 +472,4 @@ export const FormProgress = ({ currentStep, totalSteps }: { currentStep: number;
     <p className="text-sm text-white/60 text-center">Step {currentStep} of {totalSteps}</p>
   </div>
 );
+
