@@ -30,61 +30,51 @@ serve(async (req) => {
     console.log('Number of firms to analyze:', firms.length);
     console.log('Sample firms:', JSON.stringify(firms.slice(0, 2), null, 2));
 
-    // Construct a more focused system prompt
-    const systemPrompt = `You are an expert M&A advisor specializing in accounting firm acquisitions. 
-    Analyze the compatibility between a buyer's preferences and potential target firms.
-    Focus on these key factors:
-    1. Size match (employee count)
-    2. Geographic alignment
-    3. Service line overlap
+    // Construct a simpler, more focused system prompt
+    const systemPrompt = `You are an M&A advisor analyzing accounting firm matches.
+    For each firm, assess:
+    1. Size compatibility
+    2. Location fit
+    3. Service alignment
     4. Growth potential
-    5. Deal structure compatibility
-    
-    For each match, provide:
-    - Compatibility score (0-100)
-    - Key strengths
-    - Potential concerns
-    - Next steps
-    
-    Format your response as valid JSON with this structure:
+    5. Deal structure fit
+
+    Provide a JSON response with this structure:
     {
       "matches": [
         {
-          "firmId": "string",
-          "firmName": "string",
-          "compatibilityScore": number,
+          "firmId": string,
+          "firmName": string,
+          "score": number,
           "strengths": string[],
           "concerns": string[],
-          "nextSteps": string[],
-          "rationale": "string"
+          "nextSteps": string[]
         }
       ],
       "summary": {
         "totalMatches": number,
         "averageScore": number,
-        "recommendedActions": string[]
+        "recommendations": string[]
       }
     }`;
 
-    // Construct the user prompt with the actual data
+    // Simplified user prompt
     const userPrompt = `
-    Buyer Profile:
-    ${JSON.stringify({
-      type: buyerProfile.buyerType,
-      timeline: buyerProfile.timeline,
-      dealPreferences: buyerProfile.dealPreferences,
-      location: buyerProfile.location,
-      size: {
-        min: buyerProfile.practiceSize === 'small' ? 1 : buyerProfile.practiceSize === 'growing' ? 6 : buyerProfile.practiceSize === 'established' ? 16 : 31,
-        max: buyerProfile.practiceSize === 'small' ? 5 : buyerProfile.practiceSize === 'growing' ? 15 : buyerProfile.practiceSize === 'established' ? 30 : 100
-      }
-    }, null, 2)}
-    
-    Potential Target Firms:
-    ${JSON.stringify(firms, null, 2)}
-    
-    Analyze these firms and provide matches with detailed rationale.
-    Focus on alignment with buyer preferences and practical next steps.`;
+    Analyze these firms for the following buyer:
+    - Type: ${buyerProfile.buyerType}
+    - Timeline: ${buyerProfile.timeline}
+    - Deal Types: ${buyerProfile.dealPreferences?.join(', ')}
+    - Size Range: ${buyerProfile.practiceSize}
+
+    Firms to analyze:
+    ${JSON.stringify(firms.map(f => ({
+      name: f["Company Name"],
+      location: f.Location,
+      employees: f.employeeCount,
+      specialties: f.specialities
+    })), null, 2)}
+
+    Provide specific, data-driven matches with clear rationale.`;
 
     console.log('=== Prompts ===');
     console.log('System Prompt:', systemPrompt);
@@ -132,6 +122,7 @@ serve(async (req) => {
     // Extract and validate the response
     const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!analysisText) {
+      console.error('No text content in Gemini response:', data);
       throw new Error('No valid response received from Gemini');
     }
 
@@ -142,8 +133,17 @@ serve(async (req) => {
       
       // Basic validation of the response structure
       if (!parsedAnalysis.matches || !Array.isArray(parsedAnalysis.matches)) {
+        console.error('Invalid response structure:', parsedAnalysis);
         throw new Error('Invalid response structure');
       }
+
+      // Additional validation of required fields
+      parsedAnalysis.matches.forEach((match, index) => {
+        if (!match.firmId || !match.firmName || !match.score) {
+          console.error(`Invalid match at index ${index}:`, match);
+          throw new Error('Invalid match data structure');
+        }
+      });
     } catch (error) {
       console.error('Error parsing Gemini response:', error);
       throw new Error('Failed to parse AI response');
