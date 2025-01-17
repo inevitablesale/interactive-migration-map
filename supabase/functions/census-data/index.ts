@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-import { BigQuery } from '@google-cloud/bigquery'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
+import { BigQuery } from 'https://esm.sh/@google-cloud/bigquery@7.3.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error('Error in census-data function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

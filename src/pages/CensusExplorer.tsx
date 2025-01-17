@@ -23,6 +23,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   state: z.string({
@@ -32,6 +33,7 @@ const formSchema = z.object({
 
 export default function CensusExplorer() {
   const [selectedState, setSelectedState] = useState<string | null>(null);
+  const { toast } = useToast();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,9 +58,18 @@ export default function CensusExplorer() {
     queryKey: ['censusMetrics', selectedState],
     enabled: !!selectedState,
     queryFn: async () => {
-      const { data } = await supabase.functions.invoke('census-data', {
+      const { data, error } = await supabase.functions.invoke('census-data', {
         body: { stateFips: selectedState }
       });
+      
+      if (error) {
+        toast({
+          title: "Error fetching census data",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
       return data;
     }
   });
@@ -88,11 +99,11 @@ export default function CensusExplorer() {
                     <FormLabel className="text-white">Select State</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white/5 border-white/10">
                           <SelectValue placeholder="Choose a state" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-gray-900 border-white/10">
                         {states?.map((state) => (
                           <SelectItem key={state.STATEFP} value={state.STATEFP}>
                             {state.state}
@@ -103,8 +114,8 @@ export default function CensusExplorer() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Load Census Data
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Loading..." : "Load Census Data"}
               </Button>
             </form>
           </Form>
