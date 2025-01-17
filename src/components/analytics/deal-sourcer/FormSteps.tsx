@@ -339,21 +339,40 @@ export const TimelineAndDealStep = ({
   const testGeminiConnection = async () => {
     setTesting(true);
     try {
-      const { data: response, error } = await supabase.functions.invoke('test-gemini');
+      // First try the match-deals function
+      const { data: matchData, error: matchError } = await supabase.functions.invoke('match-deals', {
+        body: {
+          buyerProfile: {
+            id: '123', // This is just for testing
+            preferences: data
+          },
+          firms: [] // Empty array for testing
+        }
+      });
+
+      if (matchError) {
+        console.error('Match-deals error:', matchError);
+        throw new Error('Failed to test match-deals function');
+      }
+
+      console.log('Match-deals response:', matchData);
+
+      // If match-deals succeeds, proceed with Gemini test
+      const { data: geminiResponse, error: geminiError } = await supabase.functions.invoke('test-gemini');
       
-      if (error) throw error;
+      if (geminiError) throw geminiError;
       
-      console.log('Gemini test response:', response);
+      console.log('Gemini test response:', geminiResponse);
       
       toast({
         title: "Connection Successful",
-        description: "Successfully connected to Gemini API",
+        description: "Successfully tested both match-deals and Gemini API",
       });
     } catch (error) {
-      console.error('Gemini test error:', error);
+      console.error('Test error:', error);
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to Gemini API. Check the console for details.",
+        description: error instanceof Error ? error.message : "Failed to test connections",
         variant: "destructive",
       });
     } finally {
@@ -432,11 +451,11 @@ export const TimelineAndDealStep = ({
             disabled={testing}
           >
             {testing ? (
-              <>Testing Gemini Connection...</>
+              <>Testing Connections...</>
             ) : (
               <>
                 <Brain className="w-4 h-4 mr-2" />
-                Test Gemini Connection
+                Test Connections
               </>
             )}
           </Button>
