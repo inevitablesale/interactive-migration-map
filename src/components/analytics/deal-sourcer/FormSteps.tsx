@@ -315,37 +315,43 @@ export const TimelineAndDealStep = ({
   const [testing, setTesting] = useState(false);
 
   const testGeminiConnection = async () => {
+    console.log("🧪 Starting Gemini connection test");
     setTesting(true);
     try {
+      console.log("📤 Testing match-deals function...");
       const { data: matchData, error: matchError } = await supabase.functions.invoke('match-deals', {
         body: {
           buyerProfile: {
-            id: '123', // This is just for testing
+            id: '123',
             preferences: data
           },
-          firms: [] // Empty array for testing
+          firms: []
         }
       });
 
       if (matchError) {
-        console.error('Match-deals error:', matchError);
+        console.error('❌ Match-deals error:', matchError);
         throw new Error('Failed to test match-deals function');
       }
 
-      console.log('Match-deals response:', matchData);
+      console.log('✅ Match-deals response:', matchData);
 
+      console.log("📤 Testing Gemini API...");
       const { data: geminiResponse, error: geminiError } = await supabase.functions.invoke('test-gemini');
       
-      if (geminiError) throw geminiError;
+      if (geminiError) {
+        console.error('❌ Gemini API error:', geminiError);
+        throw geminiError;
+      }
       
-      console.log('Gemini test response:', geminiResponse);
+      console.log('✅ Gemini test response:', geminiResponse);
       
       toast({
         title: "Connection Successful",
         description: "Successfully tested both match-deals and Gemini API",
       });
     } catch (error) {
-      console.error('Test error:', error);
+      console.error('❌ Test error:', error);
       toast({
         title: "Connection Failed",
         description: error instanceof Error ? error.message : "Failed to test connections",
@@ -440,7 +446,16 @@ export const TimelineAndDealStep = ({
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
-        <Button onClick={onSubmit} className="bg-accent hover:bg-accent/90">Complete</Button>
+        <Button 
+          onClick={() => {
+            console.log("🔵 Complete button clicked");
+            console.log("📋 Current form data:", data);
+            onSubmit();
+          }} 
+          className="bg-accent hover:bg-accent/90"
+        >
+          Complete
+        </Button>
       </div>
     </div>
   );
