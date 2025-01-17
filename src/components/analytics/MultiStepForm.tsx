@@ -95,27 +95,6 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       }
 
       console.log("✅ Profile created successfully:", profile);
-
-      console.log("🎯 Creating AI opportunity...");
-      const { error: opportunityError } = await supabase
-        .from("ai_opportunities")
-        .insert({
-          user_id: user.id,
-          buyer_profile_id: profile.id,
-          opportunity_data: {
-            status: 'active',
-            created_at: new Date().toISOString(),
-            last_checked: new Date().toISOString(),
-          },
-          status: 'new',
-        });
-
-      if (opportunityError) {
-        console.error("❌ Error creating opportunity:", opportunityError);
-        throw opportunityError;
-      }
-
-      console.log("✅ AI opportunity created successfully");
       toast({
         title: "Profile Created! 🎯",
         description: "We'll start finding opportunities that match your preferences.",
