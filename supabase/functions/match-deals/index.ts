@@ -21,8 +21,9 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
     const { buyerProfile, firms } = await req.json();
 
-    console.log('Processing match request for buyer profile:', buyerProfile);
+    console.log('Processing match request for buyer profile:', JSON.stringify(buyerProfile, null, 2));
     console.log('Number of firms to analyze:', firms.length);
+    console.log('Sample of firms data:', JSON.stringify(firms.slice(0, 2), null, 2));
 
     // Construct the system prompt
     const systemPrompt = `You are an expert M&A advisor specializing in accounting firm acquisitions. 
@@ -48,6 +49,8 @@ serve(async (req) => {
     Analyze these firms and provide matches with detailed rationale.
     Focus on factual alignment points and clear next steps.`;
 
+    console.log('System Prompt:', systemPrompt);
+    console.log('User Prompt:', userPrompt);
     console.log('Sending request to Gemini API');
     
     const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
@@ -75,7 +78,7 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log('Received response from Gemini:', data);
+    console.log('Received response from Gemini:', JSON.stringify(data, null, 2));
 
     // Extract and validate the response
     const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
