@@ -1,12 +1,12 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { Building2, Users, MapPin, Target, Clock, Calculator, FileText, CheckSquare, Lightbulb, DollarSign, Brain, HandshakeIcon } from "lucide-react";
 
 export const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
@@ -19,7 +19,7 @@ export const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
   </div>
 );
 
-export const FirmPreferencesStep = ({ 
+export const BuyerTypeStep = ({ 
   data,
   onChange,
   onBack,
@@ -33,7 +33,7 @@ export const FirmPreferencesStep = ({
   <div className="space-y-6 animate-fade-in">
     <div className="flex items-center gap-2 mb-4">
       <Building2 className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Firm Preferences</h3>
+      <h3 className="text-lg font-semibold text-white">Buyer Type</h3>
     </div>
     
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -92,7 +92,176 @@ export const FirmPreferencesStep = ({
   </div>
 );
 
-export const PaymentTimingStep = ({
+export const LocationStep = ({
+  data,
+  onChange,
+  onBack,
+  onNext
+}: {
+  data: any;
+  onChange: (field: string, value: any) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) => (
+  <div className="space-y-6 animate-fade-in">
+    <div className="flex items-center gap-2 mb-4">
+      <MapPin className="w-5 h-5 text-accent" />
+      <h3 className="text-lg font-semibold text-white">Location Preferences</h3>
+    </div>
+
+    <div className="space-y-4">
+      <div>
+        <Label className="text-white mb-2">Market Type</Label>
+        <RadioGroup
+          value={data.marketType}
+          onValueChange={(value) => onChange('marketType', value)}
+          className="grid gap-3"
+        >
+          {[
+            { value: 'major_metro', label: 'Major Metro Areas' },
+            { value: 'mid_sized', label: 'Mid-sized Cities' },
+            { value: 'suburban', label: 'Suburban Markets' },
+            { value: 'rural', label: 'Rural Communities' }
+          ].map(option => (
+            <div key={option.value} className="flex items-center space-x-2">
+              <RadioGroupItem value={option.value} id={option.value} />
+              <Label htmlFor={option.value} className="text-white">{option.label}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+    </div>
+
+    <div className="flex justify-between">
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
+    </div>
+  </div>
+);
+
+export const PracticeSizeStep = ({
+  data,
+  onChange,
+  onBack,
+  onNext
+}: {
+  data: any;
+  onChange: (field: string, value: any) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) => (
+  <div className="space-y-6 animate-fade-in">
+    <div className="flex items-center gap-2 mb-4">
+      <Users className="w-5 h-5 text-accent" />
+      <h3 className="text-lg font-semibold text-white">Practice Size</h3>
+    </div>
+
+    <p className="text-white/60 mb-4">Size affects transition complexity and management needs</p>
+
+    <RadioGroup
+      value={data.practiceSize}
+      onValueChange={(value) => onChange('practiceSize', value)}
+      className="grid gap-4"
+    >
+      {[
+        { value: 'small', label: 'Small (1-5 professionals)' },
+        { value: 'growing', label: 'Growing (6-15 professionals)' },
+        { value: 'established', label: 'Established (16-30 professionals)' },
+        { value: 'large', label: 'Large (31+ professionals)' }
+      ].map(option => (
+        <Card 
+          key={option.value}
+          className={`p-4 cursor-pointer transition-all ${
+            data.practiceSize === option.value 
+              ? 'bg-accent/20 border-accent' 
+              : 'bg-white/5 border-white/10 hover:bg-white/10'
+          }`}
+          onClick={() => onChange('practiceSize', option.value)}
+        >
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value={option.value} id={option.value} />
+            <Label htmlFor={option.value} className="text-white">{option.label}</Label>
+          </div>
+        </Card>
+      ))}
+    </RadioGroup>
+
+    <div className="flex justify-between">
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
+    </div>
+  </div>
+);
+
+export const PracticeFocusStep = ({
+  data,
+  onChange,
+  onBack,
+  onNext
+}: {
+  data: any;
+  onChange: (field: string, value: any) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) => (
+  <div className="space-y-6 animate-fade-in">
+    <div className="flex items-center gap-2 mb-4">
+      <Target className="w-5 h-5 text-accent" />
+      <h3 className="text-lg font-semibold text-white">Practice Focus</h3>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[
+        { value: 'tax', label: 'Tax Services' },
+        { value: 'accounting', label: 'Accounting & Bookkeeping' },
+        { value: 'audit', label: 'Audit & Assurance' },
+        { value: 'advisory', label: 'Advisory Services' },
+        { value: 'specialty', label: 'Specialty Services' }
+      ].map(service => (
+        <Card
+          key={service.value}
+          className={`p-4 cursor-pointer transition-all ${
+            data.services?.includes(service.value)
+              ? 'bg-accent/20 border-accent'
+              : 'bg-white/5 border-white/10 hover:bg-white/10'
+          }`}
+          onClick={() => {
+            const current = data.services || [];
+            const updated = current.includes(service.value)
+              ? current.filter((v: string) => v !== service.value)
+              : [...current, service.value];
+            onChange('services', updated);
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={data.services?.includes(service.value)}
+              className="border-white/10"
+            />
+            <span className="text-white">{service.label}</span>
+          </div>
+        </Card>
+      ))}
+    </div>
+
+    <div>
+      <Label className="text-white">Additional Details</Label>
+      <Textarea
+        placeholder="Describe your ideal practice acquisition, including any specific services, industries, or other important factors you're looking for..."
+        value={data.additionalDetails}
+        onChange={(e) => onChange('additionalDetails', e.target.value)}
+        className="mt-2 bg-white/5 border-white/10 text-white"
+      />
+    </div>
+
+    <div className="flex justify-between">
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
+    </div>
+  </div>
+);
+
+export const TimelineAndDealStep = ({
   data,
   onChange,
   onBack,
@@ -106,7 +275,7 @@ export const PaymentTimingStep = ({
   <div className="space-y-6 animate-fade-in">
     <div className="flex items-center gap-2 mb-4">
       <Clock className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Timeline & Payment Structure</h3>
+      <h3 className="text-lg font-semibold text-white">Timeline & Deal Structure</h3>
     </div>
 
     <div className="space-y-6">
@@ -132,7 +301,7 @@ export const PaymentTimingStep = ({
       </div>
 
       <div>
-        <Label className="text-white mb-2">Payment Preferences</Label>
+        <Label className="text-white mb-2">Deal Preferences</Label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { value: 'cash', label: 'Cash Purchase', icon: DollarSign },
@@ -143,16 +312,16 @@ export const PaymentTimingStep = ({
             <Card
               key={option.value}
               className={`p-4 cursor-pointer transition-all ${
-                data.paymentStructures?.includes(option.value)
+                data.dealPreferences?.includes(option.value)
                   ? 'bg-accent/20 border-accent'
                   : 'bg-white/5 border-white/10 hover:bg-white/10'
               }`}
               onClick={() => {
-                const current = data.paymentStructures || [];
+                const current = data.dealPreferences || [];
                 const updated = current.includes(option.value)
                   ? current.filter((v: string) => v !== option.value)
                   : [...current, option.value];
-                onChange('paymentStructures', updated);
+                onChange('dealPreferences', updated);
               }}
             >
               <div className="flex items-center gap-2">
@@ -168,253 +337,6 @@ export const PaymentTimingStep = ({
     <div className="flex justify-between">
       <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
       <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
-    </div>
-  </div>
-);
-
-export const PostAcquisitionStep = ({
-  data,
-  onChange,
-  onBack,
-  onNext
-}: {
-  data: any;
-  onChange: (field: string, value: any) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex items-center gap-2 mb-4">
-      <Target className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Post-Acquisition Goals</h3>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {[
-        { value: 'growth', label: 'Expand Services', icon: Target },
-        { value: 'efficiency', label: 'Improve Efficiency', icon: Lightbulb },
-        { value: 'modernize', label: 'Modernize Technology', icon: Brain },
-        { value: 'retain', label: 'Retain Key Staff', icon: Users }
-      ].map(goal => (
-        <Card
-          key={goal.value}
-          className={`p-4 cursor-pointer transition-all ${
-            data.postAcquisitionGoals?.includes(goal.value)
-              ? 'bg-accent/20 border-accent'
-              : 'bg-white/5 border-white/10 hover:bg-white/10'
-          }`}
-          onClick={() => {
-            const current = data.postAcquisitionGoals || [];
-            const updated = current.includes(goal.value)
-              ? current.filter((v: string) => v !== goal.value)
-              : [...current, goal.value];
-            onChange('postAcquisitionGoals', updated);
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <goal.icon className="w-4 h-4 text-accent" />
-            <span className="text-white">{goal.label}</span>
-          </div>
-        </Card>
-      ))}
-    </div>
-
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
-      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
-    </div>
-  </div>
-);
-
-export const DealAttractivenessStep = ({
-  data,
-  onChange,
-  onBack,
-  onNext
-}: {
-  data: any;
-  onChange: (field: string, value: any) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex items-center gap-2 mb-4">
-      <Target className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Deal Attractiveness</h3>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[
-        { value: 'recurring', label: 'Recurring Revenue', icon: DollarSign },
-        { value: 'growth', label: 'Growth Potential', icon: Target },
-        { value: 'tech', label: 'Modern Technology', icon: Brain },
-        { value: 'team', label: 'Strong Team', icon: Users },
-        { value: 'processes', label: 'Efficient Processes', icon: CheckSquare }
-      ].map(feature => (
-        <Card
-          key={feature.value}
-          className={`p-4 cursor-pointer transition-all ${
-            data.attractiveFeatures?.includes(feature.value)
-              ? 'bg-accent/20 border-accent'
-              : 'bg-white/5 border-white/10 hover:bg-white/10'
-          }`}
-          onClick={() => {
-            const current = data.attractiveFeatures || [];
-            const updated = current.includes(feature.value)
-              ? current.filter((v: string) => v !== feature.value)
-              : [...current, feature.value];
-            onChange('attractiveFeatures', updated);
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <feature.icon className="w-4 h-4 text-accent" />
-            <span className="text-white">{feature.label}</span>
-          </div>
-        </Card>
-      ))}
-    </div>
-
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
-      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
-    </div>
-  </div>
-);
-
-export const AdditionalNotesStep = ({
-  data,
-  onChange,
-  onBack,
-  onNext
-}: {
-  data: any;
-  onChange: (field: string, value: any) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex items-center gap-2 mb-4">
-      <FileText className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Additional Information</h3>
-    </div>
-
-    <div className="space-y-4">
-      <div>
-        <Label className="text-white">Contact Information</Label>
-        <Input
-          placeholder="Your name"
-          value={data.buyer_name}
-          onChange={(e) => onChange('buyer_name', e.target.value)}
-          className="mt-2 bg-white/5 border-white/10 text-white"
-        />
-      </div>
-
-      <div>
-        <Label className="text-white">Email</Label>
-        <Input
-          type="email"
-          placeholder="Contact email"
-          value={data.contact_email}
-          onChange={(e) => onChange('contact_email', e.target.value)}
-          className="mt-2 bg-white/5 border-white/10 text-white"
-        />
-      </div>
-
-      <div>
-        <Label className="text-white">Team Emails (comma-separated)</Label>
-        <Input
-          placeholder="team@example.com, advisor@example.com"
-          value={data.team_emails}
-          onChange={(e) => onChange('team_emails', e.target.value)}
-          className="mt-2 bg-white/5 border-white/10 text-white"
-        />
-      </div>
-
-      <div>
-        <Label className="text-white">Alert Frequency</Label>
-        <Select 
-          value={data.alertFrequency} 
-          onValueChange={(value) => onChange('alertFrequency', value)}
-        >
-          <SelectTrigger className="mt-2 bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="Select frequency" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="realtime">Real-time</SelectItem>
-            <SelectItem value="daily">Daily</SelectItem>
-            <SelectItem value="weekly">Weekly</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label className="text-white">Additional Notes</Label>
-        <Textarea
-          placeholder="Any other important details or preferences..."
-          value={data.additionalNotes}
-          onChange={(e) => onChange('additionalNotes', e.target.value)}
-          className="mt-2 bg-white/5 border-white/10 text-white"
-        />
-      </div>
-    </div>
-
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
-      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
-    </div>
-  </div>
-);
-
-export const ReviewStep = ({
-  data,
-  onBack,
-  onSubmit
-}: {
-  data: any;
-  onBack: () => void;
-  onSubmit: () => void;
-}) => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex items-center gap-2 mb-4">
-      <CheckSquare className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Review Your Preferences</h3>
-    </div>
-
-    <div className="space-y-4">
-      <Card className="p-4 bg-white/5 border-white/10">
-        <h4 className="font-medium text-white mb-2">Contact Information</h4>
-        <div className="space-y-1 text-sm text-white/60">
-          <p>Name: {data.buyer_name}</p>
-          <p>Email: {data.contact_email}</p>
-          <p>Team Emails: {data.team_emails}</p>
-        </div>
-      </Card>
-
-      <Card className="p-4 bg-white/5 border-white/10">
-        <h4 className="font-medium text-white mb-2">Deal Preferences</h4>
-        <div className="space-y-1 text-sm text-white/60">
-          <p>Timeline: {data.timeline}</p>
-          <p>Payment Structures: {data.paymentStructures?.join(', ')}</p>
-          <p>Post-Acquisition Goals: {data.postAcquisitionGoals?.join(', ')}</p>
-        </div>
-      </Card>
-
-      <Card className="p-4 bg-white/5 border-white/10">
-        <h4 className="font-medium text-white mb-2">Alert Settings</h4>
-        <div className="space-y-1 text-sm text-white/60">
-          <p>Frequency: {data.alertFrequency}</p>
-          <p>Additional Notes: {data.additionalNotes}</p>
-        </div>
-      </Card>
-    </div>
-
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">
-        Back
-      </Button>
-      <Button onClick={onSubmit} className="bg-accent hover:bg-accent/90">
-        Submit
-      </Button>
     </div>
   </div>
 );

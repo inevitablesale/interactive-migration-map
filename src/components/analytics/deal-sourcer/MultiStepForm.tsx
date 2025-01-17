@@ -3,12 +3,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
   WelcomeStep,
-  FirmPreferencesStep,
-  PaymentTimingStep,
-  PostAcquisitionStep,
-  DealAttractivenessStep,
-  AdditionalNotesStep,
-  ReviewStep,
+  BuyerTypeStep,
+  LocationStep,
+  PracticeSizeStep,
+  PracticeFocusStep,
+  TimelineAndDealStep,
   FormProgress
 } from "./FormSteps";
 
@@ -16,24 +15,16 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
-    buyer_name: "",
-    contact_email: "",
-    team_emails: "",
-    revenueRange: "",
-    geography: [] as string[],
-    dealTypes: [] as string[],
-    paymentStructures: [] as string[],
-    complexStructures: false,
+    buyerType: "",
+    marketType: "",
+    practiceSize: "",
+    services: [] as string[],
+    additionalDetails: "",
     timeline: "",
-    postAcquisitionGoals: [] as string[],
-    preferredRole: "",
-    attractiveFeatures: [] as string[],
-    dealRequirements: "",
-    additionalNotes: "",
-    alertFrequency: "daily" as "realtime" | "daily" | "weekly",
+    dealPreferences: [] as string[],
   });
 
-  const totalSteps = 7;
+  const totalSteps = 6;
 
   const handleFieldChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -49,7 +40,6 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
   const handleSubmit = async () => {
     try {
-      // Get the current user's ID
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -61,38 +51,29 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         return;
       }
 
-      // First create the buyer profile with user_id
       const { data: profile, error: profileError } = await supabase
         .from("buyer_profiles")
         .insert({
-          user_id: user.id, // Add the user_id here
-          buyer_name: formData.buyer_name,
-          contact_email: formData.contact_email,
-          target_geography: formData.geography,
+          user_id: user.id,
           ai_preferences: {
+            buyerType: formData.buyerType,
+            marketType: formData.marketType,
+            practiceSize: formData.practiceSize,
+            services: formData.services,
+            additionalDetails: formData.additionalDetails,
             timeline: formData.timeline,
-            dealTypes: formData.dealTypes,
-            preferredRole: formData.preferredRole,
-            dealRequirements: formData.dealRequirements,
-            complexStructures: formData.complexStructures,
-            paymentStructures: formData.paymentStructures,
-            attractiveFeatures: formData.attractiveFeatures,
-            postAcquisitionGoals: formData.postAcquisitionGoals,
-            additionalNotes: formData.additionalNotes,
-            team_emails: formData.team_emails?.split(',').map(email => email.trim()).filter(Boolean) || [],
+            dealPreferences: formData.dealPreferences,
           },
-          alert_frequency: formData.alertFrequency,
         })
         .select()
         .single();
 
       if (profileError) throw profileError;
 
-      // Then create an initial AI opportunity for tracking
       const { error: opportunityError } = await supabase
         .from("ai_opportunities")
         .insert({
-          user_id: user.id, // Add the user_id here as well
+          user_id: user.id,
           buyer_profile_id: profile.id,
           opportunity_data: {
             status: 'active',
@@ -126,7 +107,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         return <WelcomeStep onNext={handleNext} />;
       case 1:
         return (
-          <FirmPreferencesStep
+          <BuyerTypeStep
             data={formData}
             onChange={handleFieldChange}
             onBack={handleBack}
@@ -135,7 +116,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         );
       case 2:
         return (
-          <PaymentTimingStep
+          <LocationStep
             data={formData}
             onChange={handleFieldChange}
             onBack={handleBack}
@@ -144,7 +125,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         );
       case 3:
         return (
-          <PostAcquisitionStep
+          <PracticeSizeStep
             data={formData}
             onChange={handleFieldChange}
             onBack={handleBack}
@@ -153,7 +134,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         );
       case 4:
         return (
-          <DealAttractivenessStep
+          <PracticeFocusStep
             data={formData}
             onChange={handleFieldChange}
             onBack={handleBack}
@@ -162,19 +143,11 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         );
       case 5:
         return (
-          <AdditionalNotesStep
+          <TimelineAndDealStep
             data={formData}
             onChange={handleFieldChange}
             onBack={handleBack}
-            onNext={handleNext}
-          />
-        );
-      case 6:
-        return (
-          <ReviewStep
-            data={formData}
-            onBack={handleBack}
-            onSubmit={handleSubmit}
+            onNext={handleSubmit}
           />
         );
       default:
