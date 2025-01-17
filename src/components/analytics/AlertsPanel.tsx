@@ -15,13 +15,17 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Alert {
   id: string;
-  title: string;
-  region: string;
-  employee_count_min: number;
-  employee_count_max: number;
-  specialties: string[];
-  frequency: string;
+  user_id: string;
+  buyer_type: string;
+  practice_size: string;
+  services: string[];
+  additional_details: string;
+  timeline: string;
+  deal_preferences: string[];
+  preferred_state: string;
+  remote_preference: string;
   created_at: string;
+  updated_at: string;
 }
 
 export const AlertsPanel = () => {
@@ -111,7 +115,7 @@ export const AlertsPanel = () => {
             <div key={alert.id} className="bg-white/5 p-4 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-white">
-                  {alert.title}
+                  {alert.buyer_type} - {alert.practice_size}
                 </span>
                 <Button
                   variant="ghost"
@@ -123,8 +127,7 @@ export const AlertsPanel = () => {
                 </Button>
               </div>
               <p className="text-sm text-blue-100/60">
-                {alert.region} · {alert.employee_count_min}-{alert.employee_count_max} employees
-                · {alert.frequency} updates
+                {alert.preferred_state} · {alert.timeline} · {alert.services.join(", ")}
               </p>
             </div>
           ))
