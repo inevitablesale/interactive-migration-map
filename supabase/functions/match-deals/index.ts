@@ -30,7 +30,6 @@ serve(async (req) => {
     console.log('Number of firms to analyze:', firms.length);
     console.log('Sample firms:', JSON.stringify(firms.slice(0, 2), null, 2));
 
-    // Construct a simpler, more focused system prompt
     const systemPrompt = `You are an M&A advisor analyzing accounting firm matches.
     For each firm, assess:
     1. Size compatibility
@@ -58,7 +57,6 @@ serve(async (req) => {
       }
     }`;
 
-    // Simplified user prompt
     const userPrompt = `
     Analyze these firms for the following buyer:
     - Type: ${buyerProfile.buyerType}
@@ -100,11 +98,10 @@ serve(async (req) => {
     console.log('=== Request to Gemini ===');
     console.log('Request Body:', JSON.stringify(requestBody, null, 2));
     
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${geminiApiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
     });
@@ -119,25 +116,21 @@ serve(async (req) => {
     console.log('=== Gemini Response ===');
     console.log('Response:', JSON.stringify(data, null, 2));
 
-    // Extract and validate the response
     const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!analysisText) {
       console.error('No text content in Gemini response:', data);
       throw new Error('No valid response received from Gemini');
     }
 
-    // Parse the response and ensure it matches our expected schema
     let parsedAnalysis;
     try {
       parsedAnalysis = JSON.parse(analysisText);
       
-      // Basic validation of the response structure
       if (!parsedAnalysis.matches || !Array.isArray(parsedAnalysis.matches)) {
         console.error('Invalid response structure:', parsedAnalysis);
         throw new Error('Invalid response structure');
       }
 
-      // Additional validation of required fields
       parsedAnalysis.matches.forEach((match, index) => {
         if (!match.firmId || !match.firmName || !match.score) {
           console.error(`Invalid match at index ${index}:`, match);
@@ -149,7 +142,6 @@ serve(async (req) => {
       throw new Error('Failed to parse AI response');
     }
 
-    // Store the analysis in Supabase
     const { data: opportunity, error: opportunityError } = await supabase
       .from('ai_opportunities')
       .insert({
