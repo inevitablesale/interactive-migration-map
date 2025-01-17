@@ -151,7 +151,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             data={formData}
             onChange={handleFieldChange}
             onBack={handleBack}
-            onNext={handleSubmit}
+            onSubmit={handleSubmit}
           />
         );
       default:
