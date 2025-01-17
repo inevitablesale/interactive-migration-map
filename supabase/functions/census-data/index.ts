@@ -12,23 +12,45 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const { stateFips } = await req.json()
+    if (!stateFips) {
+      throw new Error('State FIPS code is required')
+    }
+
     const credentials = await getGoogleCredentials()
     const bigquery = new BigQuery({
       credentials: JSON.parse(credentials),
       projectId: JSON.parse(credentials).project_id
     })
 
-    const query = `
+    // First query to validate FIPS code
+    const fipsQuery = `
+      SELECT state_fips_code, state_name
+      FROM \`bigquery-public-data.census_utility.fips_codes_all\`
+      WHERE state_fips_code = '${stateFips.padStart(2, '0')}'
+      LIMIT 1
+    `
+    const [fipsRows] = await bigquery.query({ query: fipsQuery })
+    
+    if (!fipsRows || fipsRows.length === 0) {
+      throw new Error('Invalid state FIPS code')
+    }
+
+    // Then query the ACS data
+    const acsQuery = `
       SELECT 
         geo_id,
         total_pop,
         median_income,
-        median_age
-      FROM \`bigquery-public-data.census_bureau_acs.county_2019_5yr\`
-      LIMIT 10
+        median_age,
+        housing_units,
+        employment_rate,
+        bachelors_degree_or_higher_rate
+      FROM \`bigquery-public-data.census_bureau_acs.state_2021_1yr\`
+      WHERE geo_id = '${fipsRows[0].state_fips_code}'
     `
 
-    const [rows] = await bigquery.query({ query })
+    const [rows] = await bigquery.query({ query: acsQuery })
     
     return new Response(
       JSON.stringify(rows),
