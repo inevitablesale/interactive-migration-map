@@ -51,10 +51,14 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         return;
       }
 
+      // Create profile with all required fields
       const { data: profile, error: profileError } = await supabase
         .from("buyer_profiles")
         .insert({
           user_id: user.id,
+          buyer_name: "Anonymous", // Required field with default value
+          contact_email: user.email || "anonymous@example.com", // Required field with default value
+          target_geography: ["US"], // Required field with default value
           ai_preferences: {
             buyerType: formData.buyerType,
             marketType: formData.marketType,
