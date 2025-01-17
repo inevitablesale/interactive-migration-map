@@ -440,7 +440,7 @@ export const TimelineAndDealStep = ({
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
-        <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
+        <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Complete</Button>
       </div>
     </div>
   );
