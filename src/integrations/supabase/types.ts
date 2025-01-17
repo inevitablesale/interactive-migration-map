@@ -728,42 +728,42 @@ export type Database = {
           asking_price: number | null
           City: string | null
           clientele: string | null
-          County: number | null
+          COUNTYFP: number | null
           employee_count: number | null
-          FIPS: number | null
           Latitude: number | null
           Longitude: number | null
           MSA: number | null
           service_lines: string | null
           State: string | null
+          STATEFP: number | null
         }
         Insert: {
           annual_revenue?: number | null
           asking_price?: number | null
           City?: string | null
           clientele?: string | null
-          County?: number | null
+          COUNTYFP?: number | null
           employee_count?: number | null
-          FIPS?: number | null
           Latitude?: number | null
           Longitude?: number | null
           MSA?: number | null
           service_lines?: string | null
           State?: string | null
+          STATEFP?: number | null
         }
         Update: {
           annual_revenue?: number | null
           asking_price?: number | null
           City?: string | null
           clientele?: string | null
-          County?: number | null
+          COUNTYFP?: number | null
           employee_count?: number | null
-          FIPS?: number | null
           Latitude?: number | null
           Longitude?: number | null
           MSA?: number | null
           service_lines?: string | null
           State?: string | null
+          STATEFP?: number | null
         }
         Relationships: []
       }
