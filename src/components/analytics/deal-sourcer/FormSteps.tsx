@@ -91,7 +91,7 @@ export const BuyerTypeStep = ({
     </div>
 
     <div className="flex justify-between mt-8">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">
         Back
       </Button>
       <Button onClick={onNext} className="bg-accent hover:bg-accent/90">
@@ -194,7 +194,7 @@ export const LocationStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
       <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
     </div>
   </div>
@@ -248,7 +248,7 @@ export const PracticeSizeStep = ({
     </RadioGroup>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
       <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
     </div>
   </div>
@@ -316,7 +316,7 @@ export const PracticeFocusStep = ({
     </div>
 
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
       <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
     </div>
   </div>
@@ -444,7 +444,7 @@ export const TimelineAndDealStep = ({
       </div>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+        <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
         <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
       </div>
     </div>
