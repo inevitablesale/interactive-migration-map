@@ -18,56 +18,75 @@ serve(async (req) => {
   }
 
   try {
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
-    const { buyerProfile, firms } = await req.json();
+    const { buyerProfile } = await req.json();
 
     console.log('Processing match request for buyer profile:', JSON.stringify(buyerProfile, null, 2));
-    console.log('Number of firms to analyze:', firms.length);
-    console.log('Sample of firms data:', JSON.stringify(firms.slice(0, 2), null, 2));
 
-    // Construct the system prompt
-    const systemPrompt = `You are an expert M&A advisor specializing in accounting firm acquisitions. 
-    Analyze the compatibility between a buyer's preferences and potential target firms.
-    Focus on concrete, measurable factors:
-    - Employee count alignment
-    - Geographic presence
-    - Service line overlap
-    - Market presence indicators
-    
-    Provide specific, data-backed reasons for each match.
-    Be direct and professional, avoiding speculation.
-    Structure your response as valid JSON matching the expected schema.`;
+    // Query for matching firms based on criteria
+    const { data: matchingFirms, error: queryError } = await supabase
+      .from('canary_firms_data')
+      .select('*')
+      .gte('employeeCount', buyerProfile.employee_count_min || 0)
+      .lte('employeeCount', buyerProfile.employee_count_max || 999999)
+      .in('STATE', buyerProfile.target_geography)
+      .not('specialities', 'is', null);
 
-    // Construct the user prompt with the actual data
-    const userPrompt = `
-    Buyer Profile:
-    ${JSON.stringify(buyerProfile, null, 2)}
-    
-    Potential Target Firms:
-    ${JSON.stringify(firms, null, 2)}
-    
-    Analyze these firms and provide matches with detailed rationale.
-    Focus on factual alignment points and clear next steps.`;
+    if (queryError) throw queryError;
 
-    console.log('System Prompt:', systemPrompt);
-    console.log('User Prompt:', userPrompt);
+    console.log(`Found ${matchingFirms?.length || 0} potential matches`);
+    console.log('Sample of matching firms:', JSON.stringify(matchingFirms?.slice(0, 2), null, 2));
+
+    // Prepare content for Gemini
+    const content = {
+      contents: [{
+        parts: [{
+          text: `You are an expert M&A advisor specializing in accounting firm acquisitions. 
+          Analyze the compatibility between this buyer profile and potential target firms.
+          
+          Buyer Profile:
+          ${JSON.stringify(buyerProfile, null, 2)}
+          
+          Potential Target Firms:
+          ${JSON.stringify(matchingFirms?.slice(0, 5), null, 2)}
+          
+          Provide a detailed analysis of the top matches, focusing on:
+          1. Employee count alignment
+          2. Geographic presence
+          3. Service line overlap
+          4. Market presence indicators
+          
+          Format your response as JSON with this structure:
+          {
+            "matches": [
+              {
+                "firmName": "string",
+                "matchScore": number,
+                "alignmentFactors": string[],
+                "concerns": string[],
+                "nextSteps": string[]
+              }
+            ],
+            "summary": "string"
+          }`
+        }]
+      }]
+    };
+
     console.log('Sending request to Gemini API');
     
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
+    const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${geminiApiKey}`,
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: systemPrompt },
-              { text: userPrompt }
-            ]
-          }
-        ],
+        ...content,
         generationConfig: {
           temperature: 0.7,
           topK: 40,
@@ -77,11 +96,10 @@ serve(async (req) => {
       })
     });
 
-    const data = await response.json();
-    console.log('Received response from Gemini:', JSON.stringify(data, null, 2));
+    const geminiData = await geminiResponse.json();
+    console.log('Received response from Gemini:', JSON.stringify(geminiData, null, 2));
 
-    // Extract and validate the response
-    const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const analysisText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!analysisText) {
       throw new Error('No valid response received from Gemini');
     }
@@ -100,7 +118,7 @@ serve(async (req) => {
       throw new Error('Failed to parse AI response');
     }
 
-    // Store the analysis in Supabase if needed
+    // Store the analysis in Supabase
     const { data: opportunity, error: opportunityError } = await supabase
       .from('ai_opportunities')
       .insert({
