@@ -4,22 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Database, Filter, Download } from "lucide-react";
-import { runQuery } from "@/utils/bigQueryClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function CensusExplorer() {
   const { data: censusData, isLoading, error } = useQuery({
     queryKey: ['censusMetrics'],
     queryFn: async () => {
-      const query = `
-        SELECT 
-          geo_id,
-          total_pop,
-          median_income,
-          median_age
-        FROM \`bigquery-public-data.census_bureau_acs.county_2019_5yr\`
-        LIMIT 10
-      `;
-      return runQuery(query);
+      const { data } = await supabase.functions.invoke('census-data')
+      return data
     }
   });
 
