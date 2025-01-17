@@ -6,14 +6,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
+import { Building2, Users, MapPin, Target, Clock } from "lucide-react";
 
 export const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
   <div className="space-y-6 animate-fade-in">
     <h2 className="text-2xl font-semibold text-white">Set up your Canary</h2>
     <p className="text-white/60">
-      We're here to tailor acquisition opportunities to your unique preferences. Let's get started by understanding your goals and requirements.
+      We'll help you find the right opportunities based on your preferences.
     </p>
-    <Button onClick={onNext} className="w-full">Get Started</Button>
+    <Button onClick={onNext} className="w-full bg-accent hover:bg-accent/90">Get Started</Button>
   </div>
 );
 
@@ -29,46 +31,40 @@ export const FirmPreferencesStep = ({
   onNext: () => void;
 }) => (
   <div className="space-y-6 animate-fade-in">
-    <h3 className="text-lg font-semibold text-white">Firm Preferences</h3>
+    <div className="flex items-center gap-2 mb-4">
+      <Building2 className="w-5 h-5 text-accent" />
+      <h3 className="text-lg font-semibold text-white">Firm Type</h3>
+    </div>
     
-    <div>
-      <Label>Preferred Firm Size (Revenue)</Label>
-      <Select onValueChange={(value) => onChange('revenueRange', value)} value={data.revenueRange}>
-        <SelectTrigger className="mt-1.5 bg-white/5 border-white/10">
-          <SelectValue placeholder="Select revenue range" />
-        </SelectTrigger>
-        <SelectContent className="bg-gray-900 border-white/10">
-          <SelectItem value="below_1m" className="text-white hover:bg-white/10">Below $1M</SelectItem>
-          <SelectItem value="1m_5m" className="text-white hover:bg-white/10">$1M–$5M</SelectItem>
-          <SelectItem value="5m_10m" className="text-white hover:bg-white/10">$5M–$10M</SelectItem>
-          <SelectItem value="above_10m" className="text-white hover:bg-white/10">$10M+</SelectItem>
-        </SelectContent>
-      </Select>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {['small', 'growing', 'established', 'large'].map((size) => (
+        <Card 
+          key={size}
+          className={`p-4 cursor-pointer transition-all ${
+            data.firmSize === size 
+              ? 'bg-accent/20 border-accent' 
+              : 'bg-white/5 border-white/10 hover:bg-white/10'
+          }`}
+          onClick={() => onChange('firmSize', size)}
+        >
+          <div className="font-medium text-white capitalize">{size}</div>
+          <p className="text-sm text-white/60">
+            {size === 'small' && '1-5 professionals'}
+            {size === 'growing' && '6-15 professionals'}
+            {size === 'established' && '16-30 professionals'}
+            {size === 'large' && '31+ professionals'}
+          </p>
+        </Card>
+      ))}
     </div>
 
-    <div>
-      <Label>Preferred Geography</Label>
-      <div className="mt-1.5 space-y-2">
-        {['local', 'regional', 'national', 'remote'].map(option => (
-          <div key={option} className="flex items-center space-x-2">
-            <Checkbox
-              checked={data.geography?.includes(option)}
-              onCheckedChange={(checked) => {
-                const current = data.geography || [];
-                const updated = checked
-                  ? [...current, option]
-                  : current.filter((v: string) => v !== option);
-                onChange('geography', updated);
-              }}
-            />
-            <Label>{option.charAt(0).toUpperCase() + option.slice(1)}</Label>
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
-      <Button onClick={onNext}>Next</Button>
+    <div className="flex justify-between mt-8">
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">
+        Back
+      </Button>
+      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">
+        Next
+      </Button>
     </div>
   </div>
 );
@@ -85,49 +81,15 @@ export const PaymentTimingStep = ({
   onNext: () => void;
 }) => (
   <div className="space-y-6 animate-fade-in">
-    <h3 className="text-lg font-semibold text-white">Payment & Timing Preferences</h3>
+    <div className="flex items-center gap-2 mb-4">
+      <Clock className="w-5 h-5 text-accent" />
+      <h3 className="text-lg font-semibold text-white">Timeline & Structure</h3>
+    </div>
     
-    <div>
-      <Label>Payment Structures</Label>
-      <div className="mt-1.5 space-y-2">
-        {[
-          { value: 'cash', label: 'Cash Upfront' },
-          { value: 'seller_financing', label: 'Seller Financing' },
-          { value: 'earnouts', label: 'Earnouts' },
-          { value: 'equity_rollover', label: 'Equity Rollovers' }
-        ].map(option => (
-          <div key={option.value} className="flex items-center space-x-2">
-            <Checkbox
-              checked={data.paymentStructures?.includes(option.value)}
-              onCheckedChange={(checked) => {
-                const current = data.paymentStructures || [];
-                const updated = checked
-                  ? [...current, option.value]
-                  : current.filter((v: string) => v !== option.value);
-                onChange('paymentStructures', updated);
-              }}
-            />
-            <Label>{option.label}</Label>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    <div>
-      <Label>Complex Deal Structures</Label>
-      <div className="flex items-center space-x-2 mt-1.5">
-        <Checkbox
-          checked={data.complexStructures}
-          onCheckedChange={(checked) => onChange('complexStructures', checked)}
-        />
-        <Label>Open to complex deal structures</Label>
-      </div>
-    </div>
-
-    <div>
-      <Label>Timeline</Label>
+    <div className="space-y-4">
+      <Label className="text-white">Timeline</Label>
       <Select onValueChange={(value) => onChange('timeline', value)} value={data.timeline}>
-        <SelectTrigger className="mt-1.5 bg-white/5 border-white/10">
+        <SelectTrigger className="bg-white/5 border-white/10">
           <SelectValue placeholder="Select timeline" />
         </SelectTrigger>
         <SelectContent className="bg-gray-900 border-white/10">
@@ -138,9 +100,43 @@ export const PaymentTimingStep = ({
       </Select>
     </div>
 
+    <div className="space-y-4">
+      <Label className="text-white">Deal Structure Preferences</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          { value: 'cash', label: 'Cash Purchase' },
+          { value: 'seller_financing', label: 'Seller Financing' },
+          { value: 'earnouts', label: 'Earnouts' },
+          { value: 'equity_rollover', label: 'Equity Rollovers' }
+        ].map(option => (
+          <Card 
+            key={option.value}
+            className={`p-4 cursor-pointer transition-all ${
+              data.paymentStructures?.includes(option.value)
+                ? 'bg-accent/20 border-accent'
+                : 'bg-white/5 border-white/10 hover:bg-white/10'
+            }`}
+            onClick={() => {
+              const current = data.paymentStructures || [];
+              const updated = current.includes(option.value)
+                ? current.filter((v: string) => v !== option.value)
+                : [...current, option.value];
+              onChange('paymentStructures', updated);
+            }}
+          >
+            <div className="font-medium text-white">{option.label}</div>
+          </Card>
+        ))}
+      </div>
+    </div>
+
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="text-black hover:text-white">Back</Button>
-      <Button onClick={onNext}>Next</Button>
+      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">
+        Back
+      </Button>
+      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">
+        Next
+      </Button>
     </div>
   </div>
 );
