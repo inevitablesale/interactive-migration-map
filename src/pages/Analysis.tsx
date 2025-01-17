@@ -35,6 +35,7 @@ async function fetchStats() {
 
 export default function Analysis() {
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
   const { data: stats } = useQuery({
     queryKey: ['analysisStats'],
     queryFn: fetchStats
@@ -46,23 +47,22 @@ export default function Analysis() {
     const testData = {
       buyerProfile: {
         id: 'test-123',
-        preferences: {
-          buyerType: 'individual',
-          timeline: 'short-term',
-          dealPreferences: ['cash', 'seller_financing'],
-          preferredState: 'California',
-          remotePreference: 'hybrid',
-          marketType: 'major_metro',
-          practiceSize: 'growing',
-          services: ['tax', 'accounting', 'advisory'],
-          additionalDetails: 'Looking for established practice with strong client base'
+        buyer_name: "Test Buyer",
+        contact_email: "test@example.com",
+        target_geography: ["CA", "WA", "OR"],
+        employee_count_min: 5,
+        employee_count_max: 50,
+        service_lines: ["tax", "accounting", "advisory"],
+        ai_preferences: {
+          timeline: "6-12 months",
+          dealTypes: ["full_acquisition"],
+          preferredRole: "owner_operator"
         }
-      },
-      firms: [] // The function will fetch matching firms
+      }
     };
 
     try {
-      console.log('Testing match-deals with data:', testData);
+      console.log('Sending test data:', testData);
       
       const { data, error } = await supabase.functions.invoke('match-deals', {
         body: testData
@@ -71,10 +71,11 @@ export default function Analysis() {
       if (error) throw error;
 
       console.log('Match-deals response:', data);
+      setTestResults(data);
       
       toast({
         title: "Test Completed",
-        description: "Check the console for match-deals results",
+        description: `Found ${data.matches?.length || 0} potential matches. Check the results below.`,
       });
     } catch (error) {
       console.error('Test error:', error);
@@ -131,7 +132,7 @@ export default function Analysis() {
               </div>
             ))}
           </div>
-          <div className="mt-8">
+          <div className="mt-8 space-y-4">
             <Button 
               onClick={handleTestMatchDeals}
               variant="outline" 
@@ -140,6 +141,35 @@ export default function Analysis() {
               <Beaker className="w-4 h-4 mr-2" />
               Test Match-Deals Function
             </Button>
+
+            {testResults && (
+              <div className="mt-4 p-4 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 text-left">
+                <h3 className="text-lg font-semibold text-white mb-2">Test Results</h3>
+                <div className="space-y-2 text-white/80">
+                  <p>Matches Found: {testResults.matchCount}</p>
+                  <p>Search Criteria:</p>
+                  <ul className="list-disc list-inside pl-4 text-sm">
+                    <li>Employee Range: {testResults.searchCriteria.employeeRange}</li>
+                    <li>Locations: {testResults.searchCriteria.locations.join(", ")}</li>
+                    <li>Service Lines: {testResults.searchCriteria.serviceLines?.join(", ")}</li>
+                  </ul>
+                  {testResults.matches && testResults.matches.length > 0 && (
+                    <div className="mt-4">
+                      <p className="font-semibold mb-2">Sample Matches:</p>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {testResults.matches.slice(0, 5).map((match: any, index: number) => (
+                          <div key={index} className="p-2 bg-white/5 rounded">
+                            <p className="font-medium">{match["Company Name"]}</p>
+                            <p className="text-sm text-white/60">{match.Location}</p>
+                            <p className="text-sm text-white/60">Employees: {match.employeeCount}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
