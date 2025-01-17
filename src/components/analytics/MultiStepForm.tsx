@@ -16,12 +16,13 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     buyerType: "",
-    marketType: "",
     practiceSize: "",
     services: [] as string[],
     additionalDetails: "",
     timeline: "",
     dealPreferences: [] as string[],
+    preferredState: "",
+    remotePreference: "",
   });
 
   const totalSteps = 6;
@@ -73,14 +74,15 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           user_id: user.id,
           buyer_name: "Anonymous",
           contact_email: user.email || "anonymous@example.com",
-          target_geography: ["US"],
+          target_geography: [formData.preferredState || "US"],
+          buyer_type: formData.buyerType,
+          remote_preference: formData.remotePreference,
+          service_lines: formData.services,
           ai_preferences: {
-            buyerType: formData.buyerType,
-            marketType: formData.marketType,
+            timeline: formData.timeline,
             practiceSize: formData.practiceSize,
             services: formData.services,
             additionalDetails: formData.additionalDetails,
-            timeline: formData.timeline,
             dealPreferences: formData.dealPreferences,
           },
         })
