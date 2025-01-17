@@ -1,4 +1,4 @@
-import { ChartBar, Users, TrendingUp, Lock } from "lucide-react";
+import { ChartBar, Users, TrendingUp, Lock, Beaker } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
 import { AIDealSourcer } from "@/components/analytics/AIDealSourcer";
 import { ComparisonTool } from "@/components/ComparisonTool";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
+import { useToast } from "@/hooks/use-toast";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -38,6 +39,52 @@ export default function Analysis() {
     queryKey: ['analysisStats'],
     queryFn: fetchStats
   });
+  const { toast } = useToast();
+
+  const handleTestMatchDeals = async () => {
+    // Sample buyer profile data
+    const testData = {
+      buyerProfile: {
+        id: 'test-123',
+        preferences: {
+          buyerType: 'individual',
+          timeline: 'short-term',
+          dealPreferences: ['cash', 'seller_financing'],
+          preferredState: 'California',
+          remotePreference: 'hybrid',
+          marketType: 'major_metro',
+          practiceSize: 'growing',
+          services: ['tax', 'accounting', 'advisory'],
+          additionalDetails: 'Looking for established practice with strong client base'
+        }
+      },
+      firms: [] // The function will fetch matching firms
+    };
+
+    try {
+      console.log('Testing match-deals with data:', testData);
+      
+      const { data, error } = await supabase.functions.invoke('match-deals', {
+        body: testData
+      });
+
+      if (error) throw error;
+
+      console.log('Match-deals response:', data);
+      
+      toast({
+        title: "Test Completed",
+        description: "Check the console for match-deals results",
+      });
+    } catch (error) {
+      console.error('Test error:', error);
+      toast({
+        title: "Test Failed",
+        description: error instanceof Error ? error.message : "Failed to test match-deals",
+        variant: "destructive",
+      });
+    }
+  };
 
   const statsData = [
     {
@@ -83,6 +130,16 @@ export default function Analysis() {
                 <p className="text-white/60">{stat.label}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-8">
+            <Button 
+              onClick={handleTestMatchDeals}
+              variant="outline" 
+              className="bg-purple-500/20 hover:bg-purple-500/30 border-purple-500/50 text-purple-200"
+            >
+              <Beaker className="w-4 h-4 mr-2" />
+              Test Match-Deals Function
+            </Button>
           </div>
         </div>
       </section>
