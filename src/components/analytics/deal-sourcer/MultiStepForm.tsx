@@ -59,7 +59,7 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         console.log("❌ No authenticated user found");
         toast({
           title: "Error",
-          description: "You must be logged in to submit the form.",
+          description: "You must be logged in to create a profile.",
           variant: "destructive",
         });
         return;
@@ -67,38 +67,46 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
       console.log("👤 User authenticated:", user.id);
 
-      // Save to deal_sourcing_forms table
-      console.log("📊 Creating deal sourcing form...");
-      const { error: formError } = await supabase
-        .from("deal_sourcing_forms")
+      console.log("📊 Creating buyer profile...");
+      const { data: profile, error: profileError } = await supabase
+        .from("buyer_profiles")
         .insert({
           user_id: user.id,
+          buyer_name: "Anonymous",
+          contact_email: user.email || "anonymous@example.com",
+          target_geography: [formData.preferredState || "US"],
           buyer_type: formData.buyerType,
-          practice_size: formData.practiceSize,
-          services: formData.services,
-          additional_details: formData.additionalDetails,
-          timeline: formData.timeline,
-          deal_preferences: formData.dealPreferences,
-          preferred_state: formData.preferredState,
           remote_preference: formData.remotePreference,
-        });
+          service_lines: formData.services,
+          ai_preferences: {
+            timeline: formData.timeline,
+            practiceSize: formData.practiceSize,
+            services: formData.services,
+            additionalDetails: formData.additionalDetails,
+            dealPreferences: formData.dealPreferences,
+          },
+        })
+        .select()
+        .single();
 
-      if (formError) {
-        console.error("❌ Error creating form:", formError);
-        throw formError;
+      if (profileError) {
+        console.error("❌ Error creating profile:", profileError);
+        throw profileError;
       }
 
-      console.log("✅ Form submission completed successfully");
+      console.log("✅ Profile created successfully:", profile);
+      
       toast({
-        title: "Success! 🎯",
-        description: "Your preferences have been saved.",
+        title: "Profile Created! 🎯",
+        description: "Your preferences have been saved successfully.",
       });
 
+      console.log("✨ Form submission completed successfully");
       onSuccess?.();
     } catch (error) {
       console.error('❌ Error in form submission:', error);
       toast({
-        title: "Error saving form",
+        title: "Error creating profile",
         description: "Please try again later.",
         variant: "destructive",
       });

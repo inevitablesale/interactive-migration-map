@@ -9,46 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      ai_opportunities: {
+      alerts: {
         Row: {
-          buyer_profile_id: string | null
+          additional_details: string | null
+          buyer_type: string | null
           created_at: string | null
+          deal_preferences: string[] | null
           id: string
-          opportunity_data: Json
-          score: number | null
-          status: string | null
+          practice_size: string | null
+          preferred_state: string | null
+          remote_preference: string | null
+          services: string[] | null
+          timeline: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          buyer_profile_id?: string | null
+          additional_details?: string | null
+          buyer_type?: string | null
           created_at?: string | null
+          deal_preferences?: string[] | null
           id?: string
-          opportunity_data: Json
-          score?: number | null
-          status?: string | null
+          practice_size?: string | null
+          preferred_state?: string | null
+          remote_preference?: string | null
+          services?: string[] | null
+          timeline?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          buyer_profile_id?: string | null
+          additional_details?: string | null
+          buyer_type?: string | null
           created_at?: string | null
+          deal_preferences?: string[] | null
           id?: string
-          opportunity_data?: Json
-          score?: number | null
-          status?: string | null
+          practice_size?: string | null
+          preferred_state?: string | null
+          remote_preference?: string | null
+          services?: string[] | null
+          timeline?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "ai_opportunities_buyer_profile_id_fkey"
-            columns: ["buyer_profile_id"]
-            isOneToOne: false
-            referencedRelation: "buyer_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       buyer_profiles: {
         Row: {
