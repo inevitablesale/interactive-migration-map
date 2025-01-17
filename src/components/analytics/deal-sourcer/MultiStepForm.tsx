@@ -16,64 +16,110 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     buyerType: "",
-    marketType: "",
     practiceSize: "",
     services: [] as string[],
     additionalDetails: "",
     timeline: "",
     dealPreferences: [] as string[],
+    preferredState: "",
+    remotePreference: "",
   });
 
   const totalSteps = 6;
 
   const handleFieldChange = (field: string, value: any) => {
+    console.log(`Updating field: ${field} with value:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleNext = () => {
+    console.log(`Moving to next step: ${currentStep + 1}`);
     setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1));
   };
 
   const handleBack = () => {
+    console.log(`Moving back to step: ${currentStep - 1}`);
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
   const handleSubmit = async () => {
+    console.log("🚀 Starting form submission process");
+    console.log("📝 Form data being submitted:", formData);
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log("🔍 Checking for authenticated user...");
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error("❌ Error getting user:", userError);
+        throw userError;
+      }
       
       if (!user) {
+        console.log("❌ No authenticated user found");
         toast({
           title: "Error",
-          description: "You must be logged in to create a profile.",
+          description: "You must be logged in to submit the form.",
           variant: "destructive",
         });
         return;
       }
 
-      // Create profile with all required fields
+      console.log("👤 User authenticated:", user.id);
+
+      // Save to deal_sourcing_forms table
+      console.log("📊 Creating deal sourcing form...");
+      const { error: formError } = await supabase
+        .from("deal_sourcing_forms")
+        .insert({
+          user_id: user.id,
+          buyer_type: formData.buyerType,
+          practice_size: formData.practiceSize,
+          services: formData.services,
+          additional_details: formData.additionalDetails,
+          timeline: formData.timeline,
+          deal_preferences: formData.dealPreferences,
+          preferred_state: formData.preferredState,
+          remote_preference: formData.remotePreference,
+        });
+
+      if (formError) {
+        console.error("❌ Error creating form:", formError);
+        throw formError;
+      }
+
+      // Create buyer profile
+      console.log("📊 Creating buyer profile...");
       const { data: profile, error: profileError } = await supabase
         .from("buyer_profiles")
         .insert({
           user_id: user.id,
-          buyer_name: "Anonymous", // Required field with default value
-          contact_email: user.email || "anonymous@example.com", // Required field with default value
-          target_geography: ["US"], // Required field with default value
+          buyer_name: "Anonymous",
+          contact_email: user.email || "anonymous@example.com",
+          target_geography: [formData.preferredState || "US"],
+          buyer_type: formData.buyerType,
+          remote_preference: formData.remotePreference,
+          service_lines: formData.services,
           ai_preferences: {
-            buyerType: formData.buyerType,
-            marketType: formData.marketType,
+            timeline: formData.timeline,
             practiceSize: formData.practiceSize,
             services: formData.services,
             additionalDetails: formData.additionalDetails,
-            timeline: formData.timeline,
             dealPreferences: formData.dealPreferences,
           },
         })
         .select()
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("❌ Error creating profile:", profileError);
+        throw profileError;
+      }
 
+      console.log("✅ Profile created successfully:", profile);
+
+      // Create AI opportunity
+      console.log("🎯 Creating AI opportunity...");
       const { error: opportunityError } = await supabase
         .from("ai_opportunities")
         .insert({
@@ -87,18 +133,22 @@ export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           status: 'new',
         });
 
-      if (opportunityError) throw opportunityError;
+      if (opportunityError) {
+        console.error("❌ Error creating opportunity:", opportunityError);
+        throw opportunityError;
+      }
 
+      console.log("✅ Form submission completed successfully");
       toast({
-        title: "Profile Created! 🎯",
-        description: "We'll start finding opportunities that match your preferences.",
+        title: "Success! 🎯",
+        description: "Your preferences have been saved. We'll start finding opportunities that match your criteria.",
       });
 
       onSuccess?.();
     } catch (error) {
-      console.error('Error creating profile:', error);
+      console.error('❌ Error in form submission:', error);
       toast({
-        title: "Error creating profile",
+        title: "Error saving form",
         description: "Please try again later.",
         variant: "destructive",
       });

@@ -359,6 +359,51 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_sourcing_forms: {
+        Row: {
+          additional_details: string | null
+          buyer_type: string | null
+          created_at: string
+          deal_preferences: string[] | null
+          id: string
+          practice_size: string | null
+          preferred_state: string | null
+          remote_preference: string | null
+          services: string[] | null
+          timeline: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          additional_details?: string | null
+          buyer_type?: string | null
+          created_at?: string
+          deal_preferences?: string[] | null
+          id?: string
+          practice_size?: string | null
+          preferred_state?: string | null
+          remote_preference?: string | null
+          services?: string[] | null
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          additional_details?: string | null
+          buyer_type?: string | null
+          created_at?: string
+          deal_preferences?: string[] | null
+          id?: string
+          practice_size?: string | null
+          preferred_state?: string | null
+          remote_preference?: string | null
+          services?: string[] | null
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       msa_county_reference: {
         Row: {
           COUNTYNAME: string
