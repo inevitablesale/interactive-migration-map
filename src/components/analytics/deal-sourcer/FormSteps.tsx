@@ -339,21 +339,51 @@ export const TimelineAndDealStep = ({
   const testGeminiConnection = async () => {
     setTesting(true);
     try {
-      const { data: response, error } = await supabase.functions.invoke('test-gemini');
+      // Fetch some sample firms for testing
+      const { data: firms } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .limit(5);
+
+      // Create a sample buyer profile from the form data
+      const buyerProfile = {
+        id: 'test-profile',
+        timeline: data.timeline,
+        dealPreferences: data.dealPreferences,
+        ai_preferences: {
+          timeline: data.timeline,
+          dealTypes: data.dealPreferences || [],
+          preferredRole: 'owner-operator',
+          dealRequirements: [],
+          complexStructures: false,
+          paymentStructures: ['cash', 'seller_financing'],
+          attractiveFeatures: [],
+          postAcquisitionGoals: []
+        }
+      };
+
+      console.log('Calling match-deals with:', { buyerProfile, firms });
       
-      if (error) throw error;
+      const { data: response, error } = await supabase.functions.invoke('match-deals', {
+        body: { buyerProfile, firms }
+      });
       
-      console.log('Gemini test response:', response);
+      if (error) {
+        console.error('Match-deals error:', error);
+        throw error;
+      }
+      
+      console.log('Match-deals response:', response);
       
       toast({
-        title: "Connection Successful",
-        description: "Successfully connected to Gemini API",
+        title: "Analysis Complete",
+        description: "Successfully analyzed potential matches",
       });
     } catch (error) {
-      console.error('Gemini test error:', error);
+      console.error('Match-deals execution error:', error);
       toast({
-        title: "Connection Failed",
-        description: "Failed to connect to Gemini API. Check the console for details.",
+        title: "Analysis Failed",
+        description: "Failed to analyze matches. Check the console for details.",
         variant: "destructive",
       });
     } finally {
