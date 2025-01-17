@@ -50,48 +50,6 @@ export type Database = {
           },
         ]
       }
-      alerts: {
-        Row: {
-          created_at: string | null
-          employee_count_max: number | null
-          employee_count_min: number | null
-          frequency: string
-          id: string
-          is_active: boolean | null
-          region: string | null
-          specialties: string[] | null
-          title: string
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          employee_count_max?: number | null
-          employee_count_min?: number | null
-          frequency?: string
-          id?: string
-          is_active?: boolean | null
-          region?: string | null
-          specialties?: string[] | null
-          title: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          employee_count_max?: number | null
-          employee_count_min?: number | null
-          frequency?: string
-          id?: string
-          is_active?: boolean | null
-          region?: string | null
-          specialties?: string[] | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       buyer_profiles: {
         Row: {
           acquisition_purpose: string | null
