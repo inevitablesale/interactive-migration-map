@@ -18,130 +18,89 @@ serve(async (req) => {
   }
 
   try {
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not configured');
-    }
-
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
     const { buyerProfile, firms } = await req.json();
 
-    console.log('=== Input Data ===');
-    console.log('Buyer Profile:', JSON.stringify(buyerProfile, null, 2));
+    console.log('Processing match request for buyer profile:', JSON.stringify(buyerProfile, null, 2));
     console.log('Number of firms to analyze:', firms.length);
-    console.log('Sample firms:', JSON.stringify(firms.slice(0, 2), null, 2));
+    console.log('Sample of firms data:', JSON.stringify(firms.slice(0, 2), null, 2));
 
-    const systemPrompt = `You are an M&A advisor analyzing accounting firm matches.
-    For each firm, assess:
-    1. Size compatibility
-    2. Location fit
-    3. Service alignment
-    4. Growth potential
-    5. Deal structure fit
+    // Construct the system prompt
+    const systemPrompt = `You are an expert M&A advisor specializing in accounting firm acquisitions. 
+    Analyze the compatibility between a buyer's preferences and potential target firms.
+    Focus on concrete, measurable factors:
+    - Employee count alignment
+    - Geographic presence
+    - Service line overlap
+    - Market presence indicators
+    
+    Provide specific, data-backed reasons for each match.
+    Be direct and professional, avoiding speculation.
+    Structure your response as valid JSON matching the expected schema.`;
 
-    Provide a JSON response with this structure:
-    {
-      "matches": [
-        {
-          "firmId": string,
-          "firmName": string,
-          "score": number,
-          "strengths": string[],
-          "concerns": string[],
-          "nextSteps": string[]
-        }
-      ],
-      "summary": {
-        "totalMatches": number,
-        "averageScore": number,
-        "recommendations": string[]
-      }
-    }`;
-
+    // Construct the user prompt with the actual data
     const userPrompt = `
-    Analyze these firms for the following buyer:
-    - Type: ${buyerProfile.buyerType}
-    - Timeline: ${buyerProfile.timeline}
-    - Deal Types: ${buyerProfile.dealPreferences?.join(', ')}
-    - Size Range: ${buyerProfile.practiceSize}
+    Buyer Profile:
+    ${JSON.stringify(buyerProfile, null, 2)}
+    
+    Potential Target Firms:
+    ${JSON.stringify(firms, null, 2)}
+    
+    Analyze these firms and provide matches with detailed rationale.
+    Focus on factual alignment points and clear next steps.`;
 
-    Firms to analyze:
-    ${JSON.stringify(firms.map(f => ({
-      name: f["Company Name"],
-      location: f.Location,
-      employees: f.employeeCount,
-      specialties: f.specialities
-    })), null, 2)}
-
-    Provide specific, data-driven matches with clear rationale.`;
-
-    console.log('=== Prompts ===');
     console.log('System Prompt:', systemPrompt);
     console.log('User Prompt:', userPrompt);
+    console.log('Sending request to Gemini API');
     
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: systemPrompt },
-            { text: userPrompt }
-          ]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-      }
-    };
-
-    console.log('=== Request to Gemini ===');
-    console.log('Request Body:', JSON.stringify(requestBody, null, 2));
-    
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${geminiApiKey}`,
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: systemPrompt },
+              { text: userPrompt }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
+      })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API Error:', errorText);
-      throw new Error(`Gemini API returned status ${response.status}: ${errorText}`);
-    }
-
     const data = await response.json();
-    console.log('=== Gemini Response ===');
-    console.log('Response:', JSON.stringify(data, null, 2));
+    console.log('Received response from Gemini:', JSON.stringify(data, null, 2));
 
+    // Extract and validate the response
     const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!analysisText) {
-      console.error('No text content in Gemini response:', data);
       throw new Error('No valid response received from Gemini');
     }
 
+    // Parse the response and ensure it matches our expected schema
     let parsedAnalysis;
     try {
       parsedAnalysis = JSON.parse(analysisText);
       
+      // Basic validation of the response structure
       if (!parsedAnalysis.matches || !Array.isArray(parsedAnalysis.matches)) {
-        console.error('Invalid response structure:', parsedAnalysis);
         throw new Error('Invalid response structure');
       }
-
-      parsedAnalysis.matches.forEach((match, index) => {
-        if (!match.firmId || !match.firmName || !match.score) {
-          console.error(`Invalid match at index ${index}:`, match);
-          throw new Error('Invalid match data structure');
-        }
-      });
     } catch (error) {
       console.error('Error parsing Gemini response:', error);
       throw new Error('Failed to parse AI response');
     }
 
+    // Store the analysis in Supabase if needed
     const { data: opportunity, error: opportunityError } = await supabase
       .from('ai_opportunities')
       .insert({

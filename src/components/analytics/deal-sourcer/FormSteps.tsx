@@ -339,51 +339,21 @@ export const TimelineAndDealStep = ({
   const testGeminiConnection = async () => {
     setTesting(true);
     try {
-      // Fetch some sample firms for testing
-      const { data: firms } = await supabase
-        .from('canary_firms_data')
-        .select('*')
-        .limit(5);
-
-      // Create a sample buyer profile from the form data
-      const buyerProfile = {
-        id: 'test-profile',
-        timeline: data.timeline,
-        dealPreferences: data.dealPreferences,
-        ai_preferences: {
-          timeline: data.timeline,
-          dealTypes: data.dealPreferences || [],
-          preferredRole: 'owner-operator',
-          dealRequirements: [],
-          complexStructures: false,
-          paymentStructures: ['cash', 'seller_financing'],
-          attractiveFeatures: [],
-          postAcquisitionGoals: []
-        }
-      };
-
-      console.log('Calling match-deals with:', { buyerProfile, firms });
+      const { data: response, error } = await supabase.functions.invoke('test-gemini');
       
-      const { data: response, error } = await supabase.functions.invoke('match-deals', {
-        body: { buyerProfile, firms }
-      });
+      if (error) throw error;
       
-      if (error) {
-        console.error('Match-deals error:', error);
-        throw error;
-      }
-      
-      console.log('Match-deals response:', response);
+      console.log('Gemini test response:', response);
       
       toast({
-        title: "Analysis Complete",
-        description: "Successfully analyzed potential matches",
+        title: "Connection Successful",
+        description: "Successfully connected to Gemini API",
       });
     } catch (error) {
-      console.error('Match-deals execution error:', error);
+      console.error('Gemini test error:', error);
       toast({
-        title: "Analysis Failed",
-        description: "Failed to analyze matches. Check the console for details.",
+        title: "Connection Failed",
+        description: "Failed to connect to Gemini API. Check the console for details.",
         variant: "destructive",
       });
     } finally {
