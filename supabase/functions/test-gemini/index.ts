@@ -32,11 +32,16 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log('Gemini API response:', data);
+    console.log('Full Gemini API response:', data);
+
+    // Extract the actual response text
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response text available';
+    console.log('Extracted response text:', responseText);
 
     return new Response(JSON.stringify({ 
       success: true,
-      response: data
+      response: data,
+      responseText: responseText
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
