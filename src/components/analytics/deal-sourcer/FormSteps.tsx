@@ -447,11 +447,7 @@ export const TimelineAndDealStep = ({
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5 text-black">Back</Button>
         <Button 
-          onClick={() => {
-            console.log("🔵 Complete button clicked");
-            console.log("📋 Current form data:", data);
-            onSubmit();
-          }} 
+          onClick={onSubmit} 
           className="bg-accent hover:bg-accent/90"
         >
           Complete
