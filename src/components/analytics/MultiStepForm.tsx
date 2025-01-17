@@ -9,7 +9,7 @@ import {
   PracticeFocusStep,
   TimelineAndDealStep,
   FormProgress
-} from "./FormSteps";
+} from "./deal-sourcer/FormSteps";
 
 export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
