@@ -1290,20 +1290,6 @@ export type Database = {
           firms_per_10k_population: number
         }[]
       }
-      get_value_metrics: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          county_name: string
-          state_name: string
-          median_income: number
-          median_home_value: number
-          total_firms: number
-          avg_revenue: number
-          growth_potential: number
-          state_rank: number
-          national_rank: number
-        }[]
-      }
       refresh_state_density_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
