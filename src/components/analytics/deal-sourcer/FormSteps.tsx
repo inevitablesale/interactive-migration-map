@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Users, MapPin, Target, Clock, Calculator, FileText, CheckSquare, Lightbulb, DollarSign, Brain, HandshakeIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
   <div className="space-y-6 animate-fade-in">
@@ -271,75 +273,124 @@ export const TimelineAndDealStep = ({
   onChange: (field: string, value: any) => void;
   onBack: () => void;
   onNext: () => void;
-}) => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex items-center gap-2 mb-4">
-      <Clock className="w-5 h-5 text-accent" />
-      <h3 className="text-lg font-semibold text-white">Timeline & Deal Structure</h3>
-    </div>
+}) => {
+  const { toast } = useToast();
+  const [testing, setTesting] = useState(false);
 
-    <div className="space-y-6">
-      <div>
-        <Label className="text-white mb-2">Timeline</Label>
-        <RadioGroup
-          value={data.timeline}
-          onValueChange={(value) => onChange('timeline', value)}
-          className="grid gap-3"
-        >
-          {[
-            { value: 'immediate', label: 'Immediate (1-3 months)' },
-            { value: 'short', label: 'Short-term (3-6 months)' },
-            { value: 'medium', label: 'Medium-term (6-12 months)' },
-            { value: 'long', label: 'Long-term planning (12+ months)' }
-          ].map(option => (
-            <div key={option.value} className="flex items-center space-x-2">
-              <RadioGroupItem value={option.value} id={option.value} />
-              <Label htmlFor={option.value} className="text-white">{option.label}</Label>
-            </div>
-          ))}
-        </RadioGroup>
+  const testGeminiConnection = async () => {
+    setTesting(true);
+    try {
+      const { data: response, error } = await supabase.functions.invoke('test-gemini');
+      
+      if (error) throw error;
+      
+      console.log('Gemini test response:', response);
+      
+      toast({
+        title: "Connection Successful",
+        description: "Successfully connected to Gemini API",
+      });
+    } catch (error) {
+      console.error('Gemini test error:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect to Gemini API. Check the console for details.",
+        variant: "destructive",
+      });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center gap-2 mb-4">
+        <Clock className="w-5 h-5 text-accent" />
+        <h3 className="text-lg font-semibold text-white">Timeline & Deal Structure</h3>
       </div>
 
-      <div>
-        <Label className="text-white mb-2">Deal Preferences</Label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { value: 'cash', label: 'Cash Purchase', icon: DollarSign },
-            { value: 'seller_financing', label: 'Seller Financing', icon: Calculator },
-            { value: 'gradual', label: 'Gradual Transition', icon: Clock },
-            { value: 'partnership', label: 'Partnership/Merger', icon: HandshakeIcon }
-          ].map(option => (
-            <Card
-              key={option.value}
-              className={`p-4 cursor-pointer transition-all ${
-                data.dealPreferences?.includes(option.value)
-                  ? 'bg-accent/20 border-accent'
-                  : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
-              onClick={() => {
-                const current = data.dealPreferences || [];
-                const updated = current.includes(option.value)
-                  ? current.filter((v: string) => v !== option.value)
-                  : [...current, option.value];
-                onChange('dealPreferences', updated);
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <option.icon className="w-4 h-4 text-accent" />
-                <span className="text-white">{option.label}</span>
+      <div className="space-y-6">
+        <div>
+          <Label className="text-white mb-2">Timeline</Label>
+          <RadioGroup
+            value={data.timeline}
+            onValueChange={(value) => onChange('timeline', value)}
+            className="grid gap-3"
+          >
+            {[
+              { value: 'immediate', label: 'Immediate (1-3 months)' },
+              { value: 'short', label: 'Short-term (3-6 months)' },
+              { value: 'medium', label: 'Medium-term (6-12 months)' },
+              { value: 'long', label: 'Long-term planning (12+ months)' }
+            ].map(option => (
+              <div key={option.value} className="flex items-center space-x-2">
+                <RadioGroupItem value={option.value} id={option.value} />
+                <Label htmlFor={option.value} className="text-white">{option.label}</Label>
               </div>
-            </Card>
-          ))}
+            ))}
+          </RadioGroup>
+        </div>
+
+        <div>
+          <Label className="text-white mb-2">Deal Preferences</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { value: 'cash', label: 'Cash Purchase', icon: DollarSign },
+              { value: 'seller_financing', label: 'Seller Financing', icon: Calculator },
+              { value: 'gradual', label: 'Gradual Transition', icon: Clock },
+              { value: 'partnership', label: 'Partnership/Merger', icon: HandshakeIcon }
+            ].map(option => (
+              <Card
+                key={option.value}
+                className={`p-4 cursor-pointer transition-all ${
+                  data.dealPreferences?.includes(option.value)
+                    ? 'bg-accent/20 border-accent'
+                    : 'bg-white/5 border-white/10 hover:bg-white/10'
+                }`}
+                onClick={() => {
+                  const current = data.dealPreferences || [];
+                  const updated = current.includes(option.value)
+                    ? current.filter((v: string) => v !== option.value)
+                    : [...current, option.value];
+                  onChange('dealPreferences', updated);
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <option.icon className="w-4 h-4 text-accent" />
+                  <span className="text-white">{option.label}</span>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={testGeminiConnection}
+            disabled={testing}
+          >
+            {testing ? (
+              <>Testing Gemini Connection...</>
+            ) : (
+              <>
+                <Brain className="w-4 h-4 mr-2" />
+                Test Gemini Connection
+              </>
+            )}
+          </Button>
         </div>
       </div>
-    </div>
 
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
-      <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={onBack} className="border-white/10 hover:bg-white/5">Back</Button>
+        <Button onClick={onNext} className="bg-accent hover:bg-accent/90">Next</Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const FormProgress = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
   <div className="space-y-2">
