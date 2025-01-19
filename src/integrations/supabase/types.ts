@@ -9,46 +9,84 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      alerts: {
+      ai_opportunities: {
         Row: {
-          additional_details: string | null
-          buyer_type: string | null
+          buyer_profile_id: string | null
           created_at: string | null
-          deal_preferences: string[] | null
           id: string
-          practice_size: string | null
-          preferred_state: string | null
-          remote_preference: string | null
-          services: string[] | null
-          timeline: string | null
+          opportunity_data: Json
+          score: number | null
+          status: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          additional_details?: string | null
-          buyer_type?: string | null
+          buyer_profile_id?: string | null
           created_at?: string | null
-          deal_preferences?: string[] | null
           id?: string
-          practice_size?: string | null
-          preferred_state?: string | null
-          remote_preference?: string | null
-          services?: string[] | null
-          timeline?: string | null
+          opportunity_data: Json
+          score?: number | null
+          status?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          additional_details?: string | null
-          buyer_type?: string | null
+          buyer_profile_id?: string | null
           created_at?: string | null
-          deal_preferences?: string[] | null
           id?: string
-          practice_size?: string | null
-          preferred_state?: string | null
-          remote_preference?: string | null
-          services?: string[] | null
-          timeline?: string | null
+          opportunity_data?: Json
+          score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_opportunities_buyer_profile_id_fkey"
+            columns: ["buyer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alerts: {
+        Row: {
+          created_at: string | null
+          employee_count_max: number | null
+          employee_count_min: number | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          region: string | null
+          specialties: string[] | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_count_max?: number | null
+          employee_count_min?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          region?: string | null
+          specialties?: string[] | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_count_max?: number | null
+          employee_count_min?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          region?: string | null
+          specialties?: string[] | null
+          title?: string
           updated_at?: string | null
           user_id?: string | null
         }
@@ -60,7 +98,6 @@ export type Database = {
           ai_preferences: Json | null
           alert_frequency: string | null
           buyer_name: string
-          buyer_type: string | null
           contact_email: string
           contact_phone: string | null
           created_at: string | null
@@ -75,7 +112,6 @@ export type Database = {
           preferred_insights: string[] | null
           price_max: number | null
           price_min: number | null
-          remote_preference: string | null
           retention_risk: string | null
           revenue_max: number | null
           revenue_min: number | null
@@ -90,7 +126,6 @@ export type Database = {
           ai_preferences?: Json | null
           alert_frequency?: string | null
           buyer_name: string
-          buyer_type?: string | null
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
@@ -105,7 +140,6 @@ export type Database = {
           preferred_insights?: string[] | null
           price_max?: number | null
           price_min?: number | null
-          remote_preference?: string | null
           retention_risk?: string | null
           revenue_max?: number | null
           revenue_min?: number | null
@@ -120,7 +154,6 @@ export type Database = {
           ai_preferences?: Json | null
           alert_frequency?: string | null
           buyer_name?: string
-          buyer_type?: string | null
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
@@ -135,7 +168,6 @@ export type Database = {
           preferred_insights?: string[] | null
           price_max?: number | null
           price_min?: number | null
-          remote_preference?: string | null
           retention_risk?: string | null
           revenue_max?: number | null
           revenue_min?: number | null
@@ -360,51 +392,6 @@ export type Database = {
           PLACENAME?: string | null
           PLACENS?: string | null
           STATEFP?: string | null
-        }
-        Relationships: []
-      }
-      deal_sourcing_forms: {
-        Row: {
-          additional_details: string | null
-          buyer_type: string | null
-          created_at: string
-          deal_preferences: string[] | null
-          id: string
-          practice_size: string | null
-          preferred_state: string | null
-          remote_preference: string | null
-          services: string[] | null
-          timeline: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          additional_details?: string | null
-          buyer_type?: string | null
-          created_at?: string
-          deal_preferences?: string[] | null
-          id?: string
-          practice_size?: string | null
-          preferred_state?: string | null
-          remote_preference?: string | null
-          services?: string[] | null
-          timeline?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          additional_details?: string | null
-          buyer_type?: string | null
-          created_at?: string
-          deal_preferences?: string[] | null
-          id?: string
-          practice_size?: string | null
-          preferred_state?: string | null
-          remote_preference?: string | null
-          services?: string[] | null
-          timeline?: string | null
-          updated_at?: string
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -741,42 +728,42 @@ export type Database = {
           asking_price: number | null
           City: string | null
           clientele: string | null
-          COUNTYFP: number | null
+          County: number | null
           employee_count: number | null
+          FIPS: number | null
           Latitude: number | null
           Longitude: number | null
           MSA: number | null
           service_lines: string | null
           State: string | null
-          STATEFP: number | null
         }
         Insert: {
           annual_revenue?: number | null
           asking_price?: number | null
           City?: string | null
           clientele?: string | null
-          COUNTYFP?: number | null
+          County?: number | null
           employee_count?: number | null
+          FIPS?: number | null
           Latitude?: number | null
           Longitude?: number | null
           MSA?: number | null
           service_lines?: string | null
           State?: string | null
-          STATEFP?: number | null
         }
         Update: {
           annual_revenue?: number | null
           asking_price?: number | null
           City?: string | null
           clientele?: string | null
-          COUNTYFP?: number | null
+          County?: number | null
           employee_count?: number | null
+          FIPS?: number | null
           Latitude?: number | null
           Longitude?: number | null
           MSA?: number | null
           service_lines?: string | null
           State?: string | null
-          STATEFP?: number | null
         }
         Relationships: []
       }

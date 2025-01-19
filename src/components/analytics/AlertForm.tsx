@@ -17,14 +17,12 @@ import {
 import { Loader2 } from "lucide-react";
 
 interface AlertFormData {
-  buyer_type: string;
-  practice_size: string;
-  services: string[];
-  additional_details: string;
-  timeline: string;
-  deal_preferences: string[];
-  preferred_state: string;
-  remote_preference: string;
+  title: string;
+  region: string;
+  employeeCountMin: number;
+  employeeCountMax: number;
+  specialties: string[];
+  frequency: "realtime" | "daily" | "weekly";
 }
 
 const regions = [
@@ -44,18 +42,15 @@ const specialtiesList = [
 export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [employeeRange, setEmployeeRange] = useState([10, 50]);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<AlertFormData>({
     defaultValues: {
-      buyer_type: "",
-      practice_size: "",
-      services: [],
-      additional_details: "",
-      timeline: "",
-      deal_preferences: [],
-      preferred_state: "",
-      remote_preference: "no"
+      title: "",
+      region: "",
+      specialties: [],
+      frequency: "daily"
     }
   });
 
@@ -63,8 +58,12 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     setLoading(true);
     try {
       const { error } = await supabase.from("alerts").insert({
-        ...data,
-        services: selectedSpecialties,
+        title: data.title,
+        region: data.region,
+        employee_count_min: employeeRange[0],
+        employee_count_max: employeeRange[1],
+        specialties: selectedSpecialties,
+        frequency: data.frequency,
       });
 
       if (error) throw error;
@@ -102,49 +101,28 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label>Buyer Type</Label>
+          <Label>Alert Name</Label>
           <Controller
-            name="buyer_type"
+            name="title"
             control={control}
-            rules={{ required: "Buyer type is required" }}
+            rules={{ required: "Alert name is required" }}
             render={({ field }) => (
               <Input
                 {...field}
-                placeholder="E.g., Individual Buyer"
+                placeholder="E.g., Tax firms in California"
                 className="mt-1.5 bg-white/5 border-white/10 text-white"
               />
             )}
           />
-          {errors.buyer_type && (
-            <p className="text-sm text-red-500 mt-1">{errors.buyer_type.message}</p>
+          {errors.title && (
+            <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
           )}
-        </div>
-
-        <div>
-          <Label>Practice Size</Label>
-          <Controller
-            name="practice_size"
-            control={control}
-            rules={{ required: "Practice size is required" }}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="mt-1.5 bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Select practice size" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-white/10">
-                  <SelectItem value="small" className="text-white hover:bg-white/10">Small (1-5 professionals)</SelectItem>
-                  <SelectItem value="medium" className="text-white hover:bg-white/10">Medium (6-20 professionals)</SelectItem>
-                  <SelectItem value="large" className="text-white hover:bg-white/10">Large (21+ professionals)</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
         </div>
 
         <div>
           <Label>Region</Label>
           <Controller
-            name="preferred_state"
+            name="region"
             control={control}
             rules={{ required: "Region is required" }}
             render={({ field }) => (
@@ -166,12 +144,51 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               </Select>
             )}
           />
+          {errors.region && (
+            <p className="text-sm text-red-500 mt-1">{errors.region.message}</p>
+          )}
         </div>
 
         <div>
-          <Label>Timeline</Label>
+          <Label>Employee Count Range ({employeeRange[0]} - {employeeRange[1]})</Label>
+          <Slider
+            defaultValue={[10, 50]}
+            max={200}
+            min={0}
+            step={5}
+            value={employeeRange}
+            onValueChange={setEmployeeRange}
+            className="mt-3"
+          />
+        </div>
+
+        <div>
+          <Label>Specialties</Label>
+          <div className="mt-1.5 space-y-2">
+            {specialtiesList.map(specialty => (
+              <div 
+                key={specialty.value}
+                className="flex items-center space-x-2 p-2 rounded bg-white/5 border border-white/10"
+              >
+                <input
+                  type="checkbox"
+                  id={specialty.value}
+                  checked={selectedSpecialties.includes(specialty.value)}
+                  onChange={() => handleSpecialtySelect(specialty.value)}
+                  className="rounded border-white/10"
+                />
+                <label htmlFor={specialty.value} className="text-white">
+                  {specialty.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <Label>Notification Frequency</Label>
           <Controller
-            name="timeline"
+            name="frequency"
             control={control}
             render={({ field }) => (
               <RadioGroup
@@ -180,33 +197,18 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 className="mt-1.5"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="immediate" id="immediate" />
-                  <Label htmlFor="immediate">Immediate</Label>
+                  <RadioGroupItem value="realtime" id="realtime" />
+                  <Label htmlFor="realtime">Real-time</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="within_6_months" id="within_6_months" />
-                  <Label htmlFor="within_6_months">Within 6 months</Label>
+                  <RadioGroupItem value="daily" id="daily" />
+                  <Label htmlFor="daily">Daily Digest</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="6_12_months" id="6_12_months" />
-                  <Label htmlFor="6_12_months">6-12 months</Label>
+                  <RadioGroupItem value="weekly" id="weekly" />
+                  <Label htmlFor="weekly">Weekly Summary</Label>
                 </div>
               </RadioGroup>
-            )}
-          />
-        </div>
-
-        <div>
-          <Label>Additional Details</Label>
-          <Controller
-            name="additional_details"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                placeholder="Any additional requirements or preferences"
-                className="mt-1.5 bg-white/5 border-white/10 text-white"
-              />
             )}
           />
         </div>

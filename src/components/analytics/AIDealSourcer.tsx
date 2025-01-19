@@ -27,20 +27,33 @@ export const AIDealSourcer = () => {
     try {
       const { data: profiles, error: profilesError } = await supabase
         .from("buyer_profiles")
-        .select("*")
+        .select(`
+          *,
+          ai_opportunities (*)
+        `)
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
 
-      setOpportunities(profiles || []);
+      const opportunities = profiles?.map(profile => ({
+        ...profile,
+        opportunities: profile.ai_opportunities || []
+      })) || [];
+
+      setOpportunities(opportunities);
       
       // Count unreviewed opportunities
-      const unreviewed = (profiles || []).length - savedDeals.length;
-      setUnreviewedCount(Math.max(0, unreviewed));
+      const unreviewed = opportunities.reduce((count, profile) => {
+        return count + (profile.ai_opportunities || [])
+          .filter(opp => !savedDeals.includes(opp.id))
+          .length;
+      }, 0);
+      
+      setUnreviewedCount(unreviewed);
 
       // Fetch matching firms based on the first profile's preferences
-      if (profiles && profiles.length > 0) {
-        const firstProfile = profiles[0];
+      if (opportunities.length > 0) {
+        const firstProfile = opportunities[0];
         const { data: firms } = await supabase
           .from('canary_firms_data')
           .select('*')
