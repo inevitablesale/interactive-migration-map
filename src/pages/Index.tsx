@@ -8,6 +8,10 @@ import { PricingSection } from "@/components/PricingSection";
 import { BetaAccessSection } from "@/components/BetaAccessSection";
 import CountdownBanner from "@/components/CountdownBanner";
 import { DailyRevealsSection } from "@/components/DailyRevealsSection";
+import { DatabaseSection } from "@/components/DatabaseSection";
+import { OpportunitiesTable } from "@/components/OpportunitiesTable";
+import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
+import { HowItWorks } from "@/components/HowItWorks";
 
 const Index = () => {
   return (
@@ -20,7 +24,7 @@ const Index = () => {
         <Map />
       </div>
 
-      {/* Fixed Header - Adjusted top padding to account for banner */}
+      {/* Fixed Header */}
       <div className="fixed top-12 left-4 z-50 flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
@@ -28,7 +32,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Scrollable Content - Adjusted top padding to account for banner */}
+      {/* Scrollable Content */}
       <div className="relative z-10 pt-8">
         {/* Hero Section */}
         <div className="min-h-screen">
@@ -41,34 +45,20 @@ const Index = () => {
         {/* Daily Reveals Section */}
         <DailyRevealsSection />
 
-        {/* Data Sources Section */}
-        <DataSourcesSection />
+        {/* Database Section */}
+        <DatabaseSection />
 
-        {/* Solutions Section */}
-        <SolutionsSection />
+        {/* Opportunities Table */}
+        <OpportunitiesTable />
+
+        {/* Why Professional Services Section */}
+        <WhyProfessionalServices />
+
+        {/* How It Works Section */}
+        <HowItWorks />
 
         {/* Pricing Section */}
         <PricingSection />
-
-        {/* Stats Section */}
-        <div className="py-20 px-4">
-          <Card className="w-full max-w-4xl mx-auto bg-white/90 backdrop-blur-sm shadow-lg p-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">493</div>
-                <div className="text-gray-600">Regions Analyzed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">2,297</div>
-                <div className="text-gray-600">Firms Monitored</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">872</div>
-                <div className="text-gray-600">Cities Tracked</div>
-              </div>
-            </div>
-          </Card>
-        </div>
       </div>
     </div>
   );
