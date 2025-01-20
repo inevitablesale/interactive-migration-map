@@ -34,14 +34,14 @@ export function Hero() {
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
           <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Discover high-potential firms</span>
           <br />
-          <span className="text-white">before they hit the market. Pay only when you close.</span>
+          <span className="text-white">before they hit the market</span>
         </h1>
         <div className="flex justify-center">
           <button 
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
             className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"
           >
-            <span className="text-sm uppercase tracking-wider mb-2">Your next deal is waiting</span>
+            <span className="text-sm uppercase tracking-wider mb-2">Pay only when you close</span>
             <ChevronDown className="w-6 h-6 animate-bounce" />
           </button>
         </div>
