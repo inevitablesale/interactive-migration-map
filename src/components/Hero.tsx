@@ -32,10 +32,13 @@ export function Hero() {
       <div className="text-center max-w-4xl animate-fade-in">
         <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">SERIOUS ABOUT BUYING A FIRM?</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Canary surfaces untapped opportunities</span>
+          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Discover Off-Market Opportunities</span>
           <br />
-          <span className="text-white">before anyone else</span>
+          <span className="text-white">in Professional Services</span>
         </h1>
+        <p className="text-lg md:text-xl text-gray-300 mb-8">
+          Canary connects you to firms that aren't publicly listed for sale. From accounting and law practices to consulting, engineering, and advertising firms, Canary surfaces actionable insights for buyers looking to make their next strategic acquisition.
+        </p>
         <div className="flex justify-center">
           <button 
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
