@@ -1,5 +1,5 @@
 import { Card } from "./ui/card";
-import { Check } from "lucide-react";
+import { Check, Users, LineChart, MapPin, Building2, Brain, Database, Search } from "lucide-react";
 
 export const DatabaseSection = () => {
   const industries = [
@@ -30,9 +30,39 @@ export const DatabaseSection = () => {
   ];
 
   const insights = [
-    "Firm-Level Insights: Employee size, service mix, and operational details",
-    "Census-Based Market Trends: Competitive density, economic growth, and regional demand",
-    "Location-Specific Data: Explore firms by state, county, and metropolitan areas"
+    {
+      icon: Building2,
+      title: "Firm-Level Insights",
+      details: [
+        "Employee count and growth trends",
+        "Service mix and specializations",
+        "Revenue per employee metrics",
+        "Operational efficiency indicators",
+        "Client portfolio analysis"
+      ]
+    },
+    {
+      icon: LineChart,
+      title: "Market Trend Analysis",
+      details: [
+        "Competitive density mapping",
+        "Regional economic indicators",
+        "Industry growth patterns",
+        "Market saturation metrics",
+        "Demand forecasting"
+      ]
+    },
+    {
+      icon: MapPin,
+      title: "Geographic Intelligence",
+      details: [
+        "State-by-state market analysis",
+        "County-level opportunity scoring",
+        "Metropolitan area deep dives",
+        "Population and migration trends",
+        "Local business environment assessment"
+      ]
+    }
   ];
 
   return (
@@ -62,11 +92,21 @@ export const DatabaseSection = () => {
 
           <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
             <h3 className="text-xl font-semibold text-white mb-6">What You'll Discover</h3>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {insights.map((insight, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-yellow-400 mt-1 shrink-0" />
-                  <p className="text-gray-400">{insight}</p>
+                <div key={index} className="bg-white/5 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <insight.icon className="w-5 h-5 text-yellow-400" />
+                    <h4 className="text-white font-medium">{insight.title}</h4>
+                  </div>
+                  <ul className="space-y-2">
+                    {insight.details.map((detail, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-gray-400 text-sm">
+                        <Check className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, Linkedin } from "lucide-react";
 import { Card } from "./ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,8 +67,8 @@ export const BetaAccessSection = () => {
             className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors mx-auto"
             onClick={handleLinkedInSignup}
           >
+            <Linkedin className="w-5 h-5" />
             <span>Sign Up with LinkedIn</span>
-            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </Card>

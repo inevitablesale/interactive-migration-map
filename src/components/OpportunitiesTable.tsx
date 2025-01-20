@@ -1,4 +1,5 @@
 import { Card } from "./ui/card";
+import { Building2, MapPin, Users, PieChart, Sparkles } from "lucide-react";
 
 export const OpportunitiesTable = () => {
   const opportunities = [
@@ -86,33 +87,39 @@ export const OpportunitiesTable = () => {
         <h2 className="text-3xl font-bold mb-8 text-center">
           Explore Real Opportunities with Canary
         </h2>
-        <div className="space-y-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {opportunities.map((category, idx) => (
-            <Card key={idx} className="p-6 bg-white/90 backdrop-blur-sm hover:bg-white/95 transition-all duration-200">
-              <h3 className="text-xl font-semibold mb-4 text-primary">{category.category}</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left border-b">
-                      <th className="p-3 font-semibold text-gray-700">Industry</th>
-                      <th className="p-3 font-semibold text-gray-700">Region</th>
-                      <th className="p-3 font-semibold text-gray-700">Employee Count</th>
-                      <th className="p-3 font-semibold text-gray-700">Service Mix</th>
-                      <th className="p-3 font-semibold text-gray-700">Strategic Highlights</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {category.firms.map((firm, index) => (
-                      <tr key={index} className="border-b last:border-0 hover:bg-gray-50/50">
-                        <td className="p-3 font-medium text-primary">{firm.industry}</td>
-                        <td className="p-3 text-gray-600">{firm.region}</td>
-                        <td className="p-3 text-gray-600">{firm.employeeCount}</td>
-                        <td className="p-3 text-gray-600">{firm.serviceMix}</td>
-                        <td className="p-3 text-gray-600">{firm.highlights}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <Card key={idx} className="overflow-hidden">
+              <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100">
+                <h3 className="text-xl font-semibold text-primary mb-6">{category.category}</h3>
+                <div className="space-y-6">
+                  {category.firms.map((firm, index) => (
+                    <div key={index} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Building2 className="w-5 h-5 text-blue-500" />
+                        <h4 className="font-medium text-gray-900">{firm.industry}</h4>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-600">{firm.region}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Users className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-600">{firm.employeeCount} employees</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <PieChart className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-600">{firm.serviceMix}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Sparkles className="w-4 h-4 text-yellow-500" />
+                          <span className="text-gray-600">{firm.highlights}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Card>
           ))}
