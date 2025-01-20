@@ -3,7 +3,6 @@ import { Hero } from "@/components/Hero";
 import { Bird } from "lucide-react";
 import { DataSourcesSection } from "@/components/DataSourcesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
-import { TimeCalculator } from "@/components/TimeCalculator";
 import { Card } from "@/components/ui/card";
 import { PricingSection } from "@/components/PricingSection";
 import { BetaAccessSection } from "@/components/BetaAccessSection";
@@ -50,11 +49,6 @@ const Index = () => {
 
         {/* Pricing Section */}
         <PricingSection />
-
-        {/* Time Calculator Section */}
-        <div className="py-20 px-4">
-          <TimeCalculator />
-        </div>
 
         {/* Stats Section */}
         <div className="py-20 px-4">

@@ -39,7 +39,7 @@ export const PricingSection = () => {
             <div className="flex items-center gap-3 mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Success Fee</h3>
               <span className="px-2 py-1 text-xs font-medium bg-yellow-400/10 text-yellow-600 rounded">
-                5% of Purchase Price
+                2.5% of Purchase Price
               </span>
               <span className="px-2 py-1 text-xs font-medium bg-green-400/10 text-green-600 rounded">
                 Pay Only When You Close
@@ -73,7 +73,7 @@ export const PricingSection = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-yellow-600 mt-1 shrink-0" />
-                  <span>Aligned Incentives: Our success depends on yours—5% success fee only upon deal closure.</span>
+                  <span>Aligned Incentives: Our success depends on yours—2.5% success fee only upon deal closure.</span>
                 </li>
               </ul>
             </div>
