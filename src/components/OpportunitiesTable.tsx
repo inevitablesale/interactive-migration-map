@@ -65,12 +65,12 @@ export const OpportunitiesTable = () => {
                   </thead>
                   <tbody>
                     {category.firms.map((firm, index) => (
-                      <tr key={index} className="border-b last:border-0">
-                        <td className="p-2">{firm.industry}</td>
+                      <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
+                        <td className="p-2 font-medium">{firm.industry}</td>
                         <td className="p-2">{firm.region}</td>
                         <td className="p-2">{firm.employeeCount}</td>
                         <td className="p-2">{firm.serviceMix}</td>
-                        <td className="p-2">{firm.highlights}</td>
+                        <td className="p-2 text-gray-600">{firm.highlights}</td>
                       </tr>
                     ))}
                   </tbody>

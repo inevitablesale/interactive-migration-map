@@ -36,10 +36,7 @@ export function Hero() {
           <br />
           <span className="text-white">in Professional Services</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-300 mb-8">
-          Canary connects you to firms that aren't publicly listed for sale. From accounting and law practices to consulting, engineering, and advertising firms, Canary surfaces actionable insights for buyers looking to make their next strategic acquisition.
-        </p>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-12">
           <button 
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
             className="group flex flex-col items-center text-white/80 hover:text-white transition-colors"

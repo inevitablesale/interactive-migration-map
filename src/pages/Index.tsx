@@ -12,6 +12,7 @@ import { DatabaseSection } from "@/components/DatabaseSection";
 import { OpportunitiesTable } from "@/components/OpportunitiesTable";
 import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
 import { HowItWorks } from "@/components/HowItWorks";
+import { ValueProposition } from "@/components/ValueProposition";
 
 const Index = () => {
   return (
@@ -38,6 +39,9 @@ const Index = () => {
         <div className="min-h-screen">
           <Hero />
         </div>
+
+        {/* Value Proposition */}
+        <ValueProposition />
 
         {/* Beta Access Section */}
         <BetaAccessSection />
