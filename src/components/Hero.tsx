@@ -32,9 +32,9 @@ export function Hero() {
       <div className="text-center max-w-4xl animate-fade-in">
         <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">SERIOUS ABOUT BUYING A FIRM?</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Discover high-potential firms</span>
+          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Canary surfaces untapped opportunities</span>
           <br />
-          <span className="text-white">before they hit the market</span>
+          <span className="text-white">before anyone else</span>
         </h1>
         <div className="flex justify-center">
           <button 
