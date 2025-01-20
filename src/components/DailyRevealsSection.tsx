@@ -1,5 +1,6 @@
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, ArrowRight } from "lucide-react";
 import { Card } from "./ui/card";
+import { Button } from "./ui/button";
 
 export const DailyRevealsSection = () => {
   return (
@@ -10,7 +11,7 @@ export const DailyRevealsSection = () => {
             DAILY FIRM REVEALS AT 9 AM EST
           </h2>
           <p className="text-gray-400 max-w-3xl mx-auto mb-12">
-            Every morning at 9 AM EST, we go live on LinkedIn to reveal a carefully curated accounting firm positioned for acquisition. Don't miss the opportunity to hear about each firm's strengths and why it stands out.
+            Every morning at 9 AM EST, we go live on LinkedIn to reveal a carefully curated accounting firm positioned for acquisition. These are off-market firms, surfaced using advanced analytics and expert curation.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -18,22 +19,35 @@ export const DailyRevealsSection = () => {
               <div className="flex flex-col items-center text-center">
                 <Clock className="w-12 h-12 text-yellow-400 mb-4" />
                 <h3 className="text-2xl font-semibold text-white mb-4">Members Get Early Access at 6 AM</h3>
-                <p className="text-gray-400">
-                  Can't wait for the reveal? As a member, you'll receive the daily listing in your inbox at 6 AM EST—3 hours before it goes public. Review the firm's details early and decide if it's the right fit for your acquisition goals.
-                </p>
+                <ul className="text-gray-400 space-y-4">
+                  <li>Receive the daily listing 3 hours early, directly in your inbox.</li>
+                  <li>Review key metrics like service mix, employee count, and operational stability before the public reveal.</li>
+                  <li>Get a head start on opportunities before others even see them.</li>
+                </ul>
               </div>
             </Card>
 
             <Card className="p-8 bg-black/40 backdrop-blur-md border-white/10">
               <div className="flex flex-col items-center text-center">
                 <Users className="w-12 h-12 text-yellow-400 mb-4" />
-                <h3 className="text-2xl font-semibold text-white mb-4">Public LinkedIn Reveal</h3>
-                <p className="text-gray-400">
-                  Join our daily LinkedIn live sessions at 9 AM EST for detailed insights into each featured firm. Get expert analysis and understand what makes each opportunity unique.
-                </p>
+                <h3 className="text-2xl font-semibold text-white mb-4">How Canary Works</h3>
+                <ul className="text-gray-400 space-y-4">
+                  <li>1. Sign up for free access to daily listings</li>
+                  <li>2. Explore opportunities backed by data signals</li>
+                  <li>3. Express interest and we handle outreach</li>
+                  <li>4. Close deals with our support</li>
+                </ul>
               </div>
             </Card>
           </div>
+
+          <Button 
+            className="mt-8 bg-blue-600 hover:bg-blue-700"
+            size="lg"
+          >
+            <span>Sign Up for Free Now</span>
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </div>
       </div>
     </div>
