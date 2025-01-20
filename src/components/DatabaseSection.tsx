@@ -51,17 +51,6 @@ export const DatabaseSection = () => {
         "Market saturation metrics",
         "Demand forecasting"
       ]
-    },
-    {
-      icon: MapPin,
-      title: "Geographic Intelligence",
-      details: [
-        "State-by-state market analysis",
-        "County-level opportunity scoring",
-        "Metropolitan area deep dives",
-        "Population and migration trends",
-        "Local business environment assessment"
-      ]
     }
   ];
 
