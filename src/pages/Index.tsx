@@ -12,6 +12,7 @@ import { DatabaseSection } from "@/components/DatabaseSection";
 import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
 import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
+import { CatalystSection } from "@/components/CatalystSection";
 
 const Index = () => {
   return (
@@ -50,6 +51,9 @@ const Index = () => {
 
         {/* Database Section */}
         <DatabaseSection />
+
+        {/* Catalyst Section */}
+        <CatalystSection />
 
         {/* Why Professional Services Section */}
         <WhyProfessionalServices />
