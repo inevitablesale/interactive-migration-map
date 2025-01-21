@@ -9,7 +9,6 @@ import { BetaAccessSection } from "@/components/BetaAccessSection";
 import CountdownBanner from "@/components/CountdownBanner";
 import { DailyRevealsSection } from "@/components/DailyRevealsSection";
 import { DatabaseSection } from "@/components/DatabaseSection";
-import { OpportunitiesTable } from "@/components/OpportunitiesTable";
 import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
 import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
@@ -51,9 +50,6 @@ const Index = () => {
 
         {/* Database Section */}
         <DatabaseSection />
-
-        {/* Opportunities Table */}
-        <OpportunitiesTable />
 
         {/* Why Professional Services Section */}
         <WhyProfessionalServices />

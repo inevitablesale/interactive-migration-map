@@ -1,7 +1,15 @@
 import { Card } from "./ui/card";
 import { Building2, MapPin, Users, PieChart, Sparkles } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export const OpportunitiesTable = () => {
+  const location = useLocation();
+  
+  // Only render content on the /opportunities route
+  if (location.pathname === '/') {
+    return null;
+  }
+
   const opportunities = [
     {
       category: "Succession-Ready Firms",
