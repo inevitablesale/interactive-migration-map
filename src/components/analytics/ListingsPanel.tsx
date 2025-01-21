@@ -51,11 +51,20 @@ export const ListingsPanel = () => {
 
   const handleExpressInterest = async (companyId: number) => {
     try {
-      console.log('Starting express interest process for company:', companyId);
       setIsSubmitting(true);
       
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('Current user:', user?.id);
+      // First verify authentication
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        toast({
+          title: "Authentication Error",
+          description: "Please try signing in again",
+          variant: "destructive",
+        });
+        return;
+      }
       
       if (!user) {
         toast({
@@ -85,12 +94,13 @@ export const ListingsPanel = () => {
         return;
       }
 
+      console.log('Creating tracked practice with user_id:', user.id);
+      
       // First create a tracked practice
-      console.log('Creating tracked practice for:', practice);
       const { data: trackedPractice, error: trackedError } = await supabase
         .from('tracked_practices')
         .insert({
-          user_id: user.id, // Explicitly set the user_id
+          user_id: user.id,
           industry: practice["Primary Subtitle"] || "Accounting",
           region: practice["State Name"] || practice.Location,
           employee_count: practice.employeeCount,
@@ -143,7 +153,6 @@ export const ListingsPanel = () => {
       }
 
       // Update the firm's status
-      console.log('Updating firm status for company:', companyId);
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
@@ -176,6 +185,8 @@ export const ListingsPanel = () => {
       setIsSubmitting(false);
     }
   };
+
+  // ... keep existing code (render JSX)
 
   return (
     <div className="space-y-6">
@@ -259,7 +270,7 @@ export const ListingsPanel = () => {
                       hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
                     }`}
                     onClick={() => handleExpressInterest(listing["Company ID"])}
-                    disabled={hasExpressedInterest}
+                    disabled={hasExpressedInterest || isSubmitting}
                   >
                     <Heart className="w-4 h-4 flex-shrink-0" />
                     <span className="truncate">
