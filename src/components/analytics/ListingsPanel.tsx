@@ -210,15 +210,11 @@ export const ListingsPanel = () => {
   };
 
   const filteredListings = listings?.filter((listing: Listing) => {
-    const searchTerms = searchQuery.toLowerCase().split(' ');
-    
-    const searchMatches = !searchQuery || searchTerms.every(term => 
-      listing["Primary Subtitle"]?.toLowerCase().includes(term) ||
-      listing["State Name"]?.toLowerCase().includes(term) ||
-      listing.specialities?.toLowerCase().includes(term) ||
-      listing.Summary?.toLowerCase().includes(term)
-    );
+    // Simple search: just check if the search query exists in specialties
+    const searchMatches = !searchQuery || 
+      (listing.specialities && listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
+    // Keep existing filter logic
     const industryMatches = !filters.industry || listing["Primary Subtitle"] === filters.industry;
     const employeeMatches = (!filters.minEmployees || listing.employeeCount >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || listing.employeeCount <= parseInt(filters.maxEmployees));
