@@ -28,8 +28,11 @@ export default function Dashboard() {
         id: practice["Company ID"].toString(),
         industry: practice["Primary Subtitle"] || "",
         region: practice["State Name"] || "",
-        employee_count: practice.employeeCount,
-        service_mix: {},
+        employee_count: practice.employeeCount || 0,
+        annual_revenue: 0, // Default value since it's not in canary_firms_data
+        service_mix: { "General": 100 }, // Default service mix
+        status: "pending_response", // Default status
+        last_updated: new Date().toISOString(), // Current date as ISO string
         practice_buyer_pool: []
       }));
     }
@@ -133,7 +136,7 @@ export default function Dashboard() {
         id: data["Company ID"].toString(),
         industry: data["Primary Subtitle"] || "",
         region: data["State Name"] || "",
-        employee_count: data.employeeCount,
+        employee_count: data.employeeCount || 0,
         service_mix: {},
         buyer_count: 0,
       };
