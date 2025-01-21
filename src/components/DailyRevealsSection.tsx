@@ -1,8 +1,38 @@
-import { Clock, Users, ArrowRight } from "lucide-react";
+import { Clock, Users, ArrowRight, Linkedin } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const DailyRevealsSection = () => {
+  const { toast } = useToast();
+
+  const handleLinkedInSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/thank-you`,
+        },
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+      }
+    } catch (error) {
+      console.error('LinkedIn auth error:', error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Failed to connect with LinkedIn. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black/95 relative z-20 px-4 py-16">
       <div className="max-w-6xl mx-auto">
@@ -11,7 +41,7 @@ export const DailyRevealsSection = () => {
             DAILY FIRM REVEALS AT 9 AM EST
           </h2>
           <p className="text-gray-400 max-w-3xl mx-auto mb-12">
-            Every morning at 9 AM EST, we go live on LinkedIn to reveal key metrics and insights about a carefully curated professional services firm positioned for acquisition. To protect confidentiality, firm names remain anonymized until mutual interest is established. These off-market opportunities are surfaced using advanced analytics and expert curation.
+            Every morning at 9 AM EST, we reveal key metrics and insights about a carefully curated professional services firm positioned for acquisition. To protect confidentiality, firm names remain anonymized until mutual interest is established. These off-market opportunities are surfaced using advanced analytics and expert curation.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -41,13 +71,13 @@ export const DailyRevealsSection = () => {
             </Card>
           </div>
 
-          <Button 
-            className="mt-8 bg-blue-600 hover:bg-blue-700"
-            size="lg"
+          <button 
+            className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 mx-auto"
+            onClick={handleLinkedInSignup}
           >
-            <span>Sign Up for Free Now</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+            <Linkedin className="w-5 h-5" />
+            <span>Sign Up with LinkedIn</span>
+          </button>
         </div>
       </div>
     </div>

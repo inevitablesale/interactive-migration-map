@@ -1,8 +1,38 @@
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Linkedin } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const PricingSection = () => {
+  const { toast } = useToast();
+
+  const handleLinkedInSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/thank-you`,
+        },
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+      }
+    } catch (error) {
+      console.error('LinkedIn auth error:', error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Failed to connect with LinkedIn. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="py-20 px-4 relative z-20">
       <div className="max-w-6xl mx-auto">
@@ -83,13 +113,12 @@ export const PricingSection = () => {
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Discover Your Next Acquisition?</h3>
               <p className="text-gray-600 mb-6">Don't wait for opportunities to go public. With Canary, you gain access to off-market firms and actionable insights to help you close deals faster.</p>
               <div className="space-y-4">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                  Sign Up for Free Today
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Join Our Daily LinkedIn Live
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
+                  onClick={handleLinkedInSignup}
+                >
+                  <Linkedin className="w-4 h-4" />
+                  <span>Sign Up with LinkedIn</span>
                 </Button>
               </div>
             </div>
