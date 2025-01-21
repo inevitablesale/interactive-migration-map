@@ -7,7 +7,6 @@ export const DataSourcesSection = () => {
   const { data: metricsData } = useQuery({
     queryKey: ['trackingMetrics'],
     queryFn: async () => {
-      // Use count() function properly with single()
       const { count: firmsCount } = await supabase
         .from('canary_firms_data')
         .select('*', { count: 'exact', head: true });

@@ -46,11 +46,14 @@ const Index = () => {
         {/* Beta Access Section */}
         <BetaAccessSection />
 
+        {/* Database Section - Moved above DailyRevealsSection */}
+        <DatabaseSection />
+
         {/* Daily Reveals Section */}
         <DailyRevealsSection />
 
-        {/* Database Section */}
-        <DatabaseSection />
+        {/* Data Sources Section - Contains tracking metrics */}
+        <DataSourcesSection />
 
         {/* Catalyst Section */}
         <CatalystSection />
