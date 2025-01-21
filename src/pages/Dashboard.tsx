@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
+// ... keep existing code (imports and type definitions)
+
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,7 +202,7 @@ export default function Dashboard() {
       ) : (
         <>
           <div className={`grid gap-4 ${
-            viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+            viewMode === 'grid' ? 'md:grid-cols-2' : 'grid-cols-1'
           }`}>
             {paginatedPractices?.map((practice) => (
               <PracticeCard

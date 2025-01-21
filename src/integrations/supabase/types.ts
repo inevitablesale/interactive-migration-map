@@ -174,6 +174,7 @@ export type Database = {
           STATE: string | null
           "State Name": string | null
           STATEFP: number | null
+          status: string | null
           Summary: string | null
           websiteUrl: string | null
         }
@@ -203,6 +204,7 @@ export type Database = {
           STATE?: string | null
           "State Name"?: string | null
           STATEFP?: number | null
+          status?: string | null
           Summary?: string | null
           websiteUrl?: string | null
         }
@@ -232,6 +234,7 @@ export type Database = {
           STATE?: string | null
           "State Name"?: string | null
           STATEFP?: number | null
+          status?: string | null
           Summary?: string | null
           websiteUrl?: string | null
         }
