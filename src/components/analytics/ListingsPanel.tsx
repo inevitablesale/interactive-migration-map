@@ -10,6 +10,32 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
 
+interface Listing {
+  "Company ID": number;
+  "Company Name": string;
+  "Primary Subtitle": string | null;
+  "State Name": string | null;
+  Location: string | null;
+  Summary: string | null;
+  employeeCount: number;
+  status: string;
+  notes: string | null;
+  practice_buyer_pool?: Array<{ id: string }>;
+}
+
+interface ServiceType {
+  name: string;
+  keywords: string[];
+}
+
+const SERVICE_TYPES: ServiceType[] = [
+  { name: "Software & Technology", keywords: ["software", "tech", "digital", "it"] },
+  { name: "Accounting & Tax", keywords: ["tax", "accounting", "bookkeeping", "audit"] },
+  { name: "Business Advisory", keywords: ["consult", "advisory", "strategy"] },
+  { name: "Legal Services", keywords: ["legal", "law", "attorney"] },
+  { name: "Engineering", keywords: ["engineer", "architecture", "design"] }
+];
+
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
@@ -113,43 +139,56 @@ export const ListingsPanel = () => {
     setFilters(newFilters);
   };
 
-  const generateTitle = (listing: any) => {
-    const summary = listing.Summary?.toLowerCase() || '';
+  const generateTitle = (listing: Listing): string => {
+    const summary = (listing.Summary || "").toLowerCase();
+    const primarySubtitle = listing["Primary Subtitle"] || "";
     
+    // Professional prefixes based on industry
     const prefixes = {
-      software: ['Premier', 'Innovative', 'Leading'],
-      accounting: ['Established', 'Trusted', 'Professional'],
-      consulting: ['Expert', 'Strategic', 'Premier'],
-      default: ['Leading', 'Established', 'Premier']
+      software: ["Premier", "Innovative", "Leading"],
+      accounting: ["Established", "Trusted", "Professional"],
+      consulting: ["Expert", "Strategic", "Premier"],
+      legal: ["Distinguished", "Respected", "Established"],
+      engineering: ["Advanced", "Technical", "Innovative"],
+      default: ["Leading", "Established", "Premier"]
     };
-    
-    let businessType = 'default';
-    let serviceType = '';
-    
-    if (summary.includes('software') || summary.includes('tech')) {
-      businessType = 'software';
-      serviceType = 'Software & Technology';
-    } else if (summary.includes('tax') || summary.includes('accounting')) {
-      businessType = 'accounting';
-      serviceType = 'Professional Services';
-    } else if (summary.includes('consult')) {
-      businessType = 'consulting';
-      serviceType = 'Business Advisory';
-    } else if (listing["Primary Subtitle"]) {
-      serviceType = listing["Primary Subtitle"].replace(/\b\w/g, l => l.toUpperCase());
+
+    // Determine business type and service
+    let businessType = "default";
+    let serviceType = "";
+
+    // Match against known service types
+    for (const service of SERVICE_TYPES) {
+      if (service.keywords.some(keyword => 
+        summary.includes(keyword) || primarySubtitle.toLowerCase().includes(keyword)
+      )) {
+        businessType = service.keywords[0];
+        serviceType = service.name;
+        break;
+      }
     }
-    
+
+    // If no match found but we have a primary subtitle, use that
+    if (!serviceType && primarySubtitle) {
+      serviceType = primarySubtitle
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+    }
+
+    // Get random prefix from appropriate category
     const prefixList = prefixes[businessType as keyof typeof prefixes];
     const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
-    
+
+    // Build the title
     if (serviceType) {
       return `${prefix} ${serviceType} Practice`;
     }
-    
+
     return `${prefix} Professional Practice`;
   };
 
-  const filteredListings = listings?.filter(listing => {
+  const filteredListings = listings?.filter((listing: Listing) => {
     const searchMatches = !searchQuery || 
       listing["Primary Subtitle"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       listing["State Name"]?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -170,10 +209,11 @@ export const ListingsPanel = () => {
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredListings?.map((listing) => {
+        {filteredListings?.map((listing: Listing) => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
+          const title = generateTitle(listing);
           
           return (
             <Card 
@@ -182,10 +222,10 @@ export const ListingsPanel = () => {
             >
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold leading-tight line-clamp-2">
-                    {generateTitle(listing)}
+                  <h3 className="text-lg font-semibold leading-tight line-clamp-2 flex-1 mr-3">
+                    {title}
                   </h3>
-                  <div className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs whitespace-nowrap ml-2 flex-shrink-0">
+                  <div className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs whitespace-nowrap flex-shrink-0">
                     {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
                   </div>
                 </div>
@@ -193,7 +233,7 @@ export const ListingsPanel = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-gray-500" />
-                    <span>{listing["State Name"] || listing.Location}</span>
+                    <span className="truncate">{listing["State Name"] || listing.Location}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-gray-500" />
