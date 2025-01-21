@@ -558,6 +558,79 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_buyer_pool: {
+        Row: {
+          id: string
+          is_anonymous: boolean | null
+          joined_at: string | null
+          notes: string | null
+          practice_id: string | null
+          rating: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          is_anonymous?: boolean | null
+          joined_at?: string | null
+          notes?: string | null
+          practice_id?: string | null
+          rating?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          is_anonymous?: boolean | null
+          joined_at?: string | null
+          notes?: string | null
+          practice_id?: string | null
+          rating?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_buyer_pool_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          practice_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          practice_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          practice_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_notes_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       region_data: {
         Row: {
           B01001_001E: number | null
@@ -906,6 +979,57 @@ export type Database = {
           postal_abbr?: string | null
           state?: string | null
           STATEFP?: string | null
+        }
+        Relationships: []
+      }
+      tracked_practices: {
+        Row: {
+          acquisition_potential: string | null
+          annual_revenue: number | null
+          anonymized_details: boolean | null
+          created_at: string | null
+          employee_count: number | null
+          id: string
+          industry: string
+          is_nda_signed: boolean | null
+          last_updated: string | null
+          region: string
+          seller_response_due: string | null
+          service_mix: Json | null
+          status: Database["public"]["Enums"]["practice_status"] | null
+          user_id: string | null
+        }
+        Insert: {
+          acquisition_potential?: string | null
+          annual_revenue?: number | null
+          anonymized_details?: boolean | null
+          created_at?: string | null
+          employee_count?: number | null
+          id?: string
+          industry: string
+          is_nda_signed?: boolean | null
+          last_updated?: string | null
+          region: string
+          seller_response_due?: string | null
+          service_mix?: Json | null
+          status?: Database["public"]["Enums"]["practice_status"] | null
+          user_id?: string | null
+        }
+        Update: {
+          acquisition_potential?: string | null
+          annual_revenue?: number | null
+          anonymized_details?: boolean | null
+          created_at?: string | null
+          employee_count?: number | null
+          id?: string
+          industry?: string
+          is_nda_signed?: boolean | null
+          last_updated?: string | null
+          region?: string
+          seller_response_due?: string | null
+          service_mix?: Json | null
+          status?: Database["public"]["Enums"]["practice_status"] | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1331,6 +1455,12 @@ export type Database = {
       }
     }
     Enums: {
+      practice_status:
+        | "pending_response"
+        | "owner_engaged"
+        | "negotiation"
+        | "closed"
+        | "withdrawn"
       report_visibility: "public" | "private"
     }
     CompositeTypes: {

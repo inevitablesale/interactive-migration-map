@@ -5,6 +5,7 @@ import Opportunities from "@/pages/Opportunities";
 import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
 import ThankYou from "@/pages/ThankYou";
+import Dashboard from "@/pages/Dashboard";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/market-report/:county/:state" element={<MarketReport />} />
         <Route path="/state-market-report/:state" element={<StateMarketReport />} />
         <Route path="/thank-you" element={<ThankYou />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
