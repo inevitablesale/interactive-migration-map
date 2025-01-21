@@ -210,20 +210,10 @@ export const ListingsPanel = () => {
   };
 
   const filteredListings = listings?.filter((listing: Listing) => {
-    // Only check specialities for search
-    const searchMatches = !searchQuery || 
-      (listing.specialities && listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    // Keep existing filter logic
-    const industryMatches = !filters.industry || listing["Primary Subtitle"] === filters.industry;
-    const employeeMatches = (!filters.minEmployees || listing.employeeCount >= parseInt(filters.minEmployees)) &&
-                           (!filters.maxEmployees || listing.employeeCount <= parseInt(filters.maxEmployees));
-    const regionMatches = !filters.region || listing["State Name"] === filters.region;
-    const specialityMatches = !filters.speciality || 
-                             (listing.specialities && 
-                              listing.specialities.toLowerCase().includes(filters.speciality.toLowerCase()));
-
-    return searchMatches && industryMatches && employeeMatches && regionMatches && specialityMatches;
+    // Only filter by specialties, case insensitive
+    return !searchQuery || 
+           (listing.specialities && 
+            listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
   return (
