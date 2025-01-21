@@ -18,23 +18,41 @@ export default function Dashboard() {
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get all practices with their engagement status
+      const { data: practiceEngagements, error: engagementError } = await supabase
+        .from('practice_buyer_pool')
+        .select('practice_id, status')
+        .order('joined_at', { ascending: false });
+
+      if (engagementError) throw engagementError;
+
+      // Then get the practice data
+      const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
-        .select('*')
+        .select('*, practice_notes(content, created_at)')
         .order('followerCount', { ascending: false });
 
       if (error) throw error;
-      return data.map(practice => ({
-        id: practice["Company ID"].toString(),
-        industry: practice["Primary Subtitle"] || "",
-        region: practice["State Name"] || "",
-        employee_count: practice.employeeCount || 0,
-        annual_revenue: 0, // Default value since it's not in canary_firms_data
-        service_mix: { "General": 100 }, // Default service mix
-        status: "pending_response", // Default status
-        last_updated: new Date().toISOString(), // Current date as ISO string
-        practice_buyer_pool: []
-      }));
+
+      // Map the data to include engagement status
+      return practicesData.map(practice => {
+        const engagement = practiceEngagements?.find(
+          e => e.practice_id === practice["Company ID"].toString()
+        );
+
+        return {
+          id: practice["Company ID"].toString(),
+          industry: practice["Primary Subtitle"] || "",
+          region: practice["State Name"] || "",
+          employee_count: practice.employeeCount || 0,
+          annual_revenue: 0,
+          service_mix: { "General": 100 },
+          status: engagement?.status || "owner_engaged", // Default to owner_engaged if no status
+          last_updated: new Date().toISOString(),
+          practice_buyer_pool: [],
+          notes: practice.practice_notes || []
+        };
+      });
     }
   });
 
@@ -137,7 +155,7 @@ export default function Dashboard() {
         industry: data["Primary Subtitle"] || "",
         region: data["State Name"] || "",
         employee_count: data.employeeCount || 0,
-        service_mix: {},
+        service_mix: { "General": 100 },
         buyer_count: 0,
       };
     }
