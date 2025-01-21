@@ -75,7 +75,7 @@ export const ListingsPanel = () => {
         `);
       
       if (error) throw error;
-      return data as Listing[];
+      return data as unknown as Listing[];
     }
   });
 
