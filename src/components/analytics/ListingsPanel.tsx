@@ -172,7 +172,7 @@ export const ListingsPanel = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <Button 
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2 min-w-0"
+                    className={`w-full flex items-center justify-center gap-2 min-w-0 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={!hasNotes}
                     onClick={() => hasNotes && setSelectedNotes(listing.notes)}
                   >
