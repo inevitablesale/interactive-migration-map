@@ -31,7 +31,7 @@ export const CatalystSection = () => {
         <h2 className="text-3xl font-bold mb-6 text-center">Making Off-Market Acquisitions Possible</h2>
         
         <p className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto">
-          For buyers, finding the right firm often feels like a waiting game—but what if the best opportunities never make it to the market? Canary flips the script, connecting you with high-potential firms that aren't publicly listed for sale and creating new possibilities for strategic acquisitions.
+          For buyers, finding the right firm often feels like a waiting game—but we all know the best opportunities never make it to the market. Canary flips the script, connecting you with high-potential firms that aren't publicly listed for sale and creating new possibilities for strategic acquisitions.
         </p>
 
         <h3 className="text-2xl font-semibold mb-8 text-center">How This Benefits Buyers</h3>
