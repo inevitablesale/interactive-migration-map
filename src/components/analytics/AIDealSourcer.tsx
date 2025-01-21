@@ -27,24 +27,19 @@ export const AIDealSourcer = () => {
     try {
       const { data: profiles, error: profilesError } = await supabase
         .from("buyer_profiles")
-        .select("*, ai_opportunities(*)");
+        .select("*");
 
       if (profilesError) throw profilesError;
 
       const processedOpportunities = profiles?.map(profile => ({
         ...profile,
-        opportunities: profile.ai_opportunities || []
+        opportunities: []
       })) || [];
 
       setOpportunities(processedOpportunities);
       
       // Count unreviewed opportunities
-      const unreviewed = processedOpportunities.reduce((count, profile) => {
-        return count + (profile.ai_opportunities || [])
-          .filter(opp => !savedDeals.includes(opp.id))
-          .length;
-      }, 0);
-      
+      const unreviewed = processedOpportunities.length;
       setUnreviewedCount(unreviewed);
 
       // Fetch matching firms based on the first profile's preferences

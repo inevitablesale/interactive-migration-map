@@ -91,6 +91,7 @@ export default function Dashboard() {
       
       return {
         ...data,
+        service_mix: data.service_mix as Record<string, number> || {},
         buyer_count: data.practice_buyer_pool?.length || 0,
       };
     }
