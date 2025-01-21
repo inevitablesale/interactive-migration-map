@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'owner_engaged':
+    case 'engaged':
       return 'bg-emerald-500';
     case 'negotiation':
       return 'bg-blue-500';
@@ -23,8 +23,8 @@ const getStatusColor = (status: string) => {
 
 const getStatusDisplay = (status: string) => {
   switch (status) {
-    case 'owner_engaged':
-      return 'Owner Engaged';
+    case 'engaged':
+      return 'Engaged';
     case 'negotiation':
       return 'In Negotiation';
     case 'closed':
