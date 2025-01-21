@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Play } from "lucide-react";
 
 interface PracticeOfDayProps {
   practice?: {
@@ -55,9 +55,17 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
           </div>
         </div>
 
-        <Button className="w-full" onClick={onInterested}>
-          I'm Interested
-        </Button>
+        <div className="space-y-2">
+          <Button className="w-full" onClick={onInterested}>
+            I'm Interested
+          </Button>
+          <Button variant="outline" className="w-full" asChild>
+            <a href="#replay">
+              <Play className="h-4 w-4 mr-2" />
+              Watch the live replay
+            </a>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
