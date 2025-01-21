@@ -51,6 +51,9 @@ const Index = () => {
             <Link to="/market-report/los-angeles/CA" className="text-white hover:text-yellow-400 transition-colors">
               LA Market Report
             </Link>
+            <Link to="/thank-you" className="text-white hover:text-yellow-400 transition-colors">
+              Thank You
+            </Link>
           </nav>
         </div>
       </div>
