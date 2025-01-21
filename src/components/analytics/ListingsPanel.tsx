@@ -20,6 +20,7 @@ interface Listing {
   employeeCount: number;
   status: string;
   notes: string | null;
+  specialities: string | null;
   practice_buyer_pool?: Array<{ id: string }>;
 }
 
@@ -191,14 +192,16 @@ export const ListingsPanel = () => {
   const filteredListings = listings?.filter((listing: Listing) => {
     const searchMatches = !searchQuery || 
       listing["Primary Subtitle"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing["State Name"]?.toLowerCase().includes(searchQuery.toLowerCase());
+      listing["State Name"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      listing.specialities?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const industryMatches = !filters.industry || listing["Primary Subtitle"] === filters.industry;
     const employeeMatches = (!filters.minEmployees || listing.employeeCount >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || listing.employeeCount <= parseInt(filters.maxEmployees));
     const regionMatches = !filters.region || listing["State Name"] === filters.region;
+    const specialityMatches = !filters.speciality || listing.specialities?.includes(filters.speciality);
 
-    return searchMatches && industryMatches && employeeMatches && regionMatches;
+    return searchMatches && industryMatches && employeeMatches && regionMatches && specialityMatches;
   });
 
   return (

@@ -34,6 +34,7 @@ export interface FilterState {
   minRevenue?: string;
   maxRevenue?: string;
   region?: string;
+  speciality?: string;
 }
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
@@ -51,12 +52,29 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       
       if (error) throw error;
 
-      // Get unique industries and sort them
       const uniqueIndustries = Array.from(new Set(data.map(item => item['Primary Subtitle'])))
         .filter(Boolean)
         .sort();
 
       return uniqueIndustries;
+    }
+  });
+
+  const { data: specialities } = useQuery({
+    queryKey: ['specialities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('canary_firms_data')
+        .select('specialities')
+        .not('specialities', 'is', null);
+      
+      if (error) throw error;
+
+      const uniqueSpecialities = Array.from(new Set(data.map(item => item.specialities)))
+        .filter(Boolean)
+        .sort();
+
+      return uniqueSpecialities;
     }
   });
 
@@ -89,7 +107,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search firms by industry or region..."
+            placeholder="Search firms by industry, region, or speciality..."
             className="pl-9"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
@@ -146,6 +164,26 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
               </div>
 
               <div className="space-y-2">
+                <Label>Speciality</Label>
+                <Select
+                  onValueChange={(value) => handleFilterChange('speciality', value)}
+                  value={filters.speciality || "all"}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select speciality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Specialities</SelectItem>
+                    {specialities?.map((speciality) => (
+                      <SelectItem key={speciality} value={speciality}>
+                        {speciality}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label>Region</Label>
                 <Select
                   onValueChange={(value) => handleFilterChange('region', value)}
@@ -179,24 +217,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     placeholder="Max"
                     value={filters.maxEmployees || ""}
                     onChange={(e) => handleFilterChange('maxEmployees', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Annual Revenue Range (in thousands)</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={filters.minRevenue || ""}
-                    onChange={(e) => handleFilterChange('minRevenue', e.target.value)}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={filters.maxRevenue || ""}
-                    onChange={(e) => handleFilterChange('maxRevenue', e.target.value)}
                   />
                 </div>
               </div>
