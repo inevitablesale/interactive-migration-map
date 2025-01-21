@@ -36,8 +36,7 @@ export const ListingsPanel = () => {
         console.error('Error fetching buyer profile:', error);
         console.error('Error details:', {
           code: error.code,
-          message: error.message,
-          details: error.details
+          message: error.message
         });
         throw error;
       }
@@ -62,8 +61,7 @@ export const ListingsPanel = () => {
         console.error('Error fetching listings:', error);
         console.error('Error details:', {
           code: error.code,
-          message: error.message,
-          details: error.details
+          message: error.message
         });
         throw error;
       }
@@ -164,7 +162,8 @@ export const ListingsPanel = () => {
         console.error('Error details:', {
           code: trackedError.code,
           message: trackedError.message,
-          details: trackedError.details
+          hint: trackedError.hint,
+          details: trackedError
         });
         toast({
           title: "Error",
@@ -195,7 +194,8 @@ export const ListingsPanel = () => {
         console.error('Pool error details:', {
           code: poolError.code,
           message: poolError.message,
-          details: poolError.details
+          hint: poolError.hint,
+          details: poolError
         });
         
         if (poolError.code === '23505') { // Unique violation
@@ -227,7 +227,8 @@ export const ListingsPanel = () => {
         console.error('Update error details:', {
           code: updateError.code,
           message: updateError.message,
-          details: updateError.details
+          hint: updateError.hint,
+          details: updateError
         });
         toast({
           title: "Error",
