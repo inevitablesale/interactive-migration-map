@@ -46,8 +46,8 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('Primary Subtitle')
-        .not('Primary Subtitle', 'is', null);
+        .select('"Primary Subtitle"')
+        .not('"Primary Subtitle"', 'is', null);
       
       if (error) throw error;
 

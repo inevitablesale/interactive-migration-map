@@ -22,42 +22,27 @@ export default function Dashboard() {
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
-      // First get all practices with their engagement status
-      const { data: practiceEngagements, error: engagementError } = await supabase
-        .from('practice_buyer_pool')
-        .select('practice_id, status')
-        .order('joined_at', { ascending: false });
-
-      if (engagementError) throw engagementError;
-
-      // Then get the practice data
       const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
-        .select('*, practice_notes(content, created_at)')
+        .select('*')
         .order('followerCount', { ascending: false });
 
       if (error) throw error;
 
-      // Map the data to include engagement status
-      return practicesData.map(practice => {
-        const engagement = practiceEngagements?.find(
-          e => e.practice_id === practice["Company ID"].toString()
-        );
-
-        return {
-          id: practice["Company ID"].toString(),
-          industry: practice["Primary Subtitle"] || "",
-          region: practice["State Name"] || "",
-          employee_count: practice.employeeCount || 0,
-          annual_revenue: 0,
-          service_mix: { "General": 100 },
-          status: engagement?.status || "owner_engaged",
-          last_updated: new Date().toISOString(),
-          practice_buyer_pool: [],
-          notes: practice.practice_notes || [],
-          specialities: practice.specialities
-        };
-      });
+      // Map the data to include required fields
+      return practicesData.map(practice => ({
+        id: practice["Company ID"].toString(),
+        industry: practice["Primary Subtitle"] || "",
+        region: practice["State Name"] || "",
+        employee_count: practice.employeeCount || 0,
+        annual_revenue: 0,
+        service_mix: { "General": 100 },
+        status: "owner_engaged",
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        notes: [],
+        specialities: practice.specialities
+      }));
     }
   });
 
