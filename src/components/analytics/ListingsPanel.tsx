@@ -114,37 +114,45 @@ export const ListingsPanel = () => {
   };
 
   const generateTitle = (listing: any) => {
-    // If no summary, use a default professional title
-    if (!listing.Summary) {
-      return `Leading ${listing["Primary Subtitle"]} Provider`;
-    }
-
-    // Get the first sentence
-    const firstSentence = listing.Summary.split(/[.!?]+/)[0].toLowerCase();
+    // Get the first sentence if there's a summary
+    const summary = listing.Summary?.toLowerCase() || '';
     
-    // Common professional prefixes
-    const prefixes = ['leading', 'premier', 'established', 'innovative', 'growing'];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-
-    // Check for specific patterns in the summary
-    if (firstSentence.includes('software') || firstSentence.includes('tech')) {
-      return `${prefix} Cloud-Based Software Provider`;
+    // Professional prefixes with industry context
+    const prefixes = {
+      software: ['Premier', 'Innovative', 'Leading'],
+      accounting: ['Established', 'Trusted', 'Professional'],
+      consulting: ['Expert', 'Strategic', 'Premier'],
+      default: ['Leading', 'Established', 'Premier']
+    };
+    
+    // Determine the business type and select appropriate prefix
+    let businessType = 'default';
+    let serviceType = '';
+    
+    if (summary.includes('software') || summary.includes('tech')) {
+      businessType = 'software';
+      serviceType = 'Software & Technology';
+    } else if (summary.includes('tax') || summary.includes('accounting')) {
+      businessType = 'accounting';
+      serviceType = 'Professional Services';
+    } else if (summary.includes('consult')) {
+      businessType = 'consulting';
+      serviceType = 'Business Advisory';
+    } else if (listing["Primary Subtitle"]) {
+      serviceType = listing["Primary Subtitle"].replace(/\b\w/g, l => l.toUpperCase());
     }
     
-    if (firstSentence.includes('tax') || firstSentence.includes('accounting')) {
-      return `${prefix} Professional Services Firm`;
+    // Get a random prefix from the appropriate category
+    const prefixList = prefixes[businessType as keyof typeof prefixes];
+    const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
+    
+    // If we have a service type, use it; otherwise, use a default
+    if (serviceType) {
+      return `${prefix} ${serviceType} Practice`;
     }
     
-    if (firstSentence.includes('consult')) {
-      return `${prefix} Business Advisory Firm`;
-    }
-
-    if (firstSentence.includes('wealth') || firstSentence.includes('financial')) {
-      return `${prefix} Wealth Management Practice`;
-    }
-
-    // Default to a professional title using the primary subtitle
-    return `${prefix} ${listing["Primary Subtitle"]} Provider`;
+    // Fallback to a generic professional title
+    return `${prefix} Professional Practice`;
   };
 
   const filteredListings = listings?.filter(listing => {
