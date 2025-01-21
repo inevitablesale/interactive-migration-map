@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Users, Building2, DollarSign, PieChart, Eye, X, MessageSquare, Heart, ChartPie } from "lucide-react";
+import { Users, Building2, DollarSign, Clock, Eye, X, MessageSquare, Heart } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'owner_engaged':
-      return 'bg-green-500';
+      return 'bg-emerald-500';
     case 'negotiation':
       return 'bg-blue-500';
     case 'closed':
@@ -65,33 +65,33 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xl font-semibold">{practice.industry}</CardTitle>
-        <Badge className={`${getStatusColor(practice.status)} text-white`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-semibold">{practice.industry}</CardTitle>
+        <Badge className={`${getStatusColor(practice.status)} text-white px-4 py-1 rounded-full`}>
           {getStatusDisplay(practice.status)}
         </Badge>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{practice.region}</span>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-gray-500" />
+            <span className="text-base">{practice.region}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{practice.employee_count} employees</span>
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 text-gray-500" />
+            <span className="text-base">{practice.employee_count} employees</span>
           </div>
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">${(practice.annual_revenue / 1000).toFixed(0)}k revenue</span>
+          <div className="flex items-center gap-3">
+            <DollarSign className="h-5 w-5 text-gray-500" />
+            <span className="text-base">${(practice.annual_revenue / 1000).toFixed(0)}k revenue</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className="flex items-center gap-2">
-                    <ChartPie className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm">Specialties</span>
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-gray-500" />
+                    <span className="text-base">Specialties</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -109,7 +109,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         </div>
 
         <div className="flex items-center justify-between border-t pt-4">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-gray-500">
             Last update: {format(new Date(practice.last_updated), 'MMM d, yyyy')}
           </div>
           <div className="text-sm">
@@ -117,11 +117,11 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-3">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="w-[110px]">
-                <MessageSquare className="mr-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="w-[120px] gap-2">
+                <MessageSquare className="h-4 w-4" />
                 Add Note
               </Button>
             </DialogTrigger>
@@ -133,8 +133,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             </DialogContent>
           </Dialog>
           
-          <Button variant="outline" size="sm" className="w-[110px]">
-            <Eye className="mr-2 h-4 w-4" />
+          <Button variant="outline" size="sm" className="w-[120px] gap-2">
+            <Eye className="h-4 w-4" />
             View Details
           </Button>
           
@@ -143,9 +143,9 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onWithdraw?.(practice.id)}
-              className="w-[110px] text-red-500 hover:text-red-600"
+              className="w-[120px] gap-2 text-red-500 hover:text-red-600"
             >
-              <X className="mr-2 h-4 w-4" />
+              <X className="h-4 w-4" />
               Withdraw
             </Button>
           ) : (
@@ -153,9 +153,9 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onExpressInterest?.(practice.id)}
-              className="w-[110px] text-blue-500 hover:text-blue-600"
+              className="w-[120px] gap-2 text-blue-500 hover:text-blue-600"
             >
-              <Heart className="mr-2 h-4 w-4" />
+              <Heart className="h-4 w-4" />
               Express Interest
             </Button>
           )}
