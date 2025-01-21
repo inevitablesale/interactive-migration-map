@@ -145,17 +145,7 @@ export default function Dashboard() {
           {filteredPractices?.map((practice) => (
             <PracticeCard
               key={practice.id}
-              practice={{
-                id: practice.id,
-                industry: practice.industry,
-                region: practice.region,
-                employee_count: practice.employee_count || 0,
-                annual_revenue: practice.annual_revenue || 0,
-                service_mix: practice.service_mix as Record<string, number> || {},
-                status: practice.status || 'pending_response',
-                last_updated: practice.last_updated || new Date().toISOString(),
-                practice_buyer_pool: practice.practice_buyer_pool
-              }}
+              practice={practice}
               onWithdraw={handleWithdraw}
             />
           ))}
