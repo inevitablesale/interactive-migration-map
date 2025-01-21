@@ -1,9 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Bird, Linkedin } from "lucide-react";
+import { Bird } from "lucide-react";
 import { supabase } from "./integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
 import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
 import Dashboard from "./pages/Dashboard";
@@ -93,20 +92,19 @@ function App() {
           </div>
           <div>
             {user ? (
-              <Button
+              <span 
                 onClick={handleSignOut}
-                variant="outline"
-                className="bg-transparent border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
+                className="text-yellow-400 hover:text-yellow-500 cursor-pointer transition-colors duration-200"
               >
                 Sign Out
-              </Button>
+              </span>
             ) : (
-              <Button
+              <span 
                 onClick={handleSignIn}
-                className="bg-yellow-400 text-black hover:bg-yellow-500 transition-all duration-200"
+                className="text-yellow-400 hover:text-yellow-500 cursor-pointer transition-colors duration-200"
               >
                 Sign In
-              </Button>
+              </span>
             )}
           </div>
         </div>
