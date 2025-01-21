@@ -7,17 +7,18 @@ export const DataSourcesSection = () => {
   const { data: metricsData } = useQuery({
     queryKey: ['trackingMetrics'],
     queryFn: async () => {
-      const { data: firmsData } = await supabase
+      // Use count() function properly with single()
+      const { count: firmsCount } = await supabase
         .from('canary_firms_data')
-        .select('Company ID', { count: 'exact' });
+        .select('*', { count: 'exact', head: true });
 
-      const { data: countiesData } = await supabase
+      const { count: citiesCount } = await supabase
         .from('county_data')
-        .select('COUNTYNAME', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true });
 
       return {
-        firms: firmsData?.count || 0,
-        cities: countiesData?.count || 0,
+        firms: firmsCount || 0,
+        cities: citiesCount || 0,
         monthlyAdded: 500 // Static value as per requirements
       };
     }
