@@ -1,7 +1,49 @@
-import { Database, Globe, Server, Brain, LineChart, ShieldCheck, ArrowRight } from "lucide-react";
+import { Database, Globe, Server, Brain, LineChart, ShieldCheck, ArrowRight, Building2, MapPin } from "lucide-react";
 import { Card } from "./ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const DataSourcesSection = () => {
+  const { data: metricsData } = useQuery({
+    queryKey: ['trackingMetrics'],
+    queryFn: async () => {
+      const { data: firmsData } = await supabase
+        .from('canary_firms_data')
+        .select('Company ID', { count: 'exact' });
+
+      const { data: countiesData } = await supabase
+        .from('county_data')
+        .select('COUNTYNAME', { count: 'exact', head: true });
+
+      return {
+        firms: firmsData?.count || 0,
+        cities: countiesData?.count || 0,
+        monthlyAdded: 500 // Static value as per requirements
+      };
+    }
+  });
+
+  const metrics = [
+    {
+      title: "Firms Tracked",
+      value: metricsData?.firms.toLocaleString() || "0",
+      icon: Building2,
+      color: "text-blue-400"
+    },
+    {
+      title: "Cities Covered",
+      value: metricsData?.cities.toLocaleString() || "0",
+      icon: MapPin,
+      color: "text-green-400"
+    },
+    {
+      title: "New Monthly Firms",
+      value: metricsData?.monthlyAdded.toLocaleString() || "0",
+      icon: Database,
+      color: "text-yellow-400"
+    }
+  ];
+
   const transformations = {
     collect: {
       title: "Data Collection",
@@ -43,8 +85,20 @@ export const DataSourcesSection = () => {
             Turning Market Data Into Deal Flow
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Tracking 872 cities with 500+ new firms added monthly. Canary helps buyers discover their perfect acquisition matches before they ever hit the market.
+            Tracking {metricsData?.firms.toLocaleString()} firms with {metricsData?.monthlyAdded}+ new firms added monthly. Canary helps buyers discover their perfect acquisition matches before they ever hit the market.
           </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
+          {metrics.map((metric, index) => (
+            <Card key={index} className="p-6 bg-black/40 backdrop-blur-md border-white/10">
+              <div className="flex items-center gap-3 mb-2">
+                <metric.icon className={`w-5 h-5 ${metric.color}`} />
+                <h3 className="text-lg font-semibold text-white">{metric.title}</h3>
+              </div>
+              <p className={`text-3xl font-bold ${metric.color}`}>{metric.value}</p>
+            </Card>
+          ))}
         </div>
 
         <div className="space-y-8">
