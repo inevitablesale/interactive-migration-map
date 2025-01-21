@@ -5,7 +5,6 @@ import { UpgradePrompt } from "./UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -124,9 +123,9 @@ export const ListingsPanel = () => {
           return (
             <Card 
               key={listing["Company ID"]} 
-              className="p-6"
+              className="p-6 w-full"
             >
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-start">
                   <div>
@@ -134,28 +133,28 @@ export const ListingsPanel = () => {
                       {listing["Primary Subtitle"] || "Accounting"}
                     </h3>
                   </div>
-                  <div className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                    Not Contacted
+                  <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap">
+                    {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
                   </div>
                 </div>
 
                 {/* Main Info */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-y-4">
                   <div className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-gray-500" />
-                    <span>{listing["State Name"] || listing.Location}</span>
+                    <Building2 className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <span className="truncate">{listing["State Name"] || listing.Location}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-500" />
-                    <span>{listing.employeeCount} employees</span>
+                    <Users className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <span className="truncate">{listing.employeeCount} employees</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-gray-500" />
-                    <span>$0k revenue</span>
+                    <DollarSign className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <span className="truncate">$0k revenue</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-gray-500" />
-                    <span>Specialties</span>
+                    <Clock className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <span className="truncate">Specialties</span>
                   </div>
                 </div>
 
@@ -170,35 +169,37 @@ export const ListingsPanel = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <Button 
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="w-full flex items-center justify-center gap-2 min-w-0"
                     disabled={!hasNotes}
                     onClick={() => hasNotes && setSelectedNotes(listing.notes)}
                   >
-                    <MessageSquare className="w-4 h-4" />
-                    View Notes
+                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">View Notes</span>
                   </Button>
                   
                   <Button 
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="w-full flex items-center justify-center gap-2 min-w-0"
                   >
-                    <Eye className="w-4 h-4" />
-                    View Details
+                    <Eye className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">View Details</span>
                   </Button>
                   
                   <Button 
                     variant={hasExpressedInterest ? "outline" : "default"}
-                    className={`flex items-center gap-2 ${
-                      hasExpressedInterest ? 'text-gray-500' : 'text-primary-foreground'
+                    className={`w-full flex items-center justify-center gap-2 min-w-0 ${
+                      hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
                     }`}
                     onClick={() => handleExpressInterest(listing["Company ID"])}
                     disabled={hasExpressedInterest}
                   >
-                    <Heart className="w-4 h-4" />
-                    Express Interest
+                    <Heart className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">
+                      {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                    </span>
                   </Button>
                 </div>
               </div>
