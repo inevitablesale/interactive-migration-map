@@ -40,7 +40,10 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
-    const newFilters = { ...filters, [key]: value };
+    const newFilters = { 
+      ...filters, 
+      [key]: value === "all" ? undefined : value 
+    };
     setFilters(newFilters);
     onFilter(newFilters);
   };
@@ -105,13 +108,13 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                 <Label>Industry</Label>
                 <Select
                   onValueChange={(value) => handleFilterChange('industry', value)}
-                  value={filters.industry || ""}
+                  value={filters.industry || "all"}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Industries</SelectItem>
+                    <SelectItem value="all">All Industries</SelectItem>
                     <SelectItem value="Accounting">Accounting</SelectItem>
                     <SelectItem value="Engineering">Engineering</SelectItem>
                     <SelectItem value="IT Consulting">IT Consulting</SelectItem>
@@ -124,13 +127,13 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                 <Label>Region</Label>
                 <Select
                   onValueChange={(value) => handleFilterChange('region', value)}
-                  value={filters.region || ""}
+                  value={filters.region || "all"}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select region" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Regions</SelectItem>
+                    <SelectItem value="all">All Regions</SelectItem>
                     <SelectItem value="Northeast">Northeast</SelectItem>
                     <SelectItem value="Southeast">Southeast</SelectItem>
                     <SelectItem value="Midwest">Midwest</SelectItem>
