@@ -1,5 +1,9 @@
 import { MultiStepForm } from "./deal-sourcer/MultiStepForm";
 
-export const AIDealSourcerForm = ({ onSuccess }: { onSuccess?: () => void }) => {
+interface AIDealSourcerFormProps {
+  onSuccess?: () => void;
+}
+
+export const AIDealSourcerForm = ({ onSuccess }: AIDealSourcerFormProps) => {
   return <MultiStepForm onSuccess={onSuccess} />;
 };

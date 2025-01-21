@@ -358,3 +358,88 @@ export const FormProgress = ({ currentStep, totalSteps }: { currentStep: number;
     <p className="text-sm text-white/60 text-center">Step {currentStep} of {totalSteps}</p>
   </div>
 );
+
+export const FormSteps = ({
+  currentStep,
+  onStepSubmit,
+  formData
+}: {
+  currentStep: number;
+  onStepSubmit: (data: any) => void;
+  formData: any;
+}) => {
+  const handleChange = (field: string, value: any) => {
+    onStepSubmit({ [field]: value });
+  };
+
+  switch (currentStep) {
+    case 1:
+      return <WelcomeStep onNext={() => onStepSubmit({})} />;
+    case 2:
+      return (
+        <FirmPreferencesStep
+          data={formData}
+          onChange={handleChange}
+          onBack={() => onStepSubmit({ step: currentStep - 1 })}
+          onNext={() => onStepSubmit({ step: currentStep + 1 })}
+        />
+      );
+    case 3:
+      return (
+        <PaymentTimingStep
+          data={formData}
+          onChange={handleChange}
+          onBack={() => onStepSubmit({ step: currentStep - 1 })}
+          onNext={() => onStepSubmit({ step: currentStep + 1 })}
+        />
+      );
+    case 4:
+      return (
+        <PostAcquisitionStep
+          data={formData}
+          onChange={handleChange}
+          onBack={() => onStepSubmit({ step: currentStep - 1 })}
+          onNext={() => onStepSubmit({ step: currentStep + 1 })}
+        />
+      );
+    case 5:
+      return (
+        <DealAttractivenessStep
+          data={formData}
+          onChange={handleChange}
+          onBack={() => onStepSubmit({ step: currentStep - 1 })}
+          onNext={() => onStepSubmit({ step: currentStep + 1 })}
+        />
+      );
+    case 6:
+      return (
+        <AdditionalNotesStep
+          data={formData}
+          onChange={handleChange}
+          onBack={() => onStepSubmit({ step: currentStep - 1 })}
+          onNext={() => onStepSubmit({ step: currentStep + 1 })}
+        />
+      );
+    case 7:
+      return (
+        <ReviewStep
+          data={formData}
+          onBack={() => onStepSubmit({ step: currentStep - 1 })}
+          onSubmit={() => onStepSubmit({ completed: true })}
+        />
+      );
+    default:
+      return null;
+  }
+};
+
+export {
+  WelcomeStep,
+  FirmPreferencesStep,
+  PaymentTimingStep,
+  PostAcquisitionStep,
+  DealAttractivenessStep,
+  AdditionalNotesStep,
+  ReviewStep,
+  FormProgress
+};

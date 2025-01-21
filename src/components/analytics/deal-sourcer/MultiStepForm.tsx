@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { FormSteps } from "./FormSteps";
 import { supabase } from "@/integrations/supabase/client";
 
-export function MultiStepForm() {
+interface MultiStepFormProps {
+  onSuccess?: () => void;
+}
+
+export function MultiStepForm({ onSuccess }: MultiStepFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     buyerType: "",
@@ -18,14 +22,13 @@ export function MultiStepForm() {
   const handleStepSubmit = async (stepData: any) => {
     setFormData(prev => ({ ...prev, ...stepData }));
     
-    if (currentStep < 4) {
+    if (currentStep < 7) {
       setCurrentStep(prev => prev + 1);
     } else {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("No user found");
 
-        // Update buyer profile with AI preferences
         const { error: updateError } = await supabase
           .from('buyer_profiles')
           .update({
@@ -34,6 +37,8 @@ export function MultiStepForm() {
           .eq('user_id', user.id);
 
         if (updateError) throw updateError;
+        
+        onSuccess?.();
 
       } catch (error) {
         console.error('Error saving form data:', error);
