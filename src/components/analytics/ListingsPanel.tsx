@@ -35,12 +35,7 @@ interface Listing {
   practice_buyer_pool: PracticeBuyerPool[];
 }
 
-interface ServiceType {
-  name: string;
-  keywords: string[];
-}
-
-const SERVICE_TYPES: ServiceType[] = [
+const SERVICE_TYPES = [
   { name: "Software & Technology", keywords: ["software", "tech", "digital", "it"] },
   { name: "Accounting & Tax", keywords: ["tax", "accounting", "bookkeeping", "audit"] },
   { name: "Business Advisory", keywords: ["consult", "advisory", "strategy"] },
@@ -79,137 +74,6 @@ export const ListingsPanel = () => {
     }
   });
 
-  const handleExpressInterest = async (companyId: number) => {
-    try {
-      setIsSubmitting(true);
-      
-      // Update the firm's status
-      const { error: updateError } = await supabase
-        .from('canary_firms_data')
-        .update({ status: 'pending_outreach' })
-        .eq('Company ID', companyId);
-
-      if (updateError) {
-        toast({
-          title: "Error",
-          description: "Failed to update practice status. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to express interest",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Add to practice_buyer_pool
-      const { error: poolError } = await supabase
-        .from('practice_buyer_pool')
-        .insert({
-          practice_id: companyId.toString(),
-          user_id: user.id,
-          status: 'pending_outreach',
-          is_anonymous: false
-        });
-
-      if (poolError) {
-        if (poolError.code === '23505') {
-          toast({
-            title: "Already Interested",
-            description: "You have already expressed interest in this practice.",
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to express interest. Please try again.",
-            variant: "destructive",
-          });
-        }
-        return;
-      }
-
-      await refetchListings();
-      
-      toast({
-        title: "Success",
-        description: "Successfully expressed interest in the practice.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    console.log("Searching for:", query); // Debug log
-  };
-
-  const handleFilter = (newFilters: FilterState) => {
-    setFilters(newFilters);
-  };
-
-  const generateTitle = (listing: Listing): string => {
-    const summary = (listing.Summary || "").toLowerCase();
-    const primarySubtitle = listing["Primary Subtitle"] || "";
-    
-    // Professional prefixes based on industry
-    const prefixes = {
-      software: ["Premier", "Innovative", "Leading"],
-      accounting: ["Established", "Trusted", "Professional"],
-      consulting: ["Expert", "Strategic", "Premier"],
-      legal: ["Distinguished", "Respected", "Established"],
-      engineering: ["Advanced", "Technical", "Innovative"],
-      default: ["Leading", "Established", "Premier"]
-    };
-
-    // Determine business type and service
-    let businessType = "default";
-    let serviceType = "";
-
-    // Match against known service types
-    for (const service of SERVICE_TYPES) {
-      if (service.keywords.some(keyword => 
-        summary.includes(keyword) || primarySubtitle.toLowerCase().includes(keyword)
-      )) {
-        businessType = service.keywords[0];
-        serviceType = service.name;
-        break;
-      }
-    }
-
-    // If no match found but we have a primary subtitle, use that
-    if (!serviceType && primarySubtitle) {
-      serviceType = primarySubtitle
-        .split(" ")
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(" ");
-    }
-
-    // Get random prefix from appropriate category
-    const prefixList = prefixes[businessType as keyof typeof prefixes];
-    const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
-
-    // Build the title
-    if (serviceType) {
-      return `${prefix} ${serviceType} Practice`;
-    }
-
-    return `${prefix} Professional Practice`;
-  };
-
   // THIS IS THE ONLY FILTERING NOW - JUST BY SPECIALTIES
   const filteredListings = listings?.filter((listing: Listing) => {
     if (!searchQuery) return true;
@@ -220,8 +84,8 @@ export const ListingsPanel = () => {
   return (
     <div className="space-y-6">
       <SearchFilters 
-        onSearch={handleSearch}
-        onFilter={handleFilter}
+        onSearch={setSearchQuery}
+        onFilter={setFilters}
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -229,7 +93,6 @@ export const ListingsPanel = () => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
-          const title = generateTitle(listing);
           
           return (
             <Card 
@@ -239,7 +102,7 @@ export const ListingsPanel = () => {
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <h3 className="text-lg font-semibold leading-tight line-clamp-2 flex-1 mr-3">
-                    {title}
+                    {listing["Company Name"]}
                   </h3>
                   <div className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs whitespace-nowrap flex-shrink-0">
                     {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
