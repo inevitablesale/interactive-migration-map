@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
 // ... keep existing code (imports and type definitions)
 
@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 6; // Changed from 20 to 6
 
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
@@ -135,6 +135,30 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
+  // Function to generate pagination numbers
+  const getPaginationNumbers = () => {
+    const pageNumbers: (number | 'ellipsis')[] = [];
+    const currentGroup = Math.floor((currentPage - 1) / 10);
+    const startPage = currentGroup * 10 + 1;
+    const endPage = Math.min(startPage + 9, totalPages);
+
+    if (startPage > 1) {
+      pageNumbers.push(1);
+      if (startPage > 2) pageNumbers.push('ellipsis');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) pageNumbers.push('ellipsis');
+      pageNumbers.push(totalPages);
+    }
+
+    return pageNumbers;
+  };
+
   const { data: practiceOfDay } = useQuery({
     queryKey: ['practice-of-day'],
     queryFn: async () => {
@@ -216,15 +240,21 @@ export default function Dashboard() {
                       />
                     </PaginationItem>
                     
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
+                    {getPaginationNumbers().map((page, index) => (
+                      page === 'ellipsis' ? (
+                        <PaginationItem key={`ellipsis-${index}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
                     ))}
                     
                     <PaginationItem>
