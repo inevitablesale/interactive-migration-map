@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   WelcomeStep,
   FirmPreferencesStep,
@@ -10,151 +11,181 @@ import {
   ReviewStep,
   FormProgress
 } from "./FormSteps";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
-interface MultiStepFormProps {
-  profiles?: any[];
-  onSuccess?: () => void;
-}
-
-export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    buyerType: "",
-    practiceSize: "",
-    services: [],
-    additionalDetails: "",
-    timeline: "",
-    dealPreferences: [],
-    preferredState: "",
-    remotePreference: ""
-  });
-  
+export const MultiStepForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState({
+    buyer_name: "",
+    contact_email: "",
+    team_emails: "",
+    revenueRange: "",
+    geography: [] as string[],
+    dealTypes: [] as string[],
+    paymentStructures: [] as string[],
+    complexStructures: false,
+    timeline: "",
+    postAcquisitionGoals: [] as string[],
+    preferredRole: "",
+    attractiveFeatures: [] as string[],
+    dealRequirements: "",
+    additionalNotes: "",
+    alertFrequency: "daily" as "realtime" | "daily" | "weekly",
+  });
+
+  const totalSteps = 7;
+
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleNext = () => {
+    setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1));
+  };
+
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 0));
+  };
 
   const handleSubmit = async () => {
     try {
-      const { data: user } = await supabase.auth.getUser();
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user.user?.id) {
+      if (!user) {
         toast({
-          title: "Authentication required",
-          description: "Please sign in to save your preferences.",
-          variant: "destructive"
+          title: "Error",
+          description: "You must be logged in to create a profile.",
+          variant: "destructive",
         });
         return;
       }
 
-      const { error } = await supabase
-        .from('deal_sourcing_forms')
-        .insert([
-          {
-            user_id: user.user.id,
-            ...formData
-          }
-        ]);
+      // First create the buyer profile with user_id
+      const { data: profile, error: profileError } = await supabase
+        .from("buyer_profiles")
+        .insert({
+          user_id: user.id, // Add the user_id here
+          buyer_name: formData.buyer_name,
+          contact_email: formData.contact_email,
+          target_geography: formData.geography,
+          ai_preferences: {
+            timeline: formData.timeline,
+            dealTypes: formData.dealTypes,
+            preferredRole: formData.preferredRole,
+            dealRequirements: formData.dealRequirements,
+            complexStructures: formData.complexStructures,
+            paymentStructures: formData.paymentStructures,
+            attractiveFeatures: formData.attractiveFeatures,
+            postAcquisitionGoals: formData.postAcquisitionGoals,
+            additionalNotes: formData.additionalNotes,
+            team_emails: formData.team_emails?.split(',').map(email => email.trim()).filter(Boolean) || [],
+          },
+          alert_frequency: formData.alertFrequency,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Then create an initial AI opportunity for tracking
+      const { error: opportunityError } = await supabase
+        .from("ai_opportunities")
+        .insert({
+          user_id: user.id, // Add the user_id here as well
+          buyer_profile_id: profile.id,
+          opportunity_data: {
+            status: 'active',
+            created_at: new Date().toISOString(),
+            last_checked: new Date().toISOString(),
+          },
+          status: 'new',
+        });
+
+      if (opportunityError) throw opportunityError;
 
       toast({
-        title: "Success!",
-        description: "Your preferences have been saved.",
+        title: "Profile Created! 🎯",
+        description: "We'll start finding opportunities that match your preferences.",
       });
 
-      if (onSuccess) onSuccess();
-
+      onSuccess?.();
     } catch (error) {
-      console.error('Error saving form:', error);
+      console.error('Error creating profile:', error);
       toast({
-        title: "Error",
-        description: "Failed to save your preferences. Please try again.",
-        variant: "destructive"
+        title: "Error creating profile",
+        description: "Please try again later.",
+        variant: "destructive",
       });
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 7));
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return <WelcomeStep onNext={handleNext} />;
+      case 1:
+        return (
+          <FirmPreferencesStep
+            data={formData}
+            onChange={handleFieldChange}
+            onBack={handleBack}
+            onNext={handleNext}
+          />
+        );
+      case 2:
+        return (
+          <PaymentTimingStep
+            data={formData}
+            onChange={handleFieldChange}
+            onBack={handleBack}
+            onNext={handleNext}
+          />
+        );
+      case 3:
+        return (
+          <PostAcquisitionStep
+            data={formData}
+            onChange={handleFieldChange}
+            onBack={handleBack}
+            onNext={handleNext}
+          />
+        );
+      case 4:
+        return (
+          <DealAttractivenessStep
+            data={formData}
+            onChange={handleFieldChange}
+            onBack={handleBack}
+            onNext={handleNext}
+          />
+        );
+      case 5:
+        return (
+          <AdditionalNotesStep
+            data={formData}
+            onChange={handleFieldChange}
+            onBack={handleBack}
+            onNext={handleNext}
+          />
+        );
+      case 6:
+        return (
+          <ReviewStep
+            data={formData}
+            onBack={handleBack}
+            onSubmit={handleSubmit}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <FormProgress currentStep={currentStep} totalSteps={7} />
-      {currentStep === 1 && <WelcomeStep onNext={nextStep} />}
-      {currentStep === 2 && (
-        <FirmPreferencesStep 
-          data={formData} 
-          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
-          onBack={prevStep} 
-          onNext={nextStep} 
-        />
-      )}
-      {currentStep === 3 && (
-        <PaymentTimingStep 
-          data={formData} 
-          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
-          onBack={prevStep} 
-          onNext={nextStep} 
-        />
-      )}
-      {currentStep === 4 && (
-        <PostAcquisitionStep 
-          data={formData} 
-          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
-          onBack={prevStep} 
-          onNext={nextStep} 
-        />
-      )}
-      {currentStep === 5 && (
-        <DealAttractivenessStep 
-          data={formData} 
-          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
-          onBack={prevStep} 
-          onNext={nextStep} 
-        />
-      )}
-      {currentStep === 6 && (
-        <AdditionalNotesStep 
-          data={formData} 
-          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
-          onBack={prevStep} 
-          onNext={nextStep} 
-        />
-      )}
-      {currentStep === 7 && (
-        <ReviewStep 
-          data={formData} 
-          onBack={prevStep} 
-          onSubmit={handleSubmit} 
-        />
-      )}
-      <div className="flex justify-between">
-        {currentStep > 1 && (
-          <Button 
-            variant="outline" 
-            onClick={prevStep}
-            className="border-white/10 hover:bg-white/5"
-          >
-            Previous
-          </Button>
-        )}
-        
-        {currentStep < 7 ? (
-          <Button 
-            className="ml-auto"
-            onClick={nextStep}
-          >
-            Next
-          </Button>
-        ) : (
-          <Button 
-            className="ml-auto bg-blue-600 hover:bg-blue-700"
-            onClick={handleSubmit}
-          >
-            Submit
-          </Button>
-        )}
-      </div>
+    <div className="space-y-8">
+      <FormProgress currentStep={currentStep + 1} totalSteps={totalSteps} />
+      {renderStep()}
     </div>
   );
 };
