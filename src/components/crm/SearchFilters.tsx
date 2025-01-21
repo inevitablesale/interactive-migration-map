@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchFiltersProps {
   onSearch: (query: string) => void;
@@ -38,6 +40,25 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({});
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: industries } = useQuery({
+    queryKey: ['industries'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('canary_firms_data')
+        .select('Primary Subtitle')
+        .not('Primary Subtitle', 'is', null);
+      
+      if (error) throw error;
+
+      // Get unique industries and sort them
+      const uniqueIndustries = Array.from(new Set(data.map(item => item['Primary Subtitle'])))
+        .filter(Boolean)
+        .sort();
+
+      return uniqueIndustries;
+    }
+  });
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { 
@@ -115,10 +136,11 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Industries</SelectItem>
-                    <SelectItem value="Accounting">Accounting</SelectItem>
-                    <SelectItem value="Engineering">Engineering</SelectItem>
-                    <SelectItem value="IT Consulting">IT Consulting</SelectItem>
-                    <SelectItem value="Architecture">Architecture</SelectItem>
+                    {industries?.map((industry) => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

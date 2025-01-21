@@ -19,15 +19,19 @@ export default function Dashboard() {
     queryKey: ['practices'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('tracked_practices')
-        .select(`
-          *,
-          practice_buyer_pool (*)
-        `)
-        .order('created_at', { ascending: false });
+        .from('canary_firms_data')
+        .select('*')
+        .order('followerCount', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data.map(practice => ({
+        id: practice["Company ID"].toString(),
+        industry: practice["Primary Subtitle"] || "",
+        region: practice["State Name"] || "",
+        employee_count: practice.employeeCount,
+        service_mix: {},
+        practice_buyer_pool: []
+      }));
     }
   });
 
@@ -108,22 +112,17 @@ export default function Dashboard() {
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
-    const revenueMatches = (!filters.minRevenue || (practice.annual_revenue || 0) >= parseInt(filters.minRevenue) * 1000) &&
-                          (!filters.maxRevenue || (practice.annual_revenue || 0) <= parseInt(filters.maxRevenue) * 1000);
     const regionMatches = !filters.region || practice.region === filters.region;
 
-    return searchMatches && industryMatches && employeeMatches && revenueMatches && regionMatches;
+    return searchMatches && industryMatches && employeeMatches && regionMatches;
   });
 
   const { data: practiceOfDay } = useQuery({
     queryKey: ['practice-of-day'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('tracked_practices')
-        .select(`
-          *,
-          practice_buyer_pool (*)
-        `)
+        .from('canary_firms_data')
+        .select('*')
         .limit(1)
         .maybeSingle();
 
@@ -131,9 +130,12 @@ export default function Dashboard() {
       if (!data) return null;
       
       return {
-        ...data,
-        service_mix: data.service_mix as Record<string, number> || {},
-        buyer_count: data.practice_buyer_pool?.length || 0,
+        id: data["Company ID"].toString(),
+        industry: data["Primary Subtitle"] || "",
+        region: data["State Name"] || "",
+        employee_count: data.employeeCount,
+        service_mix: {},
+        buyer_count: 0,
       };
     }
   });
@@ -186,10 +188,7 @@ export default function Dashboard() {
           {filteredPractices?.map((practice) => (
             <PracticeCard
               key={practice.id}
-              practice={{
-                ...practice,
-                service_mix: practice.service_mix as Record<string, number> || {}
-              }}
+              practice={practice}
               onWithdraw={handleWithdraw}
               onExpressInterest={() => handleExpressInterest(practice.id)}
             />
