@@ -139,9 +139,14 @@ export const ListingsPanel = () => {
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
-          // Generate a descriptive title from the Summary field or fall back to Primary Subtitle
+          // Generate a three-word title from the Summary field or fall back to Primary Subtitle
           const title = listing.Summary 
-            ? `${listing["Primary Subtitle"]} Practice - ${listing.Summary.split('.')[0]}`
+            ? `${listing["Primary Subtitle"]} ${
+                listing.Summary.split(/[.,!?]+/)[0] // Get first sentence
+                  .split(' ') // Split into words
+                  .filter(word => word.length > 2) // Filter out small words
+                  .slice(0, 2) // Take first two words
+                  .join(' ')} Practice` // Join with Practice
             : `${listing["Primary Subtitle"]} Practice`;
           
           return (
