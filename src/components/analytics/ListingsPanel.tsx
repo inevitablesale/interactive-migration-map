@@ -212,12 +212,9 @@ export const ListingsPanel = () => {
 
   // THIS IS THE ONLY FILTERING NOW - JUST BY SPECIALTIES
   const filteredListings = listings?.filter((listing: Listing) => {
-    console.log("Listing specialities:", listing.specialities); // Debug log
-    console.log("Search query:", searchQuery); // Debug log
-    
-    return !searchQuery || 
-           (listing.specialities && 
-            listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (!searchQuery) return true;
+    if (!listing.specialities) return false;
+    return listing.specialities.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
