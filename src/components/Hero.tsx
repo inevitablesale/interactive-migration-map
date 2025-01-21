@@ -32,9 +32,9 @@ export function Hero() {
       <div className="text-center max-w-4xl animate-fade-in">
         <p className="text-yellow-400 text-sm md:text-base tracking-wider mb-4">SERIOUS ABOUT BUYING A FIRM?</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Discover Off-Market Opportunities</span>
+          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-transparent bg-clip-text">Off-Market Access.</span>
           <br />
-          <span className="text-white">in Professional Services</span>
+          <span className="text-white">Simplified.</span>
         </h1>
         <div className="flex justify-center mt-12">
           <button 
