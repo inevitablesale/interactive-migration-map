@@ -12,6 +12,7 @@ import { useState } from "react";
 export const ListingsPanel = () => {
   const { toast } = useToast();
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
@@ -49,15 +50,8 @@ export const ListingsPanel = () => {
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleExpressInterest = async (companyId: number) => {
-    if (isFreeTier) {
-      toast({
-        title: "Premium Feature",
-        description: "Upgrade to view detailed firm information",
-      });
-      return;
-    }
-
     try {
+      setIsSubmitting(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
@@ -68,6 +62,15 @@ export const ListingsPanel = () => {
         return;
       }
 
+      if (isFreeTier) {
+        toast({
+          title: "Premium Feature",
+          description: "Upgrade to view detailed firm information",
+        });
+        return;
+      }
+
+      // First, add to practice_buyer_pool
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert([{
@@ -78,37 +81,53 @@ export const ListingsPanel = () => {
         }]);
 
       if (poolError) {
-        if (poolError.code === '23505') {
+        if (poolError.code === '23505') { // Unique violation
           toast({
-            title: "Already Expressed Interest",
-            description: "You have already expressed interest in this practice",
+            title: "Already Interested",
+            description: "You have already expressed interest in this practice.",
           });
         } else {
-          throw poolError;
+          console.error('Pool error:', poolError);
+          toast({
+            title: "Error",
+            description: "Failed to express interest. Please try again.",
+            variant: "destructive",
+          });
         }
         return;
       }
 
+      // Then, update the firm's status
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
         .eq('Company ID', companyId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to update practice status. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      refetchListings();
+      await refetchListings();
 
       toast({
-        title: "Interest Submitted",
-        description: "Our team has been alerted and will initiate contact within 4 hours.",
+        title: "Success",
+        description: "Successfully expressed interest in the practice.",
       });
     } catch (error) {
-      console.error('Error expressing interest:', error);
+      console.error('Express interest error:', error);
       toast({
         title: "Error",
-        description: "Failed to express interest. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
