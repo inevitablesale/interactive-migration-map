@@ -210,16 +210,22 @@ export const ListingsPanel = () => {
   };
 
   const filteredListings = listings?.filter((listing: Listing) => {
-    const searchMatches = !searchQuery || 
-      listing["Primary Subtitle"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing["State Name"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.specialities?.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchTerms = searchQuery.toLowerCase().split(' ');
+    
+    const searchMatches = !searchQuery || searchTerms.every(term => 
+      listing["Primary Subtitle"]?.toLowerCase().includes(term) ||
+      listing["State Name"]?.toLowerCase().includes(term) ||
+      listing.specialities?.toLowerCase().includes(term) ||
+      listing.Summary?.toLowerCase().includes(term)
+    );
 
     const industryMatches = !filters.industry || listing["Primary Subtitle"] === filters.industry;
     const employeeMatches = (!filters.minEmployees || listing.employeeCount >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || listing.employeeCount <= parseInt(filters.maxEmployees));
     const regionMatches = !filters.region || listing["State Name"] === filters.region;
-    const specialityMatches = !filters.speciality || listing.specialities?.includes(filters.speciality);
+    const specialityMatches = !filters.speciality || 
+                             (listing.specialities && 
+                              listing.specialities.toLowerCase().includes(filters.speciality.toLowerCase()));
 
     return searchMatches && industryMatches && employeeMatches && regionMatches && specialityMatches;
   });
