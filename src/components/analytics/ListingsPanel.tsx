@@ -66,7 +66,7 @@ export const ListingsPanel = () => {
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert({
-          practice_id: companyId,
+          practice_id: companyId.toString(),
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
@@ -139,6 +139,11 @@ export const ListingsPanel = () => {
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
+          // Generate a descriptive title from the Summary field or fall back to Primary Subtitle
+          const title = listing.Summary 
+            ? `${listing["Primary Subtitle"]} Practice - ${listing.Summary.split('.')[0]}`
+            : `${listing["Primary Subtitle"]} Practice`;
+          
           return (
             <Card 
               key={listing["Company ID"]} 
@@ -147,7 +152,7 @@ export const ListingsPanel = () => {
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <h3 className="text-lg font-semibold">
-                    {listing["Primary Subtitle"] || "Accounting"}
+                    {title}
                   </h3>
                   <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
                     {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
