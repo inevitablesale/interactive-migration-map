@@ -12,7 +12,6 @@ import { useState } from "react";
 
 export const ListingsPanel = () => {
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   
   const { data: profile } = useQuery({
@@ -125,9 +124,9 @@ export const ListingsPanel = () => {
           return (
             <Card 
               key={listing["Company ID"]} 
-              className="p-6 w-full"
+              className="p-6"
             >
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Header */}
                 <div className="flex justify-between items-start">
                   <div>
@@ -135,13 +134,13 @@ export const ListingsPanel = () => {
                       {listing["Primary Subtitle"] || "Accounting"}
                     </h3>
                   </div>
-                  <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
-                    {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
+                  <div className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                    Not Contacted
                   </div>
                 </div>
 
                 {/* Main Info */}
-                <div className="grid grid-cols-2 gap-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-gray-500" />
                     <span>{listing["State Name"] || listing.Location}</span>
@@ -171,37 +170,35 @@ export const ListingsPanel = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="flex gap-3">
                   <Button 
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2 min-w-0"
+                    className="flex items-center gap-2"
                     disabled={!hasNotes}
                     onClick={() => hasNotes && setSelectedNotes(listing.notes)}
                   >
-                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">View Notes</span>
+                    <MessageSquare className="w-4 h-4" />
+                    View Notes
                   </Button>
                   
                   <Button 
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2 min-w-0"
+                    className="flex items-center gap-2"
                   >
-                    <Eye className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">View Details</span>
+                    <Eye className="w-4 h-4" />
+                    View Details
                   </Button>
                   
                   <Button 
                     variant={hasExpressedInterest ? "outline" : "default"}
-                    className={`w-full flex items-center justify-center gap-2 min-w-0 ${
-                      hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                    className={`flex items-center gap-2 ${
+                      hasExpressedInterest ? 'text-gray-500' : 'text-primary-foreground'
                     }`}
                     onClick={() => handleExpressInterest(listing["Company ID"])}
                     disabled={hasExpressedInterest}
                   >
-                    <Heart className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">
-                      {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
-                    </span>
+                    <Heart className="w-4 h-4" />
+                    Express Interest
                   </Button>
                 </div>
               </div>
