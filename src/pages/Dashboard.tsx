@@ -5,7 +5,7 @@ import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
 export default function Dashboard() {
@@ -73,14 +73,51 @@ export default function Dashboard() {
       return;
     }
 
-    const { error } = await supabase
-      .from('practice_buyer_pool')
-      .insert([
-        { practice_id: practiceId, user_id: user.id }
-      ]);
+    // Find the practice in our data
+    const practice = practices?.find(p => p.id === practiceId);
+    if (!practice) {
+      toast({
+        title: "Error",
+        description: "Practice not found.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    if (error) {
-      if (error.code === '23505') { // Unique violation
+    // First, create or get the tracked practice
+    const { data: trackedPractice, error: trackedError } = await supabase
+      .from('tracked_practices')
+      .insert([{
+        industry: practice.industry,
+        region: practice.region,
+        employee_count: practice.employee_count,
+        annual_revenue: practice.annual_revenue,
+        service_mix: practice.service_mix,
+        status: 'pending_response',
+        user_id: user.id
+      }])
+      .select()
+      .single();
+
+    if (trackedError) {
+      toast({
+        title: "Error",
+        description: "Failed to track practice. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Then, add to practice_buyer_pool using the tracked practice ID
+    const { error: poolError } = await supabase
+      .from('practice_buyer_pool')
+      .insert([{
+        practice_id: trackedPractice.id,
+        user_id: user.id
+      }]);
+
+    if (poolError) {
+      if (poolError.code === '23505') { // Unique violation
         toast({
           title: "Already Interested",
           description: "You have already expressed interest in this practice.",
