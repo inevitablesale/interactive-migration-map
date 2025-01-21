@@ -74,7 +74,48 @@ export const ListingsPanel = () => {
     }
   });
 
-  // THIS IS THE ONLY FILTERING NOW - JUST BY SPECIALTIES
+  const handleExpressInterest = async (companyId: number) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Update the listing status
+      const { error: updateError } = await supabase
+        .from('canary_firms_data')
+        .update({ status: 'pending_outreach' })
+        .eq('Company ID', companyId);
+
+      if (updateError) throw updateError;
+
+      // Add entry to practice_buyer_pool
+      const { error: poolError } = await supabase
+        .from('practice_buyer_pool')
+        .insert({
+          practice_id: companyId.toString(),
+          status: 'interested',
+          is_anonymous: true
+        });
+
+      if (poolError) throw poolError;
+
+      toast({
+        title: "Interest Expressed",
+        description: "We've recorded your interest in this practice.",
+      });
+
+      refetchListings();
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to express interest. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredListings = listings?.filter((listing: Listing) => {
     if (!searchQuery) return true;
     if (!listing.specialities) return false;
