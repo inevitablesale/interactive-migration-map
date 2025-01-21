@@ -47,6 +47,7 @@ interface PracticeCardProps {
     last_updated: string;
     practice_buyer_pool?: { id: string }[];
     specialities?: string;
+    notes?: string;
   };
   onWithdraw?: (id: string) => void;
   onExpressInterest?: (id: string) => void;
@@ -55,6 +56,7 @@ interface PracticeCardProps {
 export function PracticeCard({ practice, onWithdraw, onExpressInterest }: PracticeCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hasExpressedInterest = practice.practice_buyer_pool && practice.practice_buyer_pool.length > 0;
+  const hasNotes = practice.notes && practice.notes.trim().length > 0;
 
   const specialties = practice.specialities ? 
     practice.specialities.split(',').map(s => s.trim()) : 
@@ -119,7 +121,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             <DialogTrigger asChild>
               <Button 
                 variant="outline" 
-                className="w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
+                className={`w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!hasNotes}
               >
                 <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
                 <span className="hidden sm:inline">View Notes</span>
@@ -127,9 +130,11 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Practice Details</DialogTitle>
+                <DialogTitle>Practice Notes</DialogTitle>
               </DialogHeader>
-              {/* Add detailed view content here */}
+              <div className="mt-4 whitespace-pre-wrap">
+                {practice.notes}
+              </div>
             </DialogContent>
           </Dialog>
           
