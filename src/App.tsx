@@ -103,10 +103,9 @@ function App() {
             ) : (
               <Button
                 onClick={handleSignIn}
-                className="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
+                className="bg-yellow-400 text-black hover:bg-yellow-500 transition-all duration-200"
               >
-                <Linkedin className="w-4 h-4" />
-                <span>Sign in with LinkedIn</span>
+                Sign In
               </Button>
             )}
           </div>
