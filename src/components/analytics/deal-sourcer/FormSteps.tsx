@@ -357,4 +357,15 @@ export const FormProgress = ({ currentStep, totalSteps }: { currentStep: number;
     <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
     <p className="text-sm text-white/60 text-center">Step {currentStep} of {totalSteps}</p>
   </div>
-);
+};
+
+export {
+  WelcomeStep,
+  FirmPreferencesStep,
+  PaymentTimingStep,
+  PostAcquisitionStep,
+  DealAttractivenessStep,
+  AdditionalNotesStep,
+  ReviewStep,
+  FormProgress
+};

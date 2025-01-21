@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FormSteps } from "./FormSteps";
+import {
+  WelcomeStep,
+  FirmPreferencesStep,
+  PaymentTimingStep,
+  PostAcquisitionStep,
+  DealAttractivenessStep,
+  AdditionalNotesStep,
+  ReviewStep,
+  FormProgress
+} from "./FormSteps";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface MultiStepFormProps {
-  profiles: any[];
+  profiles?: any[];
+  onSuccess?: () => void;
 }
 
-export const MultiStepForm = ({ profiles }: MultiStepFormProps) => {
+export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     buyerType: "",
@@ -53,6 +63,8 @@ export const MultiStepForm = ({ profiles }: MultiStepFormProps) => {
         description: "Your preferences have been saved.",
       });
 
+      if (onSuccess) onSuccess();
+
     } catch (error) {
       console.error('Error saving form:', error);
       toast({
@@ -68,12 +80,55 @@ export const MultiStepForm = ({ profiles }: MultiStepFormProps) => {
 
   return (
     <div className="space-y-6">
-      <FormSteps 
-        currentStep={currentStep}
-        formData={formData}
-        setFormData={setFormData}
-      />
-      
+      <FormProgress currentStep={currentStep} totalSteps={4} />
+      {currentStep === 1 && <WelcomeStep onNext={nextStep} />}
+      {currentStep === 2 && (
+        <FirmPreferencesStep 
+          data={formData} 
+          onChange={setFormData} 
+          onBack={prevStep} 
+          onNext={nextStep} 
+        />
+      )}
+      {currentStep === 3 && (
+        <PaymentTimingStep 
+          data={formData} 
+          onChange={setFormData} 
+          onBack={prevStep} 
+          onNext={nextStep} 
+        />
+      )}
+      {currentStep === 4 && (
+        <PostAcquisitionStep 
+          data={formData} 
+          onChange={setFormData} 
+          onBack={prevStep} 
+          onNext={nextStep} 
+        />
+      )}
+      {currentStep === 5 && (
+        <DealAttractivenessStep 
+          data={formData} 
+          onChange={setFormData} 
+          onBack={prevStep} 
+          onNext={nextStep} 
+        />
+      )}
+      {currentStep === 6 && (
+        <AdditionalNotesStep 
+          data={formData} 
+          onChange={setFormData} 
+          onBack={prevStep} 
+          onNext={nextStep} 
+        />
+      )}
+      {currentStep === 7 && (
+        <ReviewStep 
+          data={formData} 
+          onBack={prevStep} 
+          onSubmit={handleSubmit} 
+        />
+      )}
       <div className="flex justify-between">
         {currentStep > 1 && (
           <Button 
@@ -85,7 +140,7 @@ export const MultiStepForm = ({ profiles }: MultiStepFormProps) => {
           </Button>
         )}
         
-        {currentStep < 4 ? (
+        {currentStep < 7 ? (
           <Button 
             className="ml-auto"
             onClick={nextStep}
