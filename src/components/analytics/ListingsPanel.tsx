@@ -5,6 +5,7 @@ import { UpgradePrompt } from "./UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
@@ -17,6 +18,7 @@ const PLACEHOLDER_IMAGES = [
 
 export const ListingsPanel = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
@@ -67,13 +69,13 @@ export const ListingsPanel = () => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
+      <div className={`${isMobile ? 'flex overflow-x-auto pb-4 space-x-4 snap-x snap-mandatory' : 'space-y-4'}`}>
         {listings?.map((listing, index) => (
           <Card 
             key={listing["Company ID"]} 
             className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${
               isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'
-            }`}
+            } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
             onClick={handleListingClick}
           >
             <div className="flex items-start gap-4">
@@ -87,48 +89,48 @@ export const ListingsPanel = () => {
               </div>
 
               {/* Firm Details */}
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 space-y-3 min-w-0">
                 <div>
-                  <h3 className={`font-medium text-white text-lg ${isFreeTier ? 'blur-sm select-none' : ''}`}>
+                  <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
                     {listing["Company Name"]}
                     {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
                   </h3>
                   <div className="flex items-center gap-2 text-white/60 text-sm">
-                    <MapPin className="w-4 h-4" />
-                    <span>{listing.Location || listing["State Name"]}</span>
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{listing.Location || listing["State Name"]}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-blue-400" />
-                    <div>
-                      <span className="text-white/60">Employees</span>
-                      <p className="text-white font-medium">{listing.employeeCount}</p>
+                    <Users className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-white/60 block">Employees</span>
+                      <p className="text-white font-medium truncate">{listing.employeeCount}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <Briefcase className="w-4 h-4 text-green-400" />
-                    <div>
-                      <span className="text-white/60">Specialties</span>
-                      <p className="text-white font-medium line-clamp-1">{listing.specialities || "General Practice"}</p>
+                    <Briefcase className="w-4 h-4 text-green-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-white/60 block">Specialties</span>
+                      <p className="text-white font-medium truncate">{listing.specialities || "General Practice"}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-yellow-400" />
-                    <div>
-                      <span className="text-white/60">Growth</span>
-                      <p className="text-white font-medium">+{Math.floor(Math.random() * 30)}%</p>
+                    <TrendingUp className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-white/60 block">Growth</span>
+                      <p className="text-white font-medium truncate">+{Math.floor(Math.random() * 30)}%</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <DollarSign className="w-4 h-4 text-purple-400" />
-                    <div>
-                      <span className="text-white/60">Revenue/Employee</span>
-                      <p className="text-white font-medium">${Math.floor(80 + Math.random() * 40)}K</p>
+                    <DollarSign className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-white/60 block">Revenue/Employee</span>
+                      <p className="text-white font-medium truncate">${Math.floor(80 + Math.random() * 40)}K</p>
                     </div>
                   </div>
                 </div>
