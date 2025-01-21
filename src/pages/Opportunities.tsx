@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Map from "@/components/Map";
-import { Header } from "@/components/Header";
 
 const PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
@@ -137,9 +136,8 @@ export default function Opportunities() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Header />
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/10 p-8 mt-16">
+      <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/10 p-8">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold text-white mb-2">Firm Opportunities</h1>
           <p className="text-white/60">
