@@ -46,7 +46,6 @@ export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
         return;
       }
 
-      // Save to deal_sourcing_forms table instead
       const { error } = await supabase
         .from('deal_sourcing_forms')
         .insert([
@@ -75,17 +74,17 @@ export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 7));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   return (
     <div className="space-y-6">
-      <FormProgress currentStep={currentStep} totalSteps={4} />
+      <FormProgress currentStep={currentStep} totalSteps={7} />
       {currentStep === 1 && <WelcomeStep onNext={nextStep} />}
       {currentStep === 2 && (
         <FirmPreferencesStep 
           data={formData} 
-          onChange={setFormData} 
+          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
           onBack={prevStep} 
           onNext={nextStep} 
         />
@@ -93,7 +92,7 @@ export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
       {currentStep === 3 && (
         <PaymentTimingStep 
           data={formData} 
-          onChange={setFormData} 
+          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
           onBack={prevStep} 
           onNext={nextStep} 
         />
@@ -101,7 +100,7 @@ export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
       {currentStep === 4 && (
         <PostAcquisitionStep 
           data={formData} 
-          onChange={setFormData} 
+          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
           onBack={prevStep} 
           onNext={nextStep} 
         />
@@ -109,7 +108,7 @@ export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
       {currentStep === 5 && (
         <DealAttractivenessStep 
           data={formData} 
-          onChange={setFormData} 
+          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
           onBack={prevStep} 
           onNext={nextStep} 
         />
@@ -117,7 +116,7 @@ export const MultiStepForm = ({ profiles, onSuccess }: MultiStepFormProps) => {
       {currentStep === 6 && (
         <AdditionalNotesStep 
           data={formData} 
-          onChange={setFormData} 
+          onChange={(field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))} 
           onBack={prevStep} 
           onNext={nextStep} 
         />
