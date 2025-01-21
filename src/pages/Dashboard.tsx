@@ -22,11 +22,7 @@ export default function Dashboard() {
     queryFn: async () => {
       const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
-        .select(`
-          *,
-          practice_buyer_pool (*)
-        `)
-        .order('followerCount', { ascending: false });
+        .select('*');
 
       if (error) throw error;
 
@@ -37,11 +33,11 @@ export default function Dashboard() {
         employee_count: practice.employeeCount || 0,
         annual_revenue: 0,
         service_mix: { "General": 100 },
-        status: "owner_engaged",
+        status: "owner_engaged" as const,
         last_updated: new Date().toISOString(),
-        practice_buyer_pool: practice.practice_buyer_pool || [],
-        notes: practice.notes || "",
-        specialities: practice.specialities
+        practice_buyer_pool: [] as { id: string }[],
+        specialities: practice.specialities || "",
+        notes: practice.notes || ""
       }));
     }
   });
@@ -221,7 +217,7 @@ export default function Dashboard() {
         region: data["State Name"] || "",
         employee_count: data.employeeCount || 0,
         service_mix: { "General": 100 },
-        buyer_count: 0,
+        buyer_count: 0
       };
     }
   });
@@ -297,11 +293,12 @@ export default function Dashboard() {
           )}
         </div>
         <div>
-          <PracticeOfDay 
-            practice={practiceOfDay}
-            onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
-            disabled={isSubmitting}
-          />
+          {practiceOfDay && (
+            <PracticeOfDay 
+              practice={practiceOfDay}
+              onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
+            />
+          )}
         </div>
       </div>
     </div>
