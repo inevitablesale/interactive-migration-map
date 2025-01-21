@@ -16,7 +16,6 @@ const getStatusColor = (status: string) => {
     case 'closed':
       return 'bg-yellow-500';
     case 'not_contacted':
-      return 'bg-gray-500';
     default:
       return 'bg-gray-500';
   }
@@ -31,9 +30,8 @@ const getStatusDisplay = (status: string) => {
     case 'closed':
       return 'Closed';
     case 'not_contacted':
-      return 'Not Contacted';
     default:
-      return status.replace(/_/g, ' ');
+      return 'Not Contacted';
   }
 };
 
