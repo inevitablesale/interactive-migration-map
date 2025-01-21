@@ -113,6 +113,31 @@ export const ListingsPanel = () => {
     setFilters(newFilters);
   };
 
+  const generateTitle = (listing: any) => {
+    // Get meaningful words from the Summary (excluding common filler words)
+    const fillerWords = new Set(['and', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with']);
+    
+    if (!listing.Summary) {
+      return `${listing["Primary Subtitle"]} Practice`;
+    }
+
+    const words = listing.Summary
+      .split(/[.,!? ]+/)
+      .filter((word: string) => 
+        word.length > 2 && !fillerWords.has(word.toLowerCase())
+      )
+      .map((word: string) => word.trim())
+      .filter(Boolean);
+
+    if (words.length >= 2) {
+      return `${listing["Primary Subtitle"]} ${words[0]} ${words[1]}`;
+    } else if (words.length === 1) {
+      return `${listing["Primary Subtitle"]} ${words[0]} Practice`;
+    }
+    
+    return `${listing["Primary Subtitle"]} Practice`;
+  };
+
   const filteredListings = listings?.filter(listing => {
     const searchMatches = !searchQuery || 
       listing["Primary Subtitle"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -139,16 +164,6 @@ export const ListingsPanel = () => {
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
-          // Generate a three-word title from the Summary field or fall back to Primary Subtitle
-          const title = listing.Summary 
-            ? `${listing["Primary Subtitle"]} ${
-                listing.Summary.split(/[.,!?]+/)[0] // Get first sentence
-                  .split(' ') // Split into words
-                  .filter(word => word.length > 2) // Filter out small words
-                  .slice(0, 2) // Take first two words
-                  .join(' ')} Practice` // Join with Practice
-            : `${listing["Primary Subtitle"]} Practice`;
-          
           return (
             <Card 
               key={listing["Company ID"]} 
@@ -157,7 +172,7 @@ export const ListingsPanel = () => {
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <h3 className="text-lg font-semibold">
-                    {title}
+                    {generateTitle(listing)}
                   </h3>
                   <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
                     {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
