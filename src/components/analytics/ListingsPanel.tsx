@@ -10,6 +10,17 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
 
+interface PracticeBuyerPool {
+  id: string;
+  practice_id: string;
+  user_id: string;
+  status: string;
+  joined_at: string;
+  rating: number | null;
+  notes: string | null;
+  is_anonymous: boolean;
+}
+
 interface Listing {
   "Company ID": number;
   "Company Name": string;
@@ -21,7 +32,7 @@ interface Listing {
   status: string;
   notes: string | null;
   specialities: string | null;
-  practice_buyer_pool?: Array<{ id: string }>;
+  practice_buyer_pool: PracticeBuyerPool[];
 }
 
 interface ServiceType {
@@ -51,11 +62,20 @@ export const ListingsPanel = () => {
         .from('canary_firms_data')
         .select(`
           *,
-          practice_buyer_pool (*)
+          practice_buyer_pool (
+            id,
+            practice_id,
+            user_id,
+            status,
+            joined_at,
+            rating,
+            notes,
+            is_anonymous
+          )
         `);
       
       if (error) throw error;
-      return data;
+      return data as Listing[];
     }
   });
 
