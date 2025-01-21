@@ -432,14 +432,3 @@ export const FormSteps = ({
       return null;
   }
 };
-
-export {
-  WelcomeStep,
-  FirmPreferencesStep,
-  PaymentTimingStep,
-  PostAcquisitionStep,
-  DealAttractivenessStep,
-  AdditionalNotesStep,
-  ReviewStep,
-  FormProgress
-};
