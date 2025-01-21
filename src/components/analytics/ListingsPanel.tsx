@@ -210,7 +210,7 @@ export const ListingsPanel = () => {
   };
 
   const filteredListings = listings?.filter((listing: Listing) => {
-    // Simple search: just check if the search query exists in specialties
+    // Only check specialities for search
     const searchMatches = !searchQuery || 
       (listing.specialities && listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
