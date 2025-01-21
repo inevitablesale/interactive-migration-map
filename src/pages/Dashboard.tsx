@@ -36,7 +36,7 @@ export default function Dashboard() {
         status: "owner_engaged",
         last_updated: new Date().toISOString(),
         practice_buyer_pool: [],
-        notes: [],
+        notes: practice.notes || "",  // Changed from [] to "" to match PracticeCard type
         specialities: practice.specialities
       }));
     }
