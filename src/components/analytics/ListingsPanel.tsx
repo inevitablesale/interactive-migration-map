@@ -114,34 +114,37 @@ export const ListingsPanel = () => {
   };
 
   const generateTitle = (listing: any) => {
-    const fillerWords = new Set([
-      'and', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
-      'is', 'are', 'was', 'were', 'be', 'been', 'being', 'has', 'have', 'had'
-    ]);
-    
+    // If no summary, use a default professional title
     if (!listing.Summary) {
       return `Leading ${listing["Primary Subtitle"]} Provider`;
     }
 
-    // Get the first sentence and clean it up
-    const firstSentence = listing.Summary.split(/[.!?]+/)[0];
-    const words = firstSentence
-      .split(/\s+/)
-      .filter((word: string) => 
-        word.length > 2 && !fillerWords.has(word.toLowerCase())
-      )
-      .map((word: string) => word.trim())
-      .filter(Boolean);
+    // Get the first sentence
+    const firstSentence = listing.Summary.split(/[.!?]+/)[0].toLowerCase();
+    
+    // Common professional prefixes
+    const prefixes = ['leading', 'premier', 'established', 'innovative', 'growing'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
 
-    // Try to form a meaningful phrase
-    if (words.length >= 3) {
-      return `${words[0]} ${words[1]} ${listing["Primary Subtitle"]}`;
-    } else if (words.length >= 2) {
-      return `${words[0]} ${listing["Primary Subtitle"]} ${words[1]}`;
+    // Check for specific patterns in the summary
+    if (firstSentence.includes('software') || firstSentence.includes('tech')) {
+      return `${prefix} Cloud-Based Software Provider`;
     }
     
-    // Default to a professional-sounding title
-    return `Premier ${listing["Primary Subtitle"]} Provider`;
+    if (firstSentence.includes('tax') || firstSentence.includes('accounting')) {
+      return `${prefix} Professional Services Firm`;
+    }
+    
+    if (firstSentence.includes('consult')) {
+      return `${prefix} Business Advisory Firm`;
+    }
+
+    if (firstSentence.includes('wealth') || firstSentence.includes('financial')) {
+      return `${prefix} Wealth Management Practice`;
+    }
+
+    // Default to a professional title using the primary subtitle
+    return `${prefix} ${listing["Primary Subtitle"]} Provider`;
   };
 
   const filteredListings = listings?.filter(listing => {
