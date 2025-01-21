@@ -7,10 +7,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export const ListingsPanel = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
@@ -117,6 +120,7 @@ export const ListingsPanel = () => {
         {listings?.map((listing) => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
+          const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
             <Card 
@@ -171,17 +175,11 @@ export const ListingsPanel = () => {
                   <Button 
                     variant="outline"
                     className="w-full flex items-center justify-center gap-2"
-                    onClick={() => {
-                      if (isFreeTier) {
-                        toast({
-                          title: "Premium Feature",
-                          description: "Upgrade to add notes",
-                        });
-                      }
-                    }}
+                    disabled={!hasNotes}
+                    onClick={() => hasNotes && setSelectedNotes(listing.notes)}
                   >
                     <MessageSquare className="w-4 h-4" />
-                    Add Note
+                    View Notes
                   </Button>
                   
                   <Button 
@@ -222,6 +220,17 @@ export const ListingsPanel = () => {
           ]}
         />
       )}
+
+      <Dialog open={!!selectedNotes} onOpenChange={() => setSelectedNotes(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Notes</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 whitespace-pre-wrap">
+            {selectedNotes}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -164,6 +164,7 @@ export type Database = {
           Location: string | null
           logoResolutionResult: string | null
           longitude: number | null
+          notes: string | null
           originalCoverImage: string | null
           PLACEFP: string | null
           PLACENAME: string | null
@@ -194,6 +195,7 @@ export type Database = {
           Location?: string | null
           logoResolutionResult?: string | null
           longitude?: number | null
+          notes?: string | null
           originalCoverImage?: string | null
           PLACEFP?: string | null
           PLACENAME?: string | null
@@ -224,6 +226,7 @@ export type Database = {
           Location?: string | null
           logoResolutionResult?: string | null
           longitude?: number | null
+          notes?: string | null
           originalCoverImage?: string | null
           PLACEFP?: string | null
           PLACENAME?: string | null
