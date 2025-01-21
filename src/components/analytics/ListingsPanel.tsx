@@ -51,8 +51,12 @@ export const ListingsPanel = () => {
 
   const handleExpressInterest = async (companyId: number) => {
     try {
+      console.log('Starting express interest process for company:', companyId);
       setIsSubmitting(true);
+      
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user?.id);
+      
       if (!user) {
         toast({
           title: "Authentication Required",
@@ -71,6 +75,13 @@ export const ListingsPanel = () => {
       }
 
       // First, add to practice_buyer_pool
+      console.log('Attempting to insert into practice_buyer_pool:', {
+        practice_id: companyId.toString(),
+        user_id: user.id,
+        status: 'pending_outreach',
+        is_anonymous: false
+      });
+
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert([{
@@ -81,6 +92,7 @@ export const ListingsPanel = () => {
         }]);
 
       if (poolError) {
+        console.error('Pool error details:', poolError);
         if (poolError.code === '23505') { // Unique violation
           toast({
             title: "Already Interested",
@@ -98,13 +110,14 @@ export const ListingsPanel = () => {
       }
 
       // Then, update the firm's status
+      console.log('Updating firm status for company:', companyId);
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
         .eq('Company ID', companyId);
 
       if (updateError) {
-        console.error('Update error:', updateError);
+        console.error('Update error details:', updateError);
         toast({
           title: "Error",
           description: "Failed to update practice status. Please try again.",
