@@ -1,24 +1,23 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
-import Index from "@/pages/Index";
-import Analysis from "@/pages/Analysis";
-import Opportunities from "@/pages/Opportunities";
-import MarketReport from "@/pages/MarketReport";
-import StateMarketReport from "@/pages/StateMarketReport";
-import ThankYou from "@/pages/ThankYou";
-import Dashboard from "@/pages/Dashboard";
-import { Button } from "@/components/ui/button";
 import { Bird } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "./integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import Index from "./pages/Index";
+import Analysis from "./pages/Analysis";
+import Dashboard from "./pages/Dashboard";
+import MarketReport from "./pages/MarketReport";
+import StateMarketReport from "./pages/StateMarketReport";
+import ThankYou from "./pages/ThankYou";
+import Opportunities from "./pages/Opportunities";
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check current auth status
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
@@ -34,29 +33,51 @@ function App() {
   }, []);
 
   const handleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    });
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/thank-you`,
+        },
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
       toast({
-        title: "Error signing in",
-        description: error.message,
         variant: "destructive",
+        title: "Authentication Error",
+        description: "Failed to sign in. Please try again.",
       });
     }
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Sign Out Error",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Signed out successfully",
+        });
+      }
+    } catch (error) {
+      console.error("Sign out error:", error);
       toast({
-        title: "Error signing out",
-        description: error.message,
         variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signed out successfully",
+        title: "Sign Out Error",
+        description: "Failed to sign out. Please try again.",
       });
     }
   };
@@ -70,38 +91,37 @@ function App() {
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
-          {user ? (
-            <Button 
-              variant="outline" 
-              onClick={handleSignOut}
-              className="text-white hover:text-yellow-400"
-            >
-              Sign Out
-            </Button>
-          ) : (
-            <Button 
-              variant="outline" 
-              onClick={handleSignIn}
-              className="text-white hover:text-yellow-400"
-            >
-              Sign In
-            </Button>
-          )}
+          <div>
+            {user ? (
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="bg-transparent border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSignIn}
+                className="bg-yellow-400 text-black hover:bg-yellow-500 transition-all duration-200"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Add padding to account for fixed header */}
-      <div className="pt-16">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/analysis" element={<Analysis />} />
-          <Route path="/opportunities" element={<Opportunities />} />
-          <Route path="/market-report/:county/:state" element={<MarketReport />} />
-          <Route path="/state-market-report/:state" element={<StateMarketReport />} />
-          <Route path="/thank-you" element={<ThankYou />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </div>
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/analysis" element={<Analysis />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/market-report" element={<MarketReport />} />
+        <Route path="/state-market-report" element={<StateMarketReport />} />
+        <Route path="/thank-you" element={<ThankYou />} />
+        <Route path="/opportunities" element={<Opportunities />} />
+      </Routes>
     </Router>
   );
 }
