@@ -8,9 +8,19 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+interface FilterState {
+  industry?: string;
+  minEmployees?: number;
+  maxEmployees?: number;
+  minRevenue?: number;
+  maxRevenue?: number;
+  region?: string;
+}
+
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<FilterState>({});
 
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
@@ -28,26 +38,6 @@ export default function Dashboard() {
     }
   });
 
-  const { data: practiceOfDay } = useQuery({
-    queryKey: ['practice-of-day'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tracked_practices')
-        .select(`
-          *,
-          practice_buyer_pool (*)
-        `)
-        .limit(1)
-        .single();
-
-      if (error) return null;
-      return {
-        ...data,
-        buyer_count: data.practice_buyer_pool?.length || 0,
-      };
-    }
-  });
-
   const handleWithdraw = async (practiceId: string) => {
     const { error } = await supabase
       .from('practice_buyer_pool')
@@ -59,10 +49,52 @@ export default function Dashboard() {
     }
   };
 
-  const filteredPractices = practices?.filter(practice => 
-    practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    practice.region.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilter = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  const filteredPractices = practices?.filter(practice => {
+    // Search query filter
+    const searchMatches = !searchQuery || 
+      practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      practice.region.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Apply additional filters
+    const industryMatches = !filters.industry || practice.industry === filters.industry;
+    const employeeMatches = (!filters.minEmployees || (practice.employee_count || 0) >= filters.minEmployees) &&
+                           (!filters.maxEmployees || (practice.employee_count || 0) <= filters.maxEmployees);
+    const revenueMatches = (!filters.minRevenue || (practice.annual_revenue || 0) >= filters.minRevenue) &&
+                          (!filters.maxRevenue || (practice.annual_revenue || 0) <= filters.maxRevenue);
+    const regionMatches = !filters.region || practice.region === filters.region;
+
+    return searchMatches && industryMatches && employeeMatches && revenueMatches && regionMatches;
+  });
+
+  const { data: practiceOfDay } = useQuery({
+    queryKey: ['practice-of-day'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tracked_practices')
+        .select(`
+          *,
+          practice_buyer_pool (*)
+        `)
+        .limit(1)
+        .maybeSingle();
+
+      if (error) return null;
+      if (!data) return null;
+      
+      return {
+        ...data,
+        buyer_count: data.practice_buyer_pool?.length || 0,
+      };
+    }
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -91,8 +123,8 @@ export default function Dashboard() {
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2">
           <SearchFilters 
-            onSearch={setSearchQuery}
-            onFilter={() => {}} // TODO: Implement filters
+            onSearch={handleSearch}
+            onFilter={handleFilter}
           />
         </div>
         <div>
@@ -116,11 +148,11 @@ export default function Dashboard() {
                 id: practice.id,
                 industry: practice.industry,
                 region: practice.region,
-                employee_count: practice.employee_count,
-                annual_revenue: practice.annual_revenue,
-                service_mix: practice.service_mix as { [key: string]: number },
-                status: practice.status,
-                last_updated: practice.last_updated,
+                employee_count: practice.employee_count || 0,
+                annual_revenue: practice.annual_revenue || 0,
+                service_mix: practice.service_mix as Record<string, number> || {},
+                status: practice.status || 'pending_response',
+                last_updated: practice.last_updated || new Date().toISOString(),
                 practice_buyer_pool: practice.practice_buyer_pool
               }}
               onWithdraw={handleWithdraw}
