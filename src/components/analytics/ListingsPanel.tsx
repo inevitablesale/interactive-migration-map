@@ -37,12 +37,12 @@ export const ListingsPanel = () => {
     }
   });
 
-  const { data: listings } = useQuery({
+  const { data: listings, refetch: refetchListings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('*')
+        .select('*, practice_buyer_pool!inner(*)')
         .limit(3);
       
       if (error) throw error;
@@ -52,13 +52,70 @@ export const ListingsPanel = () => {
 
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
-  const handleListingClick = () => {
+  const handleExpressInterest = async (companyId: number) => {
     if (isFreeTier) {
       toast({
         title: "Premium Feature",
         description: "Upgrade to view detailed firm information",
       });
       return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to express interest",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add to practice_buyer_pool
+      const { error: poolError } = await supabase
+        .from('practice_buyer_pool')
+        .insert([{
+          practice_id: companyId,
+          user_id: user.id,
+          status: 'pending_outreach',
+          is_anonymous: false
+        }]);
+
+      if (poolError) {
+        if (poolError.code === '23505') { // Unique violation
+          toast({
+            title: "Already Expressed Interest",
+            description: "You have already expressed interest in this practice",
+          });
+        } else {
+          throw poolError;
+        }
+        return;
+      }
+
+      // Update firm status
+      const { error: updateError } = await supabase
+        .from('canary_firms_data')
+        .update({ status: 'interest_expressed' })
+        .eq('Company ID', companyId);
+
+      if (updateError) throw updateError;
+
+      // Refetch listings to update UI
+      refetchListings();
+
+      toast({
+        title: "Interest Submitted",
+        description: "Our team has been alerted and will initiate contact within 4 hours.",
+      });
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to express interest. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -76,7 +133,6 @@ export const ListingsPanel = () => {
             className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${
               isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'
             } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
-            onClick={handleListingClick}
           >
             <div className="flex items-start gap-4">
               {/* Firm Image */}
@@ -139,7 +195,7 @@ export const ListingsPanel = () => {
                   <Button 
                     variant="secondary" 
                     size="sm"
-                    className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                    className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-3"
                     onClick={() => {
                       if (isFreeTier) {
                         toast({
@@ -154,17 +210,10 @@ export const ListingsPanel = () => {
                   <Button 
                     variant="secondary" 
                     size="sm"
-                    className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                    onClick={() => {
-                      if (isFreeTier) {
-                        toast({
-                          title: "Premium Feature",
-                          description: "Upgrade to contact firms",
-                        });
-                      }
-                    }}
+                    className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3"
+                    onClick={() => handleExpressInterest(listing["Company ID"])}
                   >
-                    Contact Firm
+                    {listing.status === 'interest_expressed' ? 'Interest Expressed' : 'Express Interest'}
                   </Button>
                 </div>
               </div>
