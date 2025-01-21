@@ -189,7 +189,7 @@ export default function Dashboard() {
             onFilter={handleFilter}
           />
         </div>
-        <div>
+        <div className="md:row-span-2">
           <PracticeOfDay 
             practice={practiceOfDay}
             onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
