@@ -114,28 +114,34 @@ export const ListingsPanel = () => {
   };
 
   const generateTitle = (listing: any) => {
-    // Get meaningful words from the Summary (excluding common filler words)
-    const fillerWords = new Set(['and', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with']);
+    const fillerWords = new Set([
+      'and', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+      'is', 'are', 'was', 'were', 'be', 'been', 'being', 'has', 'have', 'had'
+    ]);
     
     if (!listing.Summary) {
-      return `${listing["Primary Subtitle"]} Practice`;
+      return `Leading ${listing["Primary Subtitle"]} Provider`;
     }
 
-    const words = listing.Summary
-      .split(/[.,!? ]+/)
+    // Get the first sentence and clean it up
+    const firstSentence = listing.Summary.split(/[.!?]+/)[0];
+    const words = firstSentence
+      .split(/\s+/)
       .filter((word: string) => 
         word.length > 2 && !fillerWords.has(word.toLowerCase())
       )
       .map((word: string) => word.trim())
       .filter(Boolean);
 
-    if (words.length >= 2) {
-      return `${listing["Primary Subtitle"]} ${words[0]} ${words[1]}`;
-    } else if (words.length === 1) {
-      return `${listing["Primary Subtitle"]} ${words[0]} Practice`;
+    // Try to form a meaningful phrase
+    if (words.length >= 3) {
+      return `${words[0]} ${words[1]} ${listing["Primary Subtitle"]}`;
+    } else if (words.length >= 2) {
+      return `${words[0]} ${listing["Primary Subtitle"]} ${words[1]}`;
     }
     
-    return `${listing["Primary Subtitle"]} Practice`;
+    // Default to a professional-sounding title
+    return `Premier ${listing["Primary Subtitle"]} Provider`;
   };
 
   const filteredListings = listings?.filter(listing => {
