@@ -25,15 +25,21 @@ export const DataSourcesSection = () => {
   const metrics = [
     {
       title: "Firms Tracked",
-      value: "872",
+      value: "2297",
       icon: Building2,
       color: "text-blue-400"
+    },
+    {
+      title: "Regions Covered",
+      value: "872",
+      icon: MapPin,
+      color: "text-green-400"
     },
     {
       title: "Cities Covered",
       value: "493",
       icon: MapPin,
-      color: "text-green-400"
+      color: "text-yellow-400"
     }
   ];
 
@@ -78,11 +84,11 @@ export const DataSourcesSection = () => {
             Turning Market Data Into Deal Flow
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Tracking {metricsData?.firms.toLocaleString()} firms across {metricsData?.cities.toLocaleString()} cities. Canary helps buyers discover their perfect acquisition matches before they ever hit the market.
+            Tracking 2297 firms across 872 regions and 493 cities. Canary helps buyers discover their perfect acquisition matches before they ever hit the market.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-16">
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
           {metrics.map((metric, index) => (
             <Card key={index} className="p-6 bg-black/40 backdrop-blur-md border-white/10">
               <div className="flex items-center gap-3 mb-2">
