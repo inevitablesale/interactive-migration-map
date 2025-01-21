@@ -117,6 +117,7 @@ export const ListingsPanel = () => {
   };
 
   const filteredListings = listings?.filter((listing: Listing) => {
+    // Only filter by specialities, not by state/region
     if (!searchQuery) return true;
     if (!listing.specialities) return false;
     return listing.specialities.toLowerCase().includes(searchQuery.toLowerCase());
