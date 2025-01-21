@@ -47,20 +47,28 @@ export const BetaAccessSection = () => {
           </p>
           <div className="grid md:grid-cols-4 gap-6 mb-8 text-left">
             <div className="p-4 bg-yellow-50 rounded-lg">
-              <h3 className="font-semibold mb-2 text-gray-900">Off-Market Intelligence</h3>
-              <p className="text-sm text-gray-600">We surface firms that aren't publicly listed for sale, identified through predictive modeling.</p>
+              <div className="min-h-[3rem] flex items-center">
+                <h3 className="font-semibold text-gray-900">Off-Market Intelligence</h3>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">We surface firms that aren't publicly listed for sale, identified through predictive modeling.</p>
             </div>
             <div className="p-4 bg-yellow-50 rounded-lg">
-              <h3 className="font-semibold mb-2 text-gray-900">Daily Picks</h3>
-              <p className="text-sm text-gray-600">Every day, Canary features one carefully selected firm positioned for acquisition.</p>
+              <div className="min-h-[3rem] flex items-center">
+                <h3 className="font-semibold text-gray-900">Daily Picks</h3>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Every day, Canary features one carefully selected firm positioned for acquisition.</p>
             </div>
             <div className="p-4 bg-yellow-50 rounded-lg">
-              <h3 className="font-semibold mb-2 text-gray-900">Managed Outreach</h3>
-              <p className="text-sm text-gray-600">We handle all communication with firm owners, ensuring professional engagement.</p>
+              <div className="min-h-[3rem] flex items-center">
+                <h3 className="font-semibold text-gray-900">Managed Outreach</h3>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">We handle all communication with firm owners, ensuring professional engagement.</p>
             </div>
             <div className="p-4 bg-yellow-50 rounded-lg">
-              <h3 className="font-semibold mb-2 text-gray-900">Risk-Free Model</h3>
-              <p className="text-sm text-gray-600">Access is free—Canary earns a 2.5% success fee only when you close a deal.</p>
+              <div className="min-h-[3rem] flex items-center">
+                <h3 className="font-semibold text-gray-900">Risk-Free Model</h3>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Access is free—Canary earns a 2.5% success fee only when you close a deal.</p>
             </div>
           </div>
           <button 
