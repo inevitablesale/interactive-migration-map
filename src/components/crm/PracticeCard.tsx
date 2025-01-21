@@ -51,9 +51,10 @@ interface PracticeCardProps {
   };
   onWithdraw?: (id: string) => void;
   onExpressInterest?: (id: string) => void;
+  disabled?: boolean;
 }
 
-export function PracticeCard({ practice, onWithdraw, onExpressInterest }: PracticeCardProps) {
+export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled }: PracticeCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hasExpressedInterest = practice.practice_buyer_pool && practice.practice_buyer_pool.length > 0;
   const hasNotes = practice.notes && practice.notes.trim().length > 0;
@@ -122,7 +123,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               <Button 
                 variant="outline" 
                 className={`w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={!hasNotes}
+                disabled={!hasNotes || disabled}
               >
                 <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
                 <span className="hidden sm:inline">View Notes</span>
@@ -141,6 +142,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           <Button 
             variant="outline" 
             className="w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
+            disabled={disabled}
           >
             <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
             <span className="hidden sm:inline">View Details</span>
@@ -151,6 +153,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               onClick={() => onWithdraw?.(practice.id)}
               className="w-full h-[clamp(2rem,4vw,2.5rem)] px-2 text-[clamp(0.7rem,1.5vw,0.875rem)] text-red-500 hover:text-red-600 flex items-center justify-center"
+              disabled={disabled}
             >
               <X className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
               <span className="hidden sm:inline">Withdraw</span>
@@ -160,6 +163,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               onClick={() => onExpressInterest?.(practice.id)}
               className="w-full h-[clamp(2rem,4vw,2.5rem)] px-2 text-[clamp(0.7rem,1.5vw,0.875rem)] text-blue-500 hover:text-blue-600 flex items-center justify-center"
+              disabled={disabled}
             >
               <Heart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
               <span className="hidden sm:inline">Express Interest</span>

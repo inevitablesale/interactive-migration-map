@@ -12,16 +12,20 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const ITEMS_PER_PAGE = 6;
 
-  const { data: practices, isLoading } = useQuery({
+  const { data: practices, isLoading, refetch } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
       const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
-        .select('*')
+        .select(`
+          *,
+          practice_buyer_pool (*)
+        `)
         .order('followerCount', { ascending: false });
 
       if (error) throw error;
@@ -35,8 +39,8 @@ export default function Dashboard() {
         service_mix: { "General": 100 },
         status: "owner_engaged",
         last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        notes: practice.notes || "",  // Changed from [] to "" to match PracticeCard type
+        practice_buyer_pool: practice.practice_buyer_pool || [],
+        notes: practice.notes || "",
         specialities: practice.specialities
       }));
     }
@@ -63,78 +67,91 @@ export default function Dashboard() {
   };
 
   const handleExpressInterest = async (practiceId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to express interest in practices.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Find the practice in our data
-    const practice = practices?.find(p => p.id === practiceId);
-    if (!practice) {
-      toast({
-        title: "Error",
-        description: "Practice not found.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // First, create or get the tracked practice
-    const { data: trackedPractice, error: trackedError } = await supabase
-      .from('tracked_practices')
-      .insert([{
-        industry: practice.industry,
-        region: practice.region,
-        employee_count: practice.employee_count,
-        annual_revenue: practice.annual_revenue,
-        service_mix: practice.service_mix,
-        status: 'pending_response',
-        user_id: user.id
-      }])
-      .select()
-      .single();
-
-    if (trackedError) {
-      toast({
-        title: "Error",
-        description: "Failed to track practice. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Then, add to practice_buyer_pool using the tracked practice ID
-    const { error: poolError } = await supabase
-      .from('practice_buyer_pool')
-      .insert([{
-        practice_id: trackedPractice.id,
-        user_id: user.id
-      }]);
-
-    if (poolError) {
-      if (poolError.code === '23505') { // Unique violation
+    try {
+      setIsSubmitting(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         toast({
-          title: "Already Interested",
-          description: "You have already expressed interest in this practice.",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to express interest. Please try again.",
+          title: "Authentication Required",
+          description: "Please sign in to express interest in practices.",
           variant: "destructive",
         });
+        return;
       }
-    } else {
+
+      // Find the practice in our data
+      const practice = practices?.find(p => p.id === practiceId);
+      if (!practice) {
+        toast({
+          title: "Error",
+          description: "Practice not found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First, create or get the tracked practice
+      const { data: trackedPractice, error: trackedError } = await supabase
+        .from('tracked_practices')
+        .insert([{
+          industry: practice.industry,
+          region: practice.region,
+          employee_count: practice.employee_count,
+          annual_revenue: practice.annual_revenue,
+          service_mix: practice.service_mix,
+          status: 'pending_response',
+          user_id: user.id
+        }])
+        .select()
+        .single();
+
+      if (trackedError) {
+        toast({
+          title: "Error",
+          description: "Failed to track practice. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then, add to practice_buyer_pool using the tracked practice ID
+      const { error: poolError } = await supabase
+        .from('practice_buyer_pool')
+        .insert([{
+          practice_id: trackedPractice.id,
+          user_id: user.id
+        }]);
+
+      if (poolError) {
+        if (poolError.code === '23505') { // Unique violation
+          toast({
+            title: "Already Interested",
+            description: "You have already expressed interest in this practice.",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to express interest. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: "Successfully expressed interest in the practice.",
+        });
+        // Refetch the data to update UI
+        refetch();
+      }
+    } catch (error) {
       toast({
-        title: "Success",
-        description: "Successfully expressed interest in the practice.",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -235,6 +252,7 @@ export default function Dashboard() {
                     practice={practice}
                     onWithdraw={handleWithdraw}
                     onExpressInterest={() => handleExpressInterest(practice.id)}
+                    disabled={isSubmitting}
                   />
                 ))}
               </div>
@@ -282,6 +300,7 @@ export default function Dashboard() {
           <PracticeOfDay 
             practice={practiceOfDay}
             onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
+            disabled={isSubmitting}
           />
         </div>
       </div>
