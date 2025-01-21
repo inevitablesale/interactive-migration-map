@@ -145,7 +145,10 @@ export default function Dashboard() {
           {filteredPractices?.map((practice) => (
             <PracticeCard
               key={practice.id}
-              practice={practice}
+              practice={{
+                ...practice,
+                service_mix: practice.service_mix as Record<string, number> || {}
+              }}
               onWithdraw={handleWithdraw}
             />
           ))}
