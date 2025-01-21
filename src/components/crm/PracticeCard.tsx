@@ -119,7 +119,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             <DialogTrigger asChild>
               <Button 
                 variant="outline" 
-                className="w-full h-[clamp(2rem,4vw,2.5rem)] px-2 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center"
+                className="w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
               >
                 <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
                 <span className="hidden sm:inline">Add Note</span>
@@ -135,7 +135,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           
           <Button 
             variant="outline" 
-            className="w-full h-[clamp(2rem,4vw,2.5rem)] px-2 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center"
+            className="w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
           >
             <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
             <span className="hidden sm:inline">View Details</span>
