@@ -114,10 +114,8 @@ export const ListingsPanel = () => {
   };
 
   const generateTitle = (listing: any) => {
-    // Get the first sentence if there's a summary
     const summary = listing.Summary?.toLowerCase() || '';
     
-    // Professional prefixes with industry context
     const prefixes = {
       software: ['Premier', 'Innovative', 'Leading'],
       accounting: ['Established', 'Trusted', 'Professional'],
@@ -125,7 +123,6 @@ export const ListingsPanel = () => {
       default: ['Leading', 'Established', 'Premier']
     };
     
-    // Determine the business type and select appropriate prefix
     let businessType = 'default';
     let serviceType = '';
     
@@ -142,16 +139,13 @@ export const ListingsPanel = () => {
       serviceType = listing["Primary Subtitle"].replace(/\b\w/g, l => l.toUpperCase());
     }
     
-    // Get a random prefix from the appropriate category
     const prefixList = prefixes[businessType as keyof typeof prefixes];
     const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
     
-    // If we have a service type, use it; otherwise, use a default
     if (serviceType) {
       return `${prefix} ${serviceType} Practice`;
     }
     
-    // Fallback to a generic professional title
     return `${prefix} Professional Practice`;
   };
 
@@ -180,7 +174,6 @@ export const ListingsPanel = () => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
-          const title = generateTitle(listing);
           
           return (
             <Card 
@@ -190,9 +183,9 @@ export const ListingsPanel = () => {
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <h3 className="text-lg font-semibold leading-tight line-clamp-2">
-                    {title}
+                    {generateTitle(listing)}
                   </h3>
-                  <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap ml-2 flex-shrink-0">
+                  <div className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs whitespace-nowrap ml-2 flex-shrink-0">
                     {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
                   </div>
                 </div>
