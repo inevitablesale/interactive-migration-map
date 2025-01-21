@@ -42,7 +42,10 @@ export const ListingsPanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('*, practice_buyer_pool!inner(*)')
+        .select(`
+          *,
+          practice_buyer_pool (*)
+        `)
         .limit(3);
       
       if (error) throw error;
@@ -76,7 +79,7 @@ export const ListingsPanel = () => {
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert([{
-          practice_id: companyId,
+          practice_id: companyId.toString(), // Convert to string to match the type
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
@@ -97,7 +100,7 @@ export const ListingsPanel = () => {
       // Update firm status
       const { error: updateError } = await supabase
         .from('canary_firms_data')
-        .update({ status: 'interest_expressed' })
+        .update({ status: 'pending_outreach' })
         .eq('Company ID', companyId);
 
       if (updateError) throw updateError;
@@ -127,99 +130,111 @@ export const ListingsPanel = () => {
   return (
     <div className="space-y-6">
       <div className={`${isMobile ? 'flex overflow-x-auto pb-4 space-x-4 snap-x snap-mandatory' : 'space-y-4'}`}>
-        {listings?.map((listing, index) => (
-          <Card 
-            key={listing["Company ID"]} 
-            className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${
-              isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'
-            } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
-          >
-            <div className="flex items-start gap-4">
-              {/* Firm Image */}
-              <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
-                <img
-                  src={listing.logoResolutionResult || listing.originalCoverImage || getRandomPlaceholder()}
-                  alt={isFreeTier ? "Firm logo" : `${listing["Company Name"]} logo`}
-                  className="w-full h-full object-cover"
-                />
+        {listings?.map((listing) => {
+          const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
+          const hasExpressedInterest = listing.status === 'pending_outreach';
+          
+          return (
+            <Card 
+              key={listing["Company ID"]} 
+              className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${
+                isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'
+              } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
+            >
+              <div className="flex items-start gap-4">
+                {/* Firm Image */}
+                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
+                  <img
+                    src={listing.logoResolutionResult || listing.originalCoverImage || getRandomPlaceholder()}
+                    alt={isFreeTier ? "Firm logo" : `${listing["Company Name"]} logo`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Firm Details */}
+                <div className="flex-1 space-y-3 min-w-0">
+                  <div>
+                    <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
+                      {listing["Company Name"]}
+                      {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
+                    </h3>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{listing.Location || listing["State Name"]}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Employees</span>
+                        <p className="text-white font-medium truncate">{listing.employeeCount}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <Briefcase className="w-4 h-4 text-green-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Specialties</span>
+                        <p className="text-white font-medium truncate">{listing.specialities || "General Practice"}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <TrendingUp className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Growth</span>
+                        <p className="text-white font-medium truncate">+{Math.floor(Math.random() * 30)}%</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <DollarSign className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Revenue/Employee</span>
+                        <p className="text-white font-medium truncate">${Math.floor(80 + Math.random() * 40)}K</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <div className="text-sm text-white/60">
+                      {interestedBuyersCount} interested {interestedBuyersCount === 1 ? 'buyer' : 'buyers'}
+                      {hasExpressedInterest && ' • Status: Pending Contact'}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-3"
+                        onClick={() => {
+                          if (isFreeTier) {
+                            toast({
+                              title: "Premium Feature",
+                              description: "Upgrade to save opportunities",
+                            });
+                          }
+                        }}
+                      >
+                        Save Opportunity
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3"
+                        onClick={() => handleExpressInterest(listing["Company ID"])}
+                        disabled={hasExpressedInterest}
+                      >
+                        {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              {/* Firm Details */}
-              <div className="flex-1 space-y-3 min-w-0">
-                <div>
-                  <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
-                    {listing["Company Name"]}
-                    {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
-                  </h3>
-                  <div className="flex items-center gap-2 text-white/60 text-sm">
-                    <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">{listing.Location || listing["State Name"]}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <span className="text-white/60 block">Employees</span>
-                      <p className="text-white font-medium truncate">{listing.employeeCount}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <Briefcase className="w-4 h-4 text-green-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <span className="text-white/60 block">Specialties</span>
-                      <p className="text-white font-medium truncate">{listing.specialities || "General Practice"}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <span className="text-white/60 block">Growth</span>
-                      <p className="text-white font-medium truncate">+{Math.floor(Math.random() * 30)}%</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <DollarSign className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <span className="text-white/60 block">Revenue/Employee</span>
-                      <p className="text-white font-medium truncate">${Math.floor(80 + Math.random() * 40)}K</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-3"
-                    onClick={() => {
-                      if (isFreeTier) {
-                        toast({
-                          title: "Premium Feature",
-                          description: "Upgrade to save opportunities",
-                        });
-                      }
-                    }}
-                  >
-                    Save Opportunity
-                  </Button>
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3"
-                    onClick={() => handleExpressInterest(listing["Company ID"])}
-                  >
-                    {listing.status === 'interest_expressed' ? 'Interest Expressed' : 'Express Interest'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
       {isFreeTier && (
