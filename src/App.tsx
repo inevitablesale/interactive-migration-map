@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Bird } from "lucide-react";
+import { Bird, Linkedin } from "lucide-react";
 import { supabase } from "./integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ function App() {
   const handleSignIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+        provider: 'linkedin_oidc',
         options: {
           redirectTo: `${window.location.origin}/thank-you`,
         },
@@ -103,9 +103,10 @@ function App() {
             ) : (
               <Button
                 onClick={handleSignIn}
-                className="bg-yellow-400 text-black hover:bg-yellow-500 transition-all duration-200"
+                className="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
               >
-                Sign In
+                <Linkedin className="w-4 h-4" />
+                <span>Sign in with LinkedIn</span>
               </Button>
             )}
           </div>
