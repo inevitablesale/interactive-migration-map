@@ -5,33 +5,31 @@ export const CatalystSection = () => {
   const benefits = [
     {
       icon: Users,
-      title: "Aggregating Buyer Interest",
-      description: "Consolidating demand into a single, clear signal, demonstrating to firm owners that the market is ready—without overwhelming them."
+      title: "Crowdsourced Buyer Interest",
+      description: "One consolidated inquiry demonstrates demand without overwhelming firm owners."
     },
     {
       icon: TrendingUp,
-      title: "Identifying Opportunities",
-      description: "Leveraging data to surface firms with strong acquisition potential, such as owners nearing retirement, scalable models, and stable growth."
+      title: "Data-Driven Discovery",
+      description: "Advanced analytics surface firms with clear acquisition signals: retiring owners, scalable operations, and untapped markets."
     },
     {
       icon: Lock,
-      title: "Securing Privacy",
-      description: "Ensuring identities remain protected until owners actively engage, maintaining trust and control throughout the process."
+      title: "Trust and Privacy",
+      description: "Identities remain anonymous until the owner chooses to engage, ensuring a professional and secure process."
     }
   ];
 
   return (
     <div className="py-20 px-4 bg-gray-50">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-center">The Catalyst for Firm Transitions</h2>
-        
-        <p className="text-lg text-gray-600 text-center mb-8 max-w-3xl mx-auto">
-          According to the Exit Planning Institute, 80–90% of a business owner's wealth is tied up in their business, and 78% of small business owners plan to sell their businesses to fund more than 60% of their retirement.
-        </p>
+        <h2 className="text-3xl font-bold mb-6 text-center">Making Off-Market Acquisitions Possible</h2>
         
         <p className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto">
-          Despite this, many firm owners hesitate to take the leap due to uncertainty and lack of preparation.
+          For buyers searching for hidden opportunities and firm owners hesitating to take the next step, Canary creates a marketplace where none existed—connecting serious buyers with high-potential firms not publicly listed for sale.
         </p>
+
+        <h3 className="text-2xl font-semibold mb-8 text-center">How Canary Changes the Game</h3>
 
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           {benefits.map((benefit, index) => (
@@ -46,7 +44,7 @@ export const CatalystSection = () => {
         </div>
 
         <p className="text-xl text-center font-semibold text-gray-800 italic">
-          "Canary doesn't just connect buyers and firms—it accelerates decisions and creates opportunities that wouldn't otherwise exist."
+          "Canary isn't just a platform—it's the missing piece in off-market acquisitions, bridging the gap between buyers and hidden opportunities."
         </p>
       </div>
     </div>
