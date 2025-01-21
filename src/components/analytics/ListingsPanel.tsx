@@ -116,7 +116,7 @@ export const ListingsPanel = () => {
 
   return (
     <div className="space-y-6">
-      <div className={`${isMobile ? 'flex overflow-x-auto pb-4 space-x-4 snap-x snap-mandatory' : 'space-y-4'}`}>
+      <div className="flex flex-col space-y-4">
         {listings?.map((listing) => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
@@ -125,7 +125,7 @@ export const ListingsPanel = () => {
           return (
             <Card 
               key={listing["Company ID"]} 
-              className={`p-6 ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
+              className="p-6 w-full"
             >
               <div className="space-y-6">
                 {/* Header */}
@@ -174,32 +174,34 @@ export const ListingsPanel = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <Button 
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2"
+                    className="w-full flex items-center justify-center gap-2 min-w-0"
                     disabled={!hasNotes}
                     onClick={() => hasNotes && setSelectedNotes(listing.notes)}
                   >
-                    <MessageSquare className="w-4 h-4" />
-                    View Notes
+                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">View Notes</span>
                   </Button>
                   
                   <Button 
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2"
+                    className="w-full flex items-center justify-center gap-2 min-w-0"
                   >
-                    <Eye className="w-4 h-4" />
-                    View Details
+                    <Eye className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">View Details</span>
                   </Button>
                   
                   <Button 
                     variant={hasExpressedInterest ? "outline" : "default"}
-                    className={`w-full flex items-center justify-center gap-2 ${
+                    className={`w-full flex items-center justify-center gap-2 min-w-0 ${
                       hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
                     }`}
                     onClick={() => handleExpressInterest(listing["Company ID"])}
                     disabled={hasExpressedInterest}
                   >
-                    <Heart className="w-4 h-4" />
-                    {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                    <Heart className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">
+                      {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                    </span>
                   </Button>
                 </div>
               </div>
