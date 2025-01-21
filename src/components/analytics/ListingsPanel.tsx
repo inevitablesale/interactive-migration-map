@@ -74,32 +74,65 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // First, add to practice_buyer_pool
-      console.log('Attempting to insert into practice_buyer_pool:', {
-        practice_id: companyId.toString(),
-        user_id: user.id,
-        status: 'pending_outreach',
-        is_anonymous: false
+      // Find the practice in our data
+      const practice = listings?.find(p => p["Company ID"] === companyId);
+      if (!practice) {
+        toast({
+          title: "Error",
+          description: "Practice not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First create a tracked practice
+      console.log('Creating tracked practice for:', practice);
+      const { data: trackedPractice, error: trackedError } = await supabase
+        .from('tracked_practices')
+        .insert([{
+          user_id: user.id,
+          industry: practice["Primary Subtitle"] || "Accounting",
+          region: practice["State Name"] || practice.Location,
+          employee_count: practice.employeeCount,
+          service_mix: { "General": 100 },
+          status: 'pending_outreach'
+        }])
+        .select()
+        .single();
+
+      if (trackedError) {
+        console.error('Error creating tracked practice:', trackedError);
+        toast({
+          title: "Error",
+          description: "Failed to track practice. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then add to practice_buyer_pool using the tracked practice ID
+      console.log('Adding to buyer pool:', {
+        practice_id: trackedPractice.id,
+        user_id: user.id
       });
 
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert([{
-          practice_id: companyId.toString(),
+          practice_id: trackedPractice.id,
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
         }]);
 
       if (poolError) {
-        console.error('Pool error details:', poolError);
+        console.error('Pool error:', poolError);
         if (poolError.code === '23505') { // Unique violation
           toast({
             title: "Already Interested",
             description: "You have already expressed interest in this practice.",
           });
         } else {
-          console.error('Pool error:', poolError);
           toast({
             title: "Error",
             description: "Failed to express interest. Please try again.",
@@ -109,7 +142,7 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // Then, update the firm's status
+      // Update the firm's status
       console.log('Updating firm status for company:', companyId);
       const { error: updateError } = await supabase
         .from('canary_firms_data')
@@ -117,7 +150,7 @@ export const ListingsPanel = () => {
         .eq('Company ID', companyId);
 
       if (updateError) {
-        console.error('Update error details:', updateError);
+        console.error('Update error:', updateError);
         toast({
           title: "Error",
           description: "Failed to update practice status. Please try again.",
