@@ -73,9 +73,9 @@ export const ListingsPanel = () => {
 
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
-  const handleExpressInterest = async (companyId: number) => {
+  const handleExpressInterest = async (practiceId: string) => {
     console.log('=== Starting Express Interest Process ===');
-    console.log('Company ID:', companyId);
+    console.log('Company ID:', practiceId);
     console.log('Current state - isSubmitting:', isSubmitting);
     
     try {
@@ -122,8 +122,8 @@ export const ListingsPanel = () => {
       }
 
       // Find the practice in our data
-      console.log('Looking up practice details for company ID:', companyId);
-      const practice = listings?.find(p => p["Company ID"] === companyId);
+      console.log('Looking up practice details for company ID:', practiceId);
+      const practice = listings?.find(p => p["Company ID"] === practiceId);
       if (!practice) {
         console.error('Practice not found in listings data');
         toast({
@@ -220,7 +220,7 @@ export const ListingsPanel = () => {
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
-        .eq('Company ID', companyId);
+        .eq('Company ID', practiceId);
 
       if (updateError) {
         console.error('Error updating firm status:', updateError);
@@ -349,7 +349,7 @@ export const ListingsPanel = () => {
                     className={`w-full flex items-center justify-center gap-2 min-w-0 ${
                       hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
                     }`}
-                    onClick={() => handleExpressInterest(listing["Company ID"])}
+                    onClick={() => handleExpressInterest(listing["Company ID"].toString())}
                     disabled={hasExpressedInterest || isSubmitting}
                   >
                     <Heart className="w-4 h-4 flex-shrink-0" />
