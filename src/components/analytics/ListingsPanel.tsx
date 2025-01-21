@@ -90,7 +90,7 @@ export const ListingsPanel = () => {
       const { data: trackedPractice, error: trackedError } = await supabase
         .from('tracked_practices')
         .insert({
-          user_id: user.id,
+          user_id: user.id, // Explicitly set the user_id
           industry: practice["Primary Subtitle"] || "Accounting",
           region: practice["State Name"] || practice.Location,
           employee_count: practice.employeeCount,
