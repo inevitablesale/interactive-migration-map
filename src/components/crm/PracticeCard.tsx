@@ -15,8 +15,25 @@ const getStatusColor = (status: string) => {
       return 'bg-blue-500';
     case 'closed':
       return 'bg-yellow-500';
+    case 'not_contacted':
+      return 'bg-gray-500';
     default:
       return 'bg-gray-500';
+  }
+};
+
+const getStatusDisplay = (status: string) => {
+  switch (status) {
+    case 'owner_engaged':
+      return 'Owner Engaged';
+    case 'negotiation':
+      return 'In Negotiation';
+    case 'closed':
+      return 'Closed';
+    case 'not_contacted':
+      return 'Not Contacted';
+    default:
+      return status.replace(/_/g, ' ');
   }
 };
 
@@ -51,7 +68,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-xl font-semibold">{practice.industry}</CardTitle>
         <Badge className={`${getStatusColor(practice.status)} text-white`}>
-          {practice.status.replace('_', ' ')}
+          {getStatusDisplay(practice.status)}
         </Badge>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -103,9 +120,9 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         <div className="flex justify-end gap-2">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Eye className="mr-2 h-4 w-4" />
-                View Details
+              <Button variant="outline" size="sm" className="w-[110px]">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Add Note
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -116,9 +133,9 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             </DialogContent>
           </Dialog>
           
-          <Button variant="outline" size="sm">
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Add Note
+          <Button variant="outline" size="sm" className="w-[110px]">
+            <Eye className="mr-2 h-4 w-4" />
+            View Details
           </Button>
           
           {hasExpressedInterest ? (
@@ -126,7 +143,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onWithdraw?.(practice.id)}
-              className="text-red-500 hover:text-red-600"
+              className="w-[110px] text-red-500 hover:text-red-600"
             >
               <X className="mr-2 h-4 w-4" />
               Withdraw
@@ -136,7 +153,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onExpressInterest?.(practice.id)}
-              className="text-blue-500 hover:text-blue-600"
+              className="w-[110px] text-blue-500 hover:text-blue-600"
             >
               <Heart className="mr-2 h-4 w-4" />
               Express Interest
