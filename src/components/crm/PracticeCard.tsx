@@ -120,7 +120,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         <div className="flex justify-end gap-3">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="w-[120px] gap-2">
+              <Button variant="outline" size="sm" className="w-[140px] gap-2">
                 <MessageSquare className="h-4 w-4" />
                 Add Note
               </Button>
@@ -133,7 +133,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             </DialogContent>
           </Dialog>
           
-          <Button variant="outline" size="sm" className="w-[120px] gap-2">
+          <Button variant="outline" size="sm" className="w-[140px] gap-2">
             <Eye className="h-4 w-4" />
             View Details
           </Button>
@@ -143,7 +143,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onWithdraw?.(practice.id)}
-              className="w-[120px] gap-2 text-red-500 hover:text-red-600"
+              className="w-[140px] gap-2 text-red-500 hover:text-red-600"
             >
               <X className="h-4 w-4" />
               Withdraw
@@ -153,7 +153,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onExpressInterest?.(practice.id)}
-              className="w-[120px] gap-2 text-blue-500 hover:text-blue-600"
+              className="w-[140px] gap-2 text-blue-500 hover:text-blue-600"
             >
               <Heart className="h-4 w-4" />
               Express Interest
