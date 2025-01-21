@@ -38,7 +38,7 @@ export const HowItWorks = () => {
   return (
     <div className="py-20 px-4">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center">How Canary Works</h2>
+        <h2 className="text-3xl font-bold mb-12 text-center bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">How Canary Works</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {steps.map((step, index) => (
             <Card key={index} className="p-6 bg-white/90 backdrop-blur-sm hover:bg-white/95 transition-all duration-200">
