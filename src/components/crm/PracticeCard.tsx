@@ -1,176 +1,128 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Users, Building2, DollarSign, Clock, Eye, X, MessageSquare, Heart } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'engaged':
-      return 'bg-emerald-500';
-    case 'negotiation':
-      return 'bg-blue-500';
-    case 'closed':
-      return 'bg-yellow-500';
-    case 'not_contacted':
-    default:
-      return 'bg-gray-500';
-  }
-};
-
-const getStatusDisplay = (status: string) => {
-  switch (status) {
-    case 'engaged':
-      return 'Engaged';
-    case 'negotiation':
-      return 'In Negotiation';
-    case 'closed':
-      return 'Closed';
-    case 'not_contacted':
-    default:
-      return 'Not Contacted';
-  }
-};
+interface Practice {
+  id: string;
+  industry: string;
+  region: string;
+  employee_count: number;
+  annual_revenue: number;
+  service_mix: { [key: string]: number };
+  status: string;
+  last_updated: string;
+  practice_buyer_pool: { id: string }[];
+  specialities?: string;
+  notes?: string;
+}
 
 interface PracticeCardProps {
-  practice: {
-    id: string;
-    industry: string;
-    region: string;
-    employee_count: number;
-    annual_revenue: number;
-    service_mix: { [key: string]: number };
-    status: string;
-    last_updated: string;
-    practice_buyer_pool?: { id: string }[];
-    specialities?: string;
-    notes?: string;
-  };
+  practice: Practice;
   onWithdraw?: (id: string) => void;
   onExpressInterest?: (id: string) => void;
   disabled?: boolean;
 }
 
 export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled }: PracticeCardProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const hasExpressedInterest = practice.practice_buyer_pool && practice.practice_buyer_pool.length > 0;
+  const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
+  const hasExpressedInterest = practice.status === 'pending_outreach';
   const hasNotes = practice.notes && practice.notes.trim().length > 0;
 
-  const specialties = practice.specialities ? 
-    practice.specialities.split(',').map(s => s.trim()) : 
-    ['General Practice'];
+  // Generate a three-word title from the industry and specialities
+  const generateTitle = () => {
+    const words = practice.specialities?.split(/[.,!? ]+/).filter(word => word.length > 2) || [];
+    if (words.length >= 2) {
+      return `${practice.industry} ${words[0]} ${words[1]}`;
+    } else if (words.length === 1) {
+      return `${practice.industry} ${words[0]} Practice`;
+    }
+    return `${practice.industry} Practice`;
+  };
 
   return (
-    <Card className="w-full overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-[clamp(0.75rem,2vw,1rem)] font-semibold truncate max-w-[60%]">
-          {practice.industry}
-        </CardTitle>
-        <Badge className={`${getStatusColor(practice.status)} text-white px-2 py-0.5 text-[clamp(0.65rem,1.5vw,0.75rem)] whitespace-nowrap ml-2`}>
-          {getStatusDisplay(practice.status)}
-        </Badge>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <Building2 className="h-4 w-4 flex-shrink-0 text-gray-500" />
-            <span className="text-[clamp(0.7rem,1.5vw,0.875rem)] truncate">{practice.region}</span>
-          </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <Users className="h-4 w-4 flex-shrink-0 text-gray-500" />
-            <span className="text-[clamp(0.7rem,1.5vw,0.875rem)]">{practice.employee_count} employees</span>
-          </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <DollarSign className="h-4 w-4 flex-shrink-0 text-gray-500" />
-            <span className="text-[clamp(0.7rem,1.5vw,0.875rem)]">${(practice.annual_revenue / 1000).toFixed(0)}k revenue</span>
-          </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 flex-shrink-0 text-gray-500" />
-                  <span className="text-[clamp(0.7rem,1.5vw,0.875rem)]">Specialties</span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="p-2">
-                    {specialties.map((specialty, index) => (
-                      <div key={index} className="text-[clamp(0.65rem,1.5vw,0.75rem)] whitespace-nowrap">
-                        • {specialty}
-                      </div>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+    <Card className="p-6">
+      <div className="space-y-6">
+        <div className="flex justify-between items-start">
+          <h3 className="text-lg font-semibold">
+            {generateTitle()}
+          </h3>
+          <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
+            {practice.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t pt-2 gap-1">
-          <div className="text-[clamp(0.65rem,1.5vw,0.75rem)] text-gray-500">
-            Last update: {format(new Date(practice.last_updated), 'MMM d, yyyy')}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-gray-500" />
+            <span>{practice.region}</span>
           </div>
-          <div className="text-[clamp(0.65rem,1.5vw,0.75rem)]">
-            {practice.practice_buyer_pool?.length || 0} interested buyers
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-gray-500" />
+            <span>{practice.employee_count} employees</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-gray-500" />
+            <span>${practice.annual_revenue.toLocaleString()}k revenue</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-gray-500" />
+            <span>{practice.specialities || 'Specialties'}</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-1 sm:gap-2">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                className={`w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={!hasNotes || disabled}
-              >
-                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline">View Notes</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Practice Notes</DialogTitle>
-              </DialogHeader>
-              <div className="mt-4 whitespace-pre-wrap">
-                {practice.notes}
-              </div>
-            </DialogContent>
-          </Dialog>
+        <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
+          <div>Last update: {format(new Date(practice.last_updated), 'MMM dd, yyyy')}</div>
+          <div>{practice.practice_buyer_pool.length} interested buyers</div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Button 
+            variant="outline"
+            className={`w-full flex items-center justify-center gap-2 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!hasNotes}
+            onClick={() => hasNotes && setSelectedNotes(practice.notes)}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="hidden sm:inline">View Notes</span>
+          </Button>
           
           <Button 
-            variant="outline" 
-            className="w-full h-[clamp(2rem,4vw,2.5rem)] px-3 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
-            disabled={disabled}
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
           >
-            <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
+            <Eye className="w-4 h-4" />
             <span className="hidden sm:inline">View Details</span>
           </Button>
           
-          {hasExpressedInterest ? (
-            <Button 
-              variant="outline" 
-              onClick={() => onWithdraw?.(practice.id)}
-              className="w-full h-[clamp(2rem,4vw,2.5rem)] px-2 text-[clamp(0.7rem,1.5vw,0.875rem)] text-red-500 hover:text-red-600 flex items-center justify-center"
-              disabled={disabled}
-            >
-              <X className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-              <span className="hidden sm:inline">Withdraw</span>
-            </Button>
-          ) : (
-            <Button 
-              variant="outline" 
-              onClick={() => onExpressInterest?.(practice.id)}
-              className="w-full h-[clamp(2rem,4vw,2.5rem)] px-2 text-[clamp(0.7rem,1.5vw,0.875rem)] text-blue-500 hover:text-blue-600 flex items-center justify-center"
-              disabled={disabled}
-            >
-              <Heart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-              <span className="hidden sm:inline">Express Interest</span>
-            </Button>
-          )}
+          <Button 
+            variant={hasExpressedInterest ? "outline" : "default"}
+            className={`w-full flex items-center justify-center gap-2 ${
+              hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
+            onClick={() => !hasExpressedInterest && onExpressInterest?.(practice.id)}
+            disabled={hasExpressedInterest || disabled}
+          >
+            <Heart className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+            </span>
+          </Button>
         </div>
-      </CardContent>
+      </div>
+
+      <Dialog open={!!selectedNotes} onOpenChange={() => setSelectedNotes(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Notes</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 whitespace-pre-wrap">
+            {selectedNotes}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
