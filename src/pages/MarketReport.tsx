@@ -8,6 +8,7 @@ import { getMetricColor } from '@/utils/market-report/formatters';
 import { AccountingIndustryCard } from "@/components/market-report/AccountingIndustryCard";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { EmploymentMetricsCard } from "@/components/market-report/EmploymentMetricsCard";
+import { Header } from "@/components/Header";
 
 export default function MarketReport() {
   const { county, state } = useParams();
@@ -45,7 +46,8 @@ export default function MarketReport() {
 
   return (
     <div className="min-h-screen bg-[#111111]">
-      <div className="max-w-7xl mx-auto p-6">
+      <Header />
+      <div className="max-w-7xl mx-auto p-6 pt-20">
         <Button onClick={() => navigate(-1)} variant="ghost" className="text-white mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Analysis
