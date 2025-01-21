@@ -17,16 +17,25 @@ export const ListingsPanel = () => {
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
     queryFn: async () => {
+      console.log('Fetching buyer profile...');
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.log('No authenticated user found');
+        return null;
+      }
 
+      console.log('Fetching subscription tier for user:', user.id);
       const { data, error } = await supabase
         .from('buyer_profiles')
         .select('subscription_tier')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching buyer profile:', error);
+        throw error;
+      }
+      console.log('Buyer profile fetched:', data);
       return data;
     }
   });
@@ -34,6 +43,7 @@ export const ListingsPanel = () => {
   const { data: listings, refetch: refetchListings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
+      console.log('Fetching listings...');
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select(`
@@ -42,7 +52,11 @@ export const ListingsPanel = () => {
         `)
         .limit(3);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching listings:', error);
+        throw error;
+      }
+      console.log('Listings fetched:', data?.length, 'results');
       return data;
     }
   });
@@ -50,14 +64,20 @@ export const ListingsPanel = () => {
   const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleExpressInterest = async (companyId: number) => {
+    console.log('=== Starting Express Interest Process ===');
+    console.log('Company ID:', companyId);
+    console.log('Current state - isSubmitting:', isSubmitting);
+    
     try {
       setIsSubmitting(true);
+      console.log('Set isSubmitting to true');
       
       // First verify authentication
+      console.log('Verifying user authentication...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError) {
-        console.error('Auth error:', authError);
+        console.error('Authentication error encountered:', authError);
         toast({
           title: "Authentication Error",
           description: "Please try signing in again",
@@ -67,6 +87,7 @@ export const ListingsPanel = () => {
       }
       
       if (!user) {
+        console.log('No authenticated user found');
         toast({
           title: "Authentication Required",
           description: "Please sign in to express interest",
@@ -74,8 +95,10 @@ export const ListingsPanel = () => {
         });
         return;
       }
+      console.log('User authenticated successfully:', user.id);
 
       if (isFreeTier) {
+        console.log('Free tier user attempting to access premium feature');
         toast({
           title: "Premium Feature",
           description: "Upgrade to view detailed firm information",
@@ -84,8 +107,10 @@ export const ListingsPanel = () => {
       }
 
       // Find the practice in our data
+      console.log('Looking up practice details for company ID:', companyId);
       const practice = listings?.find(p => p["Company ID"] === companyId);
       if (!practice) {
+        console.error('Practice not found in listings data');
         toast({
           title: "Error",
           description: "Practice not found",
@@ -93,8 +118,15 @@ export const ListingsPanel = () => {
         });
         return;
       }
+      console.log('Practice found:', practice);
 
-      console.log('Creating tracked practice with user_id:', user.id);
+      console.log('Creating tracked practice...');
+      console.log('Practice details:', {
+        user_id: user.id,
+        industry: practice["Primary Subtitle"] || "Accounting",
+        region: practice["State Name"] || practice.Location,
+        employee_count: practice.employeeCount
+      });
       
       // First create a tracked practice
       const { data: trackedPractice, error: trackedError } = await supabase
@@ -112,6 +144,11 @@ export const ListingsPanel = () => {
 
       if (trackedError) {
         console.error('Error creating tracked practice:', trackedError);
+        console.error('Error details:', {
+          code: trackedError.code,
+          message: trackedError.message,
+          details: trackedError.details
+        });
         toast({
           title: "Error",
           description: "Failed to track practice. Please try again.",
@@ -119,6 +156,7 @@ export const ListingsPanel = () => {
         });
         return;
       }
+      console.log('Tracked practice created successfully:', trackedPractice);
 
       // Then add to practice_buyer_pool using the tracked practice ID
       console.log('Adding to buyer pool:', {
@@ -136,8 +174,15 @@ export const ListingsPanel = () => {
         });
 
       if (poolError) {
-        console.error('Pool error:', poolError);
+        console.error('Error adding to buyer pool:', poolError);
+        console.error('Pool error details:', {
+          code: poolError.code,
+          message: poolError.message,
+          details: poolError.details
+        });
+        
         if (poolError.code === '23505') { // Unique violation
+          console.log('User has already expressed interest');
           toast({
             title: "Already Interested",
             description: "You have already expressed interest in this practice.",
@@ -151,15 +196,22 @@ export const ListingsPanel = () => {
         }
         return;
       }
+      console.log('Successfully added to buyer pool');
 
       // Update the firm's status
+      console.log('Updating firm status to pending_outreach');
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
         .eq('Company ID', companyId);
 
       if (updateError) {
-        console.error('Update error:', updateError);
+        console.error('Error updating firm status:', updateError);
+        console.error('Update error details:', {
+          code: updateError.code,
+          message: updateError.message,
+          details: updateError.details
+        });
         toast({
           title: "Error",
           description: "Failed to update practice status. Please try again.",
@@ -167,21 +219,33 @@ export const ListingsPanel = () => {
         });
         return;
       }
+      console.log('Firm status updated successfully');
 
+      console.log('Refetching listings...');
       await refetchListings();
+      console.log('Listings refetched successfully');
 
+      console.log('=== Express Interest Process Completed Successfully ===');
       toast({
         title: "Success",
         description: "Successfully expressed interest in the practice.",
       });
     } catch (error) {
-      console.error('Express interest error:', error);
+      console.error('Unexpected error in express interest process:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+      }
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
+      console.log('Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };
