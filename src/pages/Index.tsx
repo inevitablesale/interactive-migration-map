@@ -13,6 +13,7 @@ import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
 import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
 import { CatalystSection } from "@/components/CatalystSection";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -25,16 +26,37 @@ const Index = () => {
         <Map />
       </div>
 
-      {/* Fixed Header */}
-      <div className="fixed top-12 left-4 z-50 flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-          <span className="text-xl font-bold text-yellow-400">Canary</span>
+      {/* Fixed Header with Navigation */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+            <span className="text-xl font-bold text-yellow-400">Canary</span>
+          </div>
+          
+          {/* Navigation Menu */}
+          <nav className="flex items-center gap-6">
+            <Link to="/" className="text-white hover:text-yellow-400 transition-colors">
+              Home
+            </Link>
+            <Link to="/analysis" className="text-white hover:text-yellow-400 transition-colors">
+              Analysis
+            </Link>
+            <Link to="/opportunities" className="text-white hover:text-yellow-400 transition-colors">
+              Opportunities
+            </Link>
+            <Link to="/state-market-report/CA" className="text-white hover:text-yellow-400 transition-colors">
+              CA Market Report
+            </Link>
+            <Link to="/market-report/los-angeles/CA" className="text-white hover:text-yellow-400 transition-colors">
+              LA Market Report
+            </Link>
+          </nav>
         </div>
       </div>
 
       {/* Scrollable Content */}
-      <div className="relative z-10 pt-8">
+      <div className="relative z-10 pt-20">
         {/* Hero Section */}
         <div className="min-h-screen">
           <Hero />
