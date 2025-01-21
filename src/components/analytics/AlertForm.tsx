@@ -17,12 +17,14 @@ import {
 import { Loader2 } from "lucide-react";
 
 interface AlertFormData {
-  title: string;
-  region: string;
-  employeeCountMin: number;
-  employeeCountMax: number;
-  specialties: string[];
-  frequency: "realtime" | "daily" | "weekly";
+  additional_details: string;
+  buyer_type: string;
+  practice_size: string;
+  services: string[];
+  timeline: string;
+  deal_preferences: string[];
+  preferred_state: string;
+  remote_preference: string;
 }
 
 const regions = [
@@ -42,15 +44,18 @@ const specialtiesList = [
 export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [employeeRange, setEmployeeRange] = useState([10, 50]);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<AlertFormData>({
     defaultValues: {
-      title: "",
-      region: "",
-      specialties: [],
-      frequency: "daily"
+      additional_details: "",
+      buyer_type: "",
+      practice_size: "",
+      services: [],
+      timeline: "",
+      deal_preferences: [],
+      preferred_state: "",
+      remote_preference: "daily"
     }
   });
 
@@ -58,12 +63,8 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     setLoading(true);
     try {
       const { error } = await supabase.from("alerts").insert({
-        title: data.title,
-        region: data.region,
-        employee_count_min: employeeRange[0],
-        employee_count_max: employeeRange[1],
-        specialties: selectedSpecialties,
-        frequency: data.frequency,
+        ...data,
+        services: selectedSpecialties,
       });
 
       if (error) throw error;
@@ -101,34 +102,34 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label>Alert Name</Label>
+          <Label>Additional Details</Label>
           <Controller
-            name="title"
+            name="additional_details"
             control={control}
-            rules={{ required: "Alert name is required" }}
+            rules={{ required: "Additional details are required" }}
             render={({ field }) => (
               <Input
                 {...field}
-                placeholder="E.g., Tax firms in California"
+                placeholder="E.g., Specific requirements or preferences"
                 className="mt-1.5 bg-white/5 border-white/10 text-white"
               />
             )}
           />
-          {errors.title && (
-            <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+          {errors.additional_details && (
+            <p className="text-sm text-red-500 mt-1">{errors.additional_details.message}</p>
           )}
         </div>
 
         <div>
-          <Label>Region</Label>
+          <Label>Buyer Type</Label>
           <Controller
-            name="region"
+            name="buyer_type"
             control={control}
-            rules={{ required: "Region is required" }}
+            rules={{ required: "Buyer type is required" }}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className="mt-1.5 bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Select region" />
+                  <SelectValue placeholder="Select buyer type" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 border-white/10">
                   {regions.map(region => (
@@ -144,26 +145,32 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               </Select>
             )}
           />
-          {errors.region && (
-            <p className="text-sm text-red-500 mt-1">{errors.region.message}</p>
+          {errors.buyer_type && (
+            <p className="text-sm text-red-500 mt-1">{errors.buyer_type.message}</p>
           )}
         </div>
 
         <div>
-          <Label>Employee Count Range ({employeeRange[0]} - {employeeRange[1]})</Label>
-          <Slider
-            defaultValue={[10, 50]}
-            max={200}
-            min={0}
-            step={5}
-            value={employeeRange}
-            onValueChange={setEmployeeRange}
-            className="mt-3"
+          <Label>Practice Size</Label>
+          <Controller
+            name="practice_size"
+            control={control}
+            rules={{ required: "Practice size is required" }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="E.g., Small, Medium, Large"
+                className="mt-1.5 bg-white/5 border-white/10 text-white"
+              />
+            )}
           />
+          {errors.practice_size && (
+            <p className="text-sm text-red-500 mt-1">{errors.practice_size.message}</p>
+          )}
         </div>
 
         <div>
-          <Label>Specialties</Label>
+          <Label>Services</Label>
           <div className="mt-1.5 space-y-2">
             {specialtiesList.map(specialty => (
               <div 
@@ -186,9 +193,65 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         </div>
 
         <div>
-          <Label>Notification Frequency</Label>
+          <Label>Timeline</Label>
           <Controller
-            name="frequency"
+            name="timeline"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="E.g., 6 months, 1 year"
+                className="mt-1.5 bg-white/5 border-white/10 text-white"
+              />
+            )}
+          />
+        </div>
+
+        <div>
+          <Label>Deal Preferences</Label>
+          <Controller
+            name="deal_preferences"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="E.g., Mergers, Acquisitions"
+                className="mt-1.5 bg-white/5 border-white/10 text-white"
+              />
+            )}
+          />
+        </div>
+
+        <div>
+          <Label>Preferred State</Label>
+          <Controller
+            name="preferred_state"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="mt-1.5 bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-white/10">
+                  {regions.map(region => (
+                    <SelectItem 
+                      key={region.value} 
+                      value={region.value}
+                      className="text-white hover:bg-white/10"
+                    >
+                      {region.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
+
+        <div>
+          <Label>Remote Preference</Label>
+          <Controller
+            name="remote_preference"
             control={control}
             render={({ field }) => (
               <RadioGroup
@@ -197,16 +260,12 @@ export const AlertForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 className="mt-1.5"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="realtime" id="realtime" />
-                  <Label htmlFor="realtime">Real-time</Label>
+                  <RadioGroupItem value="yes" id="remote-yes" />
+                  <Label htmlFor="remote-yes">Yes</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="daily" id="daily" />
-                  <Label htmlFor="daily">Daily Digest</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="weekly" id="weekly" />
-                  <Label htmlFor="weekly">Weekly Summary</Label>
+                  <RadioGroupItem value="no" id="remote-no" />
+                  <Label htmlFor="remote-no">No</Label>
                 </div>
               </RadioGroup>
             )}
