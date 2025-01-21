@@ -89,14 +89,14 @@ export const ListingsPanel = () => {
       console.log('Creating tracked practice for:', practice);
       const { data: trackedPractice, error: trackedError } = await supabase
         .from('tracked_practices')
-        .insert([{
+        .insert({
           user_id: user.id,
           industry: practice["Primary Subtitle"] || "Accounting",
           region: practice["State Name"] || practice.Location,
           employee_count: practice.employeeCount,
           service_mix: { "General": 100 },
-          status: 'pending_outreach'
-        }])
+          status: 'pending_response'
+        })
         .select()
         .single();
 
@@ -118,12 +118,12 @@ export const ListingsPanel = () => {
 
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
-        .insert([{
+        .insert({
           practice_id: trackedPractice.id,
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
-        }]);
+        });
 
       if (poolError) {
         console.error('Pool error:', poolError);
