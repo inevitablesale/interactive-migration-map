@@ -8,12 +8,16 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
+
+  const ITEMS_PER_PAGE = 20;
 
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
@@ -47,10 +51,11 @@ export default function Dashboard() {
           employee_count: practice.employeeCount || 0,
           annual_revenue: 0,
           service_mix: { "General": 100 },
-          status: engagement?.status || "owner_engaged", // Default to owner_engaged if no status
+          status: engagement?.status || "owner_engaged",
           last_updated: new Date().toISOString(),
           practice_buyer_pool: [],
-          notes: practice.practice_notes || []
+          notes: practice.practice_notes || [],
+          specialities: practice.specialities
         };
       });
     }
@@ -138,6 +143,11 @@ export default function Dashboard() {
     return searchMatches && industryMatches && employeeMatches && regionMatches;
   });
 
+  // Calculate pagination
+  const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
   const { data: practiceOfDay } = useQuery({
     queryKey: ['practice-of-day'],
     queryFn: async () => {
@@ -203,18 +213,51 @@ export default function Dashboard() {
       {isLoading ? (
         <div>Loading practices...</div>
       ) : (
-        <div className={`grid gap-4 ${
-          viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
-        }`}>
-          {filteredPractices?.map((practice) => (
-            <PracticeCard
-              key={practice.id}
-              practice={practice}
-              onWithdraw={handleWithdraw}
-              onExpressInterest={() => handleExpressInterest(practice.id)}
-            />
-          ))}
-        </div>
+        <>
+          <div className={`grid gap-4 ${
+            viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+          }`}>
+            {paginatedPractices?.map((practice) => (
+              <PracticeCard
+                key={practice.id}
+                practice={practice}
+                onWithdraw={handleWithdraw}
+                onExpressInterest={() => handleExpressInterest(practice.id)}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination className="mt-6">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
     </div>
   );

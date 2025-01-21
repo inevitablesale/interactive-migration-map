@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Users, Building2, DollarSign, PieChart, Eye, X, MessageSquare, Heart } from "lucide-react";
+import { Users, Building2, DollarSign, PieChart, Eye, X, MessageSquare, Heart, ChartPie } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -30,6 +31,7 @@ interface PracticeCardProps {
     status: string;
     last_updated: string;
     practice_buyer_pool?: { id: string }[];
+    specialities?: string;
   };
   onWithdraw?: (id: string) => void;
   onExpressInterest?: (id: string) => void;
@@ -38,6 +40,11 @@ interface PracticeCardProps {
 export function PracticeCard({ practice, onWithdraw, onExpressInterest }: PracticeCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hasExpressedInterest = practice.practice_buyer_pool && practice.practice_buyer_pool.length > 0;
+
+  // Parse specialties into an array
+  const specialties = practice.specialities ? 
+    practice.specialities.split(',').map(s => s.trim()) : 
+    ['General Practice'];
 
   return (
     <Card className="w-full">
@@ -62,12 +69,25 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             <span className="text-sm">${(practice.annual_revenue / 1000).toFixed(0)}k revenue</span>
           </div>
           <div className="flex items-center gap-2">
-            <PieChart className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">
-              {Object.entries(practice.service_mix)
-                .map(([key, value]) => `${value}% ${key}`)
-                .join(', ')}
-            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="flex items-center gap-2">
+                    <ChartPie className="h-4 w-4 text-blue-400" />
+                    <span className="text-sm">Specialties</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="p-2">
+                    {specialties.map((specialty, index) => (
+                      <div key={index} className="text-sm">
+                        • {specialty}
+                      </div>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 
