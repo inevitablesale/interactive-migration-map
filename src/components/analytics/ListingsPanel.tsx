@@ -17,12 +17,13 @@ export const ListingsPanel = () => {
   const { data: profile } = useQuery({
     queryKey: ['buyerProfile'],
     queryFn: async () => {
-      console.log('Fetching buyer profile...');
+      console.log('=== Fetching Buyer Profile ===');
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.log('No authenticated user found');
         return null;
       }
+      console.log('Authenticated user ID:', user.id);
 
       console.log('Fetching subscription tier for user:', user.id);
       const { data, error } = await supabase
@@ -33,9 +34,14 @@ export const ListingsPanel = () => {
 
       if (error) {
         console.error('Error fetching buyer profile:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
         throw error;
       }
-      console.log('Buyer profile fetched:', data);
+      console.log('Buyer profile fetched successfully:', data);
       return data;
     }
   });
@@ -43,7 +49,7 @@ export const ListingsPanel = () => {
   const { data: listings, refetch: refetchListings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
-      console.log('Fetching listings...');
+      console.log('=== Fetching Listings ===');
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select(`
@@ -54,9 +60,15 @@ export const ListingsPanel = () => {
       
       if (error) {
         console.error('Error fetching listings:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
         throw error;
       }
-      console.log('Listings fetched:', data?.length, 'results');
+      console.log('Listings fetched successfully:', data?.length, 'results');
+      console.log('Sample listing data:', data?.[0]);
       return data;
     }
   });
@@ -78,6 +90,11 @@ export const ListingsPanel = () => {
       
       if (authError) {
         console.error('Authentication error encountered:', authError);
+        console.error('Auth error details:', {
+          code: authError.code,
+          message: authError.message,
+          details: authError.details
+        });
         toast({
           title: "Authentication Error",
           description: "Please try signing in again",
