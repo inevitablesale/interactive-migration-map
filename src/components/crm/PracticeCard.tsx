@@ -56,7 +56,6 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hasExpressedInterest = practice.practice_buyer_pool && practice.practice_buyer_pool.length > 0;
 
-  // Parse specialties into an array
   const specialties = practice.specialities ? 
     practice.specialities.split(',').map(s => s.trim()) : 
     ['General Practice'];
@@ -64,38 +63,38 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-semibold">{practice.industry}</CardTitle>
-        <Badge className={`${getStatusColor(practice.status)} text-white px-4 py-1 rounded-full`}>
+        <CardTitle className="text-xl md:text-2xl font-semibold truncate">{practice.industry}</CardTitle>
+        <Badge className={`${getStatusColor(practice.status)} text-white px-2 md:px-4 py-1 rounded-full text-xs md:text-sm whitespace-nowrap`}>
           {getStatusDisplay(practice.status)}
         </Badge>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-6">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-gray-500" />
-            <span className="text-base">{practice.region}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Building2 className="h-4 w-4 md:h-5 md:w-5 text-gray-500 flex-shrink-0" />
+            <span className="text-sm md:text-base truncate">{practice.region}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Users className="h-5 w-5 text-gray-500" />
-            <span className="text-base">{practice.employee_count} employees</span>
+          <div className="flex items-center gap-2 md:gap-3">
+            <Users className="h-4 w-4 md:h-5 md:w-5 text-gray-500 flex-shrink-0" />
+            <span className="text-sm md:text-base">{practice.employee_count} employees</span>
           </div>
-          <div className="flex items-center gap-3">
-            <DollarSign className="h-5 w-5 text-gray-500" />
-            <span className="text-base">${(practice.annual_revenue / 1000).toFixed(0)}k revenue</span>
+          <div className="flex items-center gap-2 md:gap-3">
+            <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-gray-500 flex-shrink-0" />
+            <span className="text-sm md:text-base">${(practice.annual_revenue / 1000).toFixed(0)}k revenue</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-gray-500" />
-                    <span className="text-base">Specialties</span>
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <Clock className="h-4 w-4 md:h-5 md:w-5 text-gray-500 flex-shrink-0" />
+                    <span className="text-sm md:text-base">Specialties</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   <div className="p-2">
                     {specialties.map((specialty, index) => (
-                      <div key={index} className="text-sm">
+                      <div key={index} className="text-xs md:text-sm">
                         • {specialty}
                       </div>
                     ))}
@@ -106,19 +105,19 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t pt-4">
-          <div className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t pt-4 gap-2 sm:gap-0">
+          <div className="text-xs md:text-sm text-gray-500">
             Last update: {format(new Date(practice.last_updated), 'MMM d, yyyy')}
           </div>
-          <div className="text-sm">
+          <div className="text-xs md:text-sm">
             {practice.practice_buyer_pool?.length || 0} interested buyers
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="w-[140px] gap-2">
+              <Button variant="outline" size="sm" className="w-full sm:w-[140px] gap-2">
                 <MessageSquare className="h-4 w-4" />
                 Add Note
               </Button>
@@ -131,7 +130,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             </DialogContent>
           </Dialog>
           
-          <Button variant="outline" size="sm" className="w-[140px] gap-2">
+          <Button variant="outline" size="sm" className="w-full sm:w-[140px] gap-2">
             <Eye className="h-4 w-4" />
             View Details
           </Button>
@@ -141,7 +140,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onWithdraw?.(practice.id)}
-              className="w-[140px] gap-2 text-red-500 hover:text-red-600"
+              className="w-full sm:w-[140px] gap-2 text-red-500 hover:text-red-600"
             >
               <X className="h-4 w-4" />
               Withdraw
@@ -151,7 +150,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={() => onExpressInterest?.(practice.id)}
-              className="w-[140px] gap-2 text-blue-500 hover:text-blue-600"
+              className="w-full sm:w-[140px] gap-2 text-blue-500 hover:text-blue-600"
             >
               <Heart className="h-4 w-4" />
               Express Interest
