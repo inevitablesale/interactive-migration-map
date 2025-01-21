@@ -4,22 +4,17 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
-import { Button } from "@/components/ui/button";
-import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
-// ... keep existing code (imports and type definitions)
-
 export default function Dashboard() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
-  const ITEMS_PER_PAGE = 6; // Changed from 20 to 6
+  const ITEMS_PER_PAGE = 6;
 
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
@@ -31,7 +26,6 @@ export default function Dashboard() {
 
       if (error) throw error;
 
-      // Map the data to include required fields
       return practicesData.map(practice => ({
         id: practice["Company ID"].toString(),
         industry: practice["Primary Subtitle"] || "",
@@ -116,12 +110,10 @@ export default function Dashboard() {
   };
 
   const filteredPractices = practices?.filter(practice => {
-    // Search query filter
     const searchMatches = !searchQuery || 
       practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
       practice.region.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Apply additional filters
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
@@ -130,12 +122,10 @@ export default function Dashboard() {
     return searchMatches && industryMatches && employeeMatches && regionMatches;
   });
 
-  // Calculate pagination
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Function to generate pagination numbers
   const getPaginationNumbers = () => {
     const pageNumbers: (number | 'ellipsis')[] = [];
     const currentGroup = Math.floor((currentPage - 1) / 10);
@@ -186,22 +176,6 @@ export default function Dashboard() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Practice Dashboard</h1>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
       <DashboardSummary />
@@ -217,9 +191,7 @@ export default function Dashboard() {
             <div>Loading practices...</div>
           ) : (
             <>
-              <div className={`mt-6 grid gap-4 ${
-                viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'
-              }`}>
+              <div className="mt-6 space-y-4">
                 {paginatedPractices?.map((practice) => (
                   <PracticeCard
                     key={practice.id}
