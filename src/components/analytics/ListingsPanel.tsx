@@ -172,6 +172,7 @@ export const ListingsPanel = () => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
+          const title = generateTitle(listing);
           
           return (
             <Card 
@@ -180,10 +181,10 @@ export const ListingsPanel = () => {
             >
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold leading-tight">
-                    {generateTitle(listing)}
+                  <h3 className="text-lg font-semibold leading-tight line-clamp-2">
+                    {title}
                   </h3>
-                  <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap ml-2">
+                  <div className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap ml-2 flex-shrink-0">
                     {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
                   </div>
                 </div>
