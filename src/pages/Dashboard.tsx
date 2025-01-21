@@ -2,12 +2,15 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
+import { SearchFilters } from "@/components/crm/SearchFilters";
+import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
@@ -25,6 +28,26 @@ export default function Dashboard() {
     }
   });
 
+  const { data: practiceOfDay } = useQuery({
+    queryKey: ['practice-of-day'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tracked_practices')
+        .select(`
+          *,
+          practice_buyer_pool (*)
+        `)
+        .limit(1)
+        .single();
+
+      if (error) return null;
+      return {
+        ...data,
+        buyer_count: data.practice_buyer_pool?.length || 0,
+      };
+    }
+  });
+
   const handleWithdraw = async (practiceId: string) => {
     const { error } = await supabase
       .from('practice_buyer_pool')
@@ -35,6 +58,11 @@ export default function Dashboard() {
       console.error('Error withdrawing interest:', error);
     }
   };
+
+  const filteredPractices = practices?.filter(practice => 
+    practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    practice.region.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -59,6 +87,21 @@ export default function Dashboard() {
       </div>
 
       <DashboardSummary />
+      
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <SearchFilters 
+            onSearch={setSearchQuery}
+            onFilter={() => {}} // TODO: Implement filters
+          />
+        </div>
+        <div>
+          <PracticeOfDay 
+            practice={practiceOfDay}
+            onInterested={() => {}} // TODO: Implement interest action
+          />
+        </div>
+      </div>
 
       {isLoading ? (
         <div>Loading practices...</div>
@@ -66,10 +109,20 @@ export default function Dashboard() {
         <div className={`grid gap-4 ${
           viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
         }`}>
-          {practices?.map((practice) => (
+          {filteredPractices?.map((practice) => (
             <PracticeCard
               key={practice.id}
-              practice={practice}
+              practice={{
+                id: practice.id,
+                industry: practice.industry,
+                region: practice.region,
+                employee_count: practice.employee_count,
+                annual_revenue: practice.annual_revenue,
+                service_mix: practice.service_mix as { [key: string]: number },
+                status: practice.status,
+                last_updated: practice.last_updated,
+                practice_buyer_pool: practice.practice_buyer_pool
+              }}
               onWithdraw={handleWithdraw}
             />
           ))}
