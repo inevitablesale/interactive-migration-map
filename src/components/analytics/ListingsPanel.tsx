@@ -91,9 +91,9 @@ export const ListingsPanel = () => {
       if (authError) {
         console.error('Authentication error encountered:', authError);
         console.error('Auth error details:', {
-          code: authError.code,
+          name: authError.name,
           message: authError.message,
-          details: authError.details
+          status: authError.status
         });
         toast({
           title: "Authentication Error",
@@ -266,8 +266,6 @@ export const ListingsPanel = () => {
       setIsSubmitting(false);
     }
   };
-
-  // ... keep existing code (render JSX)
 
   return (
     <div className="space-y-6">
