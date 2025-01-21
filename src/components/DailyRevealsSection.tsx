@@ -11,7 +11,7 @@ export const DailyRevealsSection = () => {
             DAILY FIRM REVEALS AT 9 AM EST
           </h2>
           <p className="text-gray-400 max-w-3xl mx-auto mb-12">
-            Every morning at 9 AM EST, we go live on LinkedIn to reveal key metrics and insights about a carefully curated accounting firm positioned for acquisition. To protect confidentiality, firm names remain anonymized until mutual interest is established. These off-market opportunities are surfaced using advanced analytics and expert curation.
+            Every morning at 9 AM EST, we go live on LinkedIn to reveal key metrics and insights about a carefully curated professional services firm positioned for acquisition. To protect confidentiality, firm names remain anonymized until mutual interest is established. These off-market opportunities are surfaced using advanced analytics and expert curation.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
