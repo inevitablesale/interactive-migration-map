@@ -2,25 +2,18 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
-import { SearchFilters } from "@/components/crm/SearchFilters";
+import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-interface FilterState {
-  industry?: string;
-  minEmployees?: number;
-  maxEmployees?: number;
-  minRevenue?: number;
-  maxRevenue?: number;
-  region?: string;
-}
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
+  const { toast } = useToast();
 
   const { data: practices, isLoading } = useQuery({
     queryKey: ['practices'],
@@ -45,7 +38,55 @@ export default function Dashboard() {
       .match({ practice_id: practiceId, user_id: (await supabase.auth.getUser()).data.user?.id });
 
     if (error) {
-      console.error('Error withdrawing interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to withdraw interest. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Successfully withdrew interest from the practice.",
+      });
+    }
+  };
+
+  const handleExpressInterest = async (practiceId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to express interest in practices.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('practice_buyer_pool')
+      .insert([
+        { practice_id: practiceId, user_id: user.id }
+      ]);
+
+    if (error) {
+      if (error.code === '23505') { // Unique violation
+        toast({
+          title: "Already Interested",
+          description: "You have already expressed interest in this practice.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to express interest. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Success",
+        description: "Successfully expressed interest in the practice.",
+      });
     }
   };
 
@@ -65,10 +106,10 @@ export default function Dashboard() {
 
     // Apply additional filters
     const industryMatches = !filters.industry || practice.industry === filters.industry;
-    const employeeMatches = (!filters.minEmployees || (practice.employee_count || 0) >= filters.minEmployees) &&
-                           (!filters.maxEmployees || (practice.employee_count || 0) <= filters.maxEmployees);
-    const revenueMatches = (!filters.minRevenue || (practice.annual_revenue || 0) >= filters.minRevenue) &&
-                          (!filters.maxRevenue || (practice.annual_revenue || 0) <= filters.maxRevenue);
+    const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
+                           (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
+    const revenueMatches = (!filters.minRevenue || (practice.annual_revenue || 0) >= parseInt(filters.minRevenue) * 1000) &&
+                          (!filters.maxRevenue || (practice.annual_revenue || 0) <= parseInt(filters.maxRevenue) * 1000);
     const regionMatches = !filters.region || practice.region === filters.region;
 
     return searchMatches && industryMatches && employeeMatches && revenueMatches && regionMatches;
@@ -131,7 +172,7 @@ export default function Dashboard() {
         <div>
           <PracticeOfDay 
             practice={practiceOfDay}
-            onInterested={() => {}} // TODO: Implement interest action
+            onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
           />
         </div>
       </div>
@@ -150,6 +191,7 @@ export default function Dashboard() {
                 service_mix: practice.service_mix as Record<string, number> || {}
               }}
               onWithdraw={handleWithdraw}
+              onExpressInterest={() => handleExpressInterest(practice.id)}
             />
           ))}
         </div>

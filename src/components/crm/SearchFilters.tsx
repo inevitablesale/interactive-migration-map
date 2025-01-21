@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -18,32 +18,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface SearchFiltersProps {
   onSearch: (query: string) => void;
-  onFilter: (filters: any) => void;
+  onFilter: (filters: FilterState) => void;
+}
+
+export interface FilterState {
+  industry?: string;
+  minEmployees?: string;
+  maxEmployees?: string;
+  minRevenue?: string;
+  maxRevenue?: string;
+  region?: string;
 }
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
-  const [filters, setFilters] = useState({
-    industry: '',
-    minEmployees: '',
-    maxEmployees: '',
-    minRevenue: '',
-    maxRevenue: '',
-    region: '',
-  });
+  const [filters, setFilters] = useState<FilterState>({});
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleFilterChange = (key: string, value: string) => {
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    onFilter({
-      ...newFilters,
-      minEmployees: newFilters.minEmployees ? parseInt(newFilters.minEmployees) : undefined,
-      maxEmployees: newFilters.maxEmployees ? parseInt(newFilters.maxEmployees) : undefined,
-      minRevenue: newFilters.minRevenue ? parseInt(newFilters.minRevenue) * 1000 : undefined,
-      maxRevenue: newFilters.maxRevenue ? parseInt(newFilters.maxRevenue) * 1000 : undefined,
-    });
+    onFilter(newFilters);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    onSearch(value);
+  };
+
+  const clearFilters = () => {
+    setFilters({});
+    onFilter({});
+  };
+
+  const getActiveFilterCount = () => {
+    return Object.values(filters).filter(value => value && value !== "").length;
   };
 
   return (
@@ -52,21 +65,37 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by industry or region..."
+            placeholder="Search firms by industry or region..."
             className="pl-9"
-            onChange={(e) => onSearch(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
           />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2"
+              onClick={() => handleSearch("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-        <Sheet>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" className="relative">
               <Filter className="mr-2 h-4 w-4" />
               Filters
+              {getActiveFilterCount() > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {getActiveFilterCount()}
+                </Badge>
+              )}
             </Button>
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
-              <SheetTitle>Filter Practices</SheetTitle>
+              <SheetTitle>Filter Firms</SheetTitle>
               <SheetDescription>
                 Refine your search with specific criteria
               </SheetDescription>
@@ -76,7 +105,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                 <Label>Industry</Label>
                 <Select
                   onValueChange={(value) => handleFilterChange('industry', value)}
-                  value={filters.industry}
+                  value={filters.industry || ""}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select industry" />
@@ -84,8 +113,9 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                   <SelectContent>
                     <SelectItem value="">All Industries</SelectItem>
                     <SelectItem value="Accounting">Accounting</SelectItem>
-                    <SelectItem value="Consulting">Consulting</SelectItem>
-                    <SelectItem value="Legal">Legal</SelectItem>
+                    <SelectItem value="Engineering">Engineering</SelectItem>
+                    <SelectItem value="IT Consulting">IT Consulting</SelectItem>
+                    <SelectItem value="Architecture">Architecture</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -94,7 +124,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                 <Label>Region</Label>
                 <Select
                   onValueChange={(value) => handleFilterChange('region', value)}
-                  value={filters.region}
+                  value={filters.region || ""}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select region" />
@@ -116,13 +146,13 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                   <Input
                     type="number"
                     placeholder="Min"
-                    value={filters.minEmployees}
+                    value={filters.minEmployees || ""}
                     onChange={(e) => handleFilterChange('minEmployees', e.target.value)}
                   />
                   <Input
                     type="number"
                     placeholder="Max"
-                    value={filters.maxEmployees}
+                    value={filters.maxEmployees || ""}
                     onChange={(e) => handleFilterChange('maxEmployees', e.target.value)}
                   />
                 </div>
@@ -134,17 +164,27 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                   <Input
                     type="number"
                     placeholder="Min"
-                    value={filters.minRevenue}
+                    value={filters.minRevenue || ""}
                     onChange={(e) => handleFilterChange('minRevenue', e.target.value)}
                   />
                   <Input
                     type="number"
                     placeholder="Max"
-                    value={filters.maxRevenue}
+                    value={filters.maxRevenue || ""}
                     onChange={(e) => handleFilterChange('maxRevenue', e.target.value)}
                   />
                 </div>
               </div>
+
+              {getActiveFilterCount() > 0 && (
+                <Button 
+                  variant="outline" 
+                  onClick={clearFilters}
+                  className="mt-2"
+                >
+                  Clear All Filters
+                </Button>
+              )}
             </div>
           </SheetContent>
         </Sheet>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Users, Building2, DollarSign, PieChart, Eye, X, MessageSquare } from "lucide-react";
+import { Users, Building2, DollarSign, PieChart, Eye, X, MessageSquare, Heart } from "lucide-react";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -32,10 +32,12 @@ interface PracticeCardProps {
     practice_buyer_pool?: { id: string }[];
   };
   onWithdraw?: (id: string) => void;
+  onExpressInterest?: (id: string) => void;
 }
 
-export function PracticeCard({ practice, onWithdraw }: PracticeCardProps) {
+export function PracticeCard({ practice, onWithdraw, onExpressInterest }: PracticeCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const hasExpressedInterest = practice.practice_buyer_pool && practice.practice_buyer_pool.length > 0;
 
   return (
     <Card className="w-full">
@@ -99,14 +101,27 @@ export function PracticeCard({ practice, onWithdraw }: PracticeCardProps) {
             Add Note
           </Button>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onWithdraw?.(practice.id)}
-          >
-            <X className="mr-2 h-4 w-4" />
-            Withdraw
-          </Button>
+          {hasExpressedInterest ? (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onWithdraw?.(practice.id)}
+              className="text-red-500 hover:text-red-600"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Withdraw
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onExpressInterest?.(practice.id)}
+              className="text-blue-500 hover:text-blue-600"
+            >
+              <Heart className="mr-2 h-4 w-4" />
+              Express Interest
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
