@@ -26,12 +26,21 @@ export default function PracticeDetails() {
 
       console.log('Practice data:', practice);
 
+      // Ensure COUNTYFP and STATEFP are converted to strings for the query
+      const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
+      const stateFp = practice.STATEFP?.toString().padStart(2, '0');
+
+      if (!countyFp || !stateFp) {
+        console.log('Missing FIPS codes:', { countyFp, stateFp });
+        return { practice, countyData: null };
+      }
+
       // Then get the county data using COUNTYFP and STATEFP from practice
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
         .select('*')
-        .eq('COUNTYFP', practice.COUNTYFP?.toString())
-        .eq('STATEFP', practice.STATEFP?.toString())
+        .eq('COUNTYFP', countyFp)
+        .eq('STATEFP', stateFp)
         .maybeSingle();
 
       if (countyError) throw countyError;
@@ -160,7 +169,7 @@ export default function PracticeDetails() {
                 </div>
               </>
             ) : (
-              <p className="text-muted-foreground">County data not available</p>
+              <p className="text-muted-foreground">County data not available for this location</p>
             )}
           </CardContent>
         </Card>
