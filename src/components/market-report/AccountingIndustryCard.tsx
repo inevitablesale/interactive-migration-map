@@ -33,6 +33,9 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     ? (marketData.payann * 1000) / marketData.emp
     : 0;
 
+  // Calculate population-based growth rate
+  const populationBasedGrowthRate = marketData.population_growth_rate || 0;
+
   // Format currency with K/M/B suffixes
   const formatCurrency = (value: number): string => {
     if (!value) return 'N/A';
@@ -48,7 +51,9 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     emp: marketData.emp,
     avgPayrollPerFirm,
     avgSalaryPerEmployee,
-    firms_per_10k_population: marketData.firms_per_10k_population
+    firms_per_10k_population: marketData.firms_per_10k_population,
+    total_population: marketData.total_population,
+    population_growth_rate: populationBasedGrowthRate
   });
 
   return (
@@ -60,6 +65,32 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Growth Rate</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Population-based growth rate</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            {populationBasedGrowthRate !== undefined && (
+              <Badge className={`${getMetricBadge(populationBasedGrowthRate, 'density').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(populationBasedGrowthRate, 'density').label}
+              </Badge>
+            )}
+          </div>
+          <p className={`text-xl font-bold ${getMetricColor(populationBasedGrowthRate || 0, 'growth')}`}>
+            {populationBasedGrowthRate ? `${populationBasedGrowthRate.toFixed(1)}%` : 'N/A'}
+          </p>
+        </div>
+
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
@@ -109,32 +140,6 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
           </div>
           <p className={`text-xl font-bold ${getMetricColor(avgPayrollPerFirm || 0, 'money')}`}>
             {formatCurrency(avgPayrollPerFirm)}
-          </p>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <p className="text-gray-400">Average Salary per Employee</p>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">Total annual payroll divided by total number of employees</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            {avgSalaryPerEmployee > 0 && (
-              <Badge className={`${getMetricBadge(avgSalaryPerEmployee, 'payroll').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(avgSalaryPerEmployee, 'payroll').label}
-              </Badge>
-            )}
-          </div>
-          <p className={`text-xl font-bold ${getMetricColor(avgSalaryPerEmployee || 0, 'money')}`}>
-            {formatCurrency(avgSalaryPerEmployee)}
           </p>
         </div>
       </CardContent>
