@@ -17,13 +17,16 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
     queryKey: ['growth-metrics', practice.COUNTYFP, practice.STATEFP],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_comprehensive_growth_metrics');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching growth metrics:', error);
+        return null;
+      }
       
       // Find the matching county data
-      return data.find(
+      return data?.find(
         metric => 
-          metric.countyfp === practice.COUNTYFP?.toString() && 
-          metric.statefp === practice.STATEFP?.toString()
+          metric.countyfp === practice.COUNTYFP && 
+          metric.statefp === practice.STATEFP
       );
     },
     enabled: !!practice.COUNTYFP && !!practice.STATEFP
