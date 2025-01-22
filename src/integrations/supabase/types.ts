@@ -1201,6 +1201,19 @@ export type Database = {
           establishments_per_1000_population: number
         }[]
       }
+      get_comprehensive_growth_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          statefp: string
+          countyfp: string
+          countyname: string
+          population_growth_score: number
+          market_opportunity_score: number
+          economic_health_score: number
+          composite_growth_score: number
+          growth_classification: string
+        }[]
+      }
       get_county_rankings: {
         Args: Record<PropertyKey, never>
         Returns: {
