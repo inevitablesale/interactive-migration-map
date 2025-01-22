@@ -57,33 +57,23 @@ export default function PracticeDetails() {
         websiteUrl: practice.websiteUrl,
         Location: practice.Location,
         Summary: practice.Summary,
-        foundedOn: practice.foundedOn?.toString()
+        foundedOn: practice.foundedOn?.toString(),
+        COUNTYFP: practice.COUNTYFP?.toString(),
+        STATEFP: practice.STATEFP?.toString()
       };
 
-      const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
-      const stateFp = practice.STATEFP?.toString().padStart(2, '0');
-
-      if (!countyFp || !stateFp) {
-        console.log('Missing FIPS codes:', { countyFp, stateFp });
+      if (!practice.COUNTYFP || !practice.STATEFP) {
         return { practice: transformedPractice, countyData: null };
       }
-
-      console.log('Fetching county data with FIPS:', { countyFp, stateFp });
 
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
-        .eq('COUNTYFP', countyFp)
-        .eq('STATEFP', stateFp)
-        .eq('COUNTYNAME', practice.COUNTYNAME)
+        .eq('COUNTYFP', practice.COUNTYFP.toString())
+        .eq('STATEFP', practice.STATEFP.toString())
         .maybeSingle();
 
-      if (countyError) {
-        console.error('Error fetching county data:', countyError);
-        throw countyError;
-      }
-
-      console.log('County data:', countyData);
+      if (countyError) throw countyError;
 
       const transformedCountyData: ComprehensiveMarketData = {
         total_population: countyData?.total_population,
@@ -100,6 +90,8 @@ export default function PracticeDetails() {
         bachelors_holders: countyData?.bachelors_holders,
         masters_holders: countyData?.masters_holders,
         doctorate_holders: countyData?.doctorate_holders,
+        density_rank: countyData?.density_rank,
+        state_rank: countyData?.state_rank,
         payann: countyData?.total_payroll,
         emp: countyData?.total_employees,
         total_establishments: countyData?.total_establishments,
@@ -170,25 +162,19 @@ export default function PracticeDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
       <div className="container mx-auto p-6 space-y-8">
-        {/* Header Section */}
         <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
           <PracticeHeader practice={practice} />
         </div>
 
-        {/* Key Metrics Bar */}
         <KeyMetricsBar practice={practice} />
 
-        {/* Main Content - Two Column Layout */}
         <div className="grid lg:grid-cols-5 gap-8">
-          {/* Left Column - 60% */}
           <div className="lg:col-span-3 space-y-8">
             <BusinessOverview practice={practice} />
             <PracticeInfo practice={practice} />
           </div>
 
-          {/* Right Column - 40% */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Contact Card */}
             <div className="bg-black/40 backdrop-blur-md border-white/10 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-white mb-4">Contact Information</h2>
               <div className="space-y-4">
@@ -204,7 +190,6 @@ export default function PracticeDetails() {
               </div>
             </div>
 
-            {/* Market Analysis */}
             {countyData && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-white">Market Analysis</h2>
