@@ -9,6 +9,8 @@ export interface Practice {
   last_updated?: string;
   practice_buyer_pool?: any[];
   buyer_count: number;
+  notes?: string;
+  specialities?: string;
 }
 
 export interface Listing {

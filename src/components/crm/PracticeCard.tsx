@@ -5,20 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { FirmDetailsSheet } from "./FirmDetailsSheet";
-
-interface Practice {
-  id: string;
-  industry: string;
-  region: string;
-  employee_count: number;
-  annual_revenue: number;
-  service_mix: { [key: string]: number };
-  status: string;
-  last_updated: string;
-  practice_buyer_pool: { id: string }[];
-  specialities?: string;
-  notes?: string;
-}
+import { Practice } from "@/types/interests";
 
 interface PracticeCardProps {
   practice: Practice;
@@ -33,14 +20,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled
   const hasExpressedInterest = practice.status === 'pending_outreach';
   const hasNotes = practice.notes && practice.notes.trim().length > 0;
 
-  // Generate a three-word title from the industry and specialities
+  // Generate a three-word title from the industry
   const generateTitle = () => {
-    const words = practice.specialities?.split(/[.,!? ]+/).filter(word => word.length > 2) || [];
-    if (words.length >= 2) {
-      return `${practice.industry} ${words[0]} ${words[1]}`;
-    } else if (words.length === 1) {
-      return `${practice.industry} ${words[0]} Practice`;
-    }
     return `${practice.industry} Practice`;
   };
 
@@ -59,7 +40,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
             <Building2 className="w-5 h-5 text-gray-500" />
-            <span>{practice.region}</span>
+            <span>{practice["State Name"]}</span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-gray-500" />
@@ -76,8 +57,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled
         </div>
 
         <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
-          <div>Last update: {format(new Date(practice.last_updated), 'MMM dd, yyyy')}</div>
-          <div>{practice.practice_buyer_pool.length} interested buyers</div>
+          <div>Last update: {format(new Date(practice.last_updated || new Date()), 'MMM dd, yyyy')}</div>
+          <div>{practice.practice_buyer_pool?.length || 0} interested buyers</div>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
