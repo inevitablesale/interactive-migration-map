@@ -1,4 +1,4 @@
-import { Building2, MapPin, Users, DollarSign, GraduationCap, Home, TrendingUp } from "lucide-react";
+import { Building2, MapPin, Users, DollarSign, GraduationCap, Home, TrendingUp, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +85,12 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
                 <Users className="w-5 h-5 text-gray-500" />
                 <span>{practice.employee_count} employees</span>
               </div>
+              {practice.foundedOn && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-gray-500" />
+                  <span>Founded in {practice.foundedOn}</span>
+                </div>
+              )}
               {practice.specialities && (
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-5 h-5 text-gray-500" />
