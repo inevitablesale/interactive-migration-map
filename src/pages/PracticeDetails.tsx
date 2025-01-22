@@ -12,11 +12,13 @@ export default function PracticeDetails() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['practice-details', practiceId],
     queryFn: async () => {
+      if (!practiceId) throw new Error('Practice ID is required');
+      
       // First get the practice data
       const { data: practice, error: practiceError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('Company ID', practiceId)
+        .eq('Company ID', parseInt(practiceId))
         .single();
 
       if (practiceError) throw practiceError;
