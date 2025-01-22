@@ -15,9 +15,9 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   // Calculate growth classification based on growth rate
   const getGrowthClassification = (growthRate: number | undefined) => {
     if (!growthRate) return 'Stable';
-    if (growthRate > 8) return 'High Growth';
-    if (growthRate > 5) return 'Strong Growth';
-    if (growthRate > 2) return 'Moderate Growth';
+    if (growthRate > 2) return 'High Growth';
+    if (growthRate > 1) return 'Strong Growth';
+    if (growthRate > 0.5) return 'Moderate Growth';
     if (growthRate > 0) return 'Stable Growth';
     return 'Declining';
   };
