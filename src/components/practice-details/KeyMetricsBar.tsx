@@ -111,9 +111,10 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <DollarSign className="w-5 h-5 text-green-400" />
         <div>
           <div className="flex items-center gap-1">
-            <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. Gross Revenue</p>
-          </div>
+            <div className="min-h-[4rem] flex flex-col">
+              <p className="text-sm text-white/60">Est. Gross</p>
+              <p className="text-sm text-white/60">Revenue</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -125,7 +126,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
+          <p className="text-2xl font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
           <p className="text-xs text-white/40">Based on payroll data</p>
         </div>
       </div>
@@ -134,8 +135,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. SDE</p>
-          </div>
+              <p className="text-sm text-white/60">Est. SDE</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -148,7 +149,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-lg font-semibold text-white">{formatCurrency(sde)}</p>
+          <p className="text-2xl font-semibold text-white">{formatCurrency(sde)}</p>
+          <p className="text-xs text-white/40">Multiple: {valuationMultiple.toFixed(2)}x</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -156,8 +158,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. EBITDA</p>
-          </div>
+              <p className="text-sm text-white/60">Est. EBITDA</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -170,8 +172,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-lg font-semibold text-white">{formatCurrency(currentEbitda)}</p>
-          <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
+          <p className="text-2xl font-semibold text-white">{formatCurrency(currentEbitda)}</p>
+          <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
             <div 
               className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
               style={{ width: `${gaugePosition}%` }}
@@ -184,8 +186,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Growth Rates</p>
-          </div>
+              <p className="text-sm text-white/60">Growth Rates</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -199,7 +201,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </TooltipProvider>
           </div>
           <div className="flex flex-col">
-            <p className="text-lg font-semibold text-white">
+            <p className="text-2xl font-semibold text-white">
               {formatGrowthRate(growthRate)}
             </p>
             <p className="text-xs text-white/60">
@@ -214,11 +216,11 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
           <div className="min-h-[4rem]">
             <p className="text-sm text-white/60">Est. Valuation</p>
           </div>
-          <p className="text-lg font-semibold text-white">
+          <p className="text-2xl font-semibold text-white">
             {formatCurrency(estimatedValuation)}
           </p>
           <p className="text-xs text-white/60">
-            Based on Revenue × {valuationMultiple.toFixed(2)}
+            Based on EBITDA × {valuationMultiple.toFixed(2)}
           </p>
         </div>
       </div>
