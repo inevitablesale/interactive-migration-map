@@ -1,4 +1,3 @@
-<lov-code>
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +10,7 @@ import { BusinessOverview } from "@/components/practice-details/BusinessOverview
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Building2, MapPin, Mail, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
 
 export default function PracticeDetails() {
@@ -61,7 +60,10 @@ export default function PracticeDetails() {
         websiteUrl: practice.websiteUrl,
         Location: practice.Location,
         Summary: practice.Summary,
-        foundedOn: practice.foundedOn?.toString()
+        foundedOn: practice.foundedOn?.toString(),
+        COUNTYFP: practice.COUNTYFP?.toString(),
+        STATEFP: practice.STATEFP?.toString(),
+        STATE: practice.STATE
       };
 
       const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
@@ -191,4 +193,24 @@ export default function PracticeDetails() {
             {/* Header with Logo and Title */}
             <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
               <PracticeHeader practice={practice} />
-              <div className="mt-4
+            </div>
+
+            {/* Key Metrics */}
+            <KeyMetricsBar practice={practice} />
+
+            {/* Business Overview */}
+            <BusinessOverview practice={practice} />
+
+            {/* Market Metrics Grid */}
+            {countyData && <MarketMetricsGrid marketData={countyData} />}
+          </div>
+
+          {/* Right Column - Contact Info */}
+          <div className="space-y-6">
+            <PracticeInfo practice={practice} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
