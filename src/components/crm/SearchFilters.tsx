@@ -70,9 +70,15 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       
       if (error) throw error;
 
-      const uniqueSpecialities = Array.from(new Set(data.map(item => item.specialities)))
-        .filter(Boolean)
-        .sort();
+      // Split specialities string into individual items and flatten the array
+      const allSpecialities = data
+        .map(item => item.specialities.split(',').map(s => s.trim()))
+        .flat()
+        .filter(Boolean); // Remove empty strings
+
+      // Create a Set to get unique values and convert back to array
+      const uniqueSpecialities = Array.from(new Set(allSpecialities))
+        .sort((a, b) => a.localeCompare(b));
 
       return uniqueSpecialities;
     }
