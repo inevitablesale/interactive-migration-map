@@ -7,10 +7,8 @@ import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-
-// ... keep existing code (imports and type definitions)
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -19,9 +17,9 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
-  const ITEMS_PER_PAGE = 6; // Changed from 20 to 6
+  const ITEMS_PER_PAGE = 6;
 
-  const { data: practices, isLoading } = useQuery({
+  const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
       const { data: practicesData, error } = await supabase
@@ -31,7 +29,6 @@ export default function Dashboard() {
 
       if (error) throw error;
 
-      // Map the data to include required fields
       return practicesData.map(practice => ({
         id: practice["Company ID"].toString(),
         industry: practice["Primary Subtitle"] || "",
@@ -65,6 +62,7 @@ export default function Dashboard() {
         title: "Success",
         description: "Successfully withdrew interest from the practice.",
       });
+      refetchPractices();
     }
   };
 
@@ -86,7 +84,7 @@ export default function Dashboard() {
       ]);
 
     if (error) {
-      if (error.code === '23505') { // Unique violation
+      if (error.code === '23505') {
         toast({
           title: "Already Interested",
           description: "You have already expressed interest in this practice.",
@@ -104,24 +102,25 @@ export default function Dashboard() {
         title: "Success",
         description: "Successfully expressed interest in the practice.",
       });
+      refetchPractices();
     }
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   };
 
   const handleFilter = (newFilters: FilterState) => {
     setFilters(newFilters);
+    setCurrentPage(1);
   };
 
   const filteredPractices = practices?.filter(practice => {
-    // Search query filter
     const searchMatches = !searchQuery || 
       practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
       practice.region.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Apply additional filters
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
@@ -130,12 +129,10 @@ export default function Dashboard() {
     return searchMatches && industryMatches && employeeMatches && regionMatches;
   });
 
-  // Calculate pagination
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Function to generate pagination numbers
   const getPaginationNumbers = () => {
     const pageNumbers: (number | 'ellipsis')[] = [];
     const currentGroup = Math.floor((currentPage - 1) / 10);
@@ -218,13 +215,13 @@ export default function Dashboard() {
           ) : (
             <>
               <div className={`mt-6 grid gap-4 ${
-                viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'
+                viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
               }`}>
                 {paginatedPractices?.map((practice) => (
                   <PracticeCard
                     key={practice.id}
                     practice={practice}
-                    onWithdraw={handleWithdraw}
+                    onWithdraw={() => handleWithdraw(practice.id)}
                     onExpressInterest={() => handleExpressInterest(practice.id)}
                   />
                 ))}
