@@ -33,8 +33,10 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     ? (marketData.payann * 1000) / marketData.emp
     : 0;
 
-  // Calculate population-based growth rate
-  const populationBasedGrowthRate = marketData.population_growth_rate || 0;
+  // Calculate growth rate based on total population
+  const growthRate = marketData.total_population && marketData.population_growth_rate
+    ? (marketData.population_growth_rate)
+    : 0;
 
   // Format currency with K/M/B suffixes
   const formatCurrency = (value: number): string => {
@@ -53,7 +55,7 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
     avgSalaryPerEmployee,
     firms_per_10k_population: marketData.firms_per_10k_population,
     total_population: marketData.total_population,
-    population_growth_rate: populationBasedGrowthRate
+    growth_rate: growthRate
   });
 
   return (
@@ -80,14 +82,14 @@ export const AccountingIndustryCard: React.FC<AccountingIndustryCardProps> = ({ 
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {populationBasedGrowthRate !== undefined && (
-              <Badge className={`${getMetricBadge(populationBasedGrowthRate, 'density').color} text-white font-medium px-3 py-1`}>
-                {getMetricBadge(populationBasedGrowthRate, 'density').label}
+            {growthRate !== undefined && (
+              <Badge className={`${getMetricBadge(growthRate, 'density').color} text-white font-medium px-3 py-1`}>
+                {getMetricBadge(growthRate, 'density').label}
               </Badge>
             )}
           </div>
-          <p className={`text-xl font-bold ${getMetricColor(populationBasedGrowthRate || 0, 'growth')}`}>
-            {populationBasedGrowthRate ? `${populationBasedGrowthRate.toFixed(1)}%` : 'N/A'}
+          <p className={`text-xl font-bold ${getMetricColor(growthRate || 0, 'growth')}`}>
+            {growthRate ? `${growthRate.toFixed(1)}%` : 'N/A'}
           </p>
         </div>
 
