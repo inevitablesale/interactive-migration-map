@@ -8,22 +8,29 @@ interface KeyMetricsBarProps {
 }
 
 export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
-  // Estimate revenue based on industry standards and employee count
-  const estimatedRevenue = practice.employee_count ? practice.employee_count * 150000 : 0;
-  const estimatedEBITDA = estimatedRevenue * 0.15; // 15% margin assumption
+  // Estimate revenue based on industry standards for accounting firms
+  // Average revenue per employee in accounting firms ranges from $150k to $200k
+  const revenuePerEmployee = 175000; // Using industry average
+  const estimatedRevenue = practice.employee_count ? practice.employee_count * revenuePerEmployee : 0;
+  
+  // EBITDA margins for accounting firms typically range from 15-25%
+  const ebitdaMargin = 0.20; // Using 20% as a conservative estimate
+  const estimatedEBITDA = estimatedRevenue * ebitdaMargin;
 
   // Calculate growth classification based on growth rate compared to average
   const getGrowthClassification = (growthRate: number | undefined, avgGrowthRate: number | undefined) => {
-    if (!growthRate) return 'Stable';
-    if (!avgGrowthRate) return 'Stable';
+    if (!growthRate || !avgGrowthRate) return 'Data Unavailable';
     
     const difference = growthRate - avgGrowthRate;
     
-    if (difference > 2) return 'High Growth';
-    if (difference > 1) return 'Strong Growth';
-    if (difference > 0) return 'Moderate Growth';
-    if (difference > -1) return 'Stable Growth';
-    return 'Declining';
+    // Classification based on how much the growth rate exceeds the average
+    if (difference > 3) return 'Exceptional Growth (>3% above avg)';
+    if (difference > 2) return 'High Growth (2-3% above avg)';
+    if (difference > 1) return 'Strong Growth (1-2% above avg)';
+    if (difference > 0) return 'Moderate Growth (0-1% above avg)';
+    if (difference > -1) return 'Stable (0-1% below avg)';
+    if (difference > -2) return 'Slow Growth (1-2% below avg)';
+    return 'Declining (>2% below avg)';
   };
 
   // Get the actual growth rate and average from county data
@@ -42,15 +49,17 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       <div className="flex items-center gap-2">
         <DollarSign className="w-5 h-5 text-green-400" />
         <div>
-          <p className="text-sm text-white/60">Est. Revenue</p>
+          <p className="text-sm text-white/60">Annual Revenue*</p>
           <p className="text-lg font-semibold text-white">${estimatedRevenue.toLocaleString()}</p>
+          <p className="text-xs text-white/40">*Industry average estimate</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Building2 className="w-5 h-5 text-blue-400" />
         <div>
-          <p className="text-sm text-white/60">Est. EBITDA</p>
+          <p className="text-sm text-white/60">EBITDA (20%)*</p>
           <p className="text-lg font-semibold text-white">${estimatedEBITDA.toLocaleString()}</p>
+          <p className="text-xs text-white/40">*Industry standard margin</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
