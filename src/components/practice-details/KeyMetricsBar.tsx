@@ -74,11 +74,11 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
     (countyData.payann * 1000) / countyData.emp : 
     86259; // Fallback to county average if no data
     
-  const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
+  const annualPayroll = practice.employeeCount ? practice.employeeCount * avgSalaryPerEmployee : 0;
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
 
-  const firmSize = getFirmSizeCategory(practice.employee_count);
+  const firmSize = getFirmSizeCategory(practice.employeeCount || 0);
   const sdeParams = getSDEParameters(firmSize);
 
   // Calculate SDE components based on firm size
