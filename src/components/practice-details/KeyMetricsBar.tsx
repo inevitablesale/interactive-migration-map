@@ -8,19 +8,21 @@ interface KeyMetricsBarProps {
 }
 
 export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
-  // Calculate revenue based on average salary per employee
+  // Calculate revenue based on industry standard payroll-to-revenue ratio
   const avgSalaryPerEmployee = countyData?.payann && countyData?.emp ? 
     (countyData.payann * 1000) / countyData.emp : 
     86259; // Fallback to county average if no data
     
-  const estimatedRevenue = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
+  const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
+  const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
+  const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
   
   // EBITDA margins based on market saturation and competition
   const minEbitdaMargin = 0.15; // 15%
   const maxEbitdaMargin = 0.40; // 40%
   
   // Adjust EBITDA based on market conditions
-  const marketSaturationFactor = countyData?.market_saturation || 0.2;
+  const marketSaturationFactor = countyData?.avg_market_saturation || 0.2;
   const marketDensityFactor = (countyData?.firms_per_10k_population || 3) / 10;
   
   const currentEbitdaMargin = Math.min(
@@ -66,8 +68,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <DollarSign className="w-5 h-5 text-green-400" />
         <div>
           <p className="text-sm text-white/60">Annual Revenue</p>
-          <p className="text-lg font-semibold text-white">${estimatedRevenue.toLocaleString()}</p>
-          <p className="text-xs text-white/40">Based on market data</p>
+          <p className="text-lg font-semibold text-white">${Math.round(estimatedRevenue).toLocaleString()}</p>
+          <p className="text-xs text-white/40">Based on payroll data</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -75,7 +77,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">EBITDA Range</p>
           <div className="space-y-1">
-            <p className="text-lg font-semibold text-white">${currentEbitda.toLocaleString()}</p>
+            <p className="text-lg font-semibold text-white">${Math.round(currentEbitda).toLocaleString()}</p>
             <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
               <div 
                 className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
