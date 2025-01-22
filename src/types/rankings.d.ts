@@ -36,36 +36,22 @@ export interface MSARanking {
 }
 
 export interface TopFirm {
-  id?: string;
-  "Company Name": string | null;
-  "Primary Subtitle": string | null;
-  Location: string | null;
-  Summary: string | null;
-  "Company ID": number;
-  "Profile URL": string | null;
-  employeeCount: number | null;
-  specialities: string | null;
-  employeeCountRangeLow: number | null;
-  employeeCountRangeHigh: number | null;
-  followerCount: number | null;
-  description: string | null;
-  websiteUrl: string | null;
-  foundedOn: number | null;
-  latitude: number | null;
-  longitude: number | null;
-  "Block FIPS": string | null;
-  "State Name": string | null;
-  STATE: string | null;
-  STATEFP: number | null;
-  COUNTYFP: number | null;
-  COUNTYNAME: string | null;
-  PLACEFP: string | null;
-  PLACENS: string | null;
-  PLACENAME: string | null;
-  originalCoverImage: string | null;
-  logoResolutionResult: string | null;
-  status: string | null;
-  notes: string | null;
+  company_name: string;
+  employee_count: number;
+  follower_count: number;
+  follower_ratio: number;
+  logoResolutionResult?: string;
+  originalCoverImage?: string;
+  primarySubtitle?: string;
+  employeeCountRangeLow?: number;
+  employeeCountRangeHigh?: number;
+  foundedOn?: string;
+  specialities?: string;
+  websiteUrl?: string;
+  Location?: string;
+  Summary?: string;
+  COUNTYFP?: string;
+  STATEFP?: string;
 }
 
 export interface ComprehensiveMarketData {
@@ -109,5 +95,4 @@ export interface ComprehensiveMarketData {
   avg_firms_per_10k?: number;
   avg_growth_rate?: number;
   avg_market_saturation?: number;
-  population_growth_rate?: number;
 }

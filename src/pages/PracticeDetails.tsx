@@ -68,8 +68,8 @@ export default function PracticeDetails() {
         Location: practice.Location,
         Summary: practice.Summary,
         foundedOn: practice.foundedOn?.toString(),
-        COUNTYFP: Number(practice.COUNTYFP),  // Convert to number
-        STATEFP: Number(practice.STATEFP),    // Convert to number
+        COUNTYFP: practice.COUNTYFP?.toString(),
+        STATEFP: practice.STATEFP?.toString(),
         STATE: practice.STATE
       };
 
