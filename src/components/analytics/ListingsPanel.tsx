@@ -170,7 +170,7 @@ export const ListingsPanel = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-gray-500" />
-                    <span className="truncate">{listing["State Name"] || listing.Location}</span>
+                    <span className="truncate">{listing["State Name"]}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-gray-500" />
