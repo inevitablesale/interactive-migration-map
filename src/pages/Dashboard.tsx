@@ -17,29 +17,38 @@ export default function Dashboard() {
 
   const ITEMS_PER_PAGE = 6;
 
-  // Simplified query without joins or restrictions
-  const { data: practices, isLoading, refetch } = useQuery({
-    queryKey: ['practices'],
+  // Query canary_firms_data directly
+  const { data: firms, isLoading } = useQuery({
+    queryKey: ['firms'],
     queryFn: async () => {
-      const { data: practicesData, error } = await supabase
+      console.log("Fetching firms...");
+      const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*');
+      
+      if (error) {
+        console.error("Error fetching firms:", error);
+        throw error;
+      }
+      console.log("Fetched firms:", data?.length);
+      return data;
+    }
+  });
 
+  // Query user interests
+  const { data: userInterests } = useQuery({
+    queryKey: ['user-interests'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('canary_firm_interests')
+        .select('*')
+        .eq('user_id', user.id);
+      
       if (error) throw error;
-
-      return practicesData.map(practice => ({
-        id: practice["Company ID"].toString(),
-        industry: practice["Primary Subtitle"] || "",
-        region: practice["State Name"] || "",
-        employee_count: practice.employeeCount || 0,
-        annual_revenue: 0,
-        service_mix: { "General": 100 },
-        status: practice.status || "pending_response",
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        specialities: practice.specialities || "",
-        notes: practice.notes || ""
-      }));
+      return data;
     }
   });
 
@@ -48,87 +57,35 @@ export default function Dashboard() {
     setCurrentPage(1);
   };
 
-  const handleWithdraw = async (practiceId: string) => {
-    const { error } = await supabase
-      .from('practice_buyer_pool')
-      .delete()
-      .match({ practice_id: practiceId, user_id: (await supabase.auth.getUser()).data.user?.id });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to withdraw interest. Please try again.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Successfully withdrew interest from the practice.",
-      });
-    }
-  };
-
-  const handleExpressInterest = async (practiceId: string) => {
+  const handleExpressInterest = async (companyId: number) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication Required",
-          description: "Please sign in to express interest in practices.",
+          description: "Please sign in to express interest.",
           variant: "destructive",
         });
         return;
       }
 
-      // Find the practice in our data
-      const practice = practices?.find(p => p.id === practiceId);
-      if (!practice) {
-        toast({
-          title: "Error",
-          description: "Practice not found.",
-          variant: "destructive",
+      const { error: interestError } = await supabase
+        .from('canary_firm_interests')
+        .insert({
+          company_id: companyId,
+          user_id: user.id,
+          status: 'interested',
+          is_anonymous: true
         });
-        return;
-      }
 
-      // First, create or get the tracked practice
-      const { data: trackedPractice, error: trackedError } = await supabase
-        .from('tracked_practices')
-        .insert([{
-          industry: practice.industry,
-          region: practice.region,
-          employee_count: practice.employee_count,
-          annual_revenue: practice.annual_revenue,
-          service_mix: practice.service_mix,
-          status: 'pending_response',
-          user_id: user.id
-        }])
-        .select()
-        .single();
-
-      if (trackedError) {
-        toast({
-          title: "Error",
-          description: "Failed to track practice. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Then, add to practice_buyer_pool using the tracked practice ID
-      const { error: poolError } = await supabase
-        .from('practice_buyer_pool')
-        .insert([{
-          practice_id: trackedPractice.id,
-          user_id: user.id
-        }]);
-
-      if (poolError) {
-        if (poolError.code === '23505') { // Unique violation
+      if (interestError) {
+        if (interestError.code === '23505') {
           toast({
             title: "Already Interested",
-            description: "You have already expressed interest in this practice.",
+            description: "You have already expressed interest in this company.",
             variant: "default",
           });
         } else {
@@ -141,15 +98,14 @@ export default function Dashboard() {
       } else {
         toast({
           title: "Success",
-          description: "Successfully expressed interest in the practice.",
+          description: "Successfully expressed interest in the company.",
         });
-        // Refetch the data to update UI
-        refetch();
       }
     } catch (error) {
+      console.error('Error expressing interest:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Failed to express interest. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -157,49 +113,26 @@ export default function Dashboard() {
     }
   };
 
-  // Simplified filtering without any restrictions
-  const filteredPractices = practices?.filter(practice => {
+  const filteredFirms = firms?.filter((firm) => {
     if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
       return true;
     }
 
-    const searchMatches = !searchQuery || 
-      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const stateMatches = !filters.state || practice.region === filters.state;
+    const matchesSearch = !searchQuery || 
+      (firm.specialities && firm.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
-                           (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
+    const matchesState = !filters.state || 
+      firm["State Name"] === filters.state;
+    
+    const matchesEmployeeCount = (!filters.minEmployees || firm.employeeCount >= parseInt(filters.minEmployees)) &&
+      (!filters.maxEmployees || firm.employeeCount <= parseInt(filters.maxEmployees));
 
-    return searchMatches && stateMatches && employeeMatches;
+    return matchesSearch && matchesState && matchesEmployeeCount;
   });
 
-  const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
+  const totalPages = Math.ceil((filteredFirms?.length || 0) / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  const getPaginationNumbers = () => {
-    const pageNumbers: (number | 'ellipsis')[] = [];
-    const currentGroup = Math.floor((currentPage - 1) / 10);
-    const startPage = currentGroup * 10 + 1;
-    const endPage = Math.min(startPage + 9, totalPages);
-
-    if (startPage > 1) {
-      pageNumbers.push(1);
-      if (startPage > 2) pageNumbers.push('ellipsis');
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) pageNumbers.push('ellipsis');
-      pageNumbers.push(totalPages);
-    }
-
-    return pageNumbers;
-  };
+  const paginatedFirms = filteredFirms?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const { data: practiceOfDay } = useQuery({
     queryKey: ['practice-of-day'],
@@ -240,19 +173,32 @@ export default function Dashboard() {
           />
           
           {isLoading ? (
-            <div>Loading practices...</div>
+            <div>Loading firms...</div>
           ) : (
             <>
               <div className="mt-6 space-y-4">
-                {paginatedPractices?.map((practice) => (
-                  <PracticeCard
-                    key={practice.id}
-                    practice={practice}
-                    onWithdraw={handleWithdraw}
-                    onExpressInterest={() => handleExpressInterest(practice.id)}
-                    disabled={isSubmitting}
-                  />
-                ))}
+                {paginatedFirms?.map((firm) => {
+                  const hasExpressedInterest = userInterests?.some(
+                    interest => interest.company_id === firm["Company ID"] && interest.status === 'interested'
+                  );
+                  
+                  return (
+                    <PracticeCard
+                      key={firm["Company ID"]}
+                      practice={{
+                        id: firm["Company ID"].toString(),
+                        industry: firm["Primary Subtitle"] || "",
+                        region: firm["State Name"] || "",
+                        employee_count: firm.employeeCount || 0,
+                        service_mix: { "General": 100 },
+                        status: hasExpressedInterest ? 'interested' : 'not_contacted'
+                      }}
+                      onWithdraw={() => {}} // Not implemented yet
+                      onExpressInterest={() => handleExpressInterest(firm["Company ID"])}
+                      disabled={isSubmitting}
+                    />
+                  );
+                })}
               </div>
 
               {totalPages > 1 && (
@@ -298,7 +244,7 @@ export default function Dashboard() {
           {practiceOfDay && (
             <PracticeOfDay 
               practice={practiceOfDay}
-              onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
+              onInterested={() => practiceOfDay && handleExpressInterest(parseInt(practiceOfDay.id))}
             />
           )}
         </div>
