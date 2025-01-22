@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { FirmDetailsSheet } from "./FirmDetailsSheet";
 
 interface Practice {
   id: string;
@@ -28,6 +29,7 @@ interface PracticeCardProps {
 
 export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled }: PracticeCardProps) {
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const hasExpressedInterest = practice.status === 'pending_outreach';
   const hasNotes = practice.notes && practice.notes.trim().length > 0;
 
@@ -92,6 +94,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled
           <Button 
             variant="outline"
             className="w-full flex items-center justify-center gap-2"
+            onClick={() => setIsDetailsOpen(true)}
           >
             <Eye className="w-4 h-4" />
             <span className="hidden sm:inline">View Details</span>
@@ -123,6 +126,12 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled
           </div>
         </DialogContent>
       </Dialog>
+
+      <FirmDetailsSheet
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        practice={practice}
+      />
     </Card>
   );
 }
