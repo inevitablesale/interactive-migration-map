@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,11 +9,14 @@ import { KeyMetricsBar } from "@/components/practice-details/KeyMetricsBar";
 import { BusinessOverview } from "@/components/practice-details/BusinessOverview";
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['practice-details', practiceId],
@@ -170,6 +173,16 @@ export default function PracticeDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
       <div className="container mx-auto p-6 space-y-8">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          className="text-white hover:text-white/80 hover:bg-white/10"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+
         {/* Header Section */}
         <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
           <PracticeHeader practice={practice} />
