@@ -7,12 +7,14 @@ import Opportunities from "@/pages/Opportunities";
 import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
 import ThankYou from "@/pages/ThankYou";
+import Auth from "@/pages/Auth";
 
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
         <Route path="/tracked-practices" element={<TrackedPractices />} />
         <Route path="/practice/:practiceId" element={<PracticeDetails />} />
         <Route path="/analysis" element={<Analysis />} />
