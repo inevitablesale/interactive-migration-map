@@ -32,10 +32,10 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="container mx-auto p-8">
+    <main className="p-8 max-w-7xl mx-auto w-full">
       <div className="flex items-center gap-2 mb-8">
         <LayoutDashboard className="w-6 h-6 text-blue-500" />
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
       </div>
       
       <div className="max-w-2xl mx-auto mb-8">
@@ -52,18 +52,18 @@ export default function Dashboard() {
 
       <div className="grid gap-4">
         {isLoading ? (
-          <p className="text-center text-gray-400">Loading firms...</p>
+          <p className="text-center text-muted-foreground">Loading firms...</p>
         ) : firms?.length === 0 ? (
-          <p className="text-center text-gray-400">No firms found</p>
+          <p className="text-center text-muted-foreground">No firms found</p>
         ) : (
           firms?.map((firm) => (
             <Card key={firm["Company ID"]} className="p-4">
               <h3 className="font-semibold text-lg mb-2">{firm["Company Name"]}</h3>
-              <p className="text-gray-400 text-sm mb-1">{firm["Primary Subtitle"]}</p>
+              <p className="text-muted-foreground text-sm mb-1">{firm["Primary Subtitle"]}</p>
               {firm.specialities && (
-                <p className="text-gray-500 text-sm">Specialties: {firm.specialities}</p>
+                <p className="text-muted-foreground text-sm">Specialties: {firm.specialities}</p>
               )}
-              <div className="mt-2 text-sm text-gray-400">
+              <div className="mt-2 text-sm text-muted-foreground">
                 {firm.Location && <p>Location: {firm.Location}</p>}
                 {firm.employeeCount && <p>Employees: {firm.employeeCount}</p>}
               </div>
@@ -71,6 +71,6 @@ export default function Dashboard() {
           ))
         )}
       </div>
-    </div>
+    </main>
   );
 }

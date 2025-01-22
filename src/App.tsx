@@ -38,7 +38,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-background">
         {session && (
           <>
             <AppSidebar />
