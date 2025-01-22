@@ -5,6 +5,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { PracticeHeader } from "@/components/practice-details/PracticeHeader";
+import { KeyMetricsBar } from "@/components/practice-details/KeyMetricsBar";
+import { BusinessOverview } from "@/components/practice-details/BusinessOverview";
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
@@ -147,9 +149,10 @@ export default function PracticeDetails() {
     return (
       <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white">
         <Skeleton className="h-12 w-[300px] bg-white/10" />
+        <Skeleton className="h-20 w-full bg-white/10" />
         <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-[200px] bg-white/10" />
-          <Skeleton className="h-[200px] bg-white/10" />
+          <Skeleton className="h-[400px] bg-white/10" />
+          <Skeleton className="h-[400px] bg-white/10" />
         </div>
       </div>
     );
@@ -167,22 +170,49 @@ export default function PracticeDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
       <div className="container mx-auto p-6 space-y-8">
-        <div className="neo-blur rounded-lg p-6">
+        {/* Header Section */}
+        <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
           <PracticeHeader practice={practice} />
         </div>
-        
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="neo-blur rounded-lg">
+
+        {/* Key Metrics Bar */}
+        <KeyMetricsBar practice={practice} />
+
+        {/* Main Content - Two Column Layout */}
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* Left Column - 60% */}
+          <div className="lg:col-span-3 space-y-8">
+            <BusinessOverview practice={practice} />
             <PracticeInfo practice={practice} />
           </div>
-        </div>
 
-        {countyData && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-gradient">Market Analysis</h2>
-            <MarketMetricsGrid marketData={countyData} />
+          {/* Right Column - 40% */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Contact Card */}
+            <div className="bg-black/40 backdrop-blur-md border-white/10 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Contact Information</h2>
+              <div className="space-y-4">
+                <button className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
+                  Express Interest
+                </button>
+                <button className="w-full bg-green-500/20 text-green-400 py-2 px-4 rounded hover:bg-green-500/30 transition">
+                  Save Opportunity
+                </button>
+                <p className="text-center text-white/60">
+                  {practice.follower_count || 0} interested buyers
+                </p>
+              </div>
+            </div>
+
+            {/* Market Analysis */}
+            {countyData && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-white">Market Analysis</h2>
+                <MarketMetricsGrid marketData={countyData} />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
