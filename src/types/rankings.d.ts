@@ -24,7 +24,8 @@ export interface ComprehensiveMarketData {
   rent_rank?: number;
   growth_rank?: number;
   firm_density_rank?: number;
+  density_rank?: number;
   state_rank?: number;
   national_rank?: number;
-  density_rank?: number;
+  top_firms?: TopFirm[] | null;
 }
