@@ -28,16 +28,6 @@ export function PracticeInfo({ practice }: PracticeInfoProps) {
           <h3 className="font-semibold text-yellow-400">Founded</h3>
           <p className="text-white/80">{practice.foundedOn || 'Not available'}</p>
         </div>
-        <div>
-          <h3 className="font-semibold text-yellow-400">Specialties</h3>
-          <p className="text-white/80">{practice.specialities || 'Not available'}</p>
-        </div>
-        {practice.Summary && (
-          <div>
-            <h3 className="font-semibold text-yellow-400">Summary</h3>
-            <p className="text-white/80">{practice.Summary}</p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
