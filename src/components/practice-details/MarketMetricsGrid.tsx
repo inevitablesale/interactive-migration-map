@@ -9,7 +9,8 @@ interface MarketMetricsGridProps {
 export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
   const calculateAverageSalary = () => {
     if (!marketData.payann || !marketData.emp || marketData.emp === 0) return undefined;
-    return Math.round(marketData.payann / marketData.emp);
+    // Multiply payann by 1000 since it's stored in thousands
+    return Math.round((marketData.payann * 1000) / marketData.emp);
   };
 
   return (
@@ -20,7 +21,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Average Annual Payroll",
-            value: marketData.payann ? (marketData.payann * 10).toLocaleString() : undefined,
+            value: marketData.payann ? (marketData.payann * 1000).toLocaleString() : undefined,
             type: "money",
             rank: marketData.income_rank,
             sublabel: `National Rank: ${marketData.national_income_rank}`
