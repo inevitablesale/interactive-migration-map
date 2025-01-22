@@ -69,8 +69,8 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Score</p>
           <p className="text-lg font-semibold text-white">
-            {countyData?.growth_rate ? 
-              `${Math.round(countyData.growth_rate)}%` : 
+            {countyData?.population_growth_rate ? 
+              `${Math.round(countyData.population_growth_rate)}%` : 
               'N/A'}
           </p>
         </div>
@@ -80,7 +80,7 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Status</p>
           <p className="text-lg font-semibold text-white">
-            {getGrowthClassification(countyData?.growth_rate)}
+            {getGrowthClassification(countyData?.population_growth_rate)}
           </p>
         </div>
       </div>

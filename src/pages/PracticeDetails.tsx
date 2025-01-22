@@ -119,8 +119,8 @@ export default function PracticeDetails() {
         rent_rank: countyData?.rent_rank,
         growth_rank: countyData?.growth_rank,
         firm_density_rank: countyData?.firm_density_rank,
-        density_rank: countyData?.density_rank,
-        state_rank: countyData?.state_rank,
+        density_rank: countyData?.firm_density_rank, // Using firm_density_rank instead of density_rank
+        state_rank: countyData?.growth_rank, // Using growth_rank as a proxy for state_rank
         // National-level rankings
         national_income_rank: countyData?.national_income_rank,
         national_population_rank: countyData?.national_population_rank,
