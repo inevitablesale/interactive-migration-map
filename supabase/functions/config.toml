@@ -1,0 +1,4 @@
+project_id = "vbiitcdnsssvdwjdxhbz"
+
+[functions.anonymize-summary]
+verify_jwt = false
