@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Users, Building2, DollarSign, Clock, MessageSquare, Heart, X } from "lucide-react";
+import { Users, Building2, DollarSign, Clock, MessageSquare, Heart, X, Eye } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getStatusColor = (status: string) => {
@@ -114,7 +114,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -132,6 +132,14 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               {/* Add detailed view content here */}
             </DialogContent>
           </Dialog>
+
+          <Button 
+            variant="outline" 
+            className="w-full h-[clamp(2rem,4vw,2.5rem)] text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center gap-1.5"
+          >
+            <Eye className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline truncate">View Details</span>
+          </Button>
           
           {hasExpressedInterest ? (
             <Button 
