@@ -3,12 +3,11 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { Toaster } from "@/components/ui/toaster";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CommandBar } from "@/components/CommandBar";
-import { Index } from "@/pages/Index";
-import { Analysis } from "@/pages/Analysis";
-import { MarketReport } from "@/pages/MarketReport";
-import { StateMarketReport } from "@/pages/StateMarketReport";
-import { ThankYou } from "@/pages/ThankYou";
-import { Opportunities } from "@/pages/Opportunities";
+import Index from "@/pages/Index";
+import Analysis from "@/pages/Analysis";
+import MarketReport from "@/pages/MarketReport";
+import StateMarketReport from "@/pages/StateMarketReport";
+import ThankYou from "@/pages/ThankYou";
 import BuyerDashboard from "@/pages/BuyerDashboard";
 
 export default function App() {
@@ -38,7 +37,6 @@ export default function App() {
             <Route path="/market-report/:county/:state" element={<MarketReport />} />
             <Route path="/state-market-report" element={<StateMarketReport />} />
             <Route path="/thank-you" element={<ThankYou />} />
-            <Route path="/opportunities" element={<Opportunities />} />
           </Routes>
         </main>
       </div>
