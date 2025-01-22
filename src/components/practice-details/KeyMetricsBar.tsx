@@ -19,8 +19,8 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
       const { data, error } = await supabase
         .from('county_rankings')
         .select('*')
-        .eq('countyfp', practice.COUNTYFP)
-        .eq('statefp', practice.STATEFP)
+        .eq('COUNTYFP', practice.COUNTYFP)
+        .eq('STATEFP', practice.STATEFP)
         .maybeSingle();
 
       if (error) {
@@ -44,7 +44,7 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
 
   // Add console log to debug growth rate data
   console.log('County Data Growth:', {
-    growthRatePercentage: countyData?.growth_rate_percentage,
+    growthRate: countyData?.avg_growth_rate,
     countyData
   });
 
@@ -76,8 +76,8 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Score</p>
           <p className="text-lg font-semibold text-white">
-            {countyData?.growth_rate_percentage ? 
-              `${Math.round(countyData.growth_rate_percentage)}%` : 
+            {countyData?.avg_growth_rate ? 
+              `${Math.round(countyData.avg_growth_rate)}%` : 
               'N/A'}
           </p>
         </div>
@@ -87,7 +87,7 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Status</p>
           <p className="text-lg font-semibold text-white">
-            {getGrowthClassification(countyData?.growth_rate_percentage)}
+            {getGrowthClassification(countyData?.avg_growth_rate)}
           </p>
         </div>
       </div>
