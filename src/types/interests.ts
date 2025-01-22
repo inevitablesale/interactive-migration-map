@@ -11,17 +11,8 @@ export interface Practice {
   buyer_count: number;
   notes?: string;
   specialities?: string;
-}
-
-export interface Listing {
-  "Company ID": number;
-  "Company Name": string | null;
-  "Primary Subtitle": string | null;
-  "State Name": string | null;
-  employeeCount: number | null;
-  specialities: string | null;
-  notes: string | null;
-  status?: string;
+  "Company Name"?: string;
+  employeeCount?: number;
 }
 
 export interface CanaryFirmInterest {
