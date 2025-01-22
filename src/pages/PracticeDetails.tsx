@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -55,14 +56,17 @@ export default function PracticeDetails() {
     retry: false
   });
 
-  if (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
-    toast({
-      title: "Error loading practice details",
-      description: errorMessage,
-      variant: "destructive",
-    });
-  }
+  // Handle error toast in useEffect
+  useEffect(() => {
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
+      toast({
+        title: "Error loading practice details",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   if (isLoading) {
     return (
