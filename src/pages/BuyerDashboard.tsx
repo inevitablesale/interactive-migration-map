@@ -20,7 +20,7 @@ export default function BuyerDashboard() {
         .select('*');
       
       if (searchQuery) {
-        query = query.or(`Company Name.ilike.%${searchQuery}%,Primary Subtitle.ilike.%${searchQuery}%,specialities.ilike.%${searchQuery}%`);
+        query = query.or(`"Company Name".ilike.%${searchQuery}%,"Primary Subtitle".ilike.%${searchQuery}%,specialities.ilike.%${searchQuery}%`);
       }
 
       const { data, error } = await query.limit(10);
@@ -30,31 +30,31 @@ export default function BuyerDashboard() {
         throw error;
       }
 
-      return data;
+      return data || [];
     }
   });
 
   const { data: stats } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const { data: totalFirms } = await supabase
+      const { count: totalFirms } = await supabase
         .from('canary_firms_data')
-        .select('*', { count: 'exact' });
+        .select('*', { count: 'exact', head: true });
 
-      const { data: pendingFirms } = await supabase
+      const { count: pendingFirms } = await supabase
         .from('canary_firms_data')
-        .select('*', { count: 'exact' })
-        .eq('status', 'pending_response');
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'not_contacted');
 
       const { data: buyerPool } = await supabase
         .from('practice_buyer_pool')
         .select('practice_id');
 
-      const avgPoolSize = buyerPool ? buyerPool.length / (totalFirms?.length || 1) : 0;
+      const avgPoolSize = buyerPool ? buyerPool.length / (totalFirms || 1) : 0;
 
       return {
-        total: totalFirms?.length || 0,
-        pending: pendingFirms?.length || 0,
+        total: totalFirms || 0,
+        pending: pendingFirms || 0,
         avgPoolSize: Math.round(avgPoolSize)
       };
     }
@@ -119,24 +119,24 @@ export default function BuyerDashboard() {
                 <Card key={firm["Company ID"]} className="p-6">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-semibold">Accounting</h3>
+                      <h3 className="text-lg font-semibold">{firm["Company Name"] || "Unnamed Company"}</h3>
                       <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                        Not Contacted
+                        {firm.status || "Not Contacted"}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-gray-500" />
-                        <span>{firm["State Name"]}</span>
+                        <span>{firm["State Name"] || "Location Unknown"}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-gray-500" />
-                        <span>{firm.employeeCount} employees</span>
+                        <span>{firm.employeeCount || 0} employees</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-gray-500" />
-                        <span>{firm.specialities || "Specialties"}</span>
+                        <span>{firm.specialities || "No specialties listed"}</span>
                       </div>
                     </div>
 
