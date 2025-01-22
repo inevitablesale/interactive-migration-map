@@ -52,7 +52,28 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const maxEbitda = estimatedRevenue * maxEbitdaMargin;
   const currentEbitda = estimatedRevenue * currentEbitdaMargin;
 
-  // Calculate growth classification based on actual market data
+  // Calculate valuation multiple based on various factors
+  const baseMultiple = 1.81; // Starting at the lower end of the range
+  
+  // Growth rate adjustment (+0.1x for every 5% above average)
+  const growthRate = countyData?.population_growth_rate || 0;
+  const avgGrowthRate = countyData?.avg_growth_rate || 0;
+  const growthAdjustment = Math.max(0, ((growthRate - avgGrowthRate) / 5) * 0.1);
+
+  // Market saturation adjustment (negative for saturated markets)
+  const marketSaturationAdjustment = Math.max(-0.2, (0.5 - (marketSaturationFactor || 0)) * 0.4);
+
+  // Size premium for larger firms
+  const sizePremium = practice.employee_count >= 20 ? 0.2 : 0;
+
+  // Calculate final multiple
+  const valuationMultiple = Math.min(3.25, // Cap at max industry multiple
+    baseMultiple + growthAdjustment + marketSaturationAdjustment + sizePremium
+  );
+
+  // Calculate estimated valuation
+  const estimatedValuation = sde * valuationMultiple;
+
   const getGrowthClassification = (growthRate: number | undefined, avgGrowthRate: number | undefined) => {
     if (!growthRate || !avgGrowthRate) return 'Data Unavailable';
     
@@ -66,9 +87,6 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
     if (difference > -2) return 'Slow Growth';
     return 'Declining';
   };
-
-  const growthRate = countyData?.population_growth_rate;
-  const avgGrowthRate = countyData?.avg_growth_rate;
 
   const formatGrowthRate = (rate: number | undefined) => {
     if (!rate) return 'N/A';
@@ -93,7 +111,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <DollarSign className="w-5 h-5 text-green-400" />
         <div>
           <div className="flex items-center gap-1">
-            <p className="text-sm text-white/60">Annual Revenue</p>
+            <p className="text-sm text-white/60">Est. Gross Revenue</p>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -113,7 +131,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <Building2 className="w-5 h-5 text-blue-400" />
         <div>
           <div className="flex items-center gap-1">
-            <p className="text-sm text-white/60">SDE</p>
+            <p className="text-sm text-white/60">Est. SDE</p>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -127,27 +145,52 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </TooltipProvider>
           </div>
           <p className="text-lg font-semibold text-white">{formatCurrency(sde)}</p>
-          <div className="space-y-1">
-            <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div 
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
-                style={{ width: `${gaugePosition}%` }}
-              />
-            </div>
-          </div>
+          <p className="text-xs text-white/40">Multiple: {valuationMultiple.toFixed(2)}x</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Users className="w-5 h-5 text-purple-400" />
         <div>
-          <p className="text-sm text-white/60">Employee Count</p>
-          <p className="text-lg font-semibold text-white">{practice.employee_count}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm text-white/60">Est. EBITDA</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Earnings Before Interest, Taxes, Depreciation & Amortization</p>
+                  <p className="text-xs text-gray-400">Range: {formatCurrency(minEbitda)} - {formatCurrency(maxEbitda)}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="text-lg font-semibold text-white">{formatCurrency(currentEbitda)}</p>
+          <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div 
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
+              style={{ width: `${gaugePosition}%` }}
+            />
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-yellow-400" />
         <div>
-          <p className="text-sm text-white/60">Growth Rates</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm text-white/60">Growth Rates</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Population Growth Rate</p>
+                  <p className="text-xs text-gray-400">Compared to state average</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="flex flex-col">
             <p className="text-lg font-semibold text-white">
               {formatGrowthRate(growthRate)}
@@ -161,9 +204,12 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       <div className="flex items-center gap-2">
         <LineChart className="w-5 h-5 text-orange-400" />
         <div>
-          <p className="text-sm text-white/60">Growth Status</p>
+          <p className="text-sm text-white/60">Est. Valuation</p>
           <p className="text-lg font-semibold text-white">
-            {getGrowthClassification(growthRate, avgGrowthRate)}
+            {formatCurrency(estimatedValuation)}
+          </p>
+          <p className="text-xs text-white/60">
+            Based on SDE × {valuationMultiple.toFixed(2)}
           </p>
         </div>
       </div>
