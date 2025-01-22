@@ -15,11 +15,11 @@ export default function PracticeDetails() {
     queryFn: async () => {
       if (!practiceId) throw new Error('Practice ID is required');
       
-      // First get the practice data
+      // First get the practice data - use exact match on Company ID
       const { data: practice, error: practiceError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('Company ID', parseInt(practiceId))
+        .eq('Company ID', Number(practiceId))
         .maybeSingle();
 
       if (practiceError) throw practiceError;
