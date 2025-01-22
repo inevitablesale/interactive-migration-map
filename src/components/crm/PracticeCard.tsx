@@ -65,7 +65,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest, disabled
           </div>
           <div className="flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-gray-500" />
-            <span>${practice.annual_revenue.toLocaleString()}k revenue</span>
+            <span>${(practice.annual_revenue || 0).toLocaleString()}k revenue</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-gray-500" />

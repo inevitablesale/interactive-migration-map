@@ -31,8 +31,11 @@ export default function Dashboard() {
         industry: practice["Primary Subtitle"] || "",
         region: practice["State Name"] || "",
         employee_count: practice.employeeCount || 0,
+        annual_revenue: 0, // Default value for annual_revenue
         service_mix: { "General": 100 },
-        buyer_count: 0,
+        status: practice.status || "pending_response", // Default status
+        last_updated: practice.last_updated || new Date().toISOString(),
+        practice_buyer_pool: [], // Empty array as default
         specialities: practice.specialities || "",
         notes: practice.notes || ""
       }));
