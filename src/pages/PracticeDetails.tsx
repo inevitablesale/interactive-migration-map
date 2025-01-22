@@ -88,39 +88,37 @@ export default function PracticeDetails() {
       console.log('County data:', countyData);
 
       // Transform county data to match ComprehensiveMarketData interface
-
-// Transform county data to match ComprehensiveMarketData interface
-const transformedCountyData: ComprehensiveMarketData = {
-  total_population: countyData?.total_population,
-  median_household_income: countyData?.median_household_income,
-  median_gross_rent: countyData?.median_gross_rent,
-  median_home_value: countyData?.median_home_value,
-  employed_population: countyData?.employed_population,
-  private_sector_accountants: countyData?.private_sector_accountants,
-  public_sector_accountants: countyData?.public_sector_accountants,
-  firms_per_10k_population: countyData?.firms_per_10k,
-  growth_rate_percentage: countyData?.avg_growth_rate,
-  market_saturation_index: countyData?.market_saturation,
-  total_education_population: countyData?.education_population,
-  bachelors_holders: countyData?.bachelors_holders,
-  masters_holders: countyData?.masters_holders,
-  doctorate_holders: countyData?.doctorate_holders,
-  payann: countyData?.total_payroll,
-  emp: countyData?.total_employees,
-  total_establishments: countyData?.total_establishments,
-  avgSalaryPerEmployee: countyData?.total_payroll && countyData?.total_employees ? 
-    countyData.total_payroll / countyData.total_employees : undefined,
-  vacancy_rate: countyData?.vacancy_rate,
-  vacancy_rank: countyData?.vacancy_rank,
-  income_rank: countyData?.income_rank,
-  population_rank: countyData?.population_rank,
-  rent_rank: countyData?.rent_rank,
-  density_rank: countyData?.density_rank,
-  growth_rank: countyData?.growth_rank,
-  firm_density_rank: countyData?.firm_density_rank,
-  state_rank: countyData?.state_rank,
-  national_rank: countyData?.national_rank
-};
+      const transformedCountyData: ComprehensiveMarketData = {
+        total_population: countyData?.total_population,
+        median_household_income: countyData?.median_household_income,
+        median_gross_rent: countyData?.median_gross_rent,
+        median_home_value: countyData?.median_home_value,
+        employed_population: countyData?.employed_population,
+        private_sector_accountants: countyData?.private_sector_accountants,
+        public_sector_accountants: countyData?.public_sector_accountants,
+        firms_per_10k_population: countyData?.firms_per_10k,
+        growth_rate_percentage: countyData?.avg_growth_rate,
+        market_saturation_index: countyData?.market_saturation,
+        total_education_population: countyData?.education_population,
+        bachelors_holders: countyData?.bachelors_holders,
+        masters_holders: countyData?.masters_holders,
+        doctorate_holders: countyData?.doctorate_holders,
+        payann: countyData?.total_payroll,
+        emp: countyData?.total_employees,
+        total_establishments: countyData?.total_establishments,
+        avgSalaryPerEmployee: countyData?.total_payroll && countyData?.total_employees ? 
+          countyData.total_payroll / countyData.total_employees : undefined,
+        vacancy_rate: countyData?.vacancy_rate,
+        vacancy_rank: countyData?.vacancy_rank,
+        income_rank: countyData?.income_rank,
+        population_rank: countyData?.population_rank,
+        rent_rank: countyData?.rent_rank,
+        growth_rank: countyData?.growth_rank,
+        firm_density_rank: countyData?.firm_density_rank,
+        density_rank: countyData?.density_rank,
+        state_rank: countyData?.state_rank,
+        national_rank: countyData?.national_rank
+      };
 
       return { practice: transformedPractice, countyData: transformedCountyData };
     },

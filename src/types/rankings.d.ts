@@ -22,9 +22,9 @@ export interface ComprehensiveMarketData {
   income_rank?: number;
   population_rank?: number;
   rent_rank?: number;
-  density_rank?: number;
   growth_rank?: number;
   firm_density_rank?: number;
   state_rank?: number;
   national_rank?: number;
+  density_rank?: number;
 }
