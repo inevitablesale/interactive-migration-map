@@ -50,6 +50,9 @@ export interface TopFirm {
   websiteUrl?: string;
   Location?: string;
   Summary?: string;
+  COUNTYFP?: string;
+  STATEFP?: string;
+  STATE?: string;
 }
 
 export interface ComprehensiveMarketData {
