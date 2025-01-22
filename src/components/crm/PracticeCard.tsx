@@ -20,24 +20,24 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: {
 }) {
   return (
     <div className="border rounded-lg p-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <div>
+          <div className="min-w-[200px]">
             <h3 className="font-semibold">{practice.industry}</h3>
             <p className="text-sm text-muted-foreground">{practice.region}</p>
           </div>
           
           <div className="flex gap-8">
-            <div>
+            <div className="min-w-[100px]">
               <p className="text-muted-foreground text-sm">Employees</p>
               <p className="text-sm">{practice.employee_count}</p>
             </div>
-            <div>
+            <div className="min-w-[120px]">
               <p className="text-muted-foreground text-sm">Revenue</p>
               <p className="text-sm">${practice.annual_revenue.toLocaleString()}</p>
             </div>
             {practice.specialities && (
-              <div>
+              <div className="min-w-[200px]">
                 <p className="text-muted-foreground text-sm">Specialties</p>
                 <p className="text-sm">{practice.specialities}</p>
               </div>
@@ -45,7 +45,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-4">
           <Button variant="outline" size="sm" onClick={onWithdraw}>
             Withdraw
           </Button>
