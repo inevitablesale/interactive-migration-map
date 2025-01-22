@@ -27,20 +27,36 @@ interface FirmDetailsSheetProps {
 }
 
 export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheetProps) {
+  // Extract state from region (assuming format "County, State")
+  const state = practice.region?.split(',')[1]?.trim();
+
   const { data: countyData, isLoading } = useQuery({
     queryKey: ['county-rankings', practice.region],
     queryFn: async () => {
+      if (!state) {
+        console.error('No state found in region:', practice.region);
+        return null;
+      }
+
       // Split region into county and state
-      const [county, stateStr] = practice.region.split(',').map(s => s.trim());
+      const [county] = practice.region.split(',').map(s => s.trim());
       
       // First get the state FIPS code
       const { data: stateData, error: stateError } = await supabase
         .from('state_fips_codes')
         .select('STATEFP')
-        .eq('state', stateStr)
-        .single();
+        .eq('state', state)
+        .maybeSingle();
 
-      if (stateError) throw stateError;
+      if (stateError) {
+        console.error('Error fetching state FIPS:', stateError);
+        return null;
+      }
+
+      if (!stateData) {
+        console.error('No state data found for:', state);
+        return null;
+      }
 
       // Then get the county rankings data
       const { data: countyDetails, error: countyError } = await supabase
@@ -48,12 +64,16 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
         .select('*')
         .eq('statefp', stateData.STATEFP)
         .eq('countyname', county)
-        .single();
+        .maybeSingle();
 
-      if (countyError) throw countyError;
+      if (countyError) {
+        console.error('Error fetching county data:', countyError);
+        return null;
+      }
+
       return countyDetails;
     },
-    enabled: isOpen
+    enabled: isOpen && !!state
   });
 
   return (
