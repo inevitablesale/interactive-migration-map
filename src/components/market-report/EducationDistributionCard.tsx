@@ -15,9 +15,9 @@ export function EducationDistributionCard({ marketData }: EducationDistributionC
   // Add console logs for debugging education data
   console.log('Education Data:', {
     total_population: marketData.total_education_population,
-    bachelors: marketData.bachelors_degree_holders,
-    masters: marketData.masters_degree_holders,
-    doctorate: marketData.doctorate_degree_holders
+    bachelors: marketData.bachelors_holders,
+    masters: marketData.masters_holders,
+    doctorate: marketData.doctorate_holders
   });
 
   return (
@@ -34,7 +34,7 @@ export function EducationDistributionCard({ marketData }: EducationDistributionC
             <span className="text-sm text-white/60">Bachelor's Degree</span>
             <span className="text-white font-medium">
               {calculatePercentage(
-                marketData.bachelors_degree_holders,
+                marketData.bachelors_holders,
                 marketData.total_education_population
               ).toFixed(1)}%
             </span>
@@ -44,7 +44,7 @@ export function EducationDistributionCard({ marketData }: EducationDistributionC
             <span className="text-sm text-white/60">Master's Degree</span>
             <span className="text-white font-medium">
               {calculatePercentage(
-                marketData.masters_degree_holders,
+                marketData.masters_holders,
                 marketData.total_education_population
               ).toFixed(1)}%
             </span>
@@ -54,7 +54,7 @@ export function EducationDistributionCard({ marketData }: EducationDistributionC
             <span className="text-sm text-white/60">Doctorate Degree</span>
             <span className="text-white font-medium">
               {calculatePercentage(
-                marketData.doctorate_degree_holders,
+                marketData.doctorate_holders,
                 marketData.total_education_population
               ).toFixed(1)}%
             </span>

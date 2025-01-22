@@ -20,8 +20,8 @@ export const MarketRankingBadges: React.FC<MarketRankingBadgesProps> = ({ market
   };
 
   const calculateTalentPool = () => {
-    const score = marketData.total_education_population && marketData.bachelors_degree_holders
-      ? (marketData.bachelors_degree_holders / marketData.total_education_population) * 100
+    const score = marketData.total_education_population && marketData.bachelors_holders
+      ? (marketData.bachelors_holders / marketData.total_education_population) * 100
       : 0;
     if (score > 35) return { label: "Deep Talent Pool", color: "bg-emerald-500/90 hover:bg-emerald-500/80" };
     if (score > 25) return { label: "Growing Talent", color: "bg-blue-500/90 hover:bg-blue-500/80" };
