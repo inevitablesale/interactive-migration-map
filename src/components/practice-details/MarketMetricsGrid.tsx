@@ -26,6 +26,11 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
     }).format(amount);
   };
 
+  const formatGrowthRate = (rate: number | undefined) => {
+    if (rate === undefined) return undefined;
+    return (rate / 10).toFixed(1);
+  };
+
   const averageSalary = calculateAverageSalary();
   const averagePayrollPerFirm = calculateAveragePayrollPerFirm();
 
@@ -85,7 +90,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Growth Rate",
-            value: marketData.population_growth_rate?.toString(),
+            value: formatGrowthRate(marketData.population_growth_rate)?.toString(),
             type: "growth",
             rank: marketData.growth_rank,
             sublabel: `National Rank: ${marketData.national_growth_rank}`
@@ -122,7 +127,6 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Market Accessibility */}
       <MarketMetricsCard
         title="Market Accessibility"
         icon={Home}
@@ -137,7 +141,6 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Employment Metrics */}
       <MarketMetricsCard
         title="Employment"
         icon={Percent}
