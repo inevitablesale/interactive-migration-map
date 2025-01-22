@@ -12,18 +12,23 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const estimatedRevenue = practice.employee_count ? practice.employee_count * 150000 : 0;
   const estimatedEBITDA = estimatedRevenue * 0.15; // 15% margin assumption
 
-  // Calculate growth classification based on growth rate
-  const getGrowthClassification = (growthRate: number | undefined) => {
+  // Calculate growth classification based on growth rate compared to average
+  const getGrowthClassification = (growthRate: number | undefined, avgGrowthRate: number | undefined) => {
     if (!growthRate) return 'Stable';
-    if (growthRate > 2) return 'High Growth';
-    if (growthRate > 1) return 'Strong Growth';
-    if (growthRate > 0.5) return 'Moderate Growth';
-    if (growthRate > 0) return 'Stable Growth';
+    if (!avgGrowthRate) return 'Stable';
+    
+    const difference = growthRate - avgGrowthRate;
+    
+    if (difference > 2) return 'High Growth';
+    if (difference > 1) return 'Strong Growth';
+    if (difference > 0) return 'Moderate Growth';
+    if (difference > -1) return 'Stable Growth';
     return 'Declining';
   };
 
-  // Get the actual growth rate from county data
+  // Get the actual growth rate and average from county data
   const growthRate = countyData?.growth_rate_percentage;
+  const avgGrowthRate = countyData?.avg_growth_rate;
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
@@ -64,7 +69,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Status</p>
           <p className="text-lg font-semibold text-white">
-            {getGrowthClassification(growthRate)}
+            {getGrowthClassification(growthRate, avgGrowthRate)}
           </p>
         </div>
       </div>
