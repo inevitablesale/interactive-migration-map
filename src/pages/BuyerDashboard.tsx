@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Building2, Clock, Users, Search, Filter, Eye, MessageSquare, Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,21 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useSession } from "@supabase/auth-helpers-react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 export default function BuyerDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
-  const session = useSession();
-  const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (!session) {
-      navigate("/");
-    }
-  }, [session, navigate]);
 
   const { data: firms, isLoading, error } = useQuery({
     queryKey: ['firms', searchQuery],
@@ -47,8 +37,7 @@ export default function BuyerDashboard() {
       }
 
       return data || [];
-    },
-    enabled: !!session
+    }
   });
 
   const { data: stats } = useQuery({
@@ -74,13 +63,8 @@ export default function BuyerDashboard() {
         pending: pendingFirms || 0,
         avgPoolSize: Math.round(avgPoolSize)
       };
-    },
-    enabled: !!session
+    }
   });
-
-  if (!session) {
-    return null;
-  }
 
   return (
     <main className="p-8 max-w-7xl mx-auto w-full">
