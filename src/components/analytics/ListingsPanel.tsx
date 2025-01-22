@@ -154,7 +154,7 @@ export const ListingsPanel = () => {
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredListings?.map((listing) => {
-          const hasExpressedInterest = userInterests?.some(interest => interest === listing["Company ID"]);
+          const hasExpressedInterest = userInterests?.some(interest => interest.toString() === listing["Company ID"].toString());
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
