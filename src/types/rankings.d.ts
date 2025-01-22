@@ -14,8 +14,8 @@ export interface ComprehensiveMarketData {
   masters_holders?: number;
   doctorate_holders?: number;
   payann?: number;
-  total_establishments?: number;
   emp?: number;
+  total_establishments?: number;
   avgSalaryPerEmployee?: number;
   vacancy_rate?: number;
   vacancy_rank?: number;
@@ -27,22 +27,4 @@ export interface ComprehensiveMarketData {
   firm_density_rank?: number;
   state_rank?: number;
   national_rank?: number;
-  top_firms?: TopFirm[];
-}
-
-export interface TopFirm {
-  company_name: string;
-  employee_count: number;
-  follower_count: number;
-  follower_ratio: number;
-  logoResolutionResult?: string;
-  originalCoverImage?: string;
-  primarySubtitle?: string;
-  employeeCountRangeLow?: number;
-  employeeCountRangeHigh?: number;
-  specialities?: string;
-  websiteUrl?: string;
-  Location?: string;
-  Summary?: string;
-  foundedOn?: string;
 }

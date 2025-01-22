@@ -16,14 +16,14 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Average Annual Payroll",
-            value: marketData.payann ? (marketData.payann * 1000).toString() : undefined,
+            value: marketData.payann?.toString(),
             type: "money",
             rank: marketData.income_rank,
             sublabel: "Per establishment"
           },
           {
             label: "Average Salary Per Employee",
-            value: marketData.avgSalaryPerEmployee?.toString(),
+            value: marketData.avgSalaryPerEmployee ? (marketData.avgSalaryPerEmployee * 1000).toString() : undefined,
             type: "money",
             rank: marketData.state_rank
           }

@@ -109,7 +109,7 @@ const transformedCountyData: ComprehensiveMarketData = {
   emp: countyData?.total_employees,
   total_establishments: countyData?.total_establishments,
   avgSalaryPerEmployee: countyData?.total_payroll && countyData?.total_employees ? 
-    (countyData.total_payroll * 1000) / countyData.total_employees : undefined,
+    countyData.total_payroll / countyData.total_employees : undefined,
   vacancy_rate: countyData?.vacancy_rate,
   vacancy_rank: countyData?.vacancy_rank,
   income_rank: countyData?.income_rank,
