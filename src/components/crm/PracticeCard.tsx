@@ -19,13 +19,33 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: {
   onExpressInterest: () => void;
 }) {
   return (
-    <div className="border rounded-lg p-4 space-y-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold">{practice.industry}</h3>
-          <p className="text-sm text-muted-foreground">{practice.region}</p>
+    <div className="border rounded-lg p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-8">
+          <div>
+            <h3 className="font-semibold">{practice.industry}</h3>
+            <p className="text-sm text-muted-foreground">{practice.region}</p>
+          </div>
+          
+          <div className="flex gap-8">
+            <div>
+              <p className="text-muted-foreground text-sm">Employees</p>
+              <p className="text-sm">{practice.employee_count}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-sm">Revenue</p>
+              <p className="text-sm">${practice.annual_revenue.toLocaleString()}</p>
+            </div>
+            {practice.specialities && (
+              <div>
+                <p className="text-muted-foreground text-sm">Specialties</p>
+                <p className="text-sm">{practice.specialities}</p>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="space-x-2">
+
+        <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onWithdraw}>
             Withdraw
           </Button>
@@ -39,24 +59,6 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: {
           </Link>
         </div>
       </div>
-      
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-muted-foreground">Employees</p>
-          <p>{practice.employee_count}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">Revenue</p>
-          <p>${practice.annual_revenue.toLocaleString()}</p>
-        </div>
-      </div>
-
-      {practice.specialities && (
-        <div>
-          <p className="text-muted-foreground text-sm">Specialties</p>
-          <p className="text-sm">{practice.specialities}</p>
-        </div>
-      )}
     </div>
   );
 }
