@@ -2,38 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
-import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
-
-interface PracticeBuyerPool {
-  id: string;
-  practice_id: string;
-  user_id: string;
-  status: string;
-  joined_at: string;
-  rating: number | null;
-  notes: string | null;
-  is_anonymous: boolean;
-}
-
-interface Listing {
-  "Company ID": number;
-  "Company Name": string;
-  "Primary Subtitle": string | null;
-  "State Name": string | null;
-  Location: string | null;
-  Summary: string | null;
-  employeeCount: number;
-  status: string;
-  notes: string | null;
-  specialities: string | null;
-  practice_buyer_pool: PracticeBuyerPool[];
-}
 
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +16,8 @@ export const ListingsPanel = () => {
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const { data: listings, refetch: refetchListings } = useQuery({
+  // Simplified query - no joins, no restrictions
+  const { data: listings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,7 +25,7 @@ export const ListingsPanel = () => {
         .select('*');
       
       if (error) throw error;
-      return data as unknown as Listing[];
+      return data;
     }
   });
 
@@ -80,8 +55,6 @@ export const ListingsPanel = () => {
         title: "Interest Expressed",
         description: "We've recorded your interest in this practice.",
       });
-
-      refetchListings();
     } catch (error) {
       console.error('Error expressing interest:', error);
       toast({
@@ -94,7 +67,8 @@ export const ListingsPanel = () => {
     }
   };
 
-  const filteredListings = listings?.filter((listing: Listing) => {
+  // Show all listings by default, only filter if criteria are provided
+  const filteredListings = listings?.filter((listing) => {
     if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
       return true;
     }
@@ -119,8 +93,7 @@ export const ListingsPanel = () => {
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredListings?.map((listing: Listing) => {
-          const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
+        {filteredListings?.map((listing) => {
           const hasExpressedInterest = listing.status === 'pending_outreach';
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
@@ -160,7 +133,7 @@ export const ListingsPanel = () => {
 
                 <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
                   <div>Last update: {format(new Date(), 'MMM dd, yyyy')}</div>
-                  <div>{interestedBuyersCount} interested buyers</div>
+                  <div>0 interested buyers</div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
