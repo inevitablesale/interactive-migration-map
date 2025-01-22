@@ -25,6 +25,11 @@ export interface ComprehensiveMarketData {
   density_rank?: number;
   growth_rank?: number;
   firm_density_rank?: number;
+  firms_per_10k?: number;
+  firms_per_10k_population?: number;
+  growth_rate_percentage?: number;
+  market_saturation_index?: number;
+  total_education_population?: number;
   top_firms?: TopFirm[];
 }
 
@@ -42,4 +47,5 @@ export interface TopFirm {
   websiteUrl?: string;
   Location?: string;
   Summary?: string;
+  foundedOn?: string;
 }

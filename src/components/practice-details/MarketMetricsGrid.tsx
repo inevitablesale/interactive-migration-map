@@ -63,17 +63,17 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Bachelor's Degree Holders",
-            value: marketData.bachelors_degree_holders?.toString(),
+            value: marketData.bachelors_holders?.toString(),
             type: "population"
           },
           {
             label: "Master's Degree Holders",
-            value: marketData.masters_degree_holders?.toString(),
+            value: marketData.masters_holders?.toString(),
             type: "population"
           },
           {
             label: "Doctorate Degree Holders",
-            value: marketData.doctorate_degree_holders?.toString(),
+            value: marketData.doctorate_holders?.toString(),
             type: "population"
           }
         ]}

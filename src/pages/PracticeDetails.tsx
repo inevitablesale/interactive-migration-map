@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { PracticeHeader } from "@/components/practice-details/PracticeHeader";
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
-import type { TopFirm } from "@/types/rankings";
+import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -46,8 +46,8 @@ export default function PracticeDetails() {
       const transformedPractice: TopFirm = {
         company_name: practice["Company Name"],
         employee_count: practice.employeeCount,
-        follower_count: practice.followerCount,
-        follower_ratio: practice.followerCount / (practice.employeeCount || 1),
+        follower_count: practice.followerCount || 0,
+        follower_ratio: practice.followerCount ? practice.followerCount / (practice.employeeCount || 1) : 0,
         logoResolutionResult: practice.logoResolutionResult,
         originalCoverImage: practice.originalCoverImage,
         primarySubtitle: practice["Primary Subtitle"],
@@ -87,7 +87,37 @@ export default function PracticeDetails() {
 
       console.log('County data:', countyData);
 
-      return { practice: transformedPractice, countyData };
+      // Transform county data to match ComprehensiveMarketData interface
+      const transformedCountyData: ComprehensiveMarketData = {
+        total_population: countyData?.total_population,
+        median_household_income: countyData?.median_household_income,
+        median_gross_rent: countyData?.median_gross_rent,
+        median_home_value: countyData?.median_home_value,
+        employed_population: countyData?.employed_population,
+        private_sector_accountants: countyData?.private_sector_accountants,
+        public_sector_accountants: countyData?.public_sector_accountants,
+        firms_per_10k_population: countyData?.firms_per_10k,
+        growth_rate_percentage: countyData?.avg_growth_rate,
+        market_saturation_index: countyData?.market_saturation,
+        total_education_population: countyData?.education_population,
+        bachelors_holders: countyData?.bachelors_holders,
+        masters_holders: countyData?.masters_holders,
+        doctorate_holders: countyData?.doctorate_holders,
+        payann: countyData?.payann,
+        total_establishments: countyData?.total_establishments,
+        emp: countyData?.emp,
+        avgSalaryPerEmployee: countyData?.avgSalaryPerEmployee,
+        vacancy_rate: countyData?.vacancy_rate,
+        vacancy_rank: countyData?.vacancy_rank,
+        income_rank: countyData?.income_rank,
+        population_rank: countyData?.population_rank,
+        rent_rank: countyData?.rent_rank,
+        density_rank: countyData?.firm_density_rank,
+        growth_rank: countyData?.growth_rank,
+        firm_density_rank: countyData?.firm_density_rank
+      };
+
+      return { practice: transformedPractice, countyData: transformedCountyData };
     },
     retry: false
   });
