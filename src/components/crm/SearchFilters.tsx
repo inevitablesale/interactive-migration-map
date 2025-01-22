@@ -49,7 +49,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       
       if (error) throw error;
       
-      // Get unique state names
       const uniqueStates = [...new Set(data.map(d => d['State Name']))];
       return uniqueStates;
     }

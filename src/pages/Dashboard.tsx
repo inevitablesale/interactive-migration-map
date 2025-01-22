@@ -18,22 +18,10 @@ export default function Dashboard() {
 
   const ITEMS_PER_PAGE = 6;
 
-  // Query canary_firms_data directly
   const { data: firms, isLoading } = useQuery({
     queryKey: ['firms'],
     queryFn: async () => {
       console.log("Fetching firms...");
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to search and view firms.",
-          variant: "destructive",
-        });
-        return [];
-      }
-
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*');
@@ -47,34 +35,19 @@ export default function Dashboard() {
     }
   });
 
-  // Query user interests
   const { data: userInterests } = useQuery({
     queryKey: ['user-interests'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
       const { data, error } = await supabase
         .from('canary_firm_interests')
-        .select('*')
-        .eq('user_id', user.id);
+        .select('*');
       
       if (error) throw error;
       return data;
     }
   });
 
-  const handleSearch = async (query: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to search firms.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
   };
@@ -84,21 +57,10 @@ export default function Dashboard() {
     
     setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to express interest.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const { error: interestError } = await supabase
         .from('canary_firm_interests')
         .insert({
           company_id: companyId,
-          user_id: user.id,
           status: 'interested',
           is_anonymous: true
         });
@@ -156,7 +118,6 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedFirms = filteredFirms?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Implement pagination numbers logic
   const getPaginationNumbers = () => {
     const pages = [];
     if (totalPages <= 5) {
@@ -190,7 +151,7 @@ export default function Dashboard() {
       return {
         id: data["Company ID"].toString(),
         industry: data["Primary Subtitle"] || "",
-        state: data["State Name"] || "",  // Changed from region to state
+        state: data["State Name"] || "",
         employee_count: data.employeeCount || 0,
         annual_revenue: 0,
         service_mix: { "General": 100 },
@@ -233,7 +194,7 @@ export default function Dashboard() {
                       practice={{
                         id: firm["Company ID"].toString(),
                         industry: firm["Primary Subtitle"] || "",
-                        state: firm["State Name"] || "",  // Changed from region to state
+                        state: firm["State Name"] || "",
                         employee_count: firm.employeeCount || 0,
                         annual_revenue: 0,
                         service_mix: { "General": 100 },
