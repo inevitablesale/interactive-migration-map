@@ -34,7 +34,7 @@ export default function Dashboard() {
         annual_revenue: 0, // Default value for annual_revenue
         service_mix: { "General": 100 },
         status: practice.status || "pending_response", // Default status
-        last_updated: practice.last_updated || new Date().toISOString(),
+        last_updated: new Date().toISOString(), // Current timestamp as default
         practice_buyer_pool: [], // Empty array as default
         specialities: practice.specialities || "",
         notes: practice.notes || ""
