@@ -1,6 +1,7 @@
-import { DollarSign, TrendingUp, Users, Building2, LineChart } from "lucide-react";
+import { DollarSign, TrendingUp, Users, Building2, LineChart, Info } from "lucide-react";
 import { TopFirm } from "@/types/rankings";
 import { ComprehensiveMarketData } from "@/types/rankings";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface KeyMetricsBarProps {
   practice: TopFirm;
@@ -16,6 +17,20 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
+
+  // Calculate SDE components
+  const ownerCompensation = Math.min(250000, estimatedRevenue * 0.15); // Cap at 250k
+  const nonRecurringExpenses = estimatedRevenue * 0.02; // Estimated at 2% of revenue
+  const depreciation = estimatedRevenue * 0.05; // Estimated at 5% of revenue
+  const discretionaryExpenses = estimatedRevenue * 0.03; // Estimated at 3% of revenue
+
+  // Calculate SDE
+  const sde = estimatedRevenue - 
+    (annualPayroll - ownerCompensation) - // Remove payroll but add back owner's comp
+    (estimatedRevenue * 0.20) + // Standard operating expenses (20% of revenue)
+    nonRecurringExpenses +
+    depreciation +
+    discretionaryExpenses;
   
   // EBITDA margins based on market saturation and competition
   const minEbitdaMargin = 0.15; // 15%
@@ -60,6 +75,16 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
     return `${(rate / 10).toFixed(1)}%`;
   };
 
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(2)}M`;
+    }
+    if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(0)}K`;
+    }
+    return `$${amount.toFixed(0)}`;
+  };
+
   const gaugePosition = ((currentEbitdaMargin - minEbitdaMargin) / (maxEbitdaMargin - minEbitdaMargin)) * 100;
 
   return (
@@ -67,26 +92,47 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       <div className="flex items-center gap-2">
         <DollarSign className="w-5 h-5 text-green-400" />
         <div>
-          <p className="text-sm text-white/60">Annual Revenue</p>
-          <p className="text-lg font-semibold text-white">${Math.round(estimatedRevenue).toLocaleString()}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm text-white/60">Annual Revenue</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Estimated based on industry standards</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
           <p className="text-xs text-white/40">Based on payroll data</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Building2 className="w-5 h-5 text-blue-400" />
         <div>
-          <p className="text-sm text-white/60">EBITDA Range</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm text-white/60">SDE</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">Seller's Discretionary Earnings</p>
+                  <p className="text-xs text-gray-400">Includes add-backs for owner's comp and non-recurring expenses</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="text-lg font-semibold text-white">{formatCurrency(sde)}</p>
           <div className="space-y-1">
-            <p className="text-lg font-semibold text-white">${Math.round(currentEbitda).toLocaleString()}</p>
             <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
               <div 
                 className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
                 style={{ width: `${gaugePosition}%` }}
               />
-            </div>
-            <div className="flex justify-between text-xs text-white/60">
-              <span>15%</span>
-              <span>40%</span>
             </div>
           </div>
         </div>
