@@ -15,11 +15,15 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   // Calculate growth classification based on growth rate
   const getGrowthClassification = (growthRate: number | undefined) => {
     if (!growthRate) return 'Stable';
-    if (growthRate > 2) return 'High Growth';
-    if (growthRate > 1) return 'Moderate Growth';
+    if (growthRate > 8) return 'High Growth';
+    if (growthRate > 5) return 'Strong Growth';
+    if (growthRate > 2) return 'Moderate Growth';
     if (growthRate > 0) return 'Stable Growth';
     return 'Declining';
   };
+
+  // Get the actual growth rate from county data
+  const growthRate = countyData?.growth_rate_percentage;
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
@@ -47,10 +51,10 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       <div className="flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-yellow-400" />
         <div>
-          <p className="text-sm text-white/60">Growth Score</p>
+          <p className="text-sm text-white/60">Growth Rate</p>
           <p className="text-lg font-semibold text-white">
-            {countyData?.avg_growth_rate ? 
-              `${Math.round(countyData.avg_growth_rate)}%` : 
+            {growthRate ? 
+              `${growthRate.toFixed(1)}%` : 
               'N/A'}
           </p>
         </div>
@@ -60,7 +64,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Status</p>
           <p className="text-lg font-semibold text-white">
-            {getGrowthClassification(countyData?.avg_growth_rate)}
+            {getGrowthClassification(growthRate)}
           </p>
         </div>
       </div>
