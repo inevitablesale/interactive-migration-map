@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Bird } from "lucide-react";
 import { supabase } from "./integrations/supabase/client";
@@ -117,6 +117,8 @@ function App() {
         <Route path="/state-market-report" element={<StateMarketReport />} />
         <Route path="/thank-you" element={<ThankYou />} />
         <Route path="/opportunities" element={<Opportunities />} />
+        {/* Redirect /dashboard to /analysis */}
+        <Route path="/dashboard" element={<Navigate to="/analysis" replace />} />
       </Routes>
     </Router>
   );
