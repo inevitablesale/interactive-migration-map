@@ -12,9 +12,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Index />} />
         <Route path="/tracked-practices" element={<TrackedPractices />} />
         <Route path="/practice/:practiceId" element={<PracticeDetails />} />
-        <Route path="/" element={<Index />} />
         <Route path="/analysis" element={<Analysis />} />
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/market-report/:county/:state" element={<MarketReport />} />
