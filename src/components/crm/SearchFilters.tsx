@@ -28,12 +28,9 @@ interface SearchFiltersProps {
 }
 
 export interface FilterState {
-  industry?: string;
+  state?: string;
   minEmployees?: string;
   maxEmployees?: string;
-  minRevenue?: string;
-  maxRevenue?: string;
-  region?: string;
 }
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
@@ -41,21 +38,20 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: industries } = useQuery({
-    queryKey: ['industries'],
+  const { data: states } = useQuery({
+    queryKey: ['states'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('"Primary Subtitle"')
-        .not('"Primary Subtitle"', 'is', null);
+        .select('State Name')
+        .not('State Name', 'is', null)
+        .order('State Name');
       
       if (error) throw error;
-
-      const uniqueIndustries = Array.from(new Set(data.map(item => item['Primary Subtitle'])))
-        .filter(Boolean)
-        .sort();
-
-      return uniqueIndustries;
+      
+      // Get unique state names
+      const uniqueStates = [...new Set(data.map(d => d['State Name']))];
+      return uniqueStates;
     }
   });
 
@@ -131,41 +127,21 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label>Industry</Label>
+                <Label>State</Label>
                 <Select
-                  onValueChange={(value) => handleFilterChange('industry', value)}
-                  value={filters.industry || "all"}
+                  onValueChange={(value) => handleFilterChange('state', value)}
+                  value={filters.state || "all"}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select industry" />
+                    <SelectValue placeholder="Select state" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Industries</SelectItem>
-                    {industries?.map((industry) => (
-                      <SelectItem key={industry} value={industry}>
-                        {industry}
+                    <SelectItem value="all">All States</SelectItem>
+                    {states?.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
                       </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Region</Label>
-                <Select
-                  onValueChange={(value) => handleFilterChange('region', value)}
-                  value={filters.region || "all"}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
-                    <SelectItem value="Northeast">Northeast</SelectItem>
-                    <SelectItem value="Southeast">Southeast</SelectItem>
-                    <SelectItem value="Midwest">Midwest</SelectItem>
-                    <SelectItem value="Southwest">Southwest</SelectItem>
-                    <SelectItem value="West">West</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
