@@ -5,7 +5,7 @@ import Opportunities from "@/pages/Opportunities";
 import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
 import ThankYou from "@/pages/ThankYou";
-import TrackedPractices from "@/pages/Dashboard";
+import TrackedPractices from "@/pages/TrackedPractices";
 
 function App() {
   return (
