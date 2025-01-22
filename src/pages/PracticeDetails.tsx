@@ -1,10 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
+import { PracticeHeader } from "@/components/practice-details/PracticeHeader";
+import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
+import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -111,94 +113,15 @@ export default function PracticeDetails() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        {practice.logoResolutionResult && (
-          <img 
-            src={practice.logoResolutionResult} 
-            alt={practice["Company Name"]} 
-            className="w-16 h-16 rounded-full object-cover"
-          />
-        )}
-        <div>
-          <h1 className="text-3xl font-bold">{practice["Company Name"]}</h1>
-          <p className="text-muted-foreground">{practice["Primary Subtitle"]}</p>
-        </div>
-      </div>
-
+      <PracticeHeader practice={practice} />
+      
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Practice Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold">Location</h3>
-              <p>{practice.Location}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Employee Count</h3>
-              <p>{practice.employeeCount || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Follower Count</h3>
-              <p>{practice.followerCount?.toLocaleString()}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Founded</h3>
-              <p>{practice.foundedOn || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Specialties</h3>
-              <p>{practice.specialities || 'Not available'}</p>
-            </div>
-            {practice.Summary && (
-              <div>
-                <h3 className="font-semibold">Summary</h3>
-                <p>{practice.Summary}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Market Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {countyData ? (
-              <>
-                <div>
-                  <h3 className="font-semibold">County Population</h3>
-                  <p>{countyData.total_population?.toLocaleString() || 'Not available'}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Market Density</h3>
-                  <p>{countyData.firms_per_10k?.toFixed(1) || 'Not available'} firms per 10k residents</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Market Growth Rate</h3>
-                  <p>{countyData.avg_growth_rate?.toFixed(1)}% annual growth</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Market Saturation</h3>
-                  <p>{countyData.market_saturation?.toFixed(1)}%</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">County Rankings</h3>
-                  <p>State Rank: {countyData.firm_density_rank || 'N/A'}</p>
-                  <p>National Rank: {countyData.national_firm_density_rank || 'N/A'}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Total Firms</h3>
-                  <p>{countyData.total_firms?.toLocaleString() || 'Not available'}</p>
-                </div>
-              </>
-            ) : (
-              <p className="text-muted-foreground">County data not available for this location</p>
-            )}
-          </CardContent>
-        </Card>
+        <PracticeInfo practice={practice} />
       </div>
+
+      {countyData && (
+        <MarketMetricsGrid marketData={countyData} />
+      )}
     </div>
   );
 }
