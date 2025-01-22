@@ -8,7 +8,6 @@ import Analysis from "@/pages/Analysis";
 import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
 import ThankYou from "@/pages/ThankYou";
-import BuyerDashboard from "@/pages/BuyerDashboard";
 
 export default function App() {
   const session = useSession();
@@ -25,14 +24,6 @@ export default function App() {
         <main className={session ? "md:ml-64" : ""}>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route 
-              path="/buyer-dashboard" 
-              element={
-                <div className="p-8">
-                  <BuyerDashboard />
-                </div>
-              } 
-            />
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/market-report/:county/:state" element={<MarketReport />} />
             <Route path="/state-market-report" element={<StateMarketReport />} />
