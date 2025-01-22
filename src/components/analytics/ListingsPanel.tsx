@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
 import { FirmDetailsSheet } from "@/components/crm/FirmDetailsSheet";
+import { CanaryFirmInterest, Listing } from "@/types/interests";
 
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,13 +18,12 @@ export const ListingsPanel = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState(null);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const { toast } = useToast();
 
   const ITEMS_PER_PAGE = 6;
 
-  // Updated query to fetch listings
-  const { data: listings } = useQuery({
+  const { data: listings } = useQuery<Listing[]>({
     queryKey: ['listings'],
     queryFn: async () => {
       console.log("Fetching listings...");
@@ -40,8 +40,7 @@ export const ListingsPanel = () => {
     }
   });
 
-  // Updated query to use canary_firm_interests
-  const { data: userInterests } = useQuery({
+  const { data: userInterests } = useQuery<CanaryFirmInterest[]>({
     queryKey: ['user-interests'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -49,11 +48,11 @@ export const ListingsPanel = () => {
 
       const { data, error } = await supabase
         .from('canary_firm_interests')
-        .select('company_id')
+        .select('*')
         .eq('user_id', user.id);
       
       if (error) throw error;
-      return data.map(d => d.company_id);
+      return data;
     }
   });
 
@@ -62,7 +61,6 @@ export const ListingsPanel = () => {
     setCurrentPage(1);
   };
 
-  // Updated to use canary_firm_interests
   const handleExpressInterest = async (companyId: number) => {
     if (isSubmitting) return;
     
@@ -78,7 +76,6 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // Insert into canary_firm_interests
       const { error: interestError } = await supabase
         .from('canary_firm_interests')
         .insert({
@@ -89,7 +86,7 @@ export const ListingsPanel = () => {
         });
 
       if (interestError) {
-        if (interestError.code === '23505') { // Unique violation
+        if (interestError.code === '23505') {
           toast({
             title: "Already Interested",
             description: "You have already expressed interest in this company.",
@@ -137,6 +134,10 @@ export const ListingsPanel = () => {
     return matchesSearch && matchesState && matchesEmployeeCount;
   });
 
+  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedListings = filteredListings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
   return (
     <div className="space-y-6">
       <SearchFilters 
@@ -145,8 +146,10 @@ export const ListingsPanel = () => {
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredListings?.map((listing) => {
-          const hasExpressedInterest = userInterests?.some(interest => interest === listing["Company ID"]);
+        {paginatedListings.map((listing) => {
+          const hasExpressedInterest = userInterests?.some(
+            interest => interest.company_id === listing["Company ID"] && interest.status === 'interested'
+          );
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
