@@ -1,7 +1,7 @@
 export interface Practice {
   id?: string;
   industry: string;
-  region: string;  // Keep this as region since components expect it
+  state: string;  // Changed from region to state to match our use case
   employee_count: number;
   annual_revenue?: number;
   service_mix: Record<string, number>;
