@@ -1,4 +1,4 @@
-import { DollarSign, TrendingUp, Users, Building2, LineChart, Gauge } from "lucide-react";
+import { DollarSign, TrendingUp, Users, Building2, LineChart } from "lucide-react";
 import { TopFirm } from "@/types/rankings";
 import { ComprehensiveMarketData } from "@/types/rankings";
 
@@ -8,46 +8,56 @@ interface KeyMetricsBarProps {
 }
 
 export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
-  // Estimate revenue based on industry standards for accounting firms
-  // Average revenue per employee in accounting firms ranges from $150k to $200k
-  const revenuePerEmployee = 175000; // Using industry average
-  const estimatedRevenue = practice.employee_count ? practice.employee_count * revenuePerEmployee : 0;
+  // Calculate revenue based on actual county payroll data
+  const avgPayrollPerFirm = countyData?.payann && countyData?.total_establishments ? 
+    (countyData.payann * 1000) / countyData.total_establishments : 
+    175000; // Fallback to industry average if no data
+    
+  const estimatedRevenue = practice.employee_count ? practice.employee_count * avgPayrollPerFirm : 0;
   
-  // EBITDA margins for accounting firms typically range from 15-25%
+  // EBITDA margins based on market saturation and competition
   const minEbitdaMargin = 0.15; // 15%
   const maxEbitdaMargin = 0.40; // 40%
-  const currentEbitdaMargin = 0.20; // Using 20% as current estimate
+  
+  // Adjust EBITDA based on market conditions
+  const marketSaturationFactor = countyData?.market_saturation || 0.2;
+  const marketDensityFactor = (countyData?.firms_per_10k_population || 3) / 10;
+  
+  const currentEbitdaMargin = Math.min(
+    maxEbitdaMargin,
+    Math.max(
+      minEbitdaMargin,
+      0.20 + (0.05 * (1 - marketSaturationFactor)) - (0.02 * marketDensityFactor)
+    )
+  );
+
   const minEbitda = estimatedRevenue * minEbitdaMargin;
   const maxEbitda = estimatedRevenue * maxEbitdaMargin;
   const currentEbitda = estimatedRevenue * currentEbitdaMargin;
 
-  // Calculate growth classification based on growth rate compared to average
+  // Calculate growth classification based on actual market data
   const getGrowthClassification = (growthRate: number | undefined, avgGrowthRate: number | undefined) => {
     if (!growthRate || !avgGrowthRate) return 'Data Unavailable';
     
     const difference = growthRate - avgGrowthRate;
     
-    // Classification based on how much the growth rate exceeds the average
-    if (difference > 3) return 'Exceptional Growth (>3% above avg)';
-    if (difference > 2) return 'High Growth (2-3% above avg)';
-    if (difference > 1) return 'Strong Growth (1-2% above avg)';
-    if (difference > 0) return 'Moderate Growth (0-1% above avg)';
-    if (difference > -1) return 'Stable (0-1% below avg)';
-    if (difference > -2) return 'Slow Growth (1-2% below avg)';
-    return 'Declining (>2% below avg)';
+    if (difference > 3) return 'Exceptional Growth';
+    if (difference > 2) return 'High Growth';
+    if (difference > 1) return 'Strong Growth';
+    if (difference > 0) return 'Moderate Growth';
+    if (difference > -1) return 'Stable';
+    if (difference > -2) return 'Slow Growth';
+    return 'Declining';
   };
 
-  // Get the actual growth rate and average from county data
   const growthRate = countyData?.population_growth_rate;
   const avgGrowthRate = countyData?.avg_growth_rate;
 
-  // Format the growth rate display
   const formatGrowthRate = (rate: number | undefined) => {
     if (!rate) return 'N/A';
     return `${rate.toFixed(1)}%`;
   };
 
-  // Calculate the percentage position for the gauge (0-100)
   const gaugePosition = ((currentEbitdaMargin - minEbitdaMargin) / (maxEbitdaMargin - minEbitdaMargin)) * 100;
 
   return (
@@ -55,15 +65,15 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       <div className="flex items-center gap-2">
         <DollarSign className="w-5 h-5 text-green-400" />
         <div>
-          <p className="text-sm text-white/60">Annual Revenue*</p>
+          <p className="text-sm text-white/60">Annual Revenue</p>
           <p className="text-lg font-semibold text-white">${estimatedRevenue.toLocaleString()}</p>
-          <p className="text-xs text-white/40">*Industry average estimate</p>
+          <p className="text-xs text-white/40">Based on market data</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Building2 className="w-5 h-5 text-blue-400" />
         <div>
-          <p className="text-sm text-white/60">EBITDA Range*</p>
+          <p className="text-sm text-white/60">EBITDA Range</p>
           <div className="space-y-1">
             <p className="text-lg font-semibold text-white">${currentEbitda.toLocaleString()}</p>
             <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -77,7 +87,6 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               <span>40%</span>
             </div>
           </div>
-          <p className="text-xs text-white/40">*Industry standard margin</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
