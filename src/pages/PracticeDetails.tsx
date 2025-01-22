@@ -52,14 +52,13 @@ export default function PracticeDetails() {
 
       console.log('Fetching county data with FIPS:', { countyFp, stateFp });
 
-      // Then get the county data using COUNTYFP and STATEFP from practice
-      // Add a more specific query to ensure we get exactly one row
+      // Get the county rankings data using COUNTYFP and STATEFP from practice
       const { data: countyData, error: countyError } = await supabase
-        .from('county_data')
+        .from('county_rankings')
         .select('*')
         .eq('COUNTYFP', countyFp)
         .eq('STATEFP', stateFp)
-        .eq('COUNTYNAME', practice.COUNTYNAME)  // Add this to ensure exact match
+        .eq('COUNTYNAME', practice.COUNTYNAME)
         .maybeSingle();
 
       if (countyError) {
@@ -170,27 +169,28 @@ export default function PracticeDetails() {
               <>
                 <div>
                   <h3 className="font-semibold">County Population</h3>
-                  <p>{countyData.B01001_001E?.toLocaleString() || 'Not available'}</p>
+                  <p>{countyData.total_population?.toLocaleString() || 'Not available'}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Median Household Income</h3>
-                  <p>${countyData.B19013_001E?.toLocaleString() || 'Not available'}</p>
+                  <h3 className="font-semibold">Market Density</h3>
+                  <p>{countyData.firms_per_10k?.toFixed(1) || 'Not available'} firms per 10k residents</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Median Gross Rent</h3>
-                  <p>${countyData.B25064_001E?.toLocaleString() || 'Not available'}</p>
+                  <h3 className="font-semibold">Market Growth Rate</h3>
+                  <p>{countyData.avg_growth_rate?.toFixed(1)}% annual growth</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Total Establishments</h3>
-                  <p>{countyData.ESTAB?.toLocaleString() || 'Not available'}</p>
+                  <h3 className="font-semibold">Market Saturation</h3>
+                  <p>{countyData.market_saturation?.toFixed(1)}%</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Recent Moves (2022)</h3>
-                  <p>{countyData.MOVEDIN2022?.toLocaleString() || 'Not available'}</p>
+                  <h3 className="font-semibold">County Rankings</h3>
+                  <p>State Rank: {countyData.firm_density_rank || 'N/A'}</p>
+                  <p>National Rank: {countyData.national_firm_density_rank || 'N/A'}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Employment</h3>
-                  <p>{countyData.EMP?.toLocaleString() || 'Not available'}</p>
+                  <h3 className="font-semibold">Total Firms</h3>
+                  <p>{countyData.total_firms?.toLocaleString() || 'Not available'}</p>
                 </div>
               </>
             ) : (
@@ -201,4 +201,4 @@ export default function PracticeDetails() {
       </div>
     </div>
   );
-};
+}
