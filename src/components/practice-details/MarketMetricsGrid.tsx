@@ -9,6 +9,27 @@ interface MarketMetricsGridProps {
 export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Economic Indicators - Moved to top */}
+      <MarketMetricsCard
+        title="Economic Indicators"
+        icon={DollarSign}
+        metrics={[
+          {
+            label: "Average Annual Payroll",
+            value: (marketData.payann ? (marketData.payann * 10).toString() : undefined),
+            type: "money",
+            rank: marketData.income_rank,
+            sublabel: "Per establishment"
+          },
+          {
+            label: "Average Salary Per Employee",
+            value: (marketData.avgSalaryPerEmployee ? (marketData.avgSalaryPerEmployee * 10).toString() : undefined),
+            type: "money",
+            rank: marketData.state_rank
+          }
+        ]}
+      />
+
       {/* Competition Metrics */}
       <MarketMetricsCard
         title="Market Competition"
@@ -18,7 +39,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
             label: "Market Density",
             value: marketData.firms_per_10k_population?.toString(),
             type: "density",
-            rank: marketData.density_rank,
+            rank: marketData.firm_density_rank,
             sublabel: "Firms per 10k residents"
           },
           {
@@ -75,27 +96,6 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
             label: "Doctorate Degree Holders",
             value: marketData.doctorate_holders?.toString(),
             type: "population"
-          }
-        ]}
-      />
-
-      {/* Economic Indicators */}
-      <MarketMetricsCard
-        title="Economic Indicators"
-        icon={DollarSign}
-        metrics={[
-          {
-            label: "Average Annual Payroll",
-            value: marketData.payann?.toString(),
-            type: "money",
-            rank: marketData.income_rank,
-            sublabel: "Per establishment"
-          },
-          {
-            label: "Average Salary Per Employee",
-            value: marketData.avgSalaryPerEmployee?.toString(),
-            type: "money",
-            rank: marketData.state_rank
           }
         ]}
       />
