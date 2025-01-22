@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
+import { FirmDetailsSheet } from "@/components/crm/FirmDetailsSheet";
 
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
   const { toast } = useToast();
 
   // Basic query to fetch ALL listings without any restrictions
@@ -66,10 +69,11 @@ export const ListingsPanel = () => {
         return;
       }
 
+      // Important: Convert companyId to number to match database type
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert({
-          practice_id: companyId.toString(),
+          practice_id: companyId,
           user_id: user.id,
           status: 'interested',
           is_anonymous: true
@@ -120,7 +124,7 @@ export const ListingsPanel = () => {
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredListings?.map((listing) => {
-          const hasExpressedInterest = userInterests?.includes(listing["Company ID"].toString());
+          const hasExpressedInterest = userInterests?.includes(listing["Company ID"]);
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
@@ -176,6 +180,10 @@ export const ListingsPanel = () => {
                   <Button 
                     variant="outline"
                     className="w-full flex items-center justify-center gap-2"
+                    onClick={() => {
+                      setSelectedListing(listing);
+                      setIsDetailsOpen(true);
+                    }}
                   >
                     <Eye className="w-4 h-4" />
                     <span className="hidden sm:inline">View Details</span>
@@ -211,6 +219,17 @@ export const ListingsPanel = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {selectedListing && (
+        <FirmDetailsSheet
+          isOpen={isDetailsOpen}
+          onClose={() => {
+            setIsDetailsOpen(false);
+            setSelectedListing(null);
+          }}
+          practice={selectedListing}
+        />
+      )}
     </div>
   );
 };
