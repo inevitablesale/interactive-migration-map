@@ -24,15 +24,7 @@ export default function TrackedPractices() {
     queryFn: async () => {
       const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
-        .select(`
-          *,
-          county_data!inner(
-            B19013_001E,
-            B01001_001E,
-            B25064_001E,
-            MOVEDIN2022
-          )
-        `)
+        .select('*')
         .order('followerCount', { ascending: false });
 
       if (error) throw error;
@@ -42,10 +34,7 @@ export default function TrackedPractices() {
         industry: practice["Primary Subtitle"] || "",
         region: practice["State Name"] || "",
         employee_count: practice.employeeCount || 0,
-        annual_revenue: practice.county_data?.B19013_001E || 0,
-        population: practice.county_data?.B01001_001E || 0,
-        median_rent: practice.county_data?.B25064_001E || 0,
-        recent_moves: practice.county_data?.MOVEDIN2022 || 0,
+        annual_revenue: 0,
         service_mix: { "General": 100 },
         status: "not_contacted",
         last_updated: new Date().toISOString(),
@@ -172,15 +161,7 @@ export default function TrackedPractices() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select(`
-          *,
-          county_data!inner(
-            B19013_001E,
-            B01001_001E,
-            B25064_001E,
-            MOVEDIN2022
-          )
-        `)
+        .select('*')
         .limit(1)
         .maybeSingle();
 
@@ -192,10 +173,6 @@ export default function TrackedPractices() {
         industry: data["Primary Subtitle"] || "",
         region: data["State Name"] || "",
         employee_count: data.employeeCount || 0,
-        annual_revenue: data.county_data?.B19013_001E || 0,
-        population: data.county_data?.B01001_001E || 0,
-        median_rent: data.county_data?.B25064_001E || 0,
-        recent_moves: data.county_data?.MOVEDIN2022 || 0,
         service_mix: { "General": 100 },
         buyer_count: 0,
       };
