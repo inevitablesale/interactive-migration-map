@@ -69,22 +69,52 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // Important: Convert companyId to number to match database type
+      // First, create or get the tracked practice
+      const { data: trackedPractice, error: trackedError } = await supabase
+        .from('tracked_practices')
+        .insert({
+          industry: "Accounting",
+          region: "US",
+          employee_count: 0,
+          annual_revenue: 0,
+          service_mix: { "General": 100 },
+          status: 'pending_response',
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (trackedError) {
+        toast({
+          title: "Error",
+          description: "Failed to track practice. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then, add to practice_buyer_pool using the tracked practice ID
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert({
-          practice_id: companyId,
+          practice_id: trackedPractice.id,
           user_id: user.id,
           status: 'interested',
           is_anonymous: true
         });
 
-      if (poolError) throw poolError;
-
-      toast({
-        title: "Interest Expressed",
-        description: "We've recorded your interest in this practice.",
-      });
+      if (poolError) {
+        toast({
+          title: "Error",
+          description: "Failed to express interest. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Interest Expressed",
+          description: "We've recorded your interest in this practice.",
+        });
+      }
     } catch (error) {
       console.error('Error expressing interest:', error);
       toast({
@@ -124,7 +154,7 @@ export const ListingsPanel = () => {
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredListings?.map((listing) => {
-          const hasExpressedInterest = userInterests?.includes(listing["Company ID"]);
+          const hasExpressedInterest = userInterests?.some(interest => interest === listing["Company ID"]);
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (

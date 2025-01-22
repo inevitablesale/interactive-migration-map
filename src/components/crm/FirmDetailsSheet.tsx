@@ -9,11 +9,11 @@ interface FirmDetailsSheetProps {
   isOpen: boolean;
   onClose: () => void;
   practice: {
-    id: string;
-    industry: string;
-    region: string;
-    employee_count: number;
-    annual_revenue: number;
+    id?: string;
+    industry?: string;
+    region?: string;
+    employee_count?: number;
+    annual_revenue?: number;
     specialities?: string;
     "Company Name"?: string;
     "Primary Subtitle"?: string;
@@ -23,12 +23,15 @@ interface FirmDetailsSheetProps {
     foundedOn?: number;
     logoResolutionResult?: string;
     originalCoverImage?: string;
+    Location?: string;
+    "State Name"?: string;
+    employeeCount?: number;
   };
 }
 
 export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheetProps) {
   // Extract state from region (assuming format "County, State")
-  const state = practice.region?.split(',')[1]?.trim();
+  const state = practice["State Name"] || (practice.region?.split(',')[1]?.trim());
 
   const { data: countyData, isLoading } = useQuery({
     queryKey: ['county-rankings', practice.region],
@@ -39,7 +42,7 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
       }
 
       // Split region into county and state
-      const [county] = practice.region.split(',').map(s => s.trim());
+      const [county] = practice.region?.split(',').map(s => s.trim()) || [];
       
       // First get the state FIPS code
       const { data: stateData, error: stateError } = await supabase
@@ -99,11 +102,11 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-gray-500" />
-                <span>{practice.region}</span>
+                <span>{practice["State Name"] || practice.Location || practice.region}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-gray-500" />
-                <span>{practice.employee_count} employees</span>
+                <span>{practice.employeeCount || practice.employee_count || 0} employees</span>
               </div>
               {practice.foundedOn && (
                 <div className="flex items-center gap-2">
