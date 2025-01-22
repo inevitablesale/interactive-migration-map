@@ -161,7 +161,7 @@ export default function Dashboard() {
       (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Apply filters
-    const stateMatches = !filters.states?.length || filters.states.includes(practice.region);
+    const stateMatches = !filters.state || practice.region === filters.state;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
 

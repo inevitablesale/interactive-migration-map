@@ -21,10 +21,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
 
 interface SearchFiltersProps {
   onSearch: (query: string) => void;
@@ -32,7 +28,7 @@ interface SearchFiltersProps {
 }
 
 export interface FilterState {
-  states?: string[];
+  state?: string;
   minEmployees?: string;
   maxEmployees?: string;
 }
@@ -41,7 +37,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({});
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statePopoverOpen, setStatePopoverOpen] = useState(false);
 
   const { data: states } = useQuery({
     queryKey: ['states'],
@@ -60,15 +55,10 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
     }
   });
 
-  const handleStateToggle = (state: string) => {
-    const currentStates = filters.states || [];
-    const newStates = currentStates.includes(state)
-      ? currentStates.filter(s => s !== state)
-      : [...currentStates, state];
-    
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { 
       ...filters, 
-      states: newStates.length > 0 ? newStates : undefined 
+      [key]: value === "all" ? undefined : value 
     };
     setFilters(newFilters);
     onFilter(newFilters);
@@ -85,12 +75,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   };
 
   const getActiveFilterCount = () => {
-    return Object.entries(filters).reduce((count, [key, value]) => {
-      if (Array.isArray(value)) {
-        return count + (value.length > 0 ? 1 : 0);
-      }
-      return count + (value ? 1 : 0);
-    }, 0);
+    return Object.values(filters).filter(value => value && value !== "").length;
   };
 
   return (
@@ -142,59 +127,23 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label>States</Label>
-                <Popover open={statePopoverOpen} onOpenChange={setStatePopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={statePopoverOpen}
-                      className="w-full justify-between"
-                    >
-                      {filters.states?.length 
-                        ? `${filters.states.length} selected`
-                        : "Select states..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search states..." />
-                      <CommandEmpty>No state found.</CommandEmpty>
-                      <CommandGroup className="max-h-64 overflow-auto">
-                        {states?.map((state) => (
-                          <CommandItem
-                            key={state}
-                            onSelect={() => handleStateToggle(state)}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                filters.states?.includes(state) ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {state}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                {filters.states && filters.states.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {filters.states.map(state => (
-                      <Badge 
-                        key={state}
-                        variant="secondary"
-                        className="cursor-pointer"
-                        onClick={() => handleStateToggle(state)}
-                      >
+                <Label>State</Label>
+                <Select
+                  onValueChange={(value) => handleFilterChange('state', value)}
+                  value={filters.state || "all"}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All States</SelectItem>
+                    {states?.map((state) => (
+                      <SelectItem key={state} value={state}>
                         {state}
-                        <X className="ml-1 h-3 w-3" />
-                      </Badge>
+                      </SelectItem>
                     ))}
-                  </div>
-                )}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -204,21 +153,13 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     type="number"
                     placeholder="Min"
                     value={filters.minEmployees || ""}
-                    onChange={(e) => {
-                      const newFilters = { ...filters, minEmployees: e.target.value };
-                      setFilters(newFilters);
-                      onFilter(newFilters);
-                    }}
+                    onChange={(e) => handleFilterChange('minEmployees', e.target.value)}
                   />
                   <Input
                     type="number"
                     placeholder="Max"
                     value={filters.maxEmployees || ""}
-                    onChange={(e) => {
-                      const newFilters = { ...filters, maxEmployees: e.target.value };
-                      setFilters(newFilters);
-                      onFilter(newFilters);
-                    }}
+                    onChange={(e) => handleFilterChange('maxEmployees', e.target.value)}
                   />
                 </div>
               </div>
