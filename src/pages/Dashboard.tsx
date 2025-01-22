@@ -168,13 +168,13 @@ export default function Dashboard() {
       return {
         id: data["Company ID"].toString(),
         industry: data["Primary Subtitle"] || "",
-        region: data["State Name"] || "",
+        state: data["State Name"] || "",  // Changed from region to state
         employee_count: data.employeeCount || 0,
-        annual_revenue: 0, // Added missing required field
+        annual_revenue: 0,
         service_mix: { "General": 100 },
         status: 'not_contacted',
-        last_updated: new Date().toISOString(), // Added missing required field
-        practice_buyer_pool: [], // Added missing required field
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
         buyer_count: 0
       };
     }
@@ -211,13 +211,13 @@ export default function Dashboard() {
                       practice={{
                         id: firm["Company ID"].toString(),
                         industry: firm["Primary Subtitle"] || "",
-                        region: firm["State Name"] || "",
+                        state: firm["State Name"] || "",  // Changed from region to state
                         employee_count: firm.employeeCount || 0,
-                        annual_revenue: 0, // Added missing required field
+                        annual_revenue: 0,
                         service_mix: { "General": 100 },
                         status: hasExpressedInterest ? 'pending_outreach' : 'not_contacted',
-                        last_updated: firm.updated_at || new Date().toISOString(), // Added missing required field
-                        practice_buyer_pool: [], // Added missing required field
+                        last_updated: new Date().toISOString(),
+                        practice_buyer_pool: [],
                       }}
                       onWithdraw={() => {}} // Not implemented yet
                       onExpressInterest={() => handleExpressInterest(firm["Company ID"])}
