@@ -7,6 +7,7 @@ import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
+import { Practice } from "@/types/interests";
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,6 +23,17 @@ export default function Dashboard() {
     queryKey: ['firms'],
     queryFn: async () => {
       console.log("Fetching firms...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to search and view firms.",
+          variant: "destructive",
+        });
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*');
@@ -52,7 +64,17 @@ export default function Dashboard() {
     }
   });
 
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to search firms.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSearchQuery(query);
     setCurrentPage(1);
   };
@@ -168,7 +190,7 @@ export default function Dashboard() {
       return {
         id: data["Company ID"].toString(),
         industry: data["Primary Subtitle"] || "",
-        state: data["State Name"] || "",  // Changed from region to state
+        state: data["State Name"] || "",
         employee_count: data.employeeCount || 0,
         annual_revenue: 0,
         service_mix: { "General": 100 },
@@ -176,7 +198,7 @@ export default function Dashboard() {
         last_updated: new Date().toISOString(),
         practice_buyer_pool: [],
         buyer_count: 0
-      };
+      } as Practice;
     }
   });
 
@@ -211,13 +233,14 @@ export default function Dashboard() {
                       practice={{
                         id: firm["Company ID"].toString(),
                         industry: firm["Primary Subtitle"] || "",
-                        state: firm["State Name"] || "",  // Changed from region to state
+                        state: firm["State Name"] || "",
                         employee_count: firm.employeeCount || 0,
                         annual_revenue: 0,
                         service_mix: { "General": 100 },
                         status: hasExpressedInterest ? 'pending_outreach' : 'not_contacted',
                         last_updated: new Date().toISOString(),
                         practice_buyer_pool: [],
+                        buyer_count: 0
                       }}
                       onWithdraw={() => {}} // Not implemented yet
                       onExpressInterest={() => handleExpressInterest(firm["Company ID"])}
