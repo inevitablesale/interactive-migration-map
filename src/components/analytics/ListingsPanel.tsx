@@ -35,14 +35,6 @@ interface Listing {
   practice_buyer_pool: PracticeBuyerPool[];
 }
 
-const SERVICE_TYPES = [
-  { name: "Software & Technology", keywords: ["software", "tech", "digital", "it"] },
-  { name: "Accounting & Tax", keywords: ["tax", "accounting", "bookkeeping", "audit"] },
-  { name: "Business Advisory", keywords: ["consult", "advisory", "strategy"] },
-  { name: "Legal Services", keywords: ["legal", "law", "attorney"] },
-  { name: "Engineering", keywords: ["engineer", "architecture", "design"] }
-];
-
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
@@ -119,6 +111,8 @@ export const ListingsPanel = () => {
   const filteredListings = listings?.filter((listing: Listing) => {
     // Only filter by specialities, not by state/region
     if (!searchQuery) return true;
+    
+    // Check if specialities exist and match the search query
     if (!listing.specialities) return false;
     return listing.specialities.toLowerCase().includes(searchQuery.toLowerCase());
   });

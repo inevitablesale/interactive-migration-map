@@ -31,16 +31,18 @@ export default function Dashboard() {
         industry: practice["Primary Subtitle"] || "",
         region: practice["State Name"] || "",
         employee_count: practice.employeeCount || 0,
-        annual_revenue: 0,
         service_mix: { "General": 100 },
-        status: "owner_engaged" as const,
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [] as { id: string }[],
+        buyer_count: 0,
         specialities: practice.specialities || "",
         notes: practice.notes || ""
       }));
     }
   });
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when searching
+  };
 
   const handleWithdraw = async (practiceId: string) => {
     const { error } = await supabase
@@ -151,19 +153,11 @@ export default function Dashboard() {
     }
   };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const handleFilter = (newFilters: FilterState) => {
-    setFilters(newFilters);
-  };
-
   const filteredPractices = practices?.filter(practice => {
     const searchMatches = !searchQuery || 
-      practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      practice.region.toLowerCase().includes(searchQuery.toLowerCase());
+      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
+    // Apply other filters if needed
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
@@ -234,7 +228,7 @@ export default function Dashboard() {
         <div className="md:col-span-2">
           <SearchFilters 
             onSearch={handleSearch}
-            onFilter={handleFilter}
+            onFilter={setFilters}
           />
           
           {isLoading ? (
