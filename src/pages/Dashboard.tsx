@@ -6,7 +6,6 @@ import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { Practice } from "@/types/interests";
 
 export default function Dashboard() {
@@ -18,7 +17,7 @@ export default function Dashboard() {
 
   const ITEMS_PER_PAGE = 6;
 
-  const { data: firms, isLoading } = useQuery({
+  const { data: firms } = useQuery({
     queryKey: ['firms'],
     queryFn: async () => {
       console.log("Fetching firms...");
@@ -38,9 +37,13 @@ export default function Dashboard() {
   const { data: userInterests } = useQuery({
     queryKey: ['user-interests'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('canary_firm_interests')
-        .select('*');
+        .select('*')
+        .eq('user_id', user.id);
       
       if (error) throw error;
       return data;
@@ -57,10 +60,21 @@ export default function Dashboard() {
     
     setIsSubmitting(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to express interest.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error: interestError } = await supabase
         .from('canary_firm_interests')
         .insert({
           company_id: companyId,
+          user_id: user.id,
           status: 'interested',
           is_anonymous: true
         });
@@ -97,6 +111,33 @@ export default function Dashboard() {
     }
   };
 
+  const { data: practiceOfDay } = useQuery({
+    queryKey: ['practice-of-day'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (error) return null;
+      if (!data) return null;
+      
+      return {
+        id: data["Company ID"].toString(),
+        industry: data["Primary Subtitle"] || "",
+        state: data["State Name"] || "",
+        employee_count: data.employeeCount || 0,
+        annual_revenue: 0,
+        service_mix: { "General": 100 },
+        status: 'not_contacted',
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        buyer_count: 0
+      } as Practice;
+    }
+  });
+
   const filteredFirms = firms?.filter((firm) => {
     if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
       return true;
@@ -118,51 +159,6 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedFirms = filteredFirms?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const getPaginationNumbers = () => {
-    const pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 'ellipsis', totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, 'ellipsis', totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages);
-      }
-    }
-    return pages;
-  };
-
-  const { data: practiceOfDay } = useQuery({
-    queryKey: ['practice-of-day'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('canary_firms_data')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
-
-      if (error) return null;
-      if (!data) return null;
-      
-      return {
-        id: data["Company ID"].toString(),
-        industry: data["Primary Subtitle"] || "",
-        state: data["State Name"] || "",  // Changed from region to state
-        employee_count: data.employeeCount || 0,
-        annual_revenue: 0,
-        service_mix: { "General": 100 },
-        status: 'not_contacted',
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        buyer_count: 0
-      } as Practice;
-    }
-  });
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -178,77 +174,34 @@ export default function Dashboard() {
             onFilter={setFilters}
           />
           
-          {isLoading ? (
-            <div>Loading firms...</div>
-          ) : (
-            <>
-              <div className="mt-6 space-y-4">
-                {paginatedFirms?.map((firm) => {
-                  const hasExpressedInterest = userInterests?.some(
-                    interest => interest.company_id === firm["Company ID"] && interest.status === 'interested'
-                  );
-                  
-                  return (
-                    <PracticeCard
-                      key={firm["Company ID"]}
-                      practice={{
-                        id: firm["Company ID"].toString(),
-                        industry: firm["Primary Subtitle"] || "",
-                        state: firm["State Name"] || "",  // Changed from region to state
-                        employee_count: firm.employeeCount || 0,
-                        annual_revenue: 0,
-                        service_mix: { "General": 100 },
-                        status: hasExpressedInterest ? 'pending_outreach' : 'not_contacted',
-                        last_updated: new Date().toISOString(),
-                        practice_buyer_pool: [],
-                        buyer_count: 0
-                      }}
-                      onWithdraw={() => {}} // Not implemented yet
-                      onExpressInterest={() => handleExpressInterest(firm["Company ID"])}
-                      disabled={isSubmitting}
-                    />
-                  );
-                })}
-              </div>
-
-              {totalPages > 1 && (
-                <Pagination className="mt-6">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                    
-                    {getPaginationNumbers().map((page, index) => (
-                      page === 'ellipsis' ? (
-                        <PaginationItem key={`ellipsis-${index}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      ) : (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          )}
+          <div className="mt-6 space-y-4">
+            {paginatedFirms?.map((firm) => {
+              const hasExpressedInterest = userInterests?.some(
+                interest => interest.company_id === firm["Company ID"] && interest.status === 'interested'
+              );
+              
+              return (
+                <PracticeCard
+                  key={firm["Company ID"]}
+                  practice={{
+                    id: firm["Company ID"].toString(),
+                    industry: firm["Primary Subtitle"] || "",
+                    state: firm["State Name"] || "",
+                    employee_count: firm.employeeCount || 0,
+                    annual_revenue: 0,
+                    service_mix: { "General": 100 },
+                    status: hasExpressedInterest ? 'pending_outreach' : 'not_contacted',
+                    last_updated: new Date().toISOString(),
+                    practice_buyer_pool: [],
+                    buyer_count: 0
+                  }}
+                  onWithdraw={() => {}} // Not implemented yet
+                  onExpressInterest={() => handleExpressInterest(firm["Company ID"])}
+                  disabled={isSubmitting}
+                />
+              );
+            })}
+          </div>
         </div>
         <div>
           {practiceOfDay && (
