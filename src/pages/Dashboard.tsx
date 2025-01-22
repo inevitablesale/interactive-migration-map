@@ -111,6 +111,27 @@ export default function Dashboard() {
     }
   };
 
+  const filteredFirms = firms?.filter((firm) => {
+    if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
+      return true;
+    }
+
+    const matchesSearch = !searchQuery || 
+      (firm.specialities && firm.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesState = !filters.state || 
+      firm["State Name"] === filters.state;
+    
+    const matchesEmployeeCount = (!filters.minEmployees || firm.employeeCount >= parseInt(filters.minEmployees)) &&
+      (!filters.maxEmployees || firm.employeeCount <= parseInt(filters.maxEmployees));
+
+    return matchesSearch && matchesState && matchesEmployeeCount;
+  });
+
+  const totalPages = Math.ceil((filteredFirms?.length || 0) / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedFirms = filteredFirms?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
   const { data: practiceOfDay } = useQuery({
     queryKey: ['practice-of-day'],
     queryFn: async () => {
@@ -138,27 +159,6 @@ export default function Dashboard() {
     }
   });
 
-  const filteredFirms = firms?.filter((firm) => {
-    if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
-      return true;
-    }
-
-    const matchesSearch = !searchQuery || 
-      (firm.specialities && firm.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesState = !filters.state || 
-      firm["State Name"] === filters.state;
-    
-    const matchesEmployeeCount = (!filters.minEmployees || firm.employeeCount >= parseInt(filters.minEmployees)) &&
-      (!filters.maxEmployees || firm.employeeCount <= parseInt(filters.maxEmployees));
-
-    return matchesSearch && matchesState && matchesEmployeeCount;
-  });
-
-  const totalPages = Math.ceil((filteredFirms?.length || 0) / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedFirms = filteredFirms?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -180,21 +180,23 @@ export default function Dashboard() {
                 interest => interest.company_id === firm["Company ID"] && interest.status === 'interested'
               );
               
+              const practice: Practice = {
+                id: firm["Company ID"].toString(),
+                industry: firm["Primary Subtitle"] || "",
+                "State Name": firm["State Name"] || "",
+                employee_count: firm.employeeCount || 0,
+                annual_revenue: 0,
+                service_mix: { "General": 100 },
+                status: hasExpressedInterest ? 'pending_outreach' : 'not_contacted',
+                last_updated: new Date().toISOString(),
+                practice_buyer_pool: [],
+                buyer_count: 0
+              };
+              
               return (
                 <PracticeCard
                   key={firm["Company ID"]}
-                  practice={{
-                    id: firm["Company ID"].toString(),
-                    industry: firm["Primary Subtitle"] || "",
-                    "State Name": firm["State Name"] || "",
-                    employee_count: firm.employeeCount || 0,
-                    annual_revenue: 0,
-                    service_mix: { "General": 100 },
-                    status: hasExpressedInterest ? 'pending_outreach' : 'not_contacted',
-                    last_updated: new Date().toISOString(),
-                    practice_buyer_pool: [],
-                    buyer_count: 0
-                  }}
+                  practice={practice}
                   onWithdraw={() => {}} // Not implemented yet
                   onExpressInterest={() => handleExpressInterest(firm["Company ID"])}
                   disabled={isSubmitting}
