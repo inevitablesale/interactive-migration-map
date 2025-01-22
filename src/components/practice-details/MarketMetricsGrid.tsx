@@ -9,8 +9,21 @@ interface MarketMetricsGridProps {
 export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
   const calculateAverageSalary = () => {
     if (!marketData.payann || !marketData.emp || marketData.emp === 0) return undefined;
+    // Convert payann from thousands to actual dollars and divide by total employees
     return Math.round((marketData.payann * 1000) / marketData.emp);
   };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const averageSalary = calculateAverageSalary();
+  const totalPayroll = marketData.payann ? marketData.payann * 1000 : undefined;
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -19,18 +32,18 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         icon={DollarSign}
         metrics={[
           {
-            label: "Average Annual Payroll",
-            value: marketData.payann ? marketData.payann.toLocaleString() : undefined,
+            label: "Total County Annual Payroll",
+            value: totalPayroll ? formatCurrency(totalPayroll) : undefined,
             type: "money",
             rank: marketData.income_rank,
             sublabel: `National Rank: ${marketData.national_income_rank}`
           },
           {
             label: "Average Salary Per Employee",
-            value: calculateAverageSalary()?.toLocaleString(),
+            value: averageSalary ? formatCurrency(averageSalary) : undefined,
             type: "money",
             rank: marketData.state_rank,
-            sublabel: `National Rank: ${marketData.national_income_rank}`
+            sublabel: `County Average`
           }
         ]}
       />
