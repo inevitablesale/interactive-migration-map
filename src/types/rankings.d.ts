@@ -6,10 +6,10 @@ export interface ComprehensiveMarketData {
   employed_population?: number;
   private_sector_accountants?: number;
   public_sector_accountants?: number;
-  avg_firms_per_10k?: number;
-  avg_growth_rate?: number;
-  avg_market_saturation?: number;
-  education_population?: number;
+  firms_per_10k_population?: number;
+  growth_rate_percentage?: number;
+  market_saturation_index?: number;
+  total_education_population?: number;
   bachelors_holders?: number;
   masters_holders?: number;
   doctorate_holders?: number;
@@ -25,11 +25,8 @@ export interface ComprehensiveMarketData {
   density_rank?: number;
   growth_rank?: number;
   firm_density_rank?: number;
-  firms_per_10k?: number;
-  firms_per_10k_population?: number;
-  growth_rate_percentage?: number;
-  market_saturation_index?: number;
-  total_education_population?: number;
+  national_rank?: number;
+  state_rank?: number;
   top_firms?: TopFirm[];
 }
 

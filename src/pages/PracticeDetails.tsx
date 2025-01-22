@@ -114,7 +114,9 @@ export default function PracticeDetails() {
         rent_rank: countyData?.rent_rank,
         density_rank: countyData?.firm_density_rank,
         growth_rank: countyData?.growth_rank,
-        firm_density_rank: countyData?.firm_density_rank
+        firm_density_rank: countyData?.firm_density_rank,
+        state_rank: countyData?.state_rank,
+        national_rank: countyData?.national_rank
       };
 
       return { practice: transformedPractice, countyData: transformedCountyData };

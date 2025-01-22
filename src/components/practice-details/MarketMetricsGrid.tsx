@@ -1,6 +1,6 @@
-import { ComprehensiveMarketData } from "@/types/rankings";
 import { MarketMetricsCard } from "@/components/market-report/MarketMetricsCard";
 import { Users, TrendingUp, Percent, DollarSign, GraduationCap, Home } from "lucide-react";
+import { ComprehensiveMarketData } from "@/types/rankings";
 
 interface MarketMetricsGridProps {
   marketData: ComprehensiveMarketData;
@@ -18,7 +18,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
             label: "Market Density",
             value: marketData.firms_per_10k_population?.toString(),
             type: "density",
-            rank: marketData.firm_density_rank,
+            rank: marketData.density_rank,
             sublabel: "Firms per 10k residents"
           },
           {
@@ -88,12 +88,14 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
             label: "Average Annual Payroll",
             value: marketData.payann?.toString(),
             type: "money",
-            rank: marketData.income_rank
+            rank: marketData.income_rank,
+            sublabel: "Per establishment"
           },
           {
             label: "Average Salary Per Employee",
             value: marketData.avgSalaryPerEmployee?.toString(),
-            type: "money"
+            type: "money",
+            rank: marketData.state_rank
           }
         ]}
       />
