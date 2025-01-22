@@ -13,6 +13,7 @@ import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
 import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
 import { CatalystSection } from "@/components/CatalystSection";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -27,11 +28,14 @@ const Index = () => {
 
       {/* Fixed Header with Logo */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
+          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+            Sign In
+          </Link>
         </div>
       </div>
 
