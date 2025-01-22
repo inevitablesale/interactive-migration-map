@@ -8,12 +8,12 @@ interface KeyMetricsBarProps {
 }
 
 export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
-  // Calculate revenue based on actual county payroll data
-  const avgPayrollPerFirm = countyData?.payann && countyData?.total_establishments ? 
-    (countyData.payann * 1000) / countyData.total_establishments : 
-    175000; // Fallback to industry average if no data
+  // Calculate revenue based on average salary per employee
+  const avgSalaryPerEmployee = countyData?.payann && countyData?.emp ? 
+    (countyData.payann * 1000) / countyData.emp : 
+    86259; // Fallback to county average if no data
     
-  const estimatedRevenue = practice.employee_count ? practice.employee_count * avgPayrollPerFirm : 0;
+  const estimatedRevenue = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
   
   // EBITDA margins based on market saturation and competition
   const minEbitdaMargin = 0.15; // 15%
