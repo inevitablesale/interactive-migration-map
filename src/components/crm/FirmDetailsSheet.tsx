@@ -130,7 +130,7 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
                       <Users className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm text-gray-500">Population</p>
-                        <p className="font-medium">{countyData.population?.toLocaleString()}</p>
+                        <p className="font-medium">{countyData.total_population?.toLocaleString()}</p>
                       </div>
                     </div>
                   </Card>
@@ -140,7 +140,7 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
                       <TrendingUp className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm text-gray-500">Growth Rate</p>
-                        <p className="font-medium">{(countyData.growth_rate * 100).toFixed(1)}%</p>
+                        <p className="font-medium">{(countyData.population_growth_rate * 100).toFixed(1)}%</p>
                       </div>
                     </div>
                   </Card>
@@ -150,7 +150,7 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
                       <Building2 className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm text-gray-500">Total Firms</p>
-                        <p className="font-medium">{countyData.total_firms?.toLocaleString()}</p>
+                        <p className="font-medium">{countyData.total_establishments?.toLocaleString()}</p>
                       </div>
                     </div>
                   </Card>
@@ -171,7 +171,7 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
                       <div>
                         <p className="text-sm text-gray-500">County Ranking</p>
                         <p className="font-medium">
-                          #{countyData.density_rank} in state, #{countyData.national_density_rank} nationally
+                          #{countyData.firm_density_rank} in state, #{countyData.national_firm_density_rank} nationally
                         </p>
                       </div>
                     </div>
