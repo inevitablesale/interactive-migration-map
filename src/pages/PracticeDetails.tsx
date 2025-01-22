@@ -24,7 +24,9 @@ export default function PracticeDetails() {
       if (practiceError) throw practiceError;
       if (!practice) throw new Error('Practice not found');
 
-      // Then get the county data
+      console.log('Practice data:', practice);
+
+      // Then get the county data using COUNTYFP and STATEFP from practice
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
         .select('*')
@@ -34,15 +36,17 @@ export default function PracticeDetails() {
 
       if (countyError) throw countyError;
 
+      console.log('County data:', countyData);
+
       return {
         practice,
         countyData
       };
-    }
+    },
+    retry: false
   });
 
   if (error) {
-    // Only show toast if it hasn't been shown yet
     const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
     toast({
       title: "Error loading practice details",
