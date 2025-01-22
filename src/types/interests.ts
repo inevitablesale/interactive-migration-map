@@ -2,6 +2,7 @@ export interface Practice {
   id: string;
   industry: string;
   "State Name": string;
+  region: string;
   employee_count: number;
   annual_revenue?: number;
   service_mix: Record<string, number>;
