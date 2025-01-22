@@ -16,13 +16,30 @@ export const ListingsPanel = () => {
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Simplified query - no joins, no restrictions
+  // Fetch all listings without any joins
   const { data: listings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Separate query for buyer pool data if user is authenticated
+  const { data: buyerPoolData } = useQuery({
+    queryKey: ['buyer-pool'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('practice_buyer_pool')
+        .select('*')
+        .eq('user_id', user.id);
       
       if (error) throw error;
       return data;
@@ -85,6 +102,8 @@ export const ListingsPanel = () => {
     return matchesSearch && matchesState && matchesEmployeeCount;
   });
 
+  // ... keep existing code (SearchFilters and rendering logic)
+
   return (
     <div className="space-y-6">
       <SearchFilters 
@@ -94,7 +113,9 @@ export const ListingsPanel = () => {
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredListings?.map((listing) => {
-          const hasExpressedInterest = listing.status === 'pending_outreach';
+          const hasExpressedInterest = buyerPoolData?.some(
+            pool => pool.practice_id === listing["Company ID"].toString()
+          );
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
@@ -133,7 +154,7 @@ export const ListingsPanel = () => {
 
                 <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
                   <div>Last update: {format(new Date(), 'MMM dd, yyyy')}</div>
-                  <div>0 interested buyers</div>
+                  <div>{buyerPoolData?.length || 0} interested buyers</div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
