@@ -34,56 +34,7 @@ export interface FilterState {
   minRevenue?: string;
   maxRevenue?: string;
   region?: string;
-  speciality?: string;
 }
-
-const cleanSpecialty = (specialty: string): string => {
-  // Remove unicode escape sequences and trim
-  let cleaned = specialty.replace(/\\u2022\\t/g, '').trim();
-  // Remove year prefixes like \u2022\t2022\t
-  cleaned = cleaned.replace(/^\d{4}\\t/, '');
-  // Remove any extra whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ');
-  return cleaned;
-};
-
-const normalizeSpecialty = (specialty: string): string => {
-  // Convert to lowercase for comparison
-  const lower = specialty.toLowerCase();
-  
-  // Handle accounting variations
-  if (lower.includes('accounting') || lower.includes('accountant')) {
-    if (lower.includes('bookkeeping')) {
-      return 'Accounting & Bookkeeping Services';
-    }
-    if (lower.includes('audit')) {
-      return 'Accounting & Audit Services';
-    }
-    if (lower.includes('a/p') || lower.includes('accounts payable')) {
-      return 'Accounts Payable';
-    }
-    if (lower.includes('a/r') || lower.includes('accounts receivable')) {
-      return 'Accounts Receivable';
-    }
-    // Default accounting case
-    return 'Accounting Services';
-  }
-
-  // Handle 1040-related variations
-  if (lower.includes('1040')) {
-    return '1040 Tax Preparation';
-  }
-
-  // Handle other common variations
-  if (lower.includes('1031 exchange')) return '1031 Exchange Services';
-  if (lower.includes('bookkeeping')) return 'Bookkeeping Services';
-  if (lower.includes('tax') && lower.includes('prep')) return 'Tax Preparation';
-  
-  // Capitalize first letter of each word for consistency
-  return specialty.split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({});
@@ -105,40 +56,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
         .sort();
 
       return uniqueIndustries;
-    }
-  });
-
-  const { data: specialities } = useQuery({
-    queryKey: ['specialities'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('canary_firms_data')
-        .select('specialities')
-        .not('specialities', 'is', null);
-      
-      if (error) throw error;
-
-      // Split specialities string into individual items and process them
-      const allSpecialities = data
-        .map(item => item.specialities.split(',')
-          .map(s => cleanSpecialty(s))
-          .filter(s => s.length > 3) // Filter out very short strings
-        )
-        .flat();
-
-      // Create a Map to track normalized values and remove duplicates
-      const specialtyMap = new Map();
-      allSpecialities.forEach(specialty => {
-        const normalized = normalizeSpecialty(specialty);
-        if (!specialtyMap.has(normalized)) {
-          specialtyMap.set(normalized, normalized); // Store normalized version
-        }
-      });
-
-      // Convert back to array and sort
-      return Array.from(specialtyMap.values())
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b));
     }
   });
 
@@ -171,7 +88,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search firms by speciality..."
+            placeholder="Search firms..."
             className="pl-9"
             value={searchQuery}
             onChange={(e) => {
@@ -227,25 +144,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     {industries?.map((industry) => (
                       <SelectItem key={industry} value={industry}>
                         {industry}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Speciality</Label>
-                <Select
-                  onValueChange={(value) => handleFilterChange('speciality', value)}
-                  value={filters.speciality || ""}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select speciality" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {specialities?.map((speciality) => (
-                      <SelectItem key={speciality} value={speciality}>
-                        {speciality}
                       </SelectItem>
                     ))}
                   </SelectContent>
