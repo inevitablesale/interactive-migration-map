@@ -73,22 +73,22 @@ export default function PracticeDetails() {
         STATE: practice.STATE
       };
 
-      const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
-      const stateFp = practice.STATEFP?.toString().padStart(2, '0');
+      // Get the county name from the practice data
+      const countyName = practice.COUNTYNAME;
+      const state = practice.STATE;
 
-      if (!countyFp || !stateFp) {
-        console.log('Missing FIPS codes:', { countyFp, stateFp });
+      if (!countyName || !state) {
+        console.log('Missing county or state data:', { countyName, state });
         return { practice: transformedPractice, countyData: null };
       }
 
-      console.log('Fetching county data with FIPS:', { countyFp, stateFp });
+      console.log('Fetching county data for:', { countyName, state });
 
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
-        .eq('COUNTYFP', countyFp)
-        .eq('STATEFP', stateFp)
-        .eq('COUNTYNAME', practice.COUNTYNAME)
+        .eq('COUNTYNAME', countyName)
+        .eq('state_name', state)
         .maybeSingle();
 
       if (countyError) {
