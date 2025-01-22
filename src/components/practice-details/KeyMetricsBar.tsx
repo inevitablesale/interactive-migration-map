@@ -12,25 +12,34 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
   const estimatedRevenue = practice.employee_count ? practice.employee_count * 150000 : 0;
   const estimatedEBITDA = estimatedRevenue * 0.15; // 15% margin assumption
 
-  // Fetch growth metrics for the practice's location
-  const { data: growthMetrics } = useQuery({
-    queryKey: ['growth-metrics', practice.COUNTYFP, practice.STATEFP],
+  // Fetch county rankings data for the practice's location
+  const { data: countyData } = useQuery({
+    queryKey: ['county-rankings', practice.COUNTYFP, practice.STATEFP],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_comprehensive_growth_metrics');
+      const { data, error } = await supabase
+        .from('county_rankings')
+        .select('*')
+        .eq('countyfp', practice.COUNTYFP)
+        .eq('statefp', practice.STATEFP)
+        .maybeSingle();
+
       if (error) {
-        console.error('Error fetching growth metrics:', error);
+        console.error('Error fetching county rankings:', error);
         return null;
       }
       
-      // Find the matching county data
-      return data?.find(
-        metric => 
-          metric.countyfp === practice.COUNTYFP && 
-          metric.statefp === practice.STATEFP
-      );
+      return data;
     },
     enabled: !!practice.COUNTYFP && !!practice.STATEFP
   });
+
+  // Calculate growth classification based on growth rate
+  const getGrowthClassification = (growthRate: number | undefined) => {
+    if (!growthRate) return 'Stable';
+    if (growthRate > 5) return 'High Growth';
+    if (growthRate > 2) return 'Moderate Growth';
+    return 'Stable';
+  };
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
@@ -60,8 +69,8 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Score</p>
           <p className="text-lg font-semibold text-white">
-            {growthMetrics?.composite_growth_score ? 
-              `${Math.round(growthMetrics.composite_growth_score)}%` : 
+            {countyData?.growth_rate ? 
+              `${Math.round(countyData.growth_rate)}%` : 
               'N/A'}
           </p>
         </div>
@@ -71,7 +80,7 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Status</p>
           <p className="text-lg font-semibold text-white">
-            {growthMetrics?.growth_classification || 'N/A'}
+            {getGrowthClassification(countyData?.growth_rate)}
           </p>
         </div>
       </div>
