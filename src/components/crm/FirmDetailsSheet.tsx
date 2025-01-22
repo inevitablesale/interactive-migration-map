@@ -22,14 +22,19 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
   const { data: countyData, isLoading } = useQuery({
     queryKey: ['county-data', practice.region],
     queryFn: async () => {
+      // Split region into county and state
+      const [county, stateStr] = practice.region.split(',').map(s => s.trim());
+      
+      // First get the state FIPS code
       const { data: stateData, error: stateError } = await supabase
         .from('state_fips_codes')
         .select('STATEFP')
-        .eq('state', practice.region.split(',')[0].trim())
+        .eq('state', stateStr)
         .single();
 
       if (stateError) throw stateError;
 
+      // Then get the county data using both STATEFP and COUNTYNAME
       const { data: countyDetails, error: countyError } = await supabase
         .from('county_data')
         .select(`
@@ -43,6 +48,7 @@ export function FirmDetailsSheet({ isOpen, onClose, practice }: FirmDetailsSheet
           MOVEDIN2022
         `)
         .eq('STATEFP', stateData.STATEFP)
+        .eq('COUNTYNAME', county)
         .single();
 
       if (countyError) throw countyError;
