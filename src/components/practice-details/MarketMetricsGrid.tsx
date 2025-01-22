@@ -20,7 +20,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Average Annual Payroll",
-            value: marketData.payann ? (marketData.payann * 10).toLocaleString() : undefined,
+            value: marketData.payann ? marketData.payann.toLocaleString() : undefined,
             type: "money",
             rank: marketData.income_rank,
             sublabel: `National Rank: ${marketData.national_income_rank}`
