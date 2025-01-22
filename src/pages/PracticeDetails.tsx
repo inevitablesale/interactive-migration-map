@@ -15,15 +15,29 @@ export default function PracticeDetails() {
     queryFn: async () => {
       if (!practiceId) throw new Error('Practice ID is required');
       
-      // First get the practice data - use exact match on Company ID
+      const companyId = Number(practiceId);
+      if (isNaN(companyId)) {
+        throw new Error('Invalid practice ID format');
+      }
+
+      console.log('Fetching practice with Company ID:', companyId);
+      
+      // First get the practice data
       const { data: practice, error: practiceError } = await supabase
         .from('canary_firms_data')
         .select('*')
-        .eq('Company ID', Number(practiceId))
+        .eq('Company ID', companyId)
         .maybeSingle();
 
-      if (practiceError) throw practiceError;
-      if (!practice) throw new Error('Practice not found');
+      if (practiceError) {
+        console.error('Error fetching practice:', practiceError);
+        throw practiceError;
+      }
+      
+      if (!practice) {
+        console.log('No practice found for ID:', companyId);
+        throw new Error('Practice not found');
+      }
 
       console.log('Practice data:', practice);
 
@@ -36,6 +50,8 @@ export default function PracticeDetails() {
         return { practice, countyData: null };
       }
 
+      console.log('Fetching county data with FIPS:', { countyFp, stateFp });
+
       // Then get the county data using COUNTYFP and STATEFP from practice
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
@@ -44,7 +60,10 @@ export default function PracticeDetails() {
         .eq('STATEFP', stateFp)
         .maybeSingle();
 
-      if (countyError) throw countyError;
+      if (countyError) {
+        console.error('Error fetching county data:', countyError);
+        throw countyError;
+      }
 
       console.log('County data:', countyData);
 
@@ -56,7 +75,7 @@ export default function PracticeDetails() {
     retry: false
   });
 
-  // Handle error toast in useEffect
+  // Handle error toast in useEffect to avoid infinite renders
   useEffect(() => {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
