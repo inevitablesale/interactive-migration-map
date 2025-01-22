@@ -25,7 +25,6 @@ export default function PracticeDetails() {
 
       console.log('Fetching practice with Company ID:', companyId);
       
-      // First get the practice data
       const { data: practice, error: practiceError } = await supabase
         .from('canary_firms_data')
         .select('*')
@@ -42,7 +41,6 @@ export default function PracticeDetails() {
         throw new Error('Practice not found');
       }
 
-      // Transform practice data to match TopFirm interface
       const transformedPractice: TopFirm = {
         company_name: practice["Company Name"],
         employee_count: practice.employeeCount,
@@ -60,7 +58,6 @@ export default function PracticeDetails() {
         foundedOn: practice.foundedOn?.toString()
       };
 
-      // Ensure COUNTYFP and STATEFP are converted to strings and properly padded
       const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
       const stateFp = practice.STATEFP?.toString().padStart(2, '0');
 
@@ -71,7 +68,6 @@ export default function PracticeDetails() {
 
       console.log('Fetching county data with FIPS:', { countyFp, stateFp });
 
-      // Get the county rankings data using COUNTYFP and STATEFP from practice
       const { data: countyData, error: countyError } = await supabase
         .from('county_rankings')
         .select('*')
@@ -87,7 +83,6 @@ export default function PracticeDetails() {
 
       console.log('County data:', countyData);
 
-      // Transform county data to match ComprehensiveMarketData interface
       const transformedCountyData: ComprehensiveMarketData = {
         total_population: countyData?.total_population,
         median_household_income: countyData?.median_household_income,
@@ -97,7 +92,7 @@ export default function PracticeDetails() {
         private_sector_accountants: countyData?.private_sector_accountants,
         public_sector_accountants: countyData?.public_sector_accountants,
         firms_per_10k_population: countyData?.firms_per_10k,
-        growth_rate_percentage: countyData?.avg_growth_rate,
+        growth_rate_percentage: countyData?.population_growth_rate,
         market_saturation_index: countyData?.market_saturation,
         total_education_population: countyData?.education_population,
         bachelors_holders: countyData?.bachelors_holders,
@@ -109,6 +104,7 @@ export default function PracticeDetails() {
         avgSalaryPerEmployee: countyData?.total_payroll && countyData?.total_employees ? 
           countyData.total_payroll / countyData.total_employees : undefined,
         vacancy_rate: countyData?.vacancy_rate,
+        // State-level rankings
         vacancy_rank: countyData?.vacancy_rank,
         income_rank: countyData?.income_rank,
         population_rank: countyData?.population_rank,
@@ -117,7 +113,18 @@ export default function PracticeDetails() {
         firm_density_rank: countyData?.firm_density_rank,
         density_rank: countyData?.density_rank,
         state_rank: countyData?.state_rank,
-        national_rank: countyData?.national_rank
+        // National-level rankings
+        national_income_rank: countyData?.national_income_rank,
+        national_population_rank: countyData?.national_population_rank,
+        national_rent_rank: countyData?.national_rent_rank,
+        national_firm_density_rank: countyData?.national_firm_density_rank,
+        national_growth_rank: countyData?.national_growth_rank,
+        national_vacancy_rank: countyData?.national_vacancy_rank,
+        national_market_saturation_rank: countyData?.national_market_saturation_rank,
+        // Averages
+        avg_firms_per_10k: countyData?.avg_firms_per_10k,
+        avg_growth_rate: countyData?.avg_growth_rate,
+        avg_market_saturation: countyData?.avg_market_saturation
       };
 
       return { practice: transformedPractice, countyData: transformedCountyData };
@@ -125,7 +132,6 @@ export default function PracticeDetails() {
     retry: false
   });
 
-  // Handle error toast in useEffect to avoid infinite renders
   useEffect(() => {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
@@ -161,19 +167,16 @@ export default function PracticeDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
       <div className="container mx-auto p-6 space-y-8">
-        {/* Header Section */}
         <div className="neo-blur rounded-lg p-6">
           <PracticeHeader practice={practice} />
         </div>
         
-        {/* Info Section */}
         <div className="grid gap-6 md:grid-cols-2">
           <div className="neo-blur rounded-lg">
             <PracticeInfo practice={practice} />
           </div>
         </div>
 
-        {/* Market Metrics Section */}
         {countyData && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-gradient">Market Analysis</h2>
