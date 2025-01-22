@@ -91,5 +91,4 @@ export interface ComprehensiveMarketData {
   avg_firms_per_10k?: number;
   avg_growth_rate?: number;
   avg_market_saturation?: number;
-  top_firms?: TopFirm[] | null;
 }
