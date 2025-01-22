@@ -1,15 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Users, Play } from "lucide-react";
+import { Practice } from "@/types/interests";
 
 interface PracticeOfDayProps {
-  practice?: {
-    industry: string;
-    region: string;
-    employee_count: number;
-    service_mix: Record<string, number>;
-    buyer_count: number;
-  };
+  practice?: Practice;
   onInterested?: () => void;
 }
 
@@ -35,7 +30,7 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-xl font-semibold">
-            {practice.industry} | {practice.region}
+            {practice.industry} | {practice["State Name"]}
           </h3>
           <p className="text-sm text-muted-foreground">
             {practice.employee_count} employees | {Object.entries(practice.service_mix)
