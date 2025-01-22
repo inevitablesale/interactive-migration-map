@@ -36,10 +36,17 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
   // Calculate growth classification based on growth rate
   const getGrowthClassification = (growthRate: number | undefined) => {
     if (!growthRate) return 'Stable';
-    if (growthRate > 5) return 'High Growth';
-    if (growthRate > 2) return 'Moderate Growth';
-    return 'Stable';
+    if (growthRate > 2) return 'High Growth';
+    if (growthRate > 1) return 'Moderate Growth';
+    if (growthRate > 0) return 'Stable Growth';
+    return 'Declining';
   };
+
+  // Add console log to debug growth rate data
+  console.log('County Data Growth:', {
+    growthRatePercentage: countyData?.growth_rate_percentage,
+    countyData
+  });
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
@@ -69,8 +76,8 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Score</p>
           <p className="text-lg font-semibold text-white">
-            {countyData?.population_growth_rate ? 
-              `${Math.round(countyData.population_growth_rate)}%` : 
+            {countyData?.growth_rate_percentage ? 
+              `${Math.round(countyData.growth_rate_percentage)}%` : 
               'N/A'}
           </p>
         </div>
@@ -80,7 +87,7 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Status</p>
           <p className="text-lg font-semibold text-white">
-            {getGrowthClassification(countyData?.population_growth_rate)}
+            {getGrowthClassification(countyData?.growth_rate_percentage)}
           </p>
         </div>
       </div>
