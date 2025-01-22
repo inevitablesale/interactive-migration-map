@@ -33,17 +33,9 @@ const Index = () => {
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-              Sign In
-            </Link>
-            <Link 
-              to="/auth?signup=true" 
-              className="bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors"
-            >
-              Sign Up
-            </Link>
-          </div>
+          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+            Sign In
+          </Link>
         </div>
       </div>
 
