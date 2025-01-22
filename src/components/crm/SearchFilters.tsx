@@ -37,6 +37,24 @@ export interface FilterState {
   speciality?: string;
 }
 
+const cleanSpecialty = (specialty: string): string => {
+  // Remove unicode escape sequences and trim
+  let cleaned = specialty.replace(/\\u2022\\t/g, '').trim();
+  // Remove year prefixes like \u2022\t2022\t
+  cleaned = cleaned.replace(/^\d{4}\\t/, '');
+  return cleaned;
+};
+
+const normalizeSpecialty = (specialty: string): string => {
+  // Convert to lowercase for comparison
+  const lower = specialty.toLowerCase();
+  // Handle common variations
+  if (lower.includes('1031 exchange')) return '1031 Exchange';
+  if (lower.includes('1040') && lower.includes('tax')) return '1040 Tax Preparation';
+  // Return original if no normalization needed
+  return specialty;
+};
+
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({});
   const [isOpen, setIsOpen] = useState(false);
@@ -70,17 +88,28 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       
       if (error) throw error;
 
-      // Split specialities string into individual items and flatten the array
+      // Split specialities string into individual items and process them
       const allSpecialities = data
-        .map(item => item.specialities.split(',').map(s => s.trim()))
-        .flat()
-        .filter(Boolean); // Remove empty strings
+        .map(item => item.specialities.split(',')
+          .map(s => cleanSpecialty(s))
+          .map(s => normalizeSpecialty(s))
+          .filter(s => s.length > 3) // Filter out very short strings
+        )
+        .flat();
 
-      // Create a Set to get unique values and convert back to array
-      const uniqueSpecialities = Array.from(new Set(allSpecialities))
+      // Create a Map to track normalized values and remove duplicates
+      const specialtyMap = new Map();
+      allSpecialities.forEach(specialty => {
+        const normalized = normalizeSpecialty(specialty);
+        if (!specialtyMap.has(normalized)) {
+          specialtyMap.set(normalized, specialty);
+        }
+      });
+
+      // Convert back to array and sort
+      return Array.from(specialtyMap.values())
+        .filter(Boolean)
         .sort((a, b) => a.localeCompare(b));
-
-      return uniqueSpecialities;
     }
   });
 
