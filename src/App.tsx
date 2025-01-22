@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CommandBar } from "@/components/CommandBar";
 import Analysis from "@/pages/Analysis";
-import Dashboard from "@/pages/Dashboard";
+import BuyerDashboard from "@/pages/BuyerDashboard";
 import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
 import ThankYou from "@/pages/ThankYou";
@@ -47,7 +47,7 @@ function App() {
         )}
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/market-report/:county/:state" element={<MarketReport />} />
           <Route path="/state-market-report" element={<StateMarketReport />} />
