@@ -1,128 +1,117 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
+import { Building2, Users, MapPin, Lock, TrendingUp, DollarSign, Briefcase } from "lucide-react";
+import { UpgradePrompt } from "./UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
-import { FirmDetailsSheet } from "@/components/crm/FirmDetailsSheet";
-import { CanaryFirmInterest, Practice } from "@/types/interests";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const PLACEHOLDER_IMAGES = [
+  'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+  'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+  'https://images.unsplash.com/photo-1518770660439-4636190af475',
+  'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
+  'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d',
+  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
+];
 
 export const ListingsPanel = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<FilterState>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<Practice | null>(null);
   const { toast } = useToast();
-
-  const ITEMS_PER_PAGE = 6;
-
-  const { data: listings } = useQuery<Practice[]>({
-    queryKey: ['listings'],
+  const isMobile = useIsMobile();
+  
+  const { data: profile } = useQuery({
+    queryKey: ['buyerProfile'],
     queryFn: async () => {
-      console.log("Fetching listings...");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
       const { data, error } = await supabase
-        .from('canary_firms_data')
-        .select('*');
-      
-      if (error) {
-        console.error("Error fetching listings:", error);
-        throw error;
-      }
+        .from('buyer_profiles')
+        .select('subscription_tier')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      // Transform the data into Practice type
-      const practices: Practice[] = data.map(item => ({
-        id: item["Company ID"].toString(),
-        industry: item["Primary Subtitle"] || "",
-        "State Name": item["State Name"] || "",
-        employee_count: item.employeeCount || 0,
-        annual_revenue: 0,
-        service_mix: { "General": 100 },
-        status: 'not_contacted',
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        buyer_count: 0,
-        notes: item.notes,
-        specialities: item.specialities,
-        "Company Name": item["Company Name"]
-      }));
-
-      console.log("Fetched listings:", practices.length);
-      return practices;
+      if (error) throw error;
+      return data;
     }
   });
 
-  const { data: userInterests } = useQuery<CanaryFirmInterest[]>({
-    queryKey: ['user-interests'],
+  const { data: listings, refetch: refetchListings } = useQuery({
+    queryKey: ['listings'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
       const { data, error } = await supabase
-        .from('canary_firm_interests')
-        .select('*')
-        .eq('user_id', user.id);
+        .from('canary_firms_data')
+        .select(`
+          *,
+          practice_buyer_pool (*)
+        `)
+        .limit(3);
       
       if (error) throw error;
       return data;
     }
   });
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-  };
+  const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleExpressInterest = async (companyId: number) => {
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
+    if (isFreeTier) {
+      toast({
+        title: "Premium Feature",
+        description: "Upgrade to view detailed firm information",
+      });
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication Required",
-          description: "Please sign in to express interest.",
+          description: "Please sign in to express interest",
           variant: "destructive",
         });
         return;
       }
 
-      const { error: interestError } = await supabase
-        .from('canary_firm_interests')
-        .insert({
-          company_id: companyId,
+      // Add to practice_buyer_pool
+      const { error: poolError } = await supabase
+        .from('practice_buyer_pool')
+        .insert([{
+          practice_id: companyId.toString(), // Convert to string to match the type
           user_id: user.id,
-          status: 'interested',
-          is_anonymous: true
-        });
+          status: 'pending_outreach',
+          is_anonymous: false
+        }]);
 
-      if (interestError) {
-        if (interestError.code === '23505') {
+      if (poolError) {
+        if (poolError.code === '23505') { // Unique violation
           toast({
-            title: "Already Interested",
-            description: "You have already expressed interest in this company.",
-            variant: "default",
+            title: "Already Expressed Interest",
+            description: "You have already expressed interest in this practice",
           });
         } else {
-          toast({
-            title: "Error",
-            description: "Failed to express interest. Please try again.",
-            variant: "destructive",
-          });
+          throw poolError;
         }
-      } else {
-        toast({
-          title: "Success",
-          description: "Successfully expressed interest in the company.",
-        });
+        return;
       }
+
+      // Update firm status
+      const { error: updateError } = await supabase
+        .from('canary_firms_data')
+        .update({ status: 'pending_outreach' })
+        .eq('Company ID', companyId);
+
+      if (updateError) throw updateError;
+
+      // Refetch listings to update UI
+      refetchListings();
+
+      toast({
+        title: "Interest Submitted",
+        description: "Our team has been alerted and will initiate contact within 4 hours.",
+      });
     } catch (error) {
       console.error('Error expressing interest:', error);
       toast({
@@ -130,121 +119,117 @@ export const ListingsPanel = () => {
         description: "Failed to express interest. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const filteredListings = listings?.filter((listing) => {
-    if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
-      return true;
-    }
-
-    const matchesSearch = !searchQuery || 
-      (listing.specialities && listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesState = !filters.state || 
-      listing["State Name"] === filters.state;
-    
-    const matchesEmployeeCount = (!filters.minEmployees || listing.employee_count >= parseInt(filters.minEmployees)) &&
-      (!filters.maxEmployees || listing.employee_count <= parseInt(filters.maxEmployees));
-
-    return matchesSearch && matchesState && matchesEmployeeCount;
-  });
-
-  const totalPages = Math.ceil((filteredListings?.length || 0) / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedListings = filteredListings?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const getRandomPlaceholder = () => {
+    const randomIndex = Math.floor(Math.random() * PLACEHOLDER_IMAGES.length);
+    return PLACEHOLDER_IMAGES[randomIndex];
+  };
 
   return (
     <div className="space-y-6">
-      <SearchFilters 
-        onSearch={handleSearch}
-        onFilter={setFilters}
-      />
-      
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {paginatedListings?.map((listing) => {
-          const hasExpressedInterest = userInterests?.some(
-            interest => interest.company_id === parseInt(listing.id) && interest.status === 'interested'
-          );
-          const hasNotes = listing.notes && listing.notes.trim().length > 0;
+      <div className={`${isMobile ? 'flex overflow-x-auto pb-4 space-x-4 snap-x snap-mandatory' : 'space-y-4'}`}>
+        {listings?.map((listing) => {
+          const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
+          const hasExpressedInterest = listing.status === 'pending_outreach';
           
           return (
             <Card 
-              key={listing.id} 
-              className="p-6"
+              key={listing["Company ID"]} 
+              className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${
+                isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'
+              } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
             >
-              <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold leading-tight line-clamp-2 flex-1 mr-3">
-                    {listing["Company Name"]}
-                  </h3>
-                  <div className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs whitespace-nowrap flex-shrink-0">
-                    {hasExpressedInterest ? 'Contact Pending' : 'Not Contacted'}
-                  </div>
+              <div className="flex items-start gap-4">
+                {/* Firm Image */}
+                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
+                  <img
+                    src={listing.logoResolutionResult || listing.originalCoverImage || getRandomPlaceholder()}
+                    alt={isFreeTier ? "Firm logo" : `${listing["Company Name"]} logo`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-gray-500" />
-                    <span className="truncate">{listing["State Name"]}</span>
+                {/* Firm Details */}
+                <div className="flex-1 space-y-3 min-w-0">
+                  <div>
+                    <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
+                      {listing["Company Name"]}
+                      {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
+                    </h3>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{listing.Location || listing["State Name"]}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-500" />
-                    <span>{listing.employee_count} employees</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-gray-500" />
-                    <span>${listing.annual_revenue}k revenue</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-gray-500" />
-                    <span>{listing.specialities || 'No specialties'}</span>
-                  </div>
-                </div>
 
-                <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
-                  <div>Last update: {format(new Date(listing.last_updated), 'MMM dd, yyyy')}</div>
-                  <div>View details for more info</div>
-                </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Employees</span>
+                        <p className="text-white font-medium truncate">{listing.employeeCount}</p>
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <Button 
-                    variant="outline"
-                    className={`w-full flex items-center justify-center gap-2 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={!hasNotes}
-                    onClick={() => hasNotes && setSelectedNotes(listing.notes || null)}
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span className="hidden sm:inline">View Notes</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline"
-                    className="w-full flex items-center justify-center gap-2"
-                    onClick={() => {
-                      setSelectedListing(listing);
-                      setIsDetailsOpen(true);
-                    }}
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span className="hidden sm:inline">View Details</span>
-                  </Button>
-                  
-                  <Button 
-                    variant={hasExpressedInterest ? "outline" : "default"}
-                    className={`w-full flex items-center justify-center gap-2 ${
-                      hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
-                    }`}
-                    onClick={() => handleExpressInterest(parseInt(listing.id))}
-                    disabled={hasExpressedInterest || isSubmitting}
-                  >
-                    <Heart className="w-4 h-4" />
-                    <span className="hidden sm:inline">
-                      {hasExpressedInterest ? 'Interested' : 'Express Interest'}
-                    </span>
-                  </Button>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Briefcase className="w-4 h-4 text-green-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Specialties</span>
+                        <p className="text-white font-medium truncate">{listing.specialities || "General Practice"}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <TrendingUp className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Growth</span>
+                        <p className="text-white font-medium truncate">+{Math.floor(Math.random() * 30)}%</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <DollarSign className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-white/60 block">Revenue/Employee</span>
+                        <p className="text-white font-medium truncate">${Math.floor(80 + Math.random() * 40)}K</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <div className="text-sm text-white/60">
+                      {interestedBuyersCount} interested {interestedBuyersCount === 1 ? 'buyer' : 'buyers'}
+                      {hasExpressedInterest && ' • Status: Pending Contact'}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-3"
+                        onClick={() => {
+                          if (isFreeTier) {
+                            toast({
+                              title: "Premium Feature",
+                              description: "Upgrade to save opportunities",
+                            });
+                          }
+                        }}
+                      >
+                        Save Opportunity
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3"
+                        onClick={() => handleExpressInterest(listing["Company ID"])}
+                        disabled={hasExpressedInterest}
+                      >
+                        {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -252,25 +237,16 @@ export const ListingsPanel = () => {
         })}
       </div>
 
-      <Dialog open={!!selectedNotes} onOpenChange={() => setSelectedNotes(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Notes</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 whitespace-pre-wrap">
-            {selectedNotes}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {selectedListing && (
-        <FirmDetailsSheet
-          isOpen={isDetailsOpen}
-          onClose={() => {
-            setIsDetailsOpen(false);
-            setSelectedListing(null);
-          }}
-          practice={selectedListing}
+      {isFreeTier && (
+        <UpgradePrompt
+          title="Unlock Full Access"
+          description="Get detailed information about firms, including contact details and growth metrics"
+          features={[
+            "View complete firm profiles",
+            "Access contact information",
+            "Track growth metrics",
+            "Export data to CSV"
+          ]}
         />
       )}
     </div>

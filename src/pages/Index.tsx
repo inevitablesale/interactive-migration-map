@@ -14,7 +14,7 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
 import { CatalystSection } from "@/components/CatalystSection";
 
-export default function Index() {
+const Index = () => {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* Countdown Banner */}
@@ -71,4 +71,6 @@ export default function Index() {
       </div>
     </div>
   );
-}
+};
+
+export default Index;

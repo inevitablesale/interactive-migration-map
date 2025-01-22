@@ -28,9 +28,12 @@ interface SearchFiltersProps {
 }
 
 export interface FilterState {
-  state?: string;
+  industry?: string;
   minEmployees?: string;
   maxEmployees?: string;
+  minRevenue?: string;
+  maxRevenue?: string;
+  region?: string;
 }
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
@@ -38,19 +41,22 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: states } = useQuery({
-    queryKey: ['states'],
+  const { data: industries } = useQuery({
+    queryKey: ['industries'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('"State Name"')
-        .not('State Name', 'is', null)
-        .order('State Name');
+        .select('"Primary Subtitle"')
+        .not('"Primary Subtitle"', 'is', null);
       
       if (error) throw error;
-      
-      const uniqueStates = [...new Set(data.map(d => d['State Name']))];
-      return uniqueStates;
+
+      // Get unique industries and sort them
+      const uniqueIndustries = Array.from(new Set(data.map(item => item['Primary Subtitle'])))
+        .filter(Boolean)
+        .sort();
+
+      return uniqueIndustries;
     }
   });
 
@@ -83,23 +89,17 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by specialty..."
+            placeholder="Search firms by industry or region..."
             className="pl-9"
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              onSearch(e.target.value);
-            }}
+            onChange={(e) => handleSearch(e.target.value)}
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="icon"
               className="absolute right-2 top-2"
-              onClick={() => {
-                setSearchQuery("");
-                onSearch("");
-              }}
+              onClick={() => handleSearch("")}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -126,21 +126,41 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label>State</Label>
+                <Label>Industry</Label>
                 <Select
-                  onValueChange={(value) => handleFilterChange('state', value)}
-                  value={filters.state || "all"}
+                  onValueChange={(value) => handleFilterChange('industry', value)}
+                  value={filters.industry || "all"}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
+                    <SelectValue placeholder="Select industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All States</SelectItem>
-                    {states?.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
+                    <SelectItem value="all">All Industries</SelectItem>
+                    {industries?.map((industry) => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Region</Label>
+                <Select
+                  onValueChange={(value) => handleFilterChange('region', value)}
+                  value={filters.region || "all"}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="Northeast">Northeast</SelectItem>
+                    <SelectItem value="Southeast">Southeast</SelectItem>
+                    <SelectItem value="Midwest">Midwest</SelectItem>
+                    <SelectItem value="Southwest">Southwest</SelectItem>
+                    <SelectItem value="West">West</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -159,6 +179,24 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     placeholder="Max"
                     value={filters.maxEmployees || ""}
                     onChange={(e) => handleFilterChange('maxEmployees', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Annual Revenue Range (in thousands)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.minRevenue || ""}
+                    onChange={(e) => handleFilterChange('minRevenue', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.maxRevenue || ""}
+                    onChange={(e) => handleFilterChange('maxRevenue', e.target.value)}
                   />
                 </div>
               </div>
