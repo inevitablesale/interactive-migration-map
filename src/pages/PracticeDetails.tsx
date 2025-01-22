@@ -41,7 +41,7 @@ export default function PracticeDetails() {
 
       console.log('Practice data:', practice);
 
-      // Ensure COUNTYFP and STATEFP are converted to strings for the query
+      // Ensure COUNTYFP and STATEFP are converted to strings and properly padded
       const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
       const stateFp = practice.STATEFP?.toString().padStart(2, '0');
 
@@ -53,11 +53,13 @@ export default function PracticeDetails() {
       console.log('Fetching county data with FIPS:', { countyFp, stateFp });
 
       // Then get the county data using COUNTYFP and STATEFP from practice
+      // Add a more specific query to ensure we get exactly one row
       const { data: countyData, error: countyError } = await supabase
         .from('county_data')
         .select('*')
         .eq('COUNTYFP', countyFp)
         .eq('STATEFP', stateFp)
+        .eq('COUNTYNAME', practice.COUNTYNAME)  // Add this to ensure exact match
         .maybeSingle();
 
       if (countyError) {
@@ -199,4 +201,4 @@ export default function PracticeDetails() {
       </div>
     </div>
   );
-}
+};
