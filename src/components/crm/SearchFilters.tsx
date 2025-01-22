@@ -42,17 +42,43 @@ const cleanSpecialty = (specialty: string): string => {
   let cleaned = specialty.replace(/\\u2022\\t/g, '').trim();
   // Remove year prefixes like \u2022\t2022\t
   cleaned = cleaned.replace(/^\d{4}\\t/, '');
+  // Remove any extra whitespace
+  cleaned = cleaned.replace(/\s+/g, ' ');
   return cleaned;
 };
 
 const normalizeSpecialty = (specialty: string): string => {
   // Convert to lowercase for comparison
   const lower = specialty.toLowerCase();
-  // Handle common variations
-  if (lower.includes('1031 exchange')) return '1031 Exchange';
+  
+  // Handle accounting variations
+  if (lower.includes('accounting') || lower.includes('accountant')) {
+    if (lower.includes('bookkeeping')) {
+      return 'Accounting & Bookkeeping Services';
+    }
+    if (lower.includes('audit')) {
+      return 'Accounting & Audit Services';
+    }
+    if (lower.includes('a/p') || lower.includes('accounts payable')) {
+      return 'Accounts Payable';
+    }
+    if (lower.includes('a/r') || lower.includes('accounts receivable')) {
+      return 'Accounts Receivable';
+    }
+    // Default accounting case
+    return 'Accounting Services';
+  }
+
+  // Handle other common variations
+  if (lower.includes('1031 exchange')) return '1031 Exchange Services';
   if (lower.includes('1040') && lower.includes('tax')) return '1040 Tax Preparation';
-  // Return original if no normalization needed
-  return specialty;
+  if (lower.includes('bookkeeping')) return 'Bookkeeping Services';
+  if (lower.includes('tax') && lower.includes('prep')) return 'Tax Preparation';
+  
+  // Capitalize first letter of each word for consistency
+  return specialty.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 };
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
@@ -92,7 +118,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       const allSpecialities = data
         .map(item => item.specialities.split(',')
           .map(s => cleanSpecialty(s))
-          .map(s => normalizeSpecialty(s))
           .filter(s => s.length > 3) // Filter out very short strings
         )
         .flat();
@@ -102,7 +127,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       allSpecialities.forEach(specialty => {
         const normalized = normalizeSpecialty(specialty);
         if (!specialtyMap.has(normalized)) {
-          specialtyMap.set(normalized, specialty);
+          specialtyMap.set(normalized, normalized); // Store normalized version
         }
       });
 
