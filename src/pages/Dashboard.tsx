@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
-export default function Dashboard() {
+export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
@@ -182,7 +182,7 @@ export default function Dashboard() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Practice Dashboard</h1>
+        <h1 className="text-3xl font-bold">Tracked Practices</h1>
         <div className="flex gap-2">
           <Button
             variant={viewMode === 'grid' ? 'default' : 'outline'}
