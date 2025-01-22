@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { Building2, Users, MapPin, Lock, TrendingUp, DollarSign, Briefcase } from "lucide-react";
+import { Building2, Users, MapPin, Lock, DollarSign, Calculator } from "lucide-react";
 import { UpgradePrompt } from "./UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +17,7 @@ const PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
 ];
 
-export const ListingsPanel = () => {
+export function ListingsPanel() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
@@ -75,18 +76,17 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // Add to practice_buyer_pool
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert([{
-          practice_id: companyId.toString(), // Convert to string to match the type
+          practice_id: companyId.toString(),
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
         }]);
 
       if (poolError) {
-        if (poolError.code === '23505') { // Unique violation
+        if (poolError.code === '23505') {
           toast({
             title: "Already Expressed Interest",
             description: "You have already expressed interest in this practice",
@@ -97,7 +97,6 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // Update firm status
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
@@ -105,7 +104,6 @@ export const ListingsPanel = () => {
 
       if (updateError) throw updateError;
 
-      // Refetch listings to update UI
       refetchListings();
 
       toast({
@@ -122,9 +120,21 @@ export const ListingsPanel = () => {
     }
   };
 
-  const getRandomPlaceholder = () => {
-    const randomIndex = Math.floor(Math.random() * PLACEHOLDER_IMAGES.length);
-    return PLACEHOLDER_IMAGES[randomIndex];
+  const calculateEstimatedRevenue = (employeeCount: number) => {
+    const avgRevenuePerEmployee = 150000; // Average revenue per employee for accounting firms
+    return employeeCount * avgRevenuePerEmployee;
+  };
+
+  const calculateEstimatedEBITDA = (revenue: number) => {
+    const ebitdaMargin = 0.15; // 15% EBITDA margin for accounting firms
+    return revenue * ebitdaMargin;
+  };
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`;
+    }
+    return `$${(amount / 1000).toFixed(0)}K`;
   };
 
   return (
@@ -133,102 +143,77 @@ export const ListingsPanel = () => {
         {listings?.map((listing) => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
+          const estimatedRevenue = calculateEstimatedRevenue(listing.employeeCount || 0);
+          const estimatedEBITDA = calculateEstimatedEBITDA(estimatedRevenue);
           
           return (
             <Card 
               key={listing["Company ID"]} 
-              className={`p-4 bg-black/40 backdrop-blur-md border-white/10 transition-all duration-200 ${
-                isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-white/5 cursor-pointer'
+              className={`p-4 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${
+                isFreeTier ? 'cursor-not-allowed opacity-70' : 'hover:bg-gray-50 cursor-pointer'
               } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
             >
-              <div className="flex items-start gap-4">
-                {/* Firm Image */}
-                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
-                  <img
-                    src={listing.logoResolutionResult || listing.originalCoverImage || getRandomPlaceholder()}
-                    alt={isFreeTier ? "Firm logo" : `${listing["Company Name"]} logo`}
-                    className="w-full h-full object-cover"
-                  />
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {listing["Primary Subtitle"] || "Accounting"}
+                    </h3>
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                      <MapPin className="w-4 h-4" />
+                      <span>{listing["State Name"] || listing.Location}</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Firm Details */}
-                <div className="flex-1 space-y-3 min-w-0">
-                  <div>
-                    <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
-                      {listing["Company Name"]}
-                      {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
-                    </h3>
-                    <div className="flex items-center gap-2 text-white/60 text-sm">
-                      <MapPin className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{listing.Location || listing["State Name"]}</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-blue-500" />
+                    <div>
+                      <p className="text-sm text-gray-500">Employees</p>
+                      <p className="font-medium">{listing.employeeCount || 0}</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Users className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-white/60 block">Employees</span>
-                        <p className="text-white font-medium truncate">{listing.employeeCount}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <Briefcase className="w-4 h-4 text-green-400 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-white/60 block">Specialties</span>
-                        <p className="text-white font-medium truncate">{listing.specialities || "General Practice"}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <TrendingUp className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-white/60 block">Growth</span>
-                        <p className="text-white font-medium truncate">+{Math.floor(Math.random() * 30)}%</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-white/60 block">Revenue/Employee</span>
-                        <p className="text-white font-medium truncate">${Math.floor(80 + Math.random() * 40)}K</p>
-                      </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-green-500" />
+                    <div>
+                      <p className="text-sm text-gray-500">Est. Revenue</p>
+                      <p className="font-medium">{formatCurrency(estimatedRevenue)}</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 pt-2">
-                    <div className="text-sm text-white/60">
-                      {interestedBuyersCount} interested {interestedBuyersCount === 1 ? 'buyer' : 'buyers'}
-                      {hasExpressedInterest && ' • Status: Pending Contact'}
+                  <div className="flex items-center gap-2">
+                    <Calculator className="w-4 h-4 text-purple-500" />
+                    <div>
+                      <p className="text-sm text-gray-500">Est. EBITDA</p>
+                      <p className="font-medium">{formatCurrency(estimatedEBITDA)}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="secondary" 
-                        size="sm"
-                        className="w-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-3"
-                        onClick={() => {
-                          if (isFreeTier) {
-                            toast({
-                              title: "Premium Feature",
-                              description: "Upgrade to save opportunities",
-                            });
-                          }
-                        }}
-                      >
-                        Save Opportunity
-                      </Button>
-                      <Button 
-                        variant="secondary" 
-                        size="sm"
-                        className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3"
-                        onClick={() => handleExpressInterest(listing["Company ID"])}
-                        disabled={hasExpressedInterest}
-                      >
-                        {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
-                      </Button>
-                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <div className="text-sm text-gray-500">
+                    {interestedBuyersCount} interested {interestedBuyersCount === 1 ? 'buyer' : 'buyers'}
+                    {hasExpressedInterest && ' • Status: Pending Contact'}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleExpressInterest(listing["Company ID"])}
+                      disabled={hasExpressedInterest}
+                      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                    >
+                      {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-gray-600"
+                    >
+                      View Details
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -251,4 +236,4 @@ export const ListingsPanel = () => {
       )}
     </div>
   );
-};
+}
