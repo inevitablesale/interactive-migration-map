@@ -5,7 +5,6 @@ import { supabase } from "./integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
-import Dashboard from "./pages/Dashboard";
 import MarketReport from "./pages/MarketReport";
 import StateMarketReport from "./pages/StateMarketReport";
 import ThankYou from "./pages/ThankYou";
@@ -114,7 +113,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/analysis" element={<Analysis />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/market-report" element={<MarketReport />} />
         <Route path="/state-market-report" element={<StateMarketReport />} />
         <Route path="/thank-you" element={<ThankYou />} />
