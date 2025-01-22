@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { format } from "date-fns";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +48,7 @@ export default function BuyerDashboard() {
 
       return data || [];
     },
-    enabled: !!session // Only run query if user is authenticated
+    enabled: !!session
   });
 
   const { data: stats } = useQuery({
@@ -76,7 +75,7 @@ export default function BuyerDashboard() {
         avgPoolSize: Math.round(avgPoolSize)
       };
     },
-    enabled: !!session // Only run query if user is authenticated
+    enabled: !!session
   });
 
   if (!session) {
@@ -189,9 +188,6 @@ export default function BuyerDashboard() {
               ))
             )}
           </div>
-        </div>
-        <div>
-          <PracticeOfDay />
         </div>
       </div>
     </main>
