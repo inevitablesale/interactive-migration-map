@@ -57,7 +57,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
 
   const formatGrowthRate = (rate: number | undefined) => {
     if (!rate) return 'N/A';
-    return `${rate.toFixed(1)}%`;
+    return `${(rate / 10).toFixed(1)}%`;
   };
 
   const gaugePosition = ((currentEbitdaMargin - minEbitdaMargin) / (maxEbitdaMargin - minEbitdaMargin)) * 100;
