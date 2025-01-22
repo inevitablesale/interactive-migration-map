@@ -151,7 +151,7 @@ export default function Dashboard() {
       return {
         id: data["Company ID"].toString(),
         industry: data["Primary Subtitle"] || "",
-        region: data["State Name"] || "",
+        state: data["State Name"] || "",  // Changed from region to state
         employee_count: data.employeeCount || 0,
         annual_revenue: 0,
         service_mix: { "General": 100 },
@@ -194,7 +194,7 @@ export default function Dashboard() {
                       practice={{
                         id: firm["Company ID"].toString(),
                         industry: firm["Primary Subtitle"] || "",
-                        region: firm["State Name"] || "",
+                        state: firm["State Name"] || "",  // Changed from region to state
                         employee_count: firm.employeeCount || 0,
                         annual_revenue: 0,
                         service_mix: { "General": 100 },
