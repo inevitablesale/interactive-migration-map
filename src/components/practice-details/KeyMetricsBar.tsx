@@ -27,7 +27,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   };
 
   // Get the actual growth rate and average from county data
-  const growthRate = countyData?.growth_rate_percentage;
+  const growthRate = countyData?.population_growth_rate;
   const avgGrowthRate = countyData?.avg_growth_rate;
 
   return (

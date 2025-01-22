@@ -64,7 +64,7 @@ export interface ComprehensiveMarketData {
   private_sector_accountants?: number;
   public_sector_accountants?: number;
   firms_per_10k_population?: number;
-  growth_rate_percentage?: number;
+  population_growth_rate?: number;  // Updated from growth_rate_percentage
   market_saturation_index?: number;
   total_education_population?: number;
   bachelors_holders?: number;
