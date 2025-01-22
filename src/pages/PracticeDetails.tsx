@@ -49,7 +49,24 @@ export default function PracticeDetails() {
 
       if (!countyFp || !stateFp) {
         console.log('Missing FIPS codes:', { countyFp, stateFp });
-        return { practice, countyData: null };
+        return { 
+          practice: {
+            company_name: practice["Company Name"],
+            employee_count: practice.employeeCount,
+            follower_count: practice.followerCount,
+            follower_ratio: practice.followerCount / (practice.employeeCount || 1),
+            logoResolutionResult: practice.logoResolutionResult,
+            originalCoverImage: practice.originalCoverImage,
+            primarySubtitle: practice["Primary Subtitle"],
+            employeeCountRangeLow: practice.employeeCountRangeLow,
+            employeeCountRangeHigh: practice.employeeCountRangeHigh,
+            specialities: practice.specialities,
+            websiteUrl: practice.websiteUrl,
+            Location: practice.Location,
+            Summary: practice.Summary
+          }, 
+          countyData: null 
+        };
       }
 
       console.log('Fetching county data with FIPS:', { countyFp, stateFp });
@@ -71,7 +88,21 @@ export default function PracticeDetails() {
       console.log('County data:', countyData);
 
       return {
-        practice,
+        practice: {
+          company_name: practice["Company Name"],
+          employee_count: practice.employeeCount,
+          follower_count: practice.followerCount,
+          follower_ratio: practice.followerCount / (practice.employeeCount || 1),
+          logoResolutionResult: practice.logoResolutionResult,
+          originalCoverImage: practice.originalCoverImage,
+          primarySubtitle: practice["Primary Subtitle"],
+          employeeCountRangeLow: practice.employeeCountRangeLow,
+          employeeCountRangeHigh: practice.employeeCountRangeHigh,
+          specialities: practice.specialities,
+          websiteUrl: practice.websiteUrl,
+          Location: practice.Location,
+          Summary: practice.Summary
+        },
         countyData
       };
     },

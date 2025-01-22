@@ -16,14 +16,14 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Market Density",
-            value: marketData.firms_per_10k_population?.toString(),
+            value: marketData.avg_firms_per_10k?.toString(),
             type: "density",
-            rank: marketData.density_rank,
+            rank: marketData.firm_density_rank,
             sublabel: "Firms per 10k residents"
           },
           {
             label: "Market Saturation",
-            value: marketData.market_saturation_index?.toString(),
+            value: marketData.avg_market_saturation?.toString(),
             type: "saturation",
             sublabel: "% of market capacity"
           },
@@ -42,7 +42,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Growth Rate",
-            value: marketData.growth_rate_percentage?.toString(),
+            value: marketData.avg_growth_rate?.toString(),
             type: "growth",
             rank: marketData.growth_rank,
             sublabel: "Annual growth rate"
@@ -63,17 +63,17 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         metrics={[
           {
             label: "Bachelor's Degree Holders",
-            value: marketData.bachelors_degree_holders?.toString(),
+            value: marketData.bachelors_holders?.toString(),
             type: "population"
           },
           {
             label: "Master's Degree Holders",
-            value: marketData.masters_degree_holders?.toString(),
+            value: marketData.masters_holders?.toString(),
             type: "population"
           },
           {
             label: "Doctorate Degree Holders",
-            value: marketData.doctorate_degree_holders?.toString(),
+            value: marketData.doctorate_holders?.toString(),
             type: "population"
           }
         ]}
@@ -106,7 +106,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
           {
             label: "Vacancy Rate",
             value: marketData.vacancy_rate?.toString(),
-            type: "percent",
+            type: "density",
             rank: marketData.vacancy_rank,
             sublabel: "% of vacant properties"
           }

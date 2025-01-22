@@ -6,16 +6,17 @@ export interface ComprehensiveMarketData {
   employed_population?: number;
   private_sector_accountants?: number;
   public_sector_accountants?: number;
-  firms_per_10k_population?: number;
-  growth_rate_percentage?: number;
-  market_saturation_index?: number;
-  total_education_population?: number;
-  bachelors_degree_holders?: number;
-  masters_degree_holders?: number;
-  doctorate_degree_holders?: number;
+  avg_firms_per_10k?: number;
+  avg_growth_rate?: number;
+  avg_market_saturation?: number;
+  education_population?: number;
+  bachelors_holders?: number;
+  masters_holders?: number;
+  doctorate_holders?: number;
   payann?: number;
   total_establishments?: number;
   emp?: number;
+  avgSalaryPerEmployee?: number;
   vacancy_rate?: number;
   vacancy_rank?: number;
   income_rank?: number;
@@ -23,6 +24,7 @@ export interface ComprehensiveMarketData {
   rent_rank?: number;
   density_rank?: number;
   growth_rank?: number;
+  firm_density_rank?: number;
   top_firms?: TopFirm[];
 }
 
@@ -36,7 +38,6 @@ export interface TopFirm {
   primarySubtitle?: string;
   employeeCountRangeLow?: number;
   employeeCountRangeHigh?: number;
-  foundedOn?: string;
   specialities?: string;
   websiteUrl?: string;
   Location?: string;
