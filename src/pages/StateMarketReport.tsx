@@ -24,8 +24,8 @@ export default function StateMarketReport() {
       <h1 className="text-2xl font-bold mb-6">State Market Report</h1>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stateRankings?.map((state) => (
-          <Card key={state.statefp} className="p-4">
-            <h3 className="font-semibold">{state.statefp}</h3>
+          <Card key={state.STATEFP} className="p-4">
+            <h3 className="font-semibold">{state.STATEFP}</h3>
             <p>Total Firms: {state.total_firms}</p>
             <p>Density Rank: {state.density_rank}</p>
             <p>Growth Rate: {(state.growth_rate * 100).toFixed(2)}%</p>
