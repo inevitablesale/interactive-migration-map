@@ -19,7 +19,7 @@ export default function PracticeDetails() {
         .from('canary_firms_data')
         .select('*')
         .eq('Company ID', parseInt(practiceId))
-        .single();
+        .maybeSingle();
 
       if (practiceError) throw practiceError;
       if (!practice) throw new Error('Practice not found');
@@ -30,7 +30,7 @@ export default function PracticeDetails() {
         .select('*')
         .eq('COUNTYFP', practice.COUNTYFP?.toString())
         .eq('STATEFP', practice.STATEFP?.toString())
-        .single();
+        .maybeSingle();
 
       if (countyError) throw countyError;
 
@@ -42,9 +42,11 @@ export default function PracticeDetails() {
   });
 
   if (error) {
+    // Only show toast if it hasn't been shown yet
+    const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
     toast({
       title: "Error loading practice details",
-      description: error.message,
+      description: errorMessage,
       variant: "destructive",
     });
   }
@@ -61,7 +63,12 @@ export default function PracticeDetails() {
     );
   }
 
-  if (!data) return null;
+  if (!data?.practice) return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold">Practice not found</h1>
+      <p className="text-muted-foreground">The practice you're looking for could not be found.</p>
+    </div>
+  );
 
   const { practice, countyData } = data;
 
@@ -121,30 +128,36 @@ export default function PracticeDetails() {
             <CardTitle>Market Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold">County Population</h3>
-              <p>{countyData.B01001_001E?.toLocaleString() || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Median Household Income</h3>
-              <p>${countyData.B19013_001E?.toLocaleString() || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Median Gross Rent</h3>
-              <p>${countyData.B25064_001E?.toLocaleString() || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Total Establishments</h3>
-              <p>{countyData.ESTAB?.toLocaleString() || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Recent Moves (2022)</h3>
-              <p>{countyData.MOVEDIN2022?.toLocaleString() || 'Not available'}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Employment</h3>
-              <p>{countyData.EMP?.toLocaleString() || 'Not available'}</p>
-            </div>
+            {countyData ? (
+              <>
+                <div>
+                  <h3 className="font-semibold">County Population</h3>
+                  <p>{countyData.B01001_001E?.toLocaleString() || 'Not available'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Median Household Income</h3>
+                  <p>${countyData.B19013_001E?.toLocaleString() || 'Not available'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Median Gross Rent</h3>
+                  <p>${countyData.B25064_001E?.toLocaleString() || 'Not available'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Total Establishments</h3>
+                  <p>{countyData.ESTAB?.toLocaleString() || 'Not available'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Recent Moves (2022)</h3>
+                  <p>{countyData.MOVEDIN2022?.toLocaleString() || 'Not available'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Employment</h3>
+                  <p>{countyData.EMP?.toLocaleString() || 'Not available'}</p>
+                </div>
+              </>
+            ) : (
+              <p className="text-muted-foreground">County data not available</p>
+            )}
           </CardContent>
         </Card>
       </div>
