@@ -29,6 +29,13 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   // Get the actual growth rate and average from county data
   const growthRate = countyData?.population_growth_rate;
   const avgGrowthRate = countyData?.avg_growth_rate;
+  const totalPopulation = countyData?.total_population;
+
+  // Format the growth rate display
+  const formatGrowthRate = (rate: number | undefined) => {
+    if (!rate) return 'N/A';
+    return `${rate.toFixed(1)}%`;
+  };
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
@@ -49,19 +56,22 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       <div className="flex items-center gap-2">
         <Users className="w-5 h-5 text-purple-400" />
         <div>
-          <p className="text-sm text-white/60">Employees</p>
-          <p className="text-lg font-semibold text-white">{practice.employee_count || 'N/A'}</p>
+          <p className="text-sm text-white/60">Population</p>
+          <p className="text-lg font-semibold text-white">{totalPopulation?.toLocaleString() || 'N/A'}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-yellow-400" />
         <div>
-          <p className="text-sm text-white/60">Growth Rate</p>
-          <p className="text-lg font-semibold text-white">
-            {growthRate ? 
-              `${growthRate.toFixed(1)}%` : 
-              'N/A'}
-          </p>
+          <p className="text-sm text-white/60">Growth Rates</p>
+          <div className="flex flex-col">
+            <p className="text-lg font-semibold text-white">
+              {formatGrowthRate(growthRate)}
+            </p>
+            <p className="text-xs text-white/60">
+              Avg: {formatGrowthRate(avgGrowthRate)}
+            </p>
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-2">
