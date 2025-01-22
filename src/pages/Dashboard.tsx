@@ -36,7 +36,7 @@ export default function Dashboard() {
         employee_count: practice.employeeCount || 0,
         annual_revenue: 0,
         service_mix: { "General": 100 },
-        status: "owner_engaged",
+        status: "not_contacted",
         last_updated: new Date().toISOString(),
         practice_buyer_pool: [],
         notes: [],
