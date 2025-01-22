@@ -10,13 +10,20 @@ import { BusinessOverview } from "@/components/practice-details/BusinessOverview
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useState } from "react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isMarketDataOpen, setIsMarketDataOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['practice-details', practiceId],
@@ -185,22 +192,46 @@ export default function PracticeDetails() {
           Back to Listings
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
-              <PracticeHeader practice={practice} />
+        <div className="space-y-6">
+          {/* Primary Content */}
+          <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
+            <PracticeHeader practice={practice} />
+          </div>
+
+          <KeyMetricsBar practice={practice} countyData={countyData} />
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <BusinessOverview practice={practice} />
             </div>
-
-            <KeyMetricsBar practice={practice} countyData={countyData} />
-
-            <BusinessOverview practice={practice} />
-
-            {countyData && <MarketMetricsGrid marketData={countyData} />}
+            <div>
+              <PracticeInfo practice={practice} />
+            </div>
           </div>
 
-          <div className="space-y-6">
-            <PracticeInfo practice={practice} />
-          </div>
+          {/* Market Data Section - Collapsible */}
+          <Collapsible
+            open={isMarketDataOpen}
+            onOpenChange={setIsMarketDataOpen}
+            className="bg-black/40 backdrop-blur-md rounded-lg p-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-white">Geographic & Demographic Data</h2>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="hover:bg-white/10">
+                  {isMarketDataOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            
+            <CollapsibleContent className="mt-4">
+              {countyData && <MarketMetricsGrid marketData={countyData} />}
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
     </div>
