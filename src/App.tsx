@@ -47,7 +47,14 @@ function App() {
         )}
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
+          <Route 
+            path="/buyer-dashboard" 
+            element={
+              <div className="p-8">
+                <BuyerDashboard />
+              </div>
+            } 
+          />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/market-report/:county/:state" element={<MarketReport />} />
           <Route path="/state-market-report" element={<StateMarketReport />} />
