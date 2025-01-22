@@ -8,15 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const PLACEHOLDER_IMAGES = [
-  'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
-  'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
-  'https://images.unsplash.com/photo-1518770660439-4636190af475',
-  'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
-  'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d',
-  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
-];
-
 export function ListingsPanel() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -166,7 +157,7 @@ export function ListingsPanel() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-blue-500" />
                     <div>
