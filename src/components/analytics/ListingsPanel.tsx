@@ -16,33 +16,38 @@ export const ListingsPanel = () => {
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Fetch all listings without any joins
+  // Basic query to fetch ALL listings without any restrictions
   const { data: listings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
+      console.log("Fetching listings...");
       const { data, error } = await supabase
         .from('canary_firms_data')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching listings:", error);
+        throw error;
+      }
+      console.log("Fetched listings:", data?.length);
       return data;
     }
   });
 
-  // Separate query for buyer pool data if user is authenticated
-  const { data: buyerPoolData } = useQuery({
-    queryKey: ['buyer-pool'],
+  // Separate query for user's interests
+  const { data: userInterests } = useQuery({
+    queryKey: ['user-interests'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
         .from('practice_buyer_pool')
-        .select('*')
+        .select('practice_id')
         .eq('user_id', user.id);
       
       if (error) throw error;
-      return data;
+      return data.map(d => d.practice_id);
     }
   });
 
@@ -51,17 +56,21 @@ export const ListingsPanel = () => {
     
     setIsSubmitting(true);
     try {
-      const { error: updateError } = await supabase
-        .from('canary_firms_data')
-        .update({ status: 'pending_outreach' })
-        .eq('Company ID', companyId);
-
-      if (updateError) throw updateError;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to express interest.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert({
           practice_id: companyId.toString(),
+          user_id: user.id,
           status: 'interested',
           is_anonymous: true
         });
@@ -84,7 +93,7 @@ export const ListingsPanel = () => {
     }
   };
 
-  // Show all listings by default, only filter if criteria are provided
+  // Filter listings based on search and filters only
   const filteredListings = listings?.filter((listing) => {
     if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
       return true;
@@ -102,8 +111,6 @@ export const ListingsPanel = () => {
     return matchesSearch && matchesState && matchesEmployeeCount;
   });
 
-  // ... keep existing code (SearchFilters and rendering logic)
-
   return (
     <div className="space-y-6">
       <SearchFilters 
@@ -113,9 +120,7 @@ export const ListingsPanel = () => {
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredListings?.map((listing) => {
-          const hasExpressedInterest = buyerPoolData?.some(
-            pool => pool.practice_id === listing["Company ID"].toString()
-          );
+          const hasExpressedInterest = userInterests?.includes(listing["Company ID"].toString());
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
@@ -129,7 +134,7 @@ export const ListingsPanel = () => {
                     {listing["Company Name"]}
                   </h3>
                   <div className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs whitespace-nowrap flex-shrink-0">
-                    {listing.status === 'pending_outreach' ? 'Contact Pending' : 'Not Contacted'}
+                    {hasExpressedInterest ? 'Contact Pending' : 'Not Contacted'}
                   </div>
                 </div>
 
@@ -154,7 +159,7 @@ export const ListingsPanel = () => {
 
                 <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
                   <div>Last update: {format(new Date(), 'MMM dd, yyyy')}</div>
-                  <div>{buyerPoolData?.length || 0} interested buyers</div>
+                  <div>View details for more info</div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
@@ -186,7 +191,7 @@ export const ListingsPanel = () => {
                   >
                     <Heart className="w-4 h-4" />
                     <span className="hidden sm:inline">
-                      {hasExpressedInterest ? 'Contact Pending' : 'Express Interest'}
+                      {hasExpressedInterest ? 'Interested' : 'Express Interest'}
                     </span>
                   </Button>
                 </div>
