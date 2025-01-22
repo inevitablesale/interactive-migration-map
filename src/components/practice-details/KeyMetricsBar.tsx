@@ -52,41 +52,27 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const maxEbitda = estimatedRevenue * maxEbitdaMargin;
   const currentEbitda = estimatedRevenue * currentEbitdaMargin;
 
-  // Calculate valuation multiple based on various factors
-  const baseMultiple = 2.99; // Starting at the lower end of EBITDA multiple range
+  // Calculate valuation multiple based on revenue for small firms
+  const baseMultiple = 0.71; // Starting at the lower end of revenue multiple range for small firms
   
-  // Growth rate adjustment (+0.1x for every 5% above average)
+  // Growth rate adjustment (+0.05x for every 5% above average)
   const growthRate = countyData?.population_growth_rate || 0;
   const avgGrowthRate = countyData?.avg_growth_rate || 0;
-  const growthAdjustment = Math.max(0, ((growthRate - avgGrowthRate) / 5) * 0.1);
+  const growthAdjustment = Math.max(0, ((growthRate - avgGrowthRate) / 5) * 0.05);
 
   // Market saturation adjustment (negative for saturated markets)
-  const marketSaturationAdjustment = Math.max(-0.2, (0.5 - (marketSaturationFactor || 0)) * 0.4);
+  const marketSaturationAdjustment = Math.max(-0.1, (0.5 - (marketSaturationFactor || 0)) * 0.2);
 
-  // Size premium for larger firms
-  const sizePremium = practice.employee_count >= 20 ? 0.2 : 0;
+  // Size adjustment (lower multiple for very small firms)
+  const sizeAdjustment = practice.employee_count <= 5 ? -0.1 : 0;
 
   // Calculate final multiple
-  const valuationMultiple = Math.min(4.45, // Cap at max industry EBITDA multiple
-    baseMultiple + growthAdjustment + marketSaturationAdjustment + sizePremium
+  const valuationMultiple = Math.min(1.09, // Cap at max industry revenue multiple for small firms
+    baseMultiple + growthAdjustment + marketSaturationAdjustment + sizeAdjustment
   );
 
-  // Calculate estimated valuation using EBITDA
-  const estimatedValuation = currentEbitda * valuationMultiple;
-
-  const getGrowthClassification = (growthRate: number | undefined, avgGrowthRate: number | undefined) => {
-    if (!growthRate || !avgGrowthRate) return 'Data Unavailable';
-    
-    const difference = growthRate - avgGrowthRate;
-    
-    if (difference > 3) return 'Exceptional Growth';
-    if (difference > 2) return 'High Growth';
-    if (difference > 1) return 'Strong Growth';
-    if (difference > 0) return 'Moderate Growth';
-    if (difference > -1) return 'Stable';
-    if (difference > -2) return 'Slow Growth';
-    return 'Declining';
-  };
+  // Calculate estimated valuation using Revenue for small firms
+  const estimatedValuation = estimatedRevenue * valuationMultiple;
 
   const formatGrowthRate = (rate: number | undefined) => {
     if (!rate) return 'N/A';
@@ -112,8 +98,9 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. Gross Revenue</p>
-          </div>
+              <p className="text-sm text-white/60">Est. Gross</p>
+              <p className="text-sm text-white/60">Revenue</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -125,7 +112,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
+          <p className="text-2xl font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
           <p className="text-xs text-white/40">Based on payroll data</p>
         </div>
       </div>
@@ -134,8 +121,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. SDE</p>
-          </div>
+              <p className="text-sm text-white/60">Est. SDE</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -148,7 +135,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-lg font-semibold text-white">{formatCurrency(sde)}</p>
+          <p className="text-2xl font-semibold text-white">{formatCurrency(sde)}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -156,8 +143,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. EBITDA</p>
-          </div>
+              <p className="text-sm text-white/60">Est. EBITDA</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -170,7 +157,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-lg font-semibold text-white">{formatCurrency(currentEbitda)}</p>
+          <p className="text-2xl font-semibold text-white">{formatCurrency(currentEbitda)}</p>
           <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
@@ -184,8 +171,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         <div>
           <div className="flex items-center gap-1">
             <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Growth Rates</p>
-          </div>
+              <p className="text-sm text-white/60">Growth Rates</p>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -199,7 +186,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </TooltipProvider>
           </div>
           <div className="flex flex-col">
-            <p className="text-lg font-semibold text-white">
+            <p className="text-2xl font-semibold text-white">
               {formatGrowthRate(growthRate)}
             </p>
             <p className="text-xs text-white/60">
@@ -214,7 +201,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
           <div className="min-h-[4rem]">
             <p className="text-sm text-white/60">Est. Valuation</p>
           </div>
-          <p className="text-lg font-semibold text-white">
+          <p className="text-2xl font-semibold text-white">
             {formatCurrency(estimatedValuation)}
           </p>
           <p className="text-xs text-white/60">
