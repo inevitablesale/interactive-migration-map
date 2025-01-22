@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Building2, Users, DollarSign, Clock, Eye, MessageSquare, Heart } from "lucide-react";
 import { FirmDetailsSheet } from "@/components/crm/FirmDetailsSheet";
-import { CanaryFirmInterest, Listing } from "@/types/interests";
+import { CanaryFirmInterest, Practice } from "@/types/interests";
 
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,12 +18,12 @@ export const ListingsPanel = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [selectedListing, setSelectedListing] = useState<Practice | null>(null);
   const { toast } = useToast();
 
   const ITEMS_PER_PAGE = 6;
 
-  const { data: listings } = useQuery<Listing[]>({
+  const { data: listings } = useQuery<Practice[]>({
     queryKey: ['listings'],
     queryFn: async () => {
       console.log("Fetching listings...");
@@ -35,8 +35,26 @@ export const ListingsPanel = () => {
         console.error("Error fetching listings:", error);
         throw error;
       }
-      console.log("Fetched listings:", data?.length);
-      return data;
+
+      // Transform the data into Practice type
+      const practices: Practice[] = data.map(item => ({
+        id: item["Company ID"].toString(),
+        industry: item["Primary Subtitle"] || "",
+        "State Name": item["State Name"] || "",
+        employee_count: item.employeeCount || 0,
+        annual_revenue: 0,
+        service_mix: { "General": 100 },
+        status: 'not_contacted',
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        buyer_count: 0,
+        notes: item.notes,
+        specialities: item.specialities,
+        "Company Name": item["Company Name"]
+      }));
+
+      console.log("Fetched listings:", practices.length);
+      return practices;
     }
   });
 
@@ -128,15 +146,15 @@ export const ListingsPanel = () => {
     const matchesState = !filters.state || 
       listing["State Name"] === filters.state;
     
-    const matchesEmployeeCount = (!filters.minEmployees || listing.employeeCount >= parseInt(filters.minEmployees)) &&
-      (!filters.maxEmployees || listing.employeeCount <= parseInt(filters.maxEmployees));
+    const matchesEmployeeCount = (!filters.minEmployees || listing.employee_count >= parseInt(filters.minEmployees)) &&
+      (!filters.maxEmployees || listing.employee_count <= parseInt(filters.maxEmployees));
 
     return matchesSearch && matchesState && matchesEmployeeCount;
   });
 
-  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((filteredListings?.length || 0) / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedListings = filteredListings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedListings = filteredListings?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -146,15 +164,15 @@ export const ListingsPanel = () => {
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {paginatedListings.map((listing) => {
+        {paginatedListings?.map((listing) => {
           const hasExpressedInterest = userInterests?.some(
-            interest => interest.company_id === listing["Company ID"] && interest.status === 'interested'
+            interest => interest.company_id === parseInt(listing.id) && interest.status === 'interested'
           );
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
             <Card 
-              key={listing["Company ID"]} 
+              key={listing.id} 
               className="p-6"
             >
               <div className="space-y-6">
@@ -174,11 +192,11 @@ export const ListingsPanel = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-gray-500" />
-                    <span>{listing.employeeCount} employees</span>
+                    <span>{listing.employee_count} employees</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <DollarSign className="w-5 h-5 text-gray-500" />
-                    <span>$0k revenue</span>
+                    <span>${listing.annual_revenue}k revenue</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-gray-500" />
@@ -187,7 +205,7 @@ export const ListingsPanel = () => {
                 </div>
 
                 <div className="flex justify-between text-sm text-gray-500 border-t pt-4">
-                  <div>Last update: {format(new Date(), 'MMM dd, yyyy')}</div>
+                  <div>Last update: {format(new Date(listing.last_updated), 'MMM dd, yyyy')}</div>
                   <div>View details for more info</div>
                 </div>
 
@@ -196,7 +214,7 @@ export const ListingsPanel = () => {
                     variant="outline"
                     className={`w-full flex items-center justify-center gap-2 ${!hasNotes ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={!hasNotes}
-                    onClick={() => hasNotes && setSelectedNotes(listing.notes)}
+                    onClick={() => hasNotes && setSelectedNotes(listing.notes || null)}
                   >
                     <MessageSquare className="w-4 h-4" />
                     <span className="hidden sm:inline">View Notes</span>
@@ -219,7 +237,7 @@ export const ListingsPanel = () => {
                     className={`w-full flex items-center justify-center gap-2 ${
                       hasExpressedInterest ? 'text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white'
                     }`}
-                    onClick={() => handleExpressInterest(listing["Company ID"])}
+                    onClick={() => handleExpressInterest(parseInt(listing.id))}
                     disabled={hasExpressedInterest || isSubmitting}
                   >
                     <Heart className="w-4 h-4" />
