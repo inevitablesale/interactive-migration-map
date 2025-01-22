@@ -88,6 +88,7 @@ export interface ComprehensiveMarketData {
   total_establishments?: number;
   avgSalaryPerEmployee?: number;
   vacancy_rate?: number;
+  // State-level rankings
   vacancy_rank?: number;
   income_rank?: number;
   population_rank?: number;
@@ -96,6 +97,7 @@ export interface ComprehensiveMarketData {
   firm_density_rank?: number;
   density_rank?: number;
   state_rank?: number;
+  // National-level rankings
   national_income_rank?: number;
   national_population_rank?: number;
   national_rent_rank?: number;
@@ -103,6 +105,7 @@ export interface ComprehensiveMarketData {
   national_growth_rank?: number;
   national_vacancy_rank?: number;
   national_market_saturation_rank?: number;
+  // Averages
   avg_firms_per_10k?: number;
   avg_growth_rate?: number;
   avg_market_saturation?: number;
