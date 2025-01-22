@@ -57,7 +57,9 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
         <div>
           <p className="text-sm text-white/60">Growth Score</p>
           <p className="text-lg font-semibold text-white">
-            {growthMetrics ? `${growthMetrics.composite_growth_score}%` : 'N/A'}
+            {growthMetrics?.composite_growth_score ? 
+              `${Math.round(growthMetrics.composite_growth_score)}%` : 
+              'N/A'}
           </p>
         </div>
       </div>

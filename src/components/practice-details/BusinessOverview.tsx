@@ -14,21 +14,12 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
             <h3 className="text-white/60 mb-2">Summary</h3>
             <p className="text-white">{practice.Summary || 'No summary available.'}</p>
           </div>
-          <div>
-            <h3 className="text-white/60 mb-2">Specialties</h3>
-            <p className="text-white">{practice.specialities || 'General practice'}</p>
-          </div>
-          <div>
-            <h3 className="text-white/60 mb-2">Website</h3>
-            {practice.websiteUrl ? (
-              <a href={practice.websiteUrl} target="_blank" rel="noopener noreferrer" 
-                 className="text-blue-400 hover:text-blue-300">
-                Visit Website
-              </a>
-            ) : (
-              <p className="text-white/60">Not available</p>
-            )}
-          </div>
+          {practice.specialities && (
+            <div>
+              <h3 className="text-white/60 mb-2">Specialties</h3>
+              <p className="text-white">{practice.specialities}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

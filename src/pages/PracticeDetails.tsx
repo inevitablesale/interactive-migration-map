@@ -1,3 +1,4 @@
+<lov-code>
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ import { BusinessOverview } from "@/components/practice-details/BusinessOverview
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Building2, MapPin, DollarSign, Users, Calendar, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Mail, Calendar } from "lucide-react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
 
 export default function PracticeDetails() {
@@ -190,59 +191,4 @@ export default function PracticeDetails() {
             {/* Header with Logo and Title */}
             <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
               <PracticeHeader practice={practice} />
-              <div className="mt-4 flex items-center gap-4 text-sm text-white/60">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{practice.Location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  <span>Established {practice.foundedOn}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Key Metrics Bar */}
-            <KeyMetricsBar practice={practice} />
-
-            {/* Business Overview */}
-            <BusinessOverview practice={practice} />
-
-            {/* Market Analysis */}
-            {countyData && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-white">Market Analysis</h2>
-                <MarketMetricsGrid marketData={countyData} />
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Contact and Details */}
-          <div className="space-y-6">
-            {/* Contact Card */}
-            <div className="bg-black/40 backdrop-blur-md border-white/10 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Contact Information</h2>
-              <div className="space-y-4">
-                <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                  <Mail className="mr-2 h-4 w-4" />
-                  Contact Seller
-                </Button>
-                <Button variant="outline" className="w-full border-green-500/20 text-green-400 hover:bg-green-500/10">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Schedule Call
-                </Button>
-                <div className="text-center text-white/60">
-                  <Calendar className="inline-block mr-2 h-4 w-4" />
-                  <span>{practice.follower_count || 0} interested buyers</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Practice Information */}
-            <PracticeInfo practice={practice} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+              <div className="mt-4
