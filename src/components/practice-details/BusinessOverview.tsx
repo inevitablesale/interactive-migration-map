@@ -14,8 +14,20 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
   const { toast } = useToast();
 
   const handleAnonymize = async () => {
+    console.log('Starting description generation for practice:', {
+      hasSummary: Boolean(practice.Summary),
+      hasLocation: Boolean(practice.Location),
+      hasSpecialties: Boolean(practice.specialities)
+    });
+
     setIsAnonymizing(true);
     try {
+      console.log('Invoking anonymize-summary function with data:', {
+        summaryLength: practice.Summary?.length,
+        location: practice.Location,
+        specialties: practice.specialities
+      });
+
       const { data, error } = await supabase.functions.invoke('anonymize-summary', {
         body: {
           summary: practice.Summary,
@@ -26,6 +38,11 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
 
       if (error) throw error;
 
+      console.log('Successfully generated description:', {
+        generatedLength: data.description?.length,
+        success: Boolean(data.description)
+      });
+
       // Copy the anonymized description to clipboard
       await navigator.clipboard.writeText(data.description);
 
@@ -34,7 +51,11 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
         description: "The anonymized description has been copied to your clipboard.",
       });
     } catch (error) {
-      console.error('Error anonymizing summary:', error);
+      console.error('Error generating description:', {
+        error,
+        errorMessage: error.message,
+        practiceId: practice.id
+      });
       toast({
         title: "Error",
         description: "Failed to anonymize the summary. Please try again.",
@@ -60,10 +81,10 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
             {isAnonymizing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Anonymizing...
+                Generating...
               </>
             ) : (
-              'Anonymize Summary'
+              'Generate Description'
             )}
           </Button>
         </div>

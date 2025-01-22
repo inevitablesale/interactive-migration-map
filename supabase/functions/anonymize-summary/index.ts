@@ -12,10 +12,19 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Received request to anonymize summary');
     const { summary, location, specialties } = await req.json();
     
+    console.log('Input parameters:', {
+      summaryLength: summary?.length,
+      location,
+      specialties,
+    });
+
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY')!);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    console.log('Initialized Gemini model, preparing prompt');
 
     const prompt = `
       Rewrite the following company description to be completely anonymous, removing any company names 
@@ -34,11 +43,17 @@ serve(async (req) => {
       - Keep it concise (2-3 sentences)
     `;
 
+    console.log('Sending request to Gemini API');
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
 
-    console.log('Generated anonymous description:', text);
+    console.log('Generated anonymous description:', {
+      originalLength: summary?.length,
+      newLength: text.length,
+      containsLocation: text.includes(location),
+      containsSpecialties: specialties ? text.includes(specialties) : false
+    });
 
     return new Response(
       JSON.stringify({ description: text }),
@@ -46,7 +61,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in anonymize-summary function:', {
+      error,
+      errorMessage: error.message,
+      errorStack: error.stack
+    });
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
