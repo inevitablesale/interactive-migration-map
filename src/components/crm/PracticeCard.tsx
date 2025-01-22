@@ -119,10 +119,10 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             <DialogTrigger asChild>
               <Button 
                 variant="outline" 
-                className="w-full h-[clamp(2rem,4vw,2.5rem)] px-4 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
+                className="w-full h-[clamp(2rem,4vw,2.5rem)] text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center gap-1.5"
               >
-                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline px-1">Add Note</span>
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Add Note</span>
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -135,29 +135,29 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           
           <Button 
             variant="outline" 
-            className="w-full h-[clamp(2rem,4vw,2.5rem)] px-4 text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center min-w-0"
+            className="w-full h-[clamp(2rem,4vw,2.5rem)] text-[clamp(0.7rem,1.5vw,0.875rem)] flex items-center justify-center gap-1.5"
           >
-            <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-            <span className="hidden sm:inline px-1">View Details</span>
+            <Eye className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline truncate">View Details</span>
           </Button>
           
           {hasExpressedInterest ? (
             <Button 
               variant="outline" 
               onClick={() => onWithdraw?.(practice.id)}
-              className="w-full h-[clamp(2rem,4vw,2.5rem)] px-4 text-[clamp(0.7rem,1.5vw,0.875rem)] text-red-500 hover:text-red-600 flex items-center justify-center"
+              className="w-full h-[clamp(2rem,4vw,2.5rem)] text-[clamp(0.7rem,1.5vw,0.875rem)] text-red-500 hover:text-red-600 flex items-center justify-center gap-1.5"
             >
-              <X className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-              <span className="hidden sm:inline px-1">Withdraw</span>
+              <X className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="hidden sm:inline truncate">Withdraw</span>
             </Button>
           ) : (
             <Button 
               variant="outline" 
               onClick={() => onExpressInterest?.(practice.id)}
-              className="w-full h-[clamp(2rem,4vw,2.5rem)] px-4 text-[clamp(0.7rem,1.5vw,0.875rem)] text-blue-500 hover:text-blue-600 flex items-center justify-center"
+              className="w-full h-[clamp(2rem,4vw,2.5rem)] text-[clamp(0.7rem,1.5vw,0.875rem)] text-blue-500 hover:text-blue-600 flex items-center justify-center gap-1.5"
             >
-              <Heart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 flex-shrink-0" />
-              <span className="hidden sm:inline px-1">Express Interest</span>
+              <Heart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="hidden sm:inline truncate">Express Interest</span>
             </Button>
           )}
         </div>
