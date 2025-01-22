@@ -13,13 +13,16 @@ import { FirmDetailsSheet } from "@/components/crm/FirmDetailsSheet";
 export const ListingsPanel = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
+  const [currentPage, setCurrentPage] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState<string | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
   const { toast } = useToast();
 
-  // Basic query to fetch ALL listings without any restrictions
+  const ITEMS_PER_PAGE = 6;
+
+  // Updated query to fetch listings
   const { data: listings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
@@ -37,7 +40,7 @@ export const ListingsPanel = () => {
     }
   });
 
-  // Separate query for user's interests
+  // Updated query to use canary_firm_interests
   const { data: userInterests } = useQuery({
     queryKey: ['user-interests'],
     queryFn: async () => {
@@ -45,15 +48,21 @@ export const ListingsPanel = () => {
       if (!user) return [];
 
       const { data, error } = await supabase
-        .from('practice_buyer_pool')
-        .select('practice_id')
+        .from('canary_firm_interests')
+        .select('company_id')
         .eq('user_id', user.id);
       
       if (error) throw error;
-      return data.map(d => d.practice_id);
+      return data.map(d => d.company_id);
     }
   });
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  // Updated to use canary_firm_interests
   const handleExpressInterest = async (companyId: number) => {
     if (isSubmitting) return;
     
@@ -69,50 +78,34 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // First, create or get the tracked practice
-      const { data: trackedPractice, error: trackedError } = await supabase
-        .from('tracked_practices')
+      // Insert into canary_firm_interests
+      const { error: interestError } = await supabase
+        .from('canary_firm_interests')
         .insert({
-          industry: "Accounting",
-          region: "US",
-          employee_count: 0,
-          annual_revenue: 0,
-          service_mix: { "General": 100 },
-          status: 'pending_response',
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (trackedError) {
-        toast({
-          title: "Error",
-          description: "Failed to track practice. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Then, add to practice_buyer_pool using the tracked practice ID
-      const { error: poolError } = await supabase
-        .from('practice_buyer_pool')
-        .insert({
-          practice_id: trackedPractice.id,
+          company_id: companyId,
           user_id: user.id,
           status: 'interested',
           is_anonymous: true
         });
 
-      if (poolError) {
-        toast({
-          title: "Error",
-          description: "Failed to express interest. Please try again.",
-          variant: "destructive",
-        });
+      if (interestError) {
+        if (interestError.code === '23505') { // Unique violation
+          toast({
+            title: "Already Interested",
+            description: "You have already expressed interest in this company.",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to express interest. Please try again.",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
-          title: "Interest Expressed",
-          description: "We've recorded your interest in this practice.",
+          title: "Success",
+          description: "Successfully expressed interest in the company.",
         });
       }
     } catch (error) {
@@ -127,7 +120,6 @@ export const ListingsPanel = () => {
     }
   };
 
-  // Filter listings based on search and filters only
   const filteredListings = listings?.filter((listing) => {
     if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
       return true;
@@ -148,13 +140,13 @@ export const ListingsPanel = () => {
   return (
     <div className="space-y-6">
       <SearchFilters 
-        onSearch={setSearchQuery}
+        onSearch={handleSearch}
         onFilter={setFilters}
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredListings?.map((listing) => {
-          const hasExpressedInterest = userInterests?.some(interest => interest.toString() === listing["Company ID"].toString());
+          const hasExpressedInterest = userInterests?.some(interest => interest === listing["Company ID"]);
           const hasNotes = listing.notes && listing.notes.trim().length > 0;
           
           return (
