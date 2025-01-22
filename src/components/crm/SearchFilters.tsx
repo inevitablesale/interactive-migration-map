@@ -69,9 +69,13 @@ const normalizeSpecialty = (specialty: string): string => {
     return 'Accounting Services';
   }
 
+  // Handle 1040-related variations
+  if (lower.includes('1040')) {
+    return '1040 Tax Preparation';
+  }
+
   // Handle other common variations
   if (lower.includes('1031 exchange')) return '1031 Exchange Services';
-  if (lower.includes('1040') && lower.includes('tax')) return '1040 Tax Preparation';
   if (lower.includes('bookkeeping')) return 'Bookkeeping Services';
   if (lower.includes('tax') && lower.includes('prep')) return 'Tax Preparation';
   
