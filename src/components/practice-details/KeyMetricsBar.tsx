@@ -53,7 +53,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const currentEbitda = estimatedRevenue * currentEbitdaMargin;
 
   // Calculate valuation multiple based on various factors
-  const baseMultiple = 1.81; // Starting at the lower end of the range
+  const baseMultiple = 2.99; // Starting at the lower end of EBITDA multiple range
   
   // Growth rate adjustment (+0.1x for every 5% above average)
   const growthRate = countyData?.population_growth_rate || 0;
@@ -67,12 +67,12 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const sizePremium = practice.employee_count >= 20 ? 0.2 : 0;
 
   // Calculate final multiple
-  const valuationMultiple = Math.min(3.25, // Cap at max industry multiple
+  const valuationMultiple = Math.min(4.45, // Cap at max industry EBITDA multiple
     baseMultiple + growthAdjustment + marketSaturationAdjustment + sizePremium
   );
 
-  // Calculate estimated valuation
-  const estimatedValuation = sde * valuationMultiple;
+  // Calculate estimated valuation using EBITDA
+  const estimatedValuation = currentEbitda * valuationMultiple;
 
   const getGrowthClassification = (growthRate: number | undefined, avgGrowthRate: number | undefined) => {
     if (!growthRate || !avgGrowthRate) return 'Data Unavailable';
@@ -209,7 +209,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             {formatCurrency(estimatedValuation)}
           </p>
           <p className="text-xs text-white/60">
-            Based on SDE × {valuationMultiple.toFixed(2)}
+            Based on EBITDA × {valuationMultiple.toFixed(2)}
           </p>
         </div>
       </div>
