@@ -7,11 +7,23 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { format } from "date-fns";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function BuyerDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
+  const session = useSession();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const { data: firms, isLoading } = useQuery({
+  // Redirect if not authenticated
+  if (!session) {
+    navigate("/");
+    return null;
+  }
+
+  const { data: firms, isLoading, error } = useQuery({
     queryKey: ['firms', searchQuery],
     queryFn: async () => {
       console.log("Fetching firms with search:", searchQuery);
@@ -27,6 +39,11 @@ export default function BuyerDashboard() {
       
       if (error) {
         console.error("Error fetching firms:", error);
+        toast({
+          title: "Error fetching firms",
+          description: "Please try again later",
+          variant: "destructive",
+        });
         throw error;
       }
 
@@ -112,6 +129,8 @@ export default function BuyerDashboard() {
           <div className="space-y-4">
             {isLoading ? (
               <p className="text-center text-muted-foreground">Loading firms...</p>
+            ) : error ? (
+              <p className="text-center text-red-500">Error loading firms. Please try again.</p>
             ) : firms?.length === 0 ? (
               <p className="text-center text-muted-foreground">No firms found</p>
             ) : (
