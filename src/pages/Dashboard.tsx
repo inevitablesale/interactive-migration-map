@@ -160,13 +160,12 @@ export default function Dashboard() {
     const searchMatches = !searchQuery || 
       (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // Apply other filters if needed
-    const industryMatches = !filters.industry || practice.industry === filters.industry;
+    // Apply filters
+    const stateMatches = !filters.state || practice.region === filters.state;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
-    const regionMatches = !filters.region || practice.region === filters.region;
 
-    return searchMatches && industryMatches && employeeMatches && regionMatches;
+    return searchMatches && stateMatches && employeeMatches;
   });
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;

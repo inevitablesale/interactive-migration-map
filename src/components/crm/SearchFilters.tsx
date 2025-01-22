@@ -43,7 +43,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select('State Name')
+        .select('"State Name"')
         .not('State Name', 'is', null)
         .order('State Name');
       
