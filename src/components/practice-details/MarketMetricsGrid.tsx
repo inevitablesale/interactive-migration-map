@@ -23,7 +23,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
           },
           {
             label: "Average Salary Per Employee",
-            value: marketData.avgSalaryPerEmployee ? `$${Math.round(marketData.avgSalaryPerEmployee * 10).toLocaleString()}` : undefined,
+            value: marketData.avgSalaryPerEmployee ? `$${Math.round(marketData.avgSalaryPerEmployee).toLocaleString()}` : undefined,
             type: "money",
             rank: marketData.state_rank,
             sublabel: `National Rank: ${marketData.national_income_rank}`
