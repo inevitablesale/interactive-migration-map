@@ -29,7 +29,7 @@ export const MarketRankingBadges: React.FC<MarketRankingBadgesProps> = ({ market
   };
 
   const calculateGrowthPotential = () => {
-    const score = marketData.growth_rate_percentage || 0;
+    const score = marketData.population_growth_rate || 0;
     if (score > 5) return { label: "High Growth Potential", color: "bg-emerald-500/90 hover:bg-emerald-500/80" };
     if (score > 2) return { label: "Moderate Growth", color: "bg-blue-500/90 hover:bg-blue-500/80" };
     return { label: "Stable Market", color: "bg-amber-500/90 hover:bg-amber-500/80" };

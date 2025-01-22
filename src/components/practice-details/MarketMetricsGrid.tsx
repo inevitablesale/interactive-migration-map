@@ -9,13 +9,11 @@ interface MarketMetricsGridProps {
 export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
   const calculateAverageSalary = () => {
     if (!marketData.payann || !marketData.emp || marketData.emp === 0) return undefined;
-    // Convert payann from thousands to actual dollars and divide by total employees
     return Math.round((marketData.payann * 1000) / marketData.emp);
   };
 
   const calculateAveragePayrollPerFirm = () => {
     if (!marketData.payann || !marketData.total_establishments || marketData.total_establishments === 0) return undefined;
-    // Convert payann from thousands to actual dollars and divide by number of establishments
     return Math.round((marketData.payann * 1000) / marketData.total_establishments);
   };
 
@@ -54,7 +52,6 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Competition Metrics */}
       <MarketMetricsCard
         title="Market Competition"
         icon={Users}
@@ -82,14 +79,13 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Growth Metrics */}
       <MarketMetricsCard
         title="Growth & Opportunity"
         icon={TrendingUp}
         metrics={[
           {
             label: "Growth Rate",
-            value: marketData.growth_rate_percentage?.toString(),
+            value: marketData.population_growth_rate?.toString(),
             type: "growth",
             rank: marketData.growth_rank,
             sublabel: `National Rank: ${marketData.national_growth_rank}`
@@ -104,7 +100,6 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Professional Demographics */}
       <MarketMetricsCard
         title="Professional Demographics"
         icon={GraduationCap}

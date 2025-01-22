@@ -100,7 +100,7 @@ export default function PracticeDetails() {
         private_sector_accountants: countyData?.private_sector_accountants,
         public_sector_accountants: countyData?.public_sector_accountants,
         firms_per_10k_population: countyData?.firms_per_10k,
-        growth_rate_percentage: countyData?.population_growth_rate,
+        population_growth_rate: countyData?.population_growth_rate,
         market_saturation_index: countyData?.market_saturation,
         total_education_population: countyData?.education_population,
         bachelors_holders: countyData?.bachelors_holders,
