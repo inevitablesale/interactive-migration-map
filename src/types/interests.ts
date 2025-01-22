@@ -1,5 +1,5 @@
 export interface Practice {
-  id?: string;
+  id: string;
   industry: string;
   "State Name": string;
   employee_count: number;
