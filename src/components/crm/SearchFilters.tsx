@@ -237,13 +237,12 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                 <Label>Speciality</Label>
                 <Select
                   onValueChange={(value) => handleFilterChange('speciality', value)}
-                  value={filters.speciality || "all"}
+                  value={filters.speciality || ""}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select speciality" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Specialities</SelectItem>
                     {specialities?.map((speciality) => (
                       <SelectItem key={speciality} value={speciality}>
                         {speciality}
