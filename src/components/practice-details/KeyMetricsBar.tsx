@@ -8,6 +8,66 @@ interface KeyMetricsBarProps {
   countyData?: ComprehensiveMarketData;
 }
 
+const getFirmSizeCategory = (employeeCount: number) => {
+  if (employeeCount <= 5) return 'small';
+  if (employeeCount <= 20) return 'medium';
+  return 'large';
+};
+
+const getSDEParameters = (firmSize: string) => {
+  switch (firmSize) {
+    case 'small':
+      return {
+        ownerCompRatio: 0.40, // 40% of revenue
+        operatingExpenseRatio: 0.25, // 25% of revenue
+        sdeMargin: 0.45 // 45% of revenue
+      };
+    case 'medium':
+      return {
+        ownerCompRatio: 0.30, // 30% of revenue
+        operatingExpenseRatio: 0.30, // 30% of revenue
+        sdeMargin: 0.40 // 40% of revenue
+      };
+    case 'large':
+      return {
+        ownerCompRatio: 0.20, // 20% of revenue
+        operatingExpenseRatio: 0.35, // 35% of revenue
+        sdeMargin: 0.35 // 35% of revenue
+      };
+    default:
+      return {
+        ownerCompRatio: 0.40,
+        operatingExpenseRatio: 0.25,
+        sdeMargin: 0.45
+      };
+  }
+};
+
+const getValuationMultiple = (firmSize: string, revenue: number) => {
+  // Base multiple starts at the lower end for very small firms
+  let baseMultiple = 0.71; // Starting at the lower end of revenue multiple range
+
+  // Size adjustments
+  switch (firmSize) {
+    case 'small':
+      baseMultiple = 0.71; // Lower end for small firms
+      break;
+    case 'medium':
+      baseMultiple = 0.85; // Middle range
+      break;
+    case 'large':
+      baseMultiple = 1.00; // Higher end for larger firms
+      break;
+  }
+
+  // Revenue scale adjustments
+  if (revenue > 5000000) baseMultiple += 0.05;
+  if (revenue > 10000000) baseMultiple += 0.04;
+
+  // Cap at the maximum industry multiple
+  return Math.min(1.09, baseMultiple);
+};
+
 export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   // Calculate revenue based on industry standard payroll-to-revenue ratio
   const avgSalaryPerEmployee = countyData?.payann && countyData?.emp ? 
@@ -18,60 +78,20 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
 
-  // Calculate SDE components
-  const ownerCompensation = Math.min(250000, estimatedRevenue * 0.15); // Cap at 250k
-  const nonRecurringExpenses = estimatedRevenue * 0.02; // Estimated at 2% of revenue
-  const depreciation = estimatedRevenue * 0.05; // Estimated at 5% of revenue
-  const discretionaryExpenses = estimatedRevenue * 0.03; // Estimated at 3% of revenue
+  const firmSize = getFirmSizeCategory(practice.employee_count);
+  const sdeParams = getSDEParameters(firmSize);
 
-  // Calculate SDE
-  const sde = estimatedRevenue - 
-    (annualPayroll - ownerCompensation) - // Remove payroll but add back owner's comp
-    (estimatedRevenue * 0.20) + // Standard operating expenses (20% of revenue)
-    nonRecurringExpenses +
-    depreciation +
-    discretionaryExpenses;
-  
-  // EBITDA margins based on market saturation and competition
-  const minEbitdaMargin = 0.15; // 15%
-  const maxEbitdaMargin = 0.40; // 40%
-  
-  // Adjust EBITDA based on market conditions
-  const marketSaturationFactor = countyData?.avg_market_saturation || 0.2;
-  const marketDensityFactor = (countyData?.firms_per_10k_population || 3) / 10;
-  
-  const currentEbitdaMargin = Math.min(
-    maxEbitdaMargin,
-    Math.max(
-      minEbitdaMargin,
-      0.20 + (0.05 * (1 - marketSaturationFactor)) - (0.02 * marketDensityFactor)
-    )
-  );
+  // Calculate SDE components based on firm size
+  const ownerCompensation = estimatedRevenue * sdeParams.ownerCompRatio;
+  const operatingExpenses = estimatedRevenue * sdeParams.operatingExpenseRatio;
+  const sde = estimatedRevenue * sdeParams.sdeMargin;
 
-  const minEbitda = estimatedRevenue * minEbitdaMargin;
-  const maxEbitda = estimatedRevenue * maxEbitdaMargin;
-  const currentEbitda = estimatedRevenue * currentEbitdaMargin;
+  // Calculate EBITDA (typically 70-75% of SDE for accounting firms)
+  const ebitdaRatio = 0.70;
+  const ebitda = sde * ebitdaRatio;
 
-  // Calculate valuation multiple based on revenue for small firms
-  const baseMultiple = 0.71; // Starting at the lower end of revenue multiple range for small firms
-  
-  // Growth rate adjustment (+0.05x for every 5% above average)
-  const growthRate = countyData?.population_growth_rate || 0;
-  const avgGrowthRate = countyData?.avg_growth_rate || 0;
-  const growthAdjustment = Math.max(0, ((growthRate - avgGrowthRate) / 5) * 0.05);
-
-  // Market saturation adjustment (negative for saturated markets)
-  const marketSaturationAdjustment = Math.max(-0.1, (0.5 - (marketSaturationFactor || 0)) * 0.2);
-
-  // Size adjustment (lower multiple for very small firms)
-  const sizeAdjustment = practice.employee_count <= 5 ? -0.1 : 0;
-
-  // Calculate final multiple
-  const valuationMultiple = Math.min(1.09, // Cap at max industry revenue multiple for small firms
-    baseMultiple + growthAdjustment + marketSaturationAdjustment + sizeAdjustment
-  );
-
-  // Calculate estimated valuation using Revenue for small firms
+  // Calculate valuation using revenue multiple based on firm size
+  const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
   const estimatedValuation = estimatedRevenue * valuationMultiple;
 
   const formatGrowthRate = (rate: number | undefined) => {
@@ -88,8 +108,6 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
     }
     return `$${amount.toFixed(0)}`;
   };
-
-  const gaugePosition = ((currentEbitdaMargin - minEbitdaMargin) / (maxEbitdaMargin - minEbitdaMargin)) * 100;
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
@@ -130,7 +148,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">Seller's Discretionary Earnings</p>
-                  <p className="text-xs text-gray-400">Includes add-backs for owner's comp and non-recurring expenses</p>
+                  <p className="text-xs text-gray-400">Based on {firmSize} firm benchmarks</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -151,19 +169,12 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
                   <Info className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="text-sm">Earnings Before Interest, Taxes, Depreciation & Amortization</p>
-                  <p className="text-xs text-gray-400">Range: {formatCurrency(minEbitda)} - {formatCurrency(maxEbitda)}</p>
+                  <p className="text-sm">70% of SDE for accounting firms</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="text-2xl font-semibold text-white">{formatCurrency(currentEbitda)}</p>
-          <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
-            <div 
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-green-500"
-              style={{ width: `${gaugePosition}%` }}
-            />
-          </div>
+          <p className="text-2xl font-semibold text-white">{formatCurrency(ebitda)}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -187,10 +198,10 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
           </div>
           <div className="flex flex-col">
             <p className="text-2xl font-semibold text-white">
-              {formatGrowthRate(growthRate)}
+              {formatGrowthRate(countyData?.population_growth_rate)}
             </p>
             <p className="text-xs text-white/60">
-              Avg: {formatGrowthRate(avgGrowthRate)}
+              Avg: {formatGrowthRate(countyData?.avg_growth_rate)}
             </p>
           </div>
         </div>
