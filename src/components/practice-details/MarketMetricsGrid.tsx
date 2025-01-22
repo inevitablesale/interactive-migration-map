@@ -9,7 +9,6 @@ interface MarketMetricsGridProps {
 export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
   const calculateAverageSalary = () => {
     if (!marketData.payann || !marketData.emp || marketData.emp === 0) return undefined;
-    // Multiply payann by 1000 since it's stored in thousands
     return Math.round((marketData.payann * 1000) / marketData.emp);
   };
 

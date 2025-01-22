@@ -53,29 +53,44 @@ export interface TopFirm {
 }
 
 export interface ComprehensiveMarketData {
-  total_population: number | null;
-  median_household_income: number | null;
-  median_gross_rent: number | null;
-  median_home_value: number | null;
-  employed_population: number | null;
-  private_sector_accountants: number | null;
-  public_sector_accountants: number | null;
-  firms_per_10k_population: number | null;
-  growth_rate_percentage: number | null;
-  market_saturation_index: number | null;
-  total_education_population: number | null;
-  bachelors_degree_holders: number | null;
-  masters_degree_holders: number | null;
-  doctorate_degree_holders: number | null;
-  payann: number | null;
-  total_establishments: number | null;
-  emp: number | null;
-  avgSalaryPerEmployee: number | null;
-  vacancy_rate: number | null;
-  vacancy_rank: number | null;
-  income_rank: number | null;
-  population_rank: number | null;
-  rent_rank: number | null;
-  growth_rank: number | null;
-  top_firms: TopFirm[] | null;
+  total_population?: number;
+  median_household_income?: number;
+  median_gross_rent?: number;
+  median_home_value?: number;
+  employed_population?: number;
+  private_sector_accountants?: number;
+  public_sector_accountants?: number;
+  firms_per_10k_population?: number;
+  growth_rate_percentage?: number;
+  market_saturation_index?: number;
+  total_education_population?: number;
+  bachelors_holders?: number;
+  masters_holders?: number;
+  doctorate_holders?: number;
+  payann?: number;
+  emp?: number;
+  total_establishments?: number;
+  avgSalaryPerEmployee?: number;
+  vacancy_rate?: number;
+  // State-level rankings
+  vacancy_rank?: number;
+  income_rank?: number;
+  population_rank?: number;
+  rent_rank?: number;
+  growth_rank?: number;
+  firm_density_rank?: number;
+  density_rank?: number;
+  state_rank?: number;
+  // National-level rankings
+  national_income_rank?: number;
+  national_population_rank?: number;
+  national_rent_rank?: number;
+  national_firm_density_rank?: number;
+  national_growth_rank?: number;
+  national_vacancy_rank?: number;
+  national_market_saturation_rank?: number;
+  // Averages
+  avg_firms_per_10k?: number;
+  avg_growth_rate?: number;
+  avg_market_saturation?: number;
 }
