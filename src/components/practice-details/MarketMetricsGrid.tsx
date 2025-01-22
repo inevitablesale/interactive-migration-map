@@ -7,9 +7,13 @@ interface MarketMetricsGridProps {
 }
 
 export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
+  const calculateAverageSalary = () => {
+    if (!marketData.payann || !marketData.emp || marketData.emp === 0) return undefined;
+    return Math.round(marketData.payann / marketData.emp);
+  };
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Economic Indicators - Now with national rankings */}
       <MarketMetricsCard
         title="Economic Indicators"
         icon={DollarSign}
@@ -23,7 +27,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
           },
           {
             label: "Average Salary Per Employee",
-            value: marketData.avgSalaryPerEmployee ? marketData.avgSalaryPerEmployee.toLocaleString() : undefined,
+            value: calculateAverageSalary()?.toLocaleString(),
             type: "money",
             rank: marketData.state_rank,
             sublabel: `National Rank: ${marketData.national_income_rank}`
@@ -31,7 +35,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Competition Metrics - Now with averages */}
+      {/* Competition Metrics */}
       <MarketMetricsCard
         title="Market Competition"
         icon={Users}
@@ -59,7 +63,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Growth Metrics - Now with national rankings */}
+      {/* Growth Metrics */}
       <MarketMetricsCard
         title="Growth & Opportunity"
         icon={TrendingUp}
@@ -104,7 +108,7 @@ export function MarketMetricsGrid({ marketData }: MarketMetricsGridProps) {
         ]}
       />
 
-      {/* Market Accessibility - Now with national rankings */}
+      {/* Market Accessibility */}
       <MarketMetricsCard
         title="Market Accessibility"
         icon={Home}
