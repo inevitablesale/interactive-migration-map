@@ -110,14 +110,20 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
             placeholder="Search firms by speciality..."
             className="pl-9"
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              onSearch(e.target.value);
+            }}
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="icon"
               className="absolute right-2 top-2"
-              onClick={() => handleSearch("")}
+              onClick={() => {
+                setSearchQuery("");
+                onSearch("");
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
