@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { PracticeHeader } from "@/components/practice-details/PracticeHeader";
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
+import type { TopFirm } from "@/types/rankings";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -41,7 +42,23 @@ export default function PracticeDetails() {
         throw new Error('Practice not found');
       }
 
-      console.log('Practice data:', practice);
+      // Transform practice data to match TopFirm interface
+      const transformedPractice: TopFirm = {
+        company_name: practice["Company Name"],
+        employee_count: practice.employeeCount,
+        follower_count: practice.followerCount,
+        follower_ratio: practice.followerCount / (practice.employeeCount || 1),
+        logoResolutionResult: practice.logoResolutionResult,
+        originalCoverImage: practice.originalCoverImage,
+        primarySubtitle: practice["Primary Subtitle"],
+        employeeCountRangeLow: practice.employeeCountRangeLow,
+        employeeCountRangeHigh: practice.employeeCountRangeHigh,
+        specialities: practice.specialities,
+        websiteUrl: practice.websiteUrl,
+        Location: practice.Location,
+        Summary: practice.Summary,
+        foundedOn: practice.foundedOn?.toString()
+      };
 
       // Ensure COUNTYFP and STATEFP are converted to strings and properly padded
       const countyFp = practice.COUNTYFP?.toString().padStart(3, '0');
@@ -49,24 +66,7 @@ export default function PracticeDetails() {
 
       if (!countyFp || !stateFp) {
         console.log('Missing FIPS codes:', { countyFp, stateFp });
-        return { 
-          practice: {
-            company_name: practice["Company Name"],
-            employee_count: practice.employeeCount,
-            follower_count: practice.followerCount,
-            follower_ratio: practice.followerCount / (practice.employeeCount || 1),
-            logoResolutionResult: practice.logoResolutionResult,
-            originalCoverImage: practice.originalCoverImage,
-            primarySubtitle: practice["Primary Subtitle"],
-            employeeCountRangeLow: practice.employeeCountRangeLow,
-            employeeCountRangeHigh: practice.employeeCountRangeHigh,
-            specialities: practice.specialities,
-            websiteUrl: practice.websiteUrl,
-            Location: practice.Location,
-            Summary: practice.Summary
-          }, 
-          countyData: null 
-        };
+        return { practice: transformedPractice, countyData: null };
       }
 
       console.log('Fetching county data with FIPS:', { countyFp, stateFp });
@@ -87,24 +87,7 @@ export default function PracticeDetails() {
 
       console.log('County data:', countyData);
 
-      return {
-        practice: {
-          company_name: practice["Company Name"],
-          employee_count: practice.employeeCount,
-          follower_count: practice.followerCount,
-          follower_ratio: practice.followerCount / (practice.employeeCount || 1),
-          logoResolutionResult: practice.logoResolutionResult,
-          originalCoverImage: practice.originalCoverImage,
-          primarySubtitle: practice["Primary Subtitle"],
-          employeeCountRangeLow: practice.employeeCountRangeLow,
-          employeeCountRangeHigh: practice.employeeCountRangeHigh,
-          specialities: practice.specialities,
-          websiteUrl: practice.websiteUrl,
-          Location: practice.Location,
-          Summary: practice.Summary
-        },
-        countyData
-      };
+      return { practice: transformedPractice, countyData };
     },
     retry: false
   });
@@ -123,36 +106,48 @@ export default function PracticeDetails() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-12 w-[300px]" />
+      <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white">
+        <Skeleton className="h-12 w-[300px] bg-white/10" />
         <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-[200px]" />
-          <Skeleton className="h-[200px]" />
+          <Skeleton className="h-[200px] bg-white/10" />
+          <Skeleton className="h-[200px] bg-white/10" />
         </div>
       </div>
     );
   }
 
   if (!data?.practice) return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white">
       <h1 className="text-2xl font-bold">Practice not found</h1>
-      <p className="text-muted-foreground">The practice you're looking for could not be found.</p>
+      <p className="text-white/60">The practice you're looking for could not be found.</p>
     </div>
   );
 
   const { practice, countyData } = data;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <PracticeHeader practice={practice} />
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <PracticeInfo practice={practice} />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Header Section */}
+        <div className="neo-blur rounded-lg p-6">
+          <PracticeHeader practice={practice} />
+        </div>
+        
+        {/* Info Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="neo-blur rounded-lg">
+            <PracticeInfo practice={practice} />
+          </div>
+        </div>
 
-      {countyData && (
-        <MarketMetricsGrid marketData={countyData} />
-      )}
+        {/* Market Metrics Section */}
+        {countyData && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-gradient">Market Analysis</h2>
+            <MarketMetricsGrid marketData={countyData} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

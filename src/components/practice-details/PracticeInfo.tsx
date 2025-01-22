@@ -7,35 +7,35 @@ interface PracticeInfoProps {
 
 export function PracticeInfo({ practice }: PracticeInfoProps) {
   return (
-    <Card>
+    <Card className="bg-black/40 backdrop-blur-md border-white/10">
       <CardHeader>
-        <CardTitle>Practice Information</CardTitle>
+        <CardTitle className="text-white">Practice Information</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h3 className="font-semibold">Location</h3>
-          <p>{practice.Location}</p>
+          <h3 className="font-semibold text-yellow-400">Location</h3>
+          <p className="text-white/80">{practice.Location}</p>
         </div>
         <div>
-          <h3 className="font-semibold">Employee Count</h3>
-          <p>{practice.employee_count || 'Not available'}</p>
+          <h3 className="font-semibold text-yellow-400">Employee Count</h3>
+          <p className="text-white/80">{practice.employee_count || 'Not available'}</p>
         </div>
         <div>
-          <h3 className="font-semibold">Follower Count</h3>
-          <p>{practice.follower_count?.toLocaleString()}</p>
+          <h3 className="font-semibold text-yellow-400">Follower Count</h3>
+          <p className="text-white/80">{practice.follower_count?.toLocaleString()}</p>
         </div>
         <div>
-          <h3 className="font-semibold">Founded</h3>
-          <p>{practice.foundedOn || 'Not available'}</p>
+          <h3 className="font-semibold text-yellow-400">Founded</h3>
+          <p className="text-white/80">{practice.foundedOn || 'Not available'}</p>
         </div>
         <div>
-          <h3 className="font-semibold">Specialties</h3>
-          <p>{practice.specialities || 'Not available'}</p>
+          <h3 className="font-semibold text-yellow-400">Specialties</h3>
+          <p className="text-white/80">{practice.specialities || 'Not available'}</p>
         </div>
         {practice.Summary && (
           <div>
-            <h3 className="font-semibold">Summary</h3>
-            <p>{practice.Summary}</p>
+            <h3 className="font-semibold text-yellow-400">Summary</h3>
+            <p className="text-white/80">{practice.Summary}</p>
           </div>
         )}
       </CardContent>
