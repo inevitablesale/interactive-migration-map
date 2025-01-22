@@ -12,6 +12,8 @@ export interface StateRanking {
   market_saturation_rank: number;
   avg_payroll_per_firm: number;
   education_rate: number;
+  migration_trend: number;
+  median_income: number;
 }
 
 export interface MSARanking {
