@@ -45,22 +45,24 @@ function App() {
             <CommandBar />
           </>
         )}
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route 
-            path="/buyer-dashboard" 
-            element={
-              <div className="p-8">
-                <BuyerDashboard />
-              </div>
-            } 
-          />
-          <Route path="/analysis" element={<Analysis />} />
-          <Route path="/market-report/:county/:state" element={<MarketReport />} />
-          <Route path="/state-market-report" element={<StateMarketReport />} />
-          <Route path="/thank-you" element={<ThankYou />} />
-          <Route path="/opportunities" element={<Opportunities />} />
-        </Routes>
+        <div className={session ? "pl-64" : ""}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route 
+              path="/buyer-dashboard" 
+              element={
+                <div className="p-8">
+                  <BuyerDashboard />
+                </div>
+              } 
+            />
+            <Route path="/analysis" element={<Analysis />} />
+            <Route path="/market-report/:county/:state" element={<MarketReport />} />
+            <Route path="/state-market-report" element={<StateMarketReport />} />
+            <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/opportunities" element={<Opportunities />} />
+          </Routes>
+        </div>
       </div>
       <Toaster />
     </Router>
