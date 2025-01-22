@@ -1,125 +1,59 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Bird } from "lucide-react";
 import { supabase } from "./integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import Index from "./pages/Index";
-import Analysis from "./pages/Analysis";
-import MarketReport from "./pages/MarketReport";
-import StateMarketReport from "./pages/StateMarketReport";
-import ThankYou from "./pages/ThankYou";
-import Opportunities from "./pages/Opportunities";
+import { Toaster } from "@/components/ui/toaster";
+import { AppSidebar } from "@/components/AppSidebar";
+import { CommandBar } from "@/components/CommandBar";
+import Analysis from "@/pages/Analysis";
+import MarketReport from "@/pages/MarketReport";
+import StateMarketReport from "@/pages/StateMarketReport";
+import ThankYou from "@/pages/ThankYou";
+import Opportunities from "@/pages/Opportunities";
+import Index from "@/pages/Index";
 
 function App() {
-  const [user, setUser] = useState(null);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      setSession(session);
+      setIsLoading(false);
     });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
     });
-
-    return () => subscription.unsubscribe();
   }, []);
 
-  const handleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'linkedin_oidc',
-        options: {
-          redirectTo: `${window.location.origin}/thank-you`,
-        },
-      });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
-      }
-    } catch (error) {
-      console.error("Sign in error:", error);
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "Failed to sign in. Please try again.",
-      });
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Sign Out Error",
-          description: error.message,
-        });
-      } else {
-        toast({
-          title: "Signed out successfully",
-        });
-      }
-    } catch (error) {
-      console.error("Sign out error:", error);
-      toast({
-        variant: "destructive",
-        title: "Sign Out Error",
-        description: "Failed to sign out. Please try again.",
-      });
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Bird className="w-8 h-8 text-blue-500 animate-bounce" />
+      </div>
+    );
+  }
 
   return (
     <Router>
-      {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-[9999] bg-black/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-            <span className="text-xl font-bold text-yellow-400">Canary</span>
-          </div>
-          <div>
-            {user ? (
-              <span 
-                onClick={handleSignOut}
-                className="text-yellow-400 hover:text-yellow-500 cursor-pointer transition-colors duration-200"
-              >
-                Sign Out
-              </span>
-            ) : (
-              <span 
-                onClick={handleSignIn}
-                className="text-yellow-400 hover:text-yellow-500 cursor-pointer transition-colors duration-200"
-              >
-                Sign In
-              </span>
-            )}
-          </div>
-        </div>
+      <div className="min-h-screen bg-black">
+        {session && (
+          <>
+            <AppSidebar />
+            <CommandBar />
+          </>
+        )}
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/analysis" element={<Analysis />} />
+          <Route path="/market-report/:county/:state" element={<MarketReport />} />
+          <Route path="/state-market-report" element={<StateMarketReport />} />
+          <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/opportunities" element={<Opportunities />} />
+        </Routes>
       </div>
-
-      {/* Routes */}
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/analysis" element={<Analysis />} />
-        <Route path="/market-report" element={<MarketReport />} />
-        <Route path="/state-market-report" element={<StateMarketReport />} />
-        <Route path="/thank-you" element={<ThankYou />} />
-        <Route path="/opportunities" element={<Opportunities />} />
-        {/* Redirect /dashboard to /analysis */}
-        <Route path="/dashboard" element={<Navigate to="/analysis" replace />} />
-      </Routes>
+      <Toaster />
     </Router>
   );
 }
