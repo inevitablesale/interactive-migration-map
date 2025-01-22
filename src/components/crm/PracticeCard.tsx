@@ -50,13 +50,6 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: {
           <p>${practice.annual_revenue.toLocaleString()}</p>
         </div>
       </div>
-
-      {practice.specialities && (
-        <div>
-          <p className="text-muted-foreground text-sm">Specialties</p>
-          <p className="text-sm">{practice.specialities}</p>
-        </div>
-      )}
     </div>
   );
 }
