@@ -147,6 +147,41 @@ export type Database = {
         }
         Relationships: []
       }
+      canary_firm_interests: {
+        Row: {
+          company_id: number | null
+          created_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: number | null
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: number | null
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canary_firm_interests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "canary_firms_data"
+            referencedColumns: ["Company ID"]
+          },
+        ]
+      }
       canary_firms_data: {
         Row: {
           "Block FIPS": string | null
