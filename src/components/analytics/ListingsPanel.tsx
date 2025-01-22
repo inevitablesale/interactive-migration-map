@@ -47,19 +47,7 @@ export const ListingsPanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('canary_firms_data')
-        .select(`
-          *,
-          practice_buyer_pool (
-            id,
-            practice_id,
-            user_id,
-            status,
-            joined_at,
-            rating,
-            notes,
-            is_anonymous
-          )
-        `);
+        .select('*');
       
       if (error) throw error;
       return data as unknown as Listing[];
@@ -71,7 +59,6 @@ export const ListingsPanel = () => {
     
     setIsSubmitting(true);
     try {
-      // Update the listing status
       const { error: updateError } = await supabase
         .from('canary_firms_data')
         .update({ status: 'pending_outreach' })
@@ -79,7 +66,6 @@ export const ListingsPanel = () => {
 
       if (updateError) throw updateError;
 
-      // Add entry to practice_buyer_pool
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert({
@@ -109,12 +95,20 @@ export const ListingsPanel = () => {
   };
 
   const filteredListings = listings?.filter((listing: Listing) => {
-    // Only filter by specialities, not by state/region
-    if (!searchQuery) return true;
+    if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
+      return true;
+    }
+
+    const matchesSearch = !searchQuery || 
+      (listing.specialities && listing.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    // Check if specialities exist and match the search query
-    if (!listing.specialities) return false;
-    return listing.specialities.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesState = !filters.state || 
+      listing["State Name"] === filters.state;
+    
+    const matchesEmployeeCount = (!filters.minEmployees || listing.employeeCount >= parseInt(filters.minEmployees)) &&
+      (!filters.maxEmployees || listing.employeeCount <= parseInt(filters.maxEmployees));
+
+    return matchesSearch && matchesState && matchesEmployeeCount;
   });
 
   return (

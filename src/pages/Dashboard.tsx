@@ -17,6 +17,7 @@ export default function Dashboard() {
 
   const ITEMS_PER_PAGE = 6;
 
+  // Simplified query without joins or restrictions
   const { data: practices, isLoading, refetch } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
@@ -156,13 +157,17 @@ export default function Dashboard() {
     }
   };
 
-  // Updated filtering logic to remove authentication restrictions
+  // Simplified filtering without any restrictions
   const filteredPractices = practices?.filter(practice => {
+    if (!searchQuery && !filters.state && !filters.minEmployees && !filters.maxEmployees) {
+      return true;
+    }
+
     const searchMatches = !searchQuery || 
       (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // Apply filters
     const stateMatches = !filters.state || practice.region === filters.state;
+    
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
 
