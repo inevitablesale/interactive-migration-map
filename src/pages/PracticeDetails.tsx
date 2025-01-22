@@ -119,8 +119,8 @@ export default function PracticeDetails() {
         rent_rank: countyData?.rent_rank,
         growth_rank: countyData?.growth_rank,
         firm_density_rank: countyData?.firm_density_rank,
-        density_rank: countyData?.firm_density_rank, // Using firm_density_rank instead of density_rank
-        state_rank: countyData?.growth_rank, // Using growth_rank as a proxy for state_rank
+        density_rank: countyData?.firm_density_rank,
+        state_rank: countyData?.growth_rank,
         // National-level rankings
         national_income_rank: countyData?.national_income_rank,
         national_population_rank: countyData?.national_population_rank,
@@ -176,7 +176,6 @@ export default function PracticeDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
       <div className="container mx-auto p-6 space-y-8">
-        {/* Back Button */}
         <Button
           variant="ghost"
           className="text-white hover:text-white/80 hover:bg-white/10"
@@ -186,26 +185,19 @@ export default function PracticeDetails() {
           Back to Listings
         </Button>
 
-        {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Header with Logo and Title */}
             <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
               <PracticeHeader practice={practice} />
             </div>
 
-            {/* Key Metrics */}
-            <KeyMetricsBar practice={practice} />
+            <KeyMetricsBar practice={practice} countyData={countyData} />
 
-            {/* Business Overview */}
             <BusinessOverview practice={practice} />
 
-            {/* Market Metrics Grid */}
             {countyData && <MarketMetricsGrid marketData={countyData} />}
           </div>
 
-          {/* Right Column - Contact Info */}
           <div className="space-y-6">
             <PracticeInfo practice={practice} />
           </div>

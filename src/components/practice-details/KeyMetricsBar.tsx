@@ -1,37 +1,16 @@
 import { DollarSign, TrendingUp, Users, Building2, LineChart } from "lucide-react";
 import { TopFirm } from "@/types/rankings";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { ComprehensiveMarketData } from "@/types/rankings";
 
 interface KeyMetricsBarProps {
   practice: TopFirm;
+  countyData?: ComprehensiveMarketData;
 }
 
-export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
+export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   // Estimate revenue based on industry standards and employee count
   const estimatedRevenue = practice.employee_count ? practice.employee_count * 150000 : 0;
   const estimatedEBITDA = estimatedRevenue * 0.15; // 15% margin assumption
-
-  // Fetch county rankings data for the practice's location
-  const { data: countyData } = useQuery({
-    queryKey: ['county-rankings', practice.COUNTYFP, practice.STATEFP],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('county_rankings')
-        .select('*')
-        .eq('COUNTYFP', practice.COUNTYFP)
-        .eq('STATEFP', practice.STATEFP)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching county rankings:', error);
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: !!practice.COUNTYFP && !!practice.STATEFP
-  });
 
   // Calculate growth classification based on growth rate
   const getGrowthClassification = (growthRate: number | undefined) => {
@@ -41,12 +20,6 @@ export function KeyMetricsBar({ practice }: KeyMetricsBarProps) {
     if (growthRate > 0) return 'Stable Growth';
     return 'Declining';
   };
-
-  // Add console log to debug growth rate data
-  console.log('County Data Growth:', {
-    growthRate: countyData?.avg_growth_rate,
-    countyData
-  });
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
