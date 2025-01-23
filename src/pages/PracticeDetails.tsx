@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { PracticeHeader } from "@/components/practice-details/PracticeHeader";
+import { PracticeTeaser } from "@/components/practice-details/PracticeTeaser";
 import { KeyMetricsBar } from "@/components/practice-details/KeyMetricsBar";
 import { BusinessOverview } from "@/components/practice-details/BusinessOverview";
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
@@ -229,7 +230,7 @@ export default function PracticeDetails() {
         </div>
       </div>
 
-      {/* Main Content - Added pt-24 to prevent header overlap */}
+      {/* Main Content */}
       <div className="container mx-auto p-6 space-y-8 pt-24">
         <Button
           variant="ghost"
@@ -241,10 +242,11 @@ export default function PracticeDetails() {
         </Button>
 
         <div className="space-y-6">
-          {/* Primary Content */}
           <div className="rounded-lg p-6">
             <PracticeHeader practice={practice} />
           </div>
+
+          <PracticeTeaser practice={practice} />
 
           <KeyMetricsBar practice={practice} countyData={countyData} />
 
