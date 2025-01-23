@@ -5,9 +5,10 @@ import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
 export default function TrackedPractices() {
@@ -187,97 +188,115 @@ export default function TrackedPractices() {
   });
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Tracked Practices</h1>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4" />
-          </Button>
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
+      {/* Fixed Header with Logo */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+            <span className="text-xl font-bold text-yellow-400">Canary</span>
+          </div>
+          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+            Sign In
+          </Link>
         </div>
       </div>
 
-      <DashboardSummary />
-      
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <SearchFilters 
-            onSearch={handleSearch}
-            onFilter={handleFilter}
-          />
-          
-          {isLoading ? (
-            <div>Loading practices...</div>
-          ) : (
-            <>
-              <div className={`mt-6 grid gap-4 ${
-                viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
-              }`}>
-                {paginatedPractices?.map((practice) => (
-                  <PracticeCard
-                    key={practice.id}
-                    practice={practice}
-                    onWithdraw={() => handleWithdraw(practice.id)}
-                    onExpressInterest={() => handleExpressInterest(practice.id)}
-                  />
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <Pagination className="mt-6">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                    
-                    {getPaginationNumbers().map((page, index) => (
-                      page === 'ellipsis' ? (
-                        <PaginationItem key={`ellipsis-${index}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      ) : (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          )}
+      <div className="container mx-auto p-6 pt-20 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-white">Tracked Practices</h1>
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="bg-yellow-400 text-black hover:bg-yellow-500"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="bg-yellow-400 text-black hover:bg-yellow-500"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <div>
-          <PracticeOfDay 
-            practice={practiceOfDay}
-            onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
-          />
+
+        <DashboardSummary />
+        
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <SearchFilters 
+              onSearch={handleSearch}
+              onFilter={handleFilter}
+            />
+            
+            {isLoading ? (
+              <div className="text-white">Loading practices...</div>
+            ) : (
+              <>
+                <div className={`mt-6 grid gap-4 ${
+                  viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
+                }`}>
+                  {paginatedPractices?.map((practice) => (
+                    <PracticeCard
+                      key={practice.id}
+                      practice={practice}
+                      onWithdraw={() => handleWithdraw(practice.id)}
+                      onExpressInterest={() => handleExpressInterest(practice.id)}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <Pagination className="mt-6">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
+                        />
+                      </PaginationItem>
+                      
+                      {getPaginationNumbers().map((page, index) => (
+                        page === 'ellipsis' ? (
+                          <PaginationItem key={`ellipsis-${index}`}>
+                            <PaginationEllipsis className="text-white" />
+                          </PaginationItem>
+                        ) : (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      ))}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </>
+            )}
+          </div>
+          <div>
+            <PracticeOfDay 
+              practice={practiceOfDay}
+              onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -38,12 +38,12 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   const hasExpressedInterest = practice.status === 'interested';
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
+    <div className="bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
       <div className="p-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{practice.industry}</h3>
-            <div className="flex items-center text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+            <h3 className="text-xl font-semibold text-white mb-2">{practice.industry}</h3>
+            <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full">
               <Building className="h-4 w-4 mr-2" />
               {practice.region}
             </div>
@@ -54,7 +54,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
                 variant="outline" 
                 size="sm"
                 onClick={onWithdraw}
-                className="text-gray-600 hover:text-gray-900 border-gray-200"
+                className="text-white/60 hover:text-white border-white/10 hover:border-white/20 bg-white/5"
               >
                 Withdraw
               </Button>
@@ -62,7 +62,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             <Button 
               size="sm"
               onClick={onExpressInterest}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              className="bg-yellow-400 text-black hover:bg-yellow-500"
             >
               {hasExpressedInterest ? 'Interested' : 'Express Interest'}
             </Button>
@@ -70,7 +70,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               <Button 
                 variant="secondary" 
                 size="sm"
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                className="bg-white/10 text-white hover:bg-white/20"
               >
                 View Details
               </Button>
@@ -79,36 +79,36 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         </div>
 
         <div className="grid grid-cols-4 gap-4">
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="flex items-center text-sm text-gray-600 mb-2">
+          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="flex items-center text-sm text-white/60 mb-2">
               <Users className="h-4 w-4 mr-2" />
               Employees
             </div>
-            <p className="text-lg font-semibold text-gray-900">{practice.employee_count}</p>
+            <p className="text-lg font-semibold text-white">{practice.employee_count}</p>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="flex items-center text-sm text-gray-600 mb-2">
+          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Revenue
             </div>
-            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedRevenue)}</p>
+            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="flex items-center text-sm text-gray-600 mb-2">
+          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. EBITDA
             </div>
-            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedEbitda)}</p>
+            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedEbitda)}</p>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="flex items-center text-sm text-gray-600 mb-2">
+          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Value
             </div>
-            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedValuation)}</p>
+            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedValuation)}</p>
           </div>
         </div>
       </div>
