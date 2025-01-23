@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Users, DollarSign } from "lucide-react";
-import { getFirmSizeCategory, getSDEParameters, getValuationMultiple } from "@/utils/valuationUtils";
+import { getFirmSizeCategory, getValuationMultiple } from "@/utils/valuationUtils";
 
 interface PracticeCardProps {
   practice: {
@@ -20,7 +20,7 @@ interface PracticeCardProps {
 }
 
 export function PracticeCard({ practice }: PracticeCardProps) {
-  // Calculate financial metrics using the same method as KeyMetricsBar
+  // Calculate revenue based on industry standard payroll-to-revenue ratio
   const avgSalaryPerEmployee = 86259; // Industry average when county data isn't available
   const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
@@ -28,7 +28,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
 
   const firmSize = getFirmSizeCategory(practice.employee_count);
   
-  // Calculate valuation using the same method as KeyMetricsBar
+  // Calculate valuation using revenue multiple based on firm size
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
   const estimatedValuation = estimatedRevenue * valuationMultiple;
 
