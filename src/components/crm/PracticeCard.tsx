@@ -45,7 +45,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   return (
     <div className="bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
       <div className="p-6">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
           <div>
             <h3 className="text-xl font-semibold text-white mb-2">{practice.industry}</h3>
             <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full">
@@ -53,13 +53,13 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               {city}{state ? `, ${state}` : ''}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {hasExpressedInterest && (
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={onWithdraw}
-                className="text-white/60 hover:text-white border-white/10 hover:border-white/20 bg-white/5"
+                className="text-white/60 hover:text-white border-white/10 hover:border-white/20 bg-white/5 w-full sm:w-auto"
               >
                 Withdraw
               </Button>
@@ -67,15 +67,15 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             <Button 
               size="sm"
               onClick={onExpressInterest}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
+              className="bg-yellow-400 text-black hover:bg-yellow-500 w-full sm:w-auto"
             >
               {hasExpressedInterest ? 'Interested' : 'Express Interest'}
             </Button>
-            <Link to={`/practice/${practice.id}`}>
+            <Link to={`/practice/${practice.id}`} className="w-full sm:w-auto">
               <Button 
                 variant="secondary" 
                 size="sm"
-                className="bg-white/10 text-white hover:bg-white/20"
+                className="bg-white/10 text-white hover:bg-white/20 w-full"
               >
                 View Details
               </Button>
@@ -83,7 +83,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <Users className="h-4 w-4 mr-2" />
