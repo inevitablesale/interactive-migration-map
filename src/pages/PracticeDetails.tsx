@@ -212,15 +212,6 @@ export default function PracticeDetails() {
 
           <KeyMetricsBar practice={practice} countyData={countyData} />
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <BusinessOverview practice={practice} />
-            </div>
-            <div>
-              <PracticeInfo practice={practice} />
-            </div>
-          </div>
-
           {/* Market Data Section - Collapsible */}
           <Collapsible
             open={isMarketDataOpen}
@@ -244,6 +235,15 @@ export default function PracticeDetails() {
               {countyData && <MarketMetricsGrid marketData={countyData} />}
             </CollapsibleContent>
           </Collapsible>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <BusinessOverview practice={practice} />
+            </div>
+            <div>
+              <PracticeInfo practice={practice} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
