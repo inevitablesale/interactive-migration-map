@@ -61,10 +61,10 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
         </div>
 
         <div className="space-y-2">
-          <Button className="w-full" onClick={onInterested}>
+          <Button className="w-full" onClick={onInterested} disabled>
             I'm Interested
           </Button>
-          <Button variant="outline" className="w-full" asChild>
+          <Button variant="outline" className="w-full" asChild disabled>
             <a href="#replay">
               <Play className="h-4 w-4 mr-2" />
               Watch the live replay

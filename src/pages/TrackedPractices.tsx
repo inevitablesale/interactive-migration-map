@@ -135,7 +135,7 @@ export default function TrackedPractices() {
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  });
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -202,9 +202,9 @@ export default function TrackedPractices() {
         </div>
       </div>
 
-      <div className="container mx-auto p-6 pt-20 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-white">Tracked Practices</h1>
+      <div className="container mx-auto p-4 sm:p-6 pt-20 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
@@ -239,7 +239,9 @@ export default function TrackedPractices() {
             ) : (
               <>
                 <div className={`mt-6 grid gap-4 ${
-                  viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
+                  viewMode === 'grid' 
+                    ? 'grid-cols-1 sm:grid-cols-2' 
+                    : 'grid-cols-1'
                 }`}>
                   {paginatedPractices?.map((practice) => (
                     <PracticeCard
@@ -291,7 +293,7 @@ export default function TrackedPractices() {
               </>
             )}
           </div>
-          <div>
+          <div className="mt-6 md:mt-0">
             <PracticeOfDay 
               practice={practiceOfDay}
               onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
