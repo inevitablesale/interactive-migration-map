@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
+import { CommandBar } from "@/components/CommandBar";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -172,80 +173,89 @@ export default function PracticeDetails() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white">
-        <Skeleton className="h-12 w-[300px] bg-white/10" />
-        <Skeleton className="h-20 w-full bg-white/10" />
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-[400px] bg-white/10" />
-          <Skeleton className="h-[400px] bg-white/10" />
+      <>
+        <CommandBar />
+        <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white pt-24">
+          <Skeleton className="h-12 w-[300px] bg-white/10" />
+          <Skeleton className="h-20 w-full bg-white/10" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-[400px] bg-white/10" />
+            <Skeleton className="h-[400px] bg-white/10" />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!data?.practice) return (
-    <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white">
-      <h1 className="text-2xl font-bold">Practice not found</h1>
-      <p className="text-white/60">The practice you're looking for could not be found.</p>
-    </div>
+    <>
+      <CommandBar />
+      <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white pt-24">
+        <h1 className="text-2xl font-bold">Practice not found</h1>
+        <p className="text-white/60">The practice you're looking for could not be found.</p>
+      </div>
+    </>
   );
 
   const { practice, countyData } = data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      <div className="container mx-auto p-6 space-y-8">
-        <Button
-          variant="ghost"
-          className="text-white hover:text-white/80 hover:bg-white/10"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Listings
-        </Button>
-
-        <div className="space-y-6">
-          {/* Primary Content */}
-          <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
-            <PracticeHeader practice={practice} />
-          </div>
-
-          <KeyMetricsBar practice={practice} countyData={countyData} />
-
-          {/* Market Data Section - Collapsible */}
-          <Collapsible
-            open={isMarketDataOpen}
-            onOpenChange={setIsMarketDataOpen}
-            className="bg-black/40 backdrop-blur-md rounded-lg p-6"
+    <>
+      <CommandBar />
+      <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+        <div className="container mx-auto p-6 space-y-8 pt-24">
+          <Button
+            variant="ghost"
+            className="text-white hover:text-white/80 hover:bg-white/10"
+            onClick={() => navigate(-1)}
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Geographic & Demographic Data</h2>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="hover:bg-white/10">
-                  {isMarketDataOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent className="mt-4">
-              {countyData && <MarketMetricsGrid marketData={countyData} />}
-            </CollapsibleContent>
-          </Collapsible>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Listings
+          </Button>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <BusinessOverview practice={practice} />
+          <div className="space-y-6">
+            {/* Primary Content */}
+            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
+              <PracticeHeader practice={practice} />
             </div>
-            <div>
-              <PracticeInfo practice={practice} />
+
+            <KeyMetricsBar practice={practice} countyData={countyData} />
+
+            {/* Market Data Section - Collapsible */}
+            <Collapsible
+              open={isMarketDataOpen}
+              onOpenChange={setIsMarketDataOpen}
+              className="bg-black/40 backdrop-blur-md rounded-lg p-6"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-white">Geographic & Demographic Data</h2>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="hover:bg-white/10">
+                    {isMarketDataOpen ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+              
+              <CollapsibleContent className="mt-4">
+                {countyData && <MarketMetricsGrid marketData={countyData} />}
+              </CollapsibleContent>
+            </Collapsible>
+
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <BusinessOverview practice={practice} />
+              </div>
+              <div>
+                <PracticeInfo practice={practice} />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

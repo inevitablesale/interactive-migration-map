@@ -1,5 +1,5 @@
 export interface TopFirm {
-  id: string;
+  id?: string;
   "Company Name": string | null;
   "Primary Subtitle": string | null;
   Location: string | null;
@@ -29,4 +29,44 @@ export interface TopFirm {
   logoResolutionResult: string | null;
   status: string | null;
   notes: string | null;
+}
+
+export interface ComprehensiveMarketData {
+  total_population?: number;
+  median_household_income?: number;
+  median_gross_rent?: number;
+  median_home_value?: number;
+  employed_population?: number;
+  private_sector_accountants?: number;
+  public_sector_accountants?: number;
+  firms_per_10k_population?: number;
+  population_growth_rate?: number;
+  market_saturation_index?: number;
+  total_education_population?: number;
+  bachelors_holders?: number;
+  masters_holders?: number;
+  doctorate_holders?: number;
+  payann?: number;
+  emp?: number;
+  total_establishments?: number;
+  avgSalaryPerEmployee?: number;
+  vacancy_rate?: number;
+  vacancy_rank?: number;
+  income_rank?: number;
+  population_rank?: number;
+  rent_rank?: number;
+  growth_rank?: number;
+  firm_density_rank?: number;
+  density_rank?: number;
+  state_rank?: number;
+  national_income_rank?: number;
+  national_population_rank?: number;
+  national_rent_rank?: number;
+  national_firm_density_rank?: number;
+  national_growth_rank?: number;
+  national_vacancy_rank?: number;
+  national_market_saturation_rank?: number;
+  avg_firms_per_10k?: number;
+  avg_growth_rate?: number;
+  avg_market_saturation?: number;
 }
