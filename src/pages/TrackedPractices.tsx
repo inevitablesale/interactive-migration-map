@@ -27,7 +27,7 @@ export default function TrackedPractices() {
         .from('canary_firms_data')
         .select(`
           *,
-          firm_generated_text(
+          firm_generated_text!inner (
             title
           )
         `)
@@ -47,9 +47,7 @@ export default function TrackedPractices() {
         practice_buyer_pool: [],
         notes: [],
         specialities: practice.specialities,
-        generated_title: Array.isArray(practice.firm_generated_text) && practice.firm_generated_text.length > 0
-          ? practice.firm_generated_text[0]?.title || practice["Primary Subtitle"] || ""
-          : practice["Primary Subtitle"] || ""
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
       }));
     }
   });
@@ -143,7 +141,7 @@ export default function TrackedPractices() {
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

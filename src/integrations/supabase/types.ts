@@ -474,15 +474,7 @@ export type Database = {
           teaser?: string | null
           title?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "firm_generated_text_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "canary_firms_data"
-            referencedColumns: ["Company ID"]
-          },
-        ]
+        Relationships: []
       }
       msa_county_reference: {
         Row: {
