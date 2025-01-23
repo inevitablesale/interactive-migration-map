@@ -35,6 +35,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
     return `$${(amount / 1000).toFixed(0)}K`;
   };
 
+  const hasExpressedInterest = practice.status === 'interested';
+
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
       <div className="p-6">
@@ -47,20 +49,22 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
             </div>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onWithdraw}
-              className="text-gray-600 hover:text-gray-900 border-gray-200"
-            >
-              Withdraw
-            </Button>
+            {hasExpressedInterest && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={onWithdraw}
+                className="text-gray-600 hover:text-gray-900 border-gray-200"
+              >
+                Withdraw
+              </Button>
+            )}
             <Button 
               size="sm"
               onClick={onExpressInterest}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Express Interest
+              {hasExpressedInterest ? 'Interested' : 'Express Interest'}
             </Button>
             <Link to={`/practice/${practice.id}`}>
               <Button 
