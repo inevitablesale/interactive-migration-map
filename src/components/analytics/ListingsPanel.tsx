@@ -203,7 +203,7 @@ export const ListingsPanel = () => {
                 <div className="flex-1 space-y-3 min-w-0">
                   <div>
                     <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
-                      {listing["Company Name"]}
+                      {generatedText?.title || listing["Company Name"]}
                       {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
                     </h3>
                     {generatedText?.teaser && (
