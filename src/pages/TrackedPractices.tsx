@@ -125,9 +125,15 @@ export default function TrackedPractices() {
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
-    const regionMatches = !filters.region || practice.region === filters.region;
+    const stateMatches = !filters.state || practice.region === filters.state;
+    const revenueMatches = (!filters.minRevenue || practice.annual_revenue >= parseInt(filters.minRevenue)) &&
+                          (!filters.maxRevenue || practice.annual_revenue <= parseInt(filters.maxRevenue));
+    const estimatedValuation = practice.annual_revenue * 2.5;
+    const valuationMatches = (!filters.minValuation || estimatedValuation >= parseInt(filters.minValuation)) &&
+                            (!filters.maxValuation || estimatedValuation <= parseInt(filters.maxValuation));
 
-    return searchMatches && industryMatches && employeeMatches && regionMatches;
+    return searchMatches && industryMatches && employeeMatches && stateMatches && 
+           revenueMatches && valuationMatches;
   });
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;

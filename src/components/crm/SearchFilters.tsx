@@ -33,7 +33,9 @@ export interface FilterState {
   maxEmployees?: string;
   minRevenue?: string;
   maxRevenue?: string;
-  region?: string;
+  state?: string;
+  minValuation?: string;
+  maxValuation?: string;
 }
 
 export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
@@ -51,7 +53,6 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
       
       if (error) throw error;
 
-      // Get unique industries and sort them
       const uniqueIndustries = Array.from(new Set(data.map(item => item['Primary Subtitle'])))
         .filter(Boolean)
         .sort();
@@ -146,21 +147,20 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>Region</Label>
+                <Label>State</Label>
                 <Select
-                  onValueChange={(value) => handleFilterChange('region', value)}
-                  value={filters.region || "all"}
+                  onValueChange={(value) => handleFilterChange('state', value)}
+                  value={filters.state || "all"}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select region" />
+                    <SelectValue placeholder="Select state" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
-                    <SelectItem value="Northeast">Northeast</SelectItem>
-                    <SelectItem value="Southeast">Southeast</SelectItem>
-                    <SelectItem value="Midwest">Midwest</SelectItem>
-                    <SelectItem value="Southwest">Southwest</SelectItem>
-                    <SelectItem value="West">West</SelectItem>
+                    <SelectItem value="all">All States</SelectItem>
+                    <SelectItem value="AL">Alabama</SelectItem>
+                    <SelectItem value="AK">Alaska</SelectItem>
+                    <SelectItem value="AZ">Arizona</SelectItem>
+                    {/* Add all states */}
                   </SelectContent>
                 </Select>
               </div>
@@ -184,7 +184,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>Annual Revenue Range (in thousands)</Label>
+                <Label>Est. Gross Revenue</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     type="number"
@@ -197,6 +197,24 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     placeholder="Max"
                     value={filters.maxRevenue || ""}
                     onChange={(e) => handleFilterChange('maxRevenue', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Est. Valuation</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.minValuation || ""}
+                    onChange={(e) => handleFilterChange('minValuation', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.maxValuation || ""}
+                    onChange={(e) => handleFilterChange('maxValuation', e.target.value)}
                   />
                 </div>
               </div>
