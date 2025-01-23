@@ -28,7 +28,12 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
   }
 
   return (
-    <Card className="bg-gradient-to-br from-primary/10 to-transparent">
+    <Card className="bg-gradient-to-br from-primary/10 to-transparent relative overflow-hidden">
+      {/* Coming Soon Banner */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-yellow-400/90 text-black font-bold py-2 px-20 text-lg shadow-lg z-10">
+        COMING SOON
+      </div>
+      
       <CardHeader>
         <CardTitle>Today's Featured Opportunity</CardTitle>
       </CardHeader>
