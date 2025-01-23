@@ -43,12 +43,12 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
     [practice.region, ""];
 
   return (
-    <div className="bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
-      <div className="p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-          <div>
-            <h3 className="text-xl font-semibold text-white mb-2">{practice.industry}</h3>
-            <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full">
+    <div className="min-h-[200px] sm:min-h-[250px] w-full bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
+      <div className="p-4 sm:p-6 h-full flex flex-col">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-6">
+          <div className="w-full sm:w-auto">
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{practice.industry}</h3>
+            <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full w-fit">
               <Building className="h-4 w-4 mr-2" />
               {city}{state ? `, ${state}` : ''}
             </div>
@@ -83,7 +83,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-auto">
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <Users className="h-4 w-4 mr-2" />
