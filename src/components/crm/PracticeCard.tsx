@@ -12,6 +12,7 @@ interface PracticeCardProps {
     service_mix: Record<string, number>;
     status: string;
     last_updated: string;
+    generated_title?: string;
   };
   onWithdraw: () => void;
   onExpressInterest: () => void;
@@ -47,12 +48,13 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
       <div className="p-4 sm:p-6 h-full flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-6">
           <div className="w-full sm:w-auto">
-            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{practice.industry}</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{practice.generated_title || practice.industry}</h3>
             <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full w-fit">
               <Building className="h-4 w-4 mr-2" />
               {city}{state ? `, ${state}` : ''}
             </div>
           </div>
+          
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {hasExpressedInterest && (
               <Button 

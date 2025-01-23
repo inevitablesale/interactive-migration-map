@@ -25,7 +25,12 @@ export default function TrackedPractices() {
     queryFn: async () => {
       const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
-        .select('*')
+        .select(`
+          *,
+          firm_generated_text!inner (
+            title
+          )
+        `)
         .order('followerCount', { ascending: false });
 
       if (error) throw error;
@@ -41,7 +46,8 @@ export default function TrackedPractices() {
         last_updated: new Date().toISOString(),
         practice_buyer_pool: [],
         notes: [],
-        specialities: practice.specialities
+        specialities: practice.specialities,
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
       }));
     }
   });
