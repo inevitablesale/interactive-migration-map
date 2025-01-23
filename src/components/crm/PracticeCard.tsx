@@ -36,13 +36,13 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   };
 
   return (
-    <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
       <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white/90 mb-1">{practice.industry}</h3>
-            <div className="flex items-center text-sm text-white/70">
-              <Building className="h-4 w-4 mr-1" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">{practice.industry}</h3>
+            <div className="flex items-center text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+              <Building className="h-4 w-4 mr-2" />
               {practice.region}
             </div>
           </div>
@@ -51,14 +51,14 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               variant="outline" 
               size="sm"
               onClick={onWithdraw}
-              className="text-white/70 hover:text-white border-white/20 hover:border-white/40 hover:bg-white/5"
+              className="text-gray-600 hover:text-gray-900 border-gray-200"
             >
               Withdraw
             </Button>
             <Button 
               size="sm"
               onClick={onExpressInterest}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Express Interest
             </Button>
@@ -66,7 +66,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
               <Button 
                 variant="secondary" 
                 size="sm"
-                className="bg-white/10 text-white hover:bg-white/20"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
                 View Details
               </Button>
@@ -74,37 +74,37 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-6">
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-            <div className="flex items-center text-sm text-white/70 mb-1">
-              <Users className="h-4 w-4 mr-1" />
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="flex items-center text-sm text-gray-600 mb-2">
+              <Users className="h-4 w-4 mr-2" />
               Employees
             </div>
-            <p className="text-lg font-semibold text-white">{practice.employee_count}</p>
+            <p className="text-lg font-semibold text-gray-900">{practice.employee_count}</p>
           </div>
           
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-            <div className="flex items-center text-sm text-white/70 mb-1">
-              <DollarSign className="h-4 w-4 mr-1" />
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="flex items-center text-sm text-gray-600 mb-2">
+              <DollarSign className="h-4 w-4 mr-2" />
               Est. Revenue
             </div>
-            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedRevenue)}</p>
           </div>
           
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-            <div className="flex items-center text-sm text-white/70 mb-1">
-              <DollarSign className="h-4 w-4 mr-1" />
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="flex items-center text-sm text-gray-600 mb-2">
+              <DollarSign className="h-4 w-4 mr-2" />
               Est. EBITDA
             </div>
-            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedEbitda)}</p>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedEbitda)}</p>
           </div>
           
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-            <div className="flex items-center text-sm text-white/70 mb-1">
-              <DollarSign className="h-4 w-4 mr-1" />
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="flex items-center text-sm text-gray-600 mb-2">
+              <DollarSign className="h-4 w-4 mr-2" />
               Est. Value
             </div>
-            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedValuation)}</p>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedValuation)}</p>
           </div>
         </div>
       </div>
