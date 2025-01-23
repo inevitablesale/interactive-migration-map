@@ -127,6 +127,24 @@ export const ListingsPanel = () => {
     return PLACEHOLDER_IMAGES[randomIndex];
   };
 
+  const getLocationDisplay = (listing: any) => {
+    const location = listing.Location || '';
+    const stateName = listing["State Name"] || '';
+    
+    // If Location contains both city and state (e.g., "New York, NY")
+    if (location.includes(',')) {
+      return location;
+    }
+    
+    // If we have both city (Location) and state separately
+    if (location && stateName) {
+      return `${location}, ${stateName}`;
+    }
+    
+    // Fallback to whatever we have
+    return location || stateName || 'Location unavailable';
+  };
+
   return (
     <div className="space-y-6">
       <div className={`${isMobile ? 'flex overflow-x-auto pb-4 space-x-4 snap-x snap-mandatory' : 'space-y-4'}`}>
@@ -142,7 +160,6 @@ export const ListingsPanel = () => {
               } ${isMobile ? 'min-w-[300px] snap-center' : 'w-full'}`}
             >
               <div className="flex items-start gap-4">
-                {/* Firm Image */}
                 <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
                   <img
                     src={listing.logoResolutionResult || listing.originalCoverImage || getRandomPlaceholder()}
@@ -151,7 +168,6 @@ export const ListingsPanel = () => {
                   />
                 </div>
 
-                {/* Firm Details */}
                 <div className="flex-1 space-y-3 min-w-0">
                   <div>
                     <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
@@ -160,7 +176,7 @@ export const ListingsPanel = () => {
                     </h3>
                     <div className="flex items-center gap-2 text-white/60 text-sm">
                       <MapPin className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{listing.Location || listing["State Name"]}</span>
+                      <span className="truncate">{getLocationDisplay(listing)}</span>
                     </div>
                   </div>
 
