@@ -202,7 +202,7 @@ export default function TrackedPractices() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4 sm:p-6 pt-24 space-y-6">
+      <div className="container mx-auto p-4 sm:p-6 pt-28 space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
@@ -225,81 +225,70 @@ export default function TrackedPractices() {
           </div>
         </div>
 
-        <DashboardSummary />
-        
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <SearchFilters 
-              onSearch={handleSearch}
-              onFilter={handleFilter}
-            />
-            
-            {isLoading ? (
-              <div className="text-white">Loading practices...</div>
-            ) : (
-              <>
-                <div className={`mt-6 grid gap-4 ${
-                  viewMode === 'grid' 
-                    ? 'grid-cols-1 sm:grid-cols-2' 
-                    : 'grid-cols-1'
-                }`}>
-                  {paginatedPractices?.map((practice) => (
-                    <PracticeCard
-                      key={practice.id}
-                      practice={practice}
-                      onWithdraw={() => handleWithdraw(practice.id)}
-                      onExpressInterest={() => handleExpressInterest(practice.id)}
-                    />
-                  ))}
-                </div>
+        {isLoading ? (
+          <div className="text-white">Loading practices...</div>
+        ) : (
+          <>
+            <div className={`mt-6 grid gap-4 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 sm:grid-cols-2' 
+                : 'grid-cols-1'
+            }`}>
+              {paginatedPractices?.map((practice) => (
+                <PracticeCard
+                  key={practice.id}
+                  practice={practice}
+                  onWithdraw={() => handleWithdraw(practice.id)}
+                  onExpressInterest={() => handleExpressInterest(practice.id)}
+                />
+              ))}
+            </div>
 
-                {totalPages > 1 && (
-                  <Pagination className="mt-6">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                          className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
-                        />
+            {totalPages > 1 && (
+              <Pagination className="mt-6">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
+                    />
+                  </PaginationItem>
+                  
+                  {getPaginationNumbers().map((page, index) => (
+                    page === 'ellipsis' ? (
+                      <PaginationItem key={`ellipsis-${index}`}>
+                        <PaginationEllipsis className="text-white" />
                       </PaginationItem>
-                      
-                      {getPaginationNumbers().map((page, index) => (
-                        page === 'ellipsis' ? (
-                          <PaginationItem key={`ellipsis-${index}`}>
-                            <PaginationEllipsis className="text-white" />
-                          </PaginationItem>
-                        ) : (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                              className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        )
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                          className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
-                        />
+                    ) : (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                          className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
+                        >
+                          {page}
+                        </PaginationLink>
                       </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </>
+                    )
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
-          </div>
-          <div className="mt-6 md:mt-0">
-            <PracticeOfDay 
-              practice={practiceOfDay}
-              onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
-            />
-          </div>
-        </div>
+          </>
+        )}
+      </div>
+      <div className="mt-6 md:mt-0">
+        <PracticeOfDay 
+          practice={practiceOfDay}
+          onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
+        />
       </div>
     </div>
   );
