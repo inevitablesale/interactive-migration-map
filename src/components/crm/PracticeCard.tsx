@@ -25,8 +25,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
   const ebitdaMargin = 0.25; // Industry average EBITDA margin
   const estimatedEbitda = estimatedRevenue * ebitdaMargin;
-  const valuationMultiple = 1.0; // Conservative valuation multiple
-  const estimatedValuation = estimatedRevenue * valuationMultiple;
+  const valuationMultiple = 2.5; // Industry standard multiple for professional services firms
+  const estimatedValuation = estimatedEbitda * valuationMultiple;
 
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
@@ -83,37 +83,37 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <Users className="h-4 w-4 mr-2" />
               Employees
             </div>
-            <p className="text-lg font-semibold text-white">{practice.employee_count}</p>
+            <p className="text-base sm:text-lg font-semibold text-white">{practice.employee_count}</p>
           </div>
           
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Revenue
             </div>
-            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
           </div>
           
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. EBITDA
             </div>
-            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedEbitda)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedEbitda)}</p>
           </div>
           
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Value
             </div>
-            <p className="text-lg font-semibold text-white">{formatCurrency(estimatedValuation)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedValuation)}</p>
           </div>
         </div>
       </div>
