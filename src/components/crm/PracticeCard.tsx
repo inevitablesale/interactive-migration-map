@@ -27,12 +27,6 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
 
   const firmSize = getFirmSizeCategory(practice.employee_count);
-  const sdeParams = getSDEParameters(firmSize);
-  const sde = estimatedRevenue * sdeParams.sdeMargin;
-  
-  // Calculate EBITDA (typically 70% of SDE for accounting firms)
-  const ebitdaRatio = 0.70;
-  const ebitda = sde * ebitdaRatio;
   
   // Calculate valuation using the same method as KeyMetricsBar
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
