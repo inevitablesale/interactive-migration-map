@@ -16,6 +16,25 @@ const PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
 ];
 
+interface GeneratedText {
+  title: string | null;
+  teaser: string | null;
+}
+
+interface Listing {
+  "Company ID": number;
+  "Company Name": string;
+  Location: string;
+  "State Name": string;
+  status: string;
+  logoResolutionResult: string | null;
+  originalCoverImage: string | null;
+  employeeCount: number;
+  specialities: string;
+  practice_buyer_pool: Array<any>;
+  firm_generated_text: GeneratedText[];
+}
+
 export const ListingsPanel = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -37,7 +56,7 @@ export const ListingsPanel = () => {
     }
   });
 
-  const { data: listings, refetch: refetchListings } = useQuery({
+  const { data: listings, refetch: refetchListings } = useQuery<Listing[]>({
     queryKey: ['listings'],
     queryFn: async () => {
       const { data, error } = await supabase
