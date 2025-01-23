@@ -10,7 +10,8 @@ import { BusinessOverview } from "@/components/practice-details/BusinessOverview
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Bird } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   Collapsible,
   CollapsibleContent,
@@ -172,7 +173,7 @@ export default function PracticeDetails() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white">
+      <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white pt-24">
         <Skeleton className="h-12 w-[300px] bg-white/10" />
         <Skeleton className="h-20 w-full bg-white/10" />
         <div className="grid gap-6 md:grid-cols-2">
@@ -184,7 +185,7 @@ export default function PracticeDetails() {
   }
 
   if (!data?.practice) return (
-    <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white">
+    <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white pt-24">
       <h1 className="text-2xl font-bold">Practice not found</h1>
       <p className="text-white/60">The practice you're looking for could not be found.</p>
     </div>
@@ -215,7 +216,21 @@ export default function PracticeDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      <div className="container mx-auto p-6 space-y-8">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+            <span className="text-xl font-bold text-yellow-400">Canary</span>
+          </div>
+          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+            Sign In
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Content - Added pt-24 to prevent header overlap */}
+      <div className="container mx-auto p-6 space-y-8 pt-24">
         <Button
           variant="ghost"
           className="text-white hover:text-white/80 hover:bg-white/10"
