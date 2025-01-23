@@ -56,23 +56,6 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
           
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            {hasExpressedInterest && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={onWithdraw}
-                className="text-white/60 hover:text-white border-white/10 hover:border-white/20 bg-white/5 w-full sm:w-auto"
-              >
-                Withdraw
-              </Button>
-            )}
-            <Button 
-              size="sm"
-              onClick={onExpressInterest}
-              className="bg-yellow-400 text-black hover:bg-yellow-500 w-full sm:w-auto"
-            >
-              {hasExpressedInterest ? 'Interested' : 'Express Interest'}
-            </Button>
             <Link to={`/practice/${practice.id}`} className="w-full sm:w-auto">
               <Button 
                 variant="secondary" 
@@ -85,37 +68,29 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mt-auto">
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <Users className="h-4 w-4 mr-2" />
               Employees
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white">{practice.employee_count}</p>
+            <p className="text-base sm:text-lg font-semibold text-white truncate">{practice.employee_count}</p>
           </div>
-          
+            
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Revenue
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedRevenue)}</p>
           </div>
-          
-          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
-            <div className="flex items-center text-sm text-white/60 mb-2">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Est. EBITDA
-            </div>
-            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedEbitda)}</p>
-          </div>
-          
+            
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Value
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedValuation)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedValuation)}</p>
           </div>
         </div>
       </div>
