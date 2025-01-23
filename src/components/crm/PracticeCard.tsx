@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Users, DollarSign } from "lucide-react";
+import { getFirmSizeCategory, getSDEParameters, getValuationMultiple } from "@/utils/valuationUtils";
 
 interface PracticeCardProps {
   practice: {
@@ -18,16 +19,21 @@ interface PracticeCardProps {
   onExpressInterest: () => void;
 }
 
-export function PracticeCard({ practice, onWithdraw, onExpressInterest }: PracticeCardProps) {
-  // Calculate financial metrics based on employee count
-  const avgSalaryPerEmployee = 86259; // Industry average
+export function PracticeCard({ practice }: PracticeCardProps) {
+  // Calculate financial metrics using the sophisticated method
+  const avgSalaryPerEmployee = 86259; // Industry average when county data isn't available
   const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
-  const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
+  const payrollToRevenueRatio = 0.35;
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
-  const ebitdaMargin = 0.25; // Industry average EBITDA margin
-  const estimatedEbitda = estimatedRevenue * ebitdaMargin;
-  const valuationMultiple = 2.5; // Industry standard multiple for professional services firms
-  const estimatedValuation = estimatedEbitda * valuationMultiple;
+
+  const firmSize = getFirmSizeCategory(practice.employee_count);
+  const sdeParams = getSDEParameters(firmSize);
+  const sde = estimatedRevenue * sdeParams.sdeMargin;
+  const ebitdaRatio = 0.70;
+  const ebitda = sde * ebitdaRatio;
+  
+  const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
+  const estimatedValuation = estimatedRevenue * valuationMultiple;
 
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
@@ -35,8 +41,6 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
     }
     return `$${(amount / 1000).toFixed(0)}K`;
   };
-
-  const hasExpressedInterest = practice.status === 'interested';
 
   // Parse location to get city and state
   const [city, state] = practice.region.includes(",") ? 
