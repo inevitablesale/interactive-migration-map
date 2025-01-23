@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Building, Users, DollarSign } from "lucide-react";
 
 interface PracticeCardProps {
   practice: {
@@ -38,43 +39,72 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   };
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold">{practice.industry}</h3>
-          <p className="text-sm text-muted-foreground">{practice.region}</p>
-        </div>
-        <div className="space-x-2">
-          <Button variant="outline" size="sm" onClick={onWithdraw}>
-            Withdraw
-          </Button>
-          <Button size="sm" onClick={onExpressInterest}>
-            Express Interest
-          </Button>
-          <Link to={`/practice/${practice.id}`}>
-            <Button variant="secondary" size="sm">
-              View Details
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">{practice.industry}</h3>
+            <div className="flex items-center text-sm text-gray-600">
+              <Building className="h-4 w-4 mr-1" />
+              {practice.region}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onWithdraw}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Withdraw
             </Button>
-          </Link>
+            <Button 
+              size="sm"
+              onClick={onExpressInterest}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              Express Interest
+            </Button>
+            <Link to={`/practice/${practice.id}`}>
+              <Button variant="secondary" size="sm">
+                View Details
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
-        <div>
-          <p className="text-muted-foreground">Employees</p>
-          <p>{practice.employee_count}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">Est. Gross Revenue</p>
-          <p>{formatCurrency(estimatedRevenue)}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">Est. EBITDA</p>
-          <p>{formatCurrency(estimatedEbitda)}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">Est. Valuation</p>
-          <p>{formatCurrency(estimatedValuation)}</p>
+
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              <Users className="h-4 w-4 mr-1" />
+              Employees
+            </div>
+            <p className="text-lg font-semibold text-gray-900">{practice.employee_count}</p>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              <DollarSign className="h-4 w-4 mr-1" />
+              Est. Revenue
+            </div>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedRevenue)}</p>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              <DollarSign className="h-4 w-4 mr-1" />
+              Est. EBITDA
+            </div>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedEbitda)}</p>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              <DollarSign className="h-4 w-4 mr-1" />
+              Est. Value
+            </div>
+            <p className="text-lg font-semibold text-gray-900">{formatCurrency(estimatedValuation)}</p>
+          </div>
         </div>
       </div>
     </div>
