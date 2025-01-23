@@ -35,39 +35,6 @@ export interface MSARanking {
   median_income: number;
 }
 
-export interface TopFirm {
-  id?: string;
-  "Company Name": string;
-  "Primary Subtitle": string | null;
-  Location: string | null;
-  Summary: string | null;
-  "Company ID": number;
-  "Profile URL": string | null;
-  employeeCount: number | null;
-  specialities: string | null;
-  employeeCountRangeLow: number | null;
-  employeeCountRangeHigh: number | null;
-  followerCount: number | null;
-  description: string | null;
-  websiteUrl: string | null;
-  foundedOn: number | null;
-  latitude: number | null;
-  longitude: number | null;
-  "Block FIPS": string | null;
-  "State Name": string | null;
-  STATE: string | null;
-  STATEFP: number | null;
-  COUNTYFP: number | null;
-  COUNTYNAME: string | null;
-  PLACEFP: string | null;
-  PLACENS: string | null;
-  PLACENAME: string | null;
-  originalCoverImage: string | null;
-  logoResolutionResult: string | null;
-  status: string | null;
-  notes: string | null;
-}
-
 export interface ComprehensiveMarketData {
   total_population?: number;
   median_household_income?: number;
@@ -109,4 +76,37 @@ export interface ComprehensiveMarketData {
   avg_firms_per_10k?: number;
   avg_growth_rate?: number;
   avg_market_saturation?: number;
+}
+
+export interface TopFirm {
+  id?: string;
+  "Company Name": string;
+  "Primary Subtitle": string | null;
+  Location: string | null;
+  Summary: string | null;
+  "Company ID": number;
+  "Profile URL": string | null;
+  employeeCount: number | null;
+  specialities: string | null;
+  employeeCountRangeLow: number | null;
+  employeeCountRangeHigh: number | null;
+  followerCount: number | null;
+  description: string | null;
+  websiteUrl: string | null;
+  foundedOn: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  "Block FIPS": string | null;
+  "State Name": string | null;
+  STATE: string | null;
+  STATEFP: number | null;
+  COUNTYFP: number | null;
+  COUNTYNAME: string | null;
+  PLACEFP: string | null;
+  PLACENS: string | null;
+  PLACENAME: string | null;
+  originalCoverImage: string | null;
+  logoResolutionResult: string | null;
+  status: string | null;
+  notes: string | null;
 }
