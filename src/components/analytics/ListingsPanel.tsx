@@ -44,7 +44,11 @@ export const ListingsPanel = () => {
         .from('canary_firms_data')
         .select(`
           *,
-          practice_buyer_pool (*)
+          practice_buyer_pool (*),
+          firm_generated_text (
+            title,
+            teaser
+          )
         `)
         .limit(3);
       
@@ -151,6 +155,7 @@ export const ListingsPanel = () => {
         {listings?.map((listing) => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
+          const generatedText = listing.firm_generated_text?.[0];
           
           return (
             <Card 
@@ -171,10 +176,15 @@ export const ListingsPanel = () => {
                 <div className="flex-1 space-y-3 min-w-0">
                   <div>
                     <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
-                      {listing["Company Name"]}
+                      {generatedText?.title || listing["Company Name"]}
                       {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
                     </h3>
-                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                    {generatedText?.teaser && (
+                      <p className="text-sm text-white/60 mt-1 line-clamp-2">
+                        {generatedText.teaser}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 text-white/60 text-sm mt-2">
                       <MapPin className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">{getLocationDisplay(listing)}</span>
                     </div>
