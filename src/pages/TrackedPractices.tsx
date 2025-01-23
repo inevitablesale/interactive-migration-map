@@ -190,7 +190,7 @@ export default function TrackedPractices() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       {/* Fixed Header with Logo */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
@@ -203,7 +203,7 @@ export default function TrackedPractices() {
       </header>
 
       {/* Main Content with increased top padding */}
-      <main className="container mx-auto p-4 sm:p-6 pt-36 space-y-6">
+      <main className="container mx-auto p-4 sm:p-6 pt-[88px] space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
