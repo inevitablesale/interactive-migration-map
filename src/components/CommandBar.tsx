@@ -16,7 +16,7 @@ export const CommandBar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/10">
+    <div className="fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center">
         <nav className="flex items-center gap-8">
           <button
