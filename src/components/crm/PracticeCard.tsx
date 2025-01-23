@@ -35,6 +35,9 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
     return `$${(amount / 1000).toFixed(0)}K`;
   };
 
+  // Split location into city and state
+  const [city, state] = practice.region.split(', ');
+
   const hasExpressedInterest = practice.status === 'interested';
 
   return (
@@ -43,9 +46,15 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         <div className="flex justify-between items-start mb-6">
           <div>
             <h3 className="text-xl font-semibold text-white mb-2">{practice.industry}</h3>
-            <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full">
-              <Building className="h-4 w-4 mr-2" />
-              {practice.region}
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full">
+                <Building className="h-4 w-4 mr-2" />
+                {city}
+              </div>
+              <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full">
+                <Building className="h-4 w-4 mr-2" />
+                {state}
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
