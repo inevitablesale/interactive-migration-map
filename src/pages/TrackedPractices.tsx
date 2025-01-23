@@ -16,7 +16,7 @@ export default function TrackedPractices() {
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
-
+  
   const ITEMS_PER_PAGE = 6;
 
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
@@ -119,7 +119,8 @@ export default function TrackedPractices() {
   const filteredPractices = practices?.filter(practice => {
     const searchMatches = !searchQuery || 
       practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      practice.region.toLowerCase().includes(searchQuery.toLowerCase());
+      practice.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
