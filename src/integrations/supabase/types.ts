@@ -449,6 +449,33 @@ export type Database = {
         }
         Relationships: []
       }
+      firm_generated_text: {
+        Row: {
+          badges: string | null
+          callouts: string | null
+          company_id: number
+          generated_summary: string | null
+          teaser: string | null
+          title: string | null
+        }
+        Insert: {
+          badges?: string | null
+          callouts?: string | null
+          company_id: number
+          generated_summary?: string | null
+          teaser?: string | null
+          title?: string | null
+        }
+        Update: {
+          badges?: string | null
+          callouts?: string | null
+          company_id?: number
+          generated_summary?: string | null
+          teaser?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       msa_county_reference: {
         Row: {
           COUNTYNAME: string
@@ -1386,6 +1413,30 @@ export type Database = {
           year_2022_moves: number
           growth_rate: number
           trend_direction: string
+        }[]
+      }
+      get_merged_county_firm_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          county_name: string
+          state_name: string
+          state_fp: string
+          county_fp: string
+          total_population: number
+          median_household_income: number
+          firms_per_10k: number
+          growth_rate_percentage: number
+          market_saturation: number
+          firm_density_rank: number
+          national_density_rank: number
+          total_firms: number
+          avg_employee_count: number
+          avg_follower_count: number
+          top_specialties: string[]
+          total_education_population: number
+          bachelors_holders: number
+          masters_holders: number
+          doctorate_holders: number
         }[]
       }
       get_msa_rankings: {
