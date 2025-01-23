@@ -18,7 +18,7 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        navigate("/tracked-practices");
       }
     };
     checkSession();
@@ -29,7 +29,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/thank-you`,
+          redirectTo: `${window.location.origin}/tracked-practices`,
         },
       });
 
