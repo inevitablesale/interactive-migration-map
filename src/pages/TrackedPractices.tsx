@@ -28,7 +28,8 @@ export default function TrackedPractices() {
         .select(`
           *,
           firm_generated_text(
-            title
+            title,
+            teaser
           )
         `)
         .order('followerCount', { ascending: false });
@@ -49,7 +50,10 @@ export default function TrackedPractices() {
         specialities: practice.specialities,
         generated_title: Array.isArray(practice.firm_generated_text) && practice.firm_generated_text.length > 0
           ? practice.firm_generated_text[0]?.title || practice["Primary Subtitle"] || ""
-          : practice["Primary Subtitle"] || ""
+          : practice["Primary Subtitle"] || "",
+        teaser: Array.isArray(practice.firm_generated_text) && practice.firm_generated_text.length > 0
+          ? practice.firm_generated_text[0]?.teaser || null
+          : null
       }));
     }
   });

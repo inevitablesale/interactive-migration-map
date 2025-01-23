@@ -13,6 +13,7 @@ interface PracticeCardProps {
     status: string;
     last_updated: string;
     generated_title?: string;
+    teaser?: string | null;
   };
   onWithdraw: () => void;
   onExpressInterest: () => void;
@@ -49,6 +50,11 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-6">
           <div className="w-full sm:w-auto">
             <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{practice.generated_title || practice.industry}</h3>
+            {practice.teaser && (
+              <p className="text-sm text-white/60 mb-2 line-clamp-2">
+                {practice.teaser}
+              </p>
+            )}
             <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full w-fit">
               <Building className="h-4 w-4 mr-2" />
               {city}{state ? `, ${state}` : ''}
