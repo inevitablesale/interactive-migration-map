@@ -111,111 +111,134 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
 
   return (
     <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
-      <div className="flex items-center gap-2">
-        <DollarSign className="w-5 h-5 text-green-400" />
-        <div>
-          <div className="flex items-center gap-1">
-            <div className="min-h-[4rem]">
-              <p className="text-sm text-white/60">Est. Gross</p>
-              <p className="text-sm text-white/60">Revenue</p>
+      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-emerald-400" />
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-medium text-white/60">Est. Gross Revenue</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-white/40 hover:text-white/60 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Estimated based on industry standards</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Estimated based on industry standards</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <p className="text-2xl font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
-          <p className="text-xs text-white/40">Based on payroll data</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Building2 className="w-5 h-5 text-blue-400" />
-        <div>
-          <div className="flex items-center gap-1">
-            <div className="min-h-[4rem]">
-              <p className="text-sm text-white/60">Est. SDE</p>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Seller's Discretionary Earnings</p>
-                  <p className="text-xs text-gray-400">Based on {firmSize} firm benchmarks</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <p className="text-2xl font-semibold text-white">{formatCurrency(sde)}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Users className="w-5 h-5 text-purple-400" />
-        <div>
-          <div className="flex items-center gap-1">
-            <div className="min-h-[4rem]">
-              <p className="text-sm text-white/60">Est. EBITDA</p>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">70% of SDE for accounting firms</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <p className="text-2xl font-semibold text-white">{formatCurrency(ebitda)}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-yellow-400" />
-        <div>
-          <div className="flex items-center gap-1">
-            <div className="min-h-[4rem]">
-              <p className="text-sm text-white/60">Growth Rates</p>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">Population Growth Rate</p>
-                  <p className="text-xs text-gray-400">Compared to state average</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-2xl font-semibold text-white">
-              {formatGrowthRate(countyData?.population_growth_rate)}
-            </p>
-            <p className="text-xs text-white/60">
-              Avg: {formatGrowthRate(countyData?.avg_growth_rate)}
-            </p>
           </div>
         </div>
+        <div className="mt-2">
+          <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(estimatedRevenue)}</p>
+          <p className="text-xs text-white/40 mt-1">Based on payroll data</p>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <LineChart className="w-5 h-5 text-orange-400" />
-        <div>
-          <div className="min-h-[4rem]">
-            <p className="text-sm text-white/60">Est. Valuation</p>
+
+      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-blue-400" />
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-medium text-white/60">Est. SDE</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-white/40 hover:text-white/60 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Seller's Discretionary Earnings</p>
+                    <p className="text-xs text-gray-400">Based on {firmSize} firm benchmarks</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
-          <p className="text-2xl font-semibold text-white">
+        </div>
+        <div className="mt-2">
+          <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(sde)}</p>
+        </div>
+      </div>
+
+      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-purple-400" />
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-medium text-white/60">Est. EBITDA</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-white/40 hover:text-white/60 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">70% of SDE for accounting firms</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </div>
+        <div className="mt-2">
+          <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(ebitda)}</p>
+        </div>
+      </div>
+
+      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-yellow-400" />
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-medium text-white/60">Growth Rates</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-white/40 hover:text-white/60 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Population Growth Rate</p>
+                    <p className="text-xs text-gray-400">Compared to state average</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </div>
+        <div className="mt-2">
+          <p className="text-2xl font-bold text-white tracking-tight">
+            {formatGrowthRate(countyData?.population_growth_rate)}
+          </p>
+          <p className="text-xs text-white/40 mt-1">
+            Avg: {formatGrowthRate(countyData?.avg_growth_rate)}
+          </p>
+        </div>
+      </div>
+
+      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <LineChart className="w-5 h-5 text-orange-400" />
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-medium text-white/60">Est. Valuation</p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-white/40 hover:text-white/60 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm">Based on industry multiples</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </div>
+        <div className="mt-2">
+          <p className="text-2xl font-bold text-white tracking-tight">
             {formatCurrency(estimatedValuation)}
           </p>
-          <p className="text-xs text-white/60">
+          <p className="text-xs text-white/40 mt-1">
             Based on Revenue × {valuationMultiple.toFixed(2)}
           </p>
         </div>
