@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
-import { CommandBar } from "@/components/CommandBar";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -216,7 +215,6 @@ export default function PracticeDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      <CommandBar />
       <div className="container mx-auto p-6 space-y-8">
         <Button
           variant="ghost"
@@ -229,7 +227,7 @@ export default function PracticeDetails() {
 
         <div className="space-y-6">
           {/* Primary Content */}
-          <div className="bg-black/40 backdrop-blur-md rounded-lg p-6">
+          <div className="rounded-lg p-6">
             <PracticeHeader practice={practice} />
           </div>
 
