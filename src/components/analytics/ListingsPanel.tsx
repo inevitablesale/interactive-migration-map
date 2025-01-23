@@ -72,7 +72,15 @@ export const ListingsPanel = () => {
         .limit(3);
       
       if (error) throw error;
-      return data as Listing[];
+      
+      // Transform the data to match our Listing interface
+      const transformedData = data.map(item => ({
+        ...item,
+        practice_buyer_pool: item.practice_buyer_pool || [],
+        firm_generated_text: item.firm_generated_text || []
+      }));
+      
+      return transformedData;
     }
   });
 
