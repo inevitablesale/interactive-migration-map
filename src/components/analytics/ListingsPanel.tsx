@@ -31,8 +31,14 @@ interface Listing {
   originalCoverImage: string | null;
   employeeCount: number;
   specialities: string;
-  practice_buyer_pool: Array<any>;
-  firm_generated_text: GeneratedText[];
+  practice_buyer_pool: Array<{
+    id: string;
+    status: string;
+  }>;
+  firm_generated_text: Array<{
+    title: string | null;
+    teaser: string | null;
+  }>;
 }
 
 export const ListingsPanel = () => {
@@ -63,23 +69,24 @@ export const ListingsPanel = () => {
         .from('canary_firms_data')
         .select(`
           *,
-          practice_buyer_pool (
+          practice_buyer_pool:canary_firm_interests(
             id,
             status
           ),
-          firm_generated_text (
+          firm_generated_text(
             title,
             teaser
           )
         `)
-        .limit(3);
+        .limit(3)
+        .order('followerCount', { ascending: false });
       
       if (error) throw error;
       
-      return data.map(item => ({
+      return data.map((item: any) => ({
         ...item,
-        practice_buyer_pool: item.practice_buyer_pool || [],
-        firm_generated_text: item.firm_generated_text || []
+        practice_buyer_pool: Array.isArray(item.practice_buyer_pool) ? item.practice_buyer_pool : [],
+        firm_generated_text: Array.isArray(item.firm_generated_text) ? item.firm_generated_text : []
       }));
     }
   });
@@ -106,11 +113,10 @@ export const ListingsPanel = () => {
         return;
       }
 
-      // Add to practice_buyer_pool
       const { error: poolError } = await supabase
-        .from('practice_buyer_pool')
+        .from('canary_firm_interests')
         .insert([{
-          practice_id: companyId.toString(),
+          company_id: companyId,
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
