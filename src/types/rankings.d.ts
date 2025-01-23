@@ -36,22 +36,36 @@ export interface MSARanking {
 }
 
 export interface TopFirm {
-  company_name: string;
-  employee_count: number;
-  follower_count: number;
-  follower_ratio: number;
-  logoResolutionResult?: string;
-  originalCoverImage?: string;
-  primarySubtitle?: string;
-  employeeCountRangeLow?: number;
-  employeeCountRangeHigh?: number;
-  foundedOn?: string;
-  specialities?: string;
-  websiteUrl?: string;
-  Location?: string;
-  Summary?: string;
-  COUNTYFP?: string;
-  STATEFP?: string;
+  id?: string;
+  "Company Name": string;
+  "Primary Subtitle": string | null;
+  Location: string | null;
+  Summary: string | null;
+  "Company ID": number;
+  "Profile URL": string | null;
+  employeeCount: number | null;
+  specialities: string | null;
+  employeeCountRangeLow: number | null;
+  employeeCountRangeHigh: number | null;
+  followerCount: number | null;
+  description: string | null;
+  websiteUrl: string | null;
+  foundedOn: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  "Block FIPS": string | null;
+  "State Name": string | null;
+  STATE: string | null;
+  STATEFP: number | null;
+  COUNTYFP: number | null;
+  COUNTYNAME: string | null;
+  PLACEFP: string | null;
+  PLACENS: string | null;
+  PLACENAME: string | null;
+  originalCoverImage: string | null;
+  logoResolutionResult: string | null;
+  status: string | null;
+  notes: string | null;
 }
 
 export interface ComprehensiveMarketData {
@@ -63,7 +77,7 @@ export interface ComprehensiveMarketData {
   private_sector_accountants?: number;
   public_sector_accountants?: number;
   firms_per_10k_population?: number;
-  growth_rate_percentage?: number;
+  population_growth_rate?: number;
   market_saturation_index?: number;
   total_education_population?: number;
   bachelors_holders?: number;

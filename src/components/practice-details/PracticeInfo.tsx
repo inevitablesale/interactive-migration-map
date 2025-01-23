@@ -18,11 +18,11 @@ export function PracticeInfo({ practice }: PracticeInfoProps) {
         </div>
         <div>
           <h3 className="font-semibold text-yellow-400">Employee Count</h3>
-          <p className="text-white/80">{practice.employee_count || 'Not available'}</p>
+          <p className="text-white/80">{practice.employeeCount || 'Not available'}</p>
         </div>
         <div>
           <h3 className="font-semibold text-yellow-400">Follower Count</h3>
-          <p className="text-white/80">{practice.follower_count?.toLocaleString()}</p>
+          <p className="text-white/80">{practice.followerCount?.toLocaleString()}</p>
         </div>
         <div>
           <h3 className="font-semibold text-yellow-400">Founded</h3>
