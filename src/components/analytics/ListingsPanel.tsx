@@ -63,7 +63,10 @@ export const ListingsPanel = () => {
         .from('canary_firms_data')
         .select(`
           *,
-          practice_buyer_pool (*),
+          practice_buyer_pool (
+            id,
+            status
+          ),
           firm_generated_text (
             title,
             teaser
@@ -73,14 +76,11 @@ export const ListingsPanel = () => {
       
       if (error) throw error;
       
-      // Transform the data to match our Listing interface
-      const transformedData = data.map(item => ({
+      return data.map(item => ({
         ...item,
         practice_buyer_pool: item.practice_buyer_pool || [],
         firm_generated_text: item.firm_generated_text || []
       }));
-      
-      return transformedData;
     }
   });
 
