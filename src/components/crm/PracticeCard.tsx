@@ -33,7 +33,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   const ebitda = sde * ebitdaRatio;
   
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
-  const estimatedValuation = estimatedRevenue * valuationMultiple;
+  const estimatedValuation = sde * ebitdaRatio * valuationMultiple;
 
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
