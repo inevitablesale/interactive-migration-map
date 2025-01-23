@@ -102,14 +102,14 @@ export const ListingsPanel = () => {
       const { error: poolError } = await supabase
         .from('practice_buyer_pool')
         .insert([{
-          practice_id: companyId.toString(), // Convert to string to match the type
+          practice_id: companyId.toString(),
           user_id: user.id,
           status: 'pending_outreach',
           is_anonymous: false
         }]);
 
       if (poolError) {
-        if (poolError.code === '23505') { // Unique violation
+        if (poolError.code === '23505') {
           toast({
             title: "Already Expressed Interest",
             description: "You have already expressed interest in this practice",
@@ -174,7 +174,6 @@ export const ListingsPanel = () => {
         {listings?.map((listing) => {
           const interestedBuyersCount = listing.practice_buyer_pool?.length || 0;
           const hasExpressedInterest = listing.status === 'pending_outreach';
-          const generatedText = listing.firm_generated_text?.[0];
           
           return (
             <Card 
@@ -187,7 +186,7 @@ export const ListingsPanel = () => {
                 <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
                   <img
                     src={listing.logoResolutionResult || listing.originalCoverImage || getRandomPlaceholder()}
-                    alt={isFreeTier ? "Firm logo" : `${listing["Company Name"]} logo`}
+                    alt={`${listing["Company Name"]} logo`}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -195,14 +194,9 @@ export const ListingsPanel = () => {
                 <div className="flex-1 space-y-3 min-w-0">
                   <div>
                     <h3 className={`font-medium text-white text-lg truncate ${isFreeTier ? 'blur-sm select-none' : ''}`}>
-                      {generatedText?.title || listing["Company Name"]}
+                      {listing["Company Name"]}
                       {isFreeTier && <Lock className="w-4 h-4 inline ml-2 text-yellow-500" />}
                     </h3>
-                    {generatedText?.teaser && (
-                      <p className="text-sm text-white/60 mt-1 line-clamp-2">
-                        {generatedText.teaser}
-                      </p>
-                    )}
                     <div className="flex items-center gap-2 text-white/60 text-sm mt-2">
                       <MapPin className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">{getLocationDisplay(listing)}</span>
