@@ -20,20 +20,23 @@ interface PracticeCardProps {
 }
 
 export function PracticeCard({ practice }: PracticeCardProps) {
-  // Calculate financial metrics using the sophisticated method
+  // Calculate financial metrics using the same method as KeyMetricsBar
   const avgSalaryPerEmployee = 86259; // Industry average when county data isn't available
   const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
-  const payrollToRevenueRatio = 0.35;
+  const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
 
   const firmSize = getFirmSizeCategory(practice.employee_count);
   const sdeParams = getSDEParameters(firmSize);
   const sde = estimatedRevenue * sdeParams.sdeMargin;
+  
+  // Calculate EBITDA (typically 70% of SDE for accounting firms)
   const ebitdaRatio = 0.70;
   const ebitda = sde * ebitdaRatio;
   
+  // Calculate valuation using the same method as KeyMetricsBar
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
-  const estimatedValuation = sde * ebitdaRatio * valuationMultiple;
+  const estimatedValuation = estimatedRevenue * valuationMultiple;
 
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
