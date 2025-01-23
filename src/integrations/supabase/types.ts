@@ -1388,30 +1388,6 @@ export type Database = {
           trend_direction: string
         }[]
       }
-      get_merged_county_firm_data: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          county_name: string
-          state_name: string
-          state_fp: string
-          county_fp: string
-          total_population: number
-          median_household_income: number
-          firms_per_10k: number
-          growth_rate_percentage: number
-          market_saturation: number
-          firm_density_rank: number
-          national_density_rank: number
-          total_firms: number
-          avg_employee_count: number
-          avg_follower_count: number
-          top_specialties: string[]
-          total_education_population: number
-          bachelors_holders: number
-          masters_holders: number
-          doctorate_holders: number
-        }[]
-      }
       get_msa_rankings: {
         Args: Record<PropertyKey, never>
         Returns: {
