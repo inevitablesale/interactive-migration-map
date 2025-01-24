@@ -32,10 +32,15 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
             return { avgSalaryPerEmployee: 86259 }; // Fallback value
           }
           
-          const data = await useMarketReportData(county, state).queryFn();
-          return {
-            avgSalaryPerEmployee: data?.countyData?.avgSalaryPerEmployee || 86259
-          };
+          const marketReport = await useMarketReportData(county, state);
+          const countyData = marketReport.data?.countyData;
+          
+          // Calculate average salary from county data if available
+          const avgSalaryPerEmployee = countyData?.payann && countyData?.emp 
+            ? (countyData.payann * 1000) / countyData.emp 
+            : 86259; // Fallback to national average
+            
+          return { avgSalaryPerEmployee };
         },
         enabled: !!practice.region,
         staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
