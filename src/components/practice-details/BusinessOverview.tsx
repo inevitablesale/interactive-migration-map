@@ -36,6 +36,16 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
       generatedText.callouts) : 
     [];
 
+  // Split the summary into two paragraphs at the first period followed by a space
+  const summaryText = generatedText?.generated_summary || practice.Summary || 'No summary available.';
+  const firstPeriodIndex = summaryText.indexOf('. ');
+  const [firstParagraph, secondParagraph] = firstPeriodIndex !== -1 
+    ? [
+        summaryText.slice(0, firstPeriodIndex + 1),
+        summaryText.slice(firstPeriodIndex + 2)
+      ]
+    : [summaryText, ''];
+
   return (
     <div className="space-y-6">
       <div className="bg-black/40 backdrop-blur-md border-white/10 rounded-lg p-6">
@@ -50,7 +60,10 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
         <div className="space-y-6">
           <div>
             <h3 className="text-white/60 mb-2 flex items-center gap-2">Summary</h3>
-            <p className="text-white">{generatedText?.generated_summary || practice.Summary || 'No summary available.'}</p>
+            <div className="space-y-4">
+              <p className="text-white">{firstParagraph}</p>
+              {secondParagraph && <p className="text-white">{secondParagraph}</p>}
+            </div>
           </div>
 
           {/* Teaser Section */}
