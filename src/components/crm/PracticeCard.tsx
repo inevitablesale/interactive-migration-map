@@ -14,6 +14,9 @@ interface PracticeCardProps {
     last_updated: string;
     generated_title?: string;
     avgSalaryPerEmployee?: number;
+    COUNTYFP?: number;
+    STATEFP?: number;
+    COUNTYNAME?: string;
   };
   onWithdraw: () => void;
   onExpressInterest: () => void;
