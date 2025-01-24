@@ -164,6 +164,39 @@ export default function TrackedPractices() {
     setCurrentPage(1);
   };
 
+  // Helper function to generate pagination numbers
+  const getPaginationRange = () => {
+    const range: (number | 'ellipsis')[] = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    range.push(1);
+    
+    if (currentPage > 3) {
+      range.push('ellipsis');
+    }
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      range.push(i);
+    }
+
+    if (currentPage < totalPages - 2) {
+      range.push('ellipsis');
+    }
+
+    if (totalPages > 1) {
+      range.push(totalPages);
+    }
+
+    return range;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
@@ -248,7 +281,7 @@ export default function TrackedPractices() {
                         />
                       </PaginationItem>
                       
-                      {getPaginationNumbers().map((page, index) => (
+                      {getPaginationRange().map((page, index) => (
                         page === 'ellipsis' ? (
                           <PaginationItem key={`ellipsis-${index}`}>
                             <PaginationEllipsis className="text-white" />
@@ -279,10 +312,7 @@ export default function TrackedPractices() {
             )}
           </div>
           <div className="mt-6 md:mt-0">
-            <PracticeOfDay 
-              practice={practiceOfDay}
-              onInterested={() => practiceOfDay && handleExpressInterest(practiceOfDay.id)}
-            />
+            <PracticeOfDay />
           </div>
         </div>
       </main>
