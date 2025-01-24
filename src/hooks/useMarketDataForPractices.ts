@@ -24,7 +24,7 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
           const statefp = practice.STATEFP.toString();
           const countyfp = practice.COUNTYFP.toString();
           
-          console.log('Querying county_data with:', {
+          console.log('Querying county_rankings with:', {
             STATEFP: statefp,
             COUNTYFP: countyfp,
             COUNTYNAME: practice.COUNTYNAME,
@@ -33,8 +33,8 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
           });
 
           const { data: countyData, error: countyError } = await supabase
-            .from('county_data')
-            .select('PAYANN, EMP')
+            .from('county_rankings')
+            .select('total_payroll, total_employees')
             .eq('STATEFP', statefp)
             .eq('COUNTYFP', countyfp)
             .eq('COUNTYNAME', practice.COUNTYNAME)
@@ -46,8 +46,8 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
           }
           
           // Calculate average salary from county data if available
-          const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP 
-            ? (countyData.PAYANN * 1000) / countyData.EMP 
+          const avgSalaryPerEmployee = countyData?.total_payroll && countyData?.total_employees 
+            ? (countyData.total_payroll) / countyData.total_employees 
             : 86259; // Fallback to national average
             
           console.log('Market data query result:', {
