@@ -31,7 +31,7 @@ export default function DocSign() {
           .eq('user_id', session.user.id)
           .single();
 
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') throw error;
 
         if (data) {
           setDocuments(data);
@@ -54,6 +54,23 @@ export default function DocSign() {
         return;
       }
 
+      // First, try to get the existing document record
+      const { data: existingDoc } = await supabase
+        .from('user_documents')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (!existingDoc) {
+        // If no record exists, create one
+        const { error: insertError } = await supabase
+          .from('user_documents')
+          .insert([{ user_id: session.user.id }]);
+
+        if (insertError) throw insertError;
+      }
+
+      // Now update the document status
       const updateData = {
         [`${documentType}_signed`]: true,
         [`${documentType}_signed_at`]: new Date().toISOString()
