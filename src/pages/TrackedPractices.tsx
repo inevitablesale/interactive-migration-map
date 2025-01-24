@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
 
@@ -17,9 +17,42 @@ function TrackedPractices() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [session, setSession] = useState(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const ITEMS_PER_PAGE = 6;
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+      });
+    }
+  };
 
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
@@ -187,9 +220,18 @@ function TrackedPractices() {
             <Bird className="w-8 h-8 text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </Link>
-          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-            Sign In
-          </Link>
+          {session ? (
+            <button
+              onClick={handleSignOut}
+              className="text-white hover:text-yellow-400 transition-colors"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+              Sign In
+            </Link>
+          )}
         </div>
       </header>
 
