@@ -32,7 +32,7 @@ function TrackedPractices() {
             title
           )
         `)
-        .order('followerCount', { ascending: false });
+        .order('employeeCount', { ascending: false });
 
       if (error) throw error;
 
