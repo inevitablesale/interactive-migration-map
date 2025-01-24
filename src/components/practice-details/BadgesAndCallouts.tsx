@@ -83,7 +83,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           <div className="flex flex-wrap gap-2">
             {parsedBadges.map((badge, index) => (
               <Badge 
-                key={`badge-${companyId}-${index}`}
+                key={`${companyId}-badge-${index}`}
                 className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 variant="secondary"
               >
@@ -109,7 +109,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
               
               return (
                 <div 
-                  key={`callout-${companyId}-${index}`}
+                  key={`${companyId}-callout-${index}`}
                   className="bg-white/5 rounded-lg p-4"
                 >
                   <h4 className="font-semibold text-blue-400 mb-2">{title}</h4>
