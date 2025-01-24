@@ -134,6 +134,10 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
     onFilter({});
   };
 
+  const saveAndClose = () => {
+    setIsOpen(false);
+  };
+
   const getActiveFilterCount = () => {
     return Object.values(filters).filter(value => value && value !== "").length;
   };
@@ -274,15 +278,23 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                 </div>
               </div>
 
-              {getActiveFilterCount() > 0 && (
+              <div className="flex gap-2 mt-6">
+                {getActiveFilterCount() > 0 && (
+                  <Button 
+                    variant="outline" 
+                    onClick={clearFilters}
+                    className="flex-1"
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
                 <Button 
-                  variant="outline" 
-                  onClick={clearFilters}
-                  className="mt-2"
+                  onClick={saveAndClose}
+                  className="flex-1"
                 >
-                  Clear All Filters
+                  Save Filters
                 </Button>
-              )}
+              </div>
             </div>
           </SheetContent>
         </Sheet>
