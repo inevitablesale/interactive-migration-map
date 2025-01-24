@@ -298,7 +298,6 @@ export default function PracticeDetails() {
               <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                 <div className="flex-1">
                   <PracticeHeader practice={practice} generatedText={generatedText} />
-                  <p className="text-white mt-2">Atlanta's Premier Multi-Industry Advisory Firm</p>
                   {generatedText?.teaser && (
                     <p className="mt-4 text-white/80">{generatedText.teaser}</p>
                   )}
