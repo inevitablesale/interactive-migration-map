@@ -11,7 +11,6 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: corsHeaders
@@ -23,7 +22,6 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
-    // Create Supabase client
     const supabase = createClient(
       SUPABASE_URL!,
       SUPABASE_ANON_KEY!
@@ -49,13 +47,12 @@ serve(async (req) => {
       throw new Error('Company not found')
     }
 
-    // Get user details - get most recent profile
+    // Get user profile
     console.log('Fetching user profile for userId:', userId)
     const { data: userProfile, error: userError } = await supabase
       .from('buyer_profiles')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
       .maybeSingle()
 
     console.log('User profile query result:', { data: userProfile, error: userError })
