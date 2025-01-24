@@ -96,7 +96,7 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
             <Button
               variant="outline"
               onClick={() => setShowDialog(false)}
-              className="border-white/10 text-white hover:bg-white/10"
+              className="bg-black border-white/10 text-white hover:bg-white/10"
             >
               Cancel
             </Button>
