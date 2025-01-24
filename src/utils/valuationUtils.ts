@@ -78,16 +78,3 @@ export const getValuationMultiple = (firmSize: string, revenue: number) => {
   // Cap at the maximum industry multiple
   return Math.min(1.50, baseMultiple);
 };
-
-// Updated to use average salary per employee from county data
-export const estimateAnnualRevenue = (employeeCount: number, avgSalaryPerEmployee?: number) => {
-  // Use provided average salary or fall back to industry average
-  const salary = avgSalaryPerEmployee || 86259; // Default to national average if not provided
-  
-  // Industry standard: Payroll typically represents about 35% of total revenue
-  const payrollToRevenueRatio = 0.35;
-  
-  // Calculate total payroll and then estimate revenue
-  const totalPayroll = employeeCount * salary;
-  return totalPayroll / payrollToRevenueRatio;
-};

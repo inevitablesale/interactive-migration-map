@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-import { estimateAnnualRevenue } from "@/utils/valuationUtils";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -32,45 +31,24 @@ export default function TrackedPractices() {
             title
           )
         `)
-        .returns<any[]>();
+        .order('followerCount', { ascending: false });
 
       if (error) throw error;
 
-      // Get county data in a separate query
-      const countyDataPromises = practicesData.map(practice => 
-        supabase
-          .from('county_data')
-          .select('PAYANN, EMP')
-          .eq('COUNTYFP', practice.COUNTYFP?.toString())
-          .eq('STATEFP', practice.STATEFP?.toString())
-          .single()
-      );
-
-      const countyDataResults = await Promise.all(countyDataPromises);
-
-      return practicesData.map((practice, index) => {
-        const countyData = countyDataResults[index].data;
-        const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
-          countyData.PAYANN / countyData.EMP : undefined;
-        
-        const annual_revenue = estimateAnnualRevenue(practice.employeeCount || 0, avgSalaryPerEmployee);
-
-        return {
-          id: practice["Company ID"].toString(),
-          industry: practice["Primary Subtitle"] || "",
-          region: practice["State Name"] || "",
-          employee_count: practice.employeeCount || 0,
-          avgSalaryPerEmployee,
-          annual_revenue,
-          service_mix: { "General": 100 },
-          status: "not_contacted",
-          last_updated: new Date().toISOString(),
-          practice_buyer_pool: [],
-          notes: [],
-          specialities: practice.specialities,
-          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
-        };
-      });
+      return practicesData.map(practice => ({
+        id: practice["Company ID"].toString(),
+        industry: practice["Primary Subtitle"] || "",
+        region: practice["State Name"] || "",
+        employee_count: practice.employeeCount || 0,
+        annual_revenue: 0,
+        service_mix: { "General": 100 },
+        status: "not_contacted",
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        notes: [],
+        specialities: practice.specialities,
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+      }));
     }
   });
 
@@ -163,7 +141,7 @@ export default function TrackedPractices() {
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -332,3 +310,4 @@ export default function TrackedPractices() {
       </main>
     </div>
   );
+}
