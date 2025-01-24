@@ -9,12 +9,11 @@ import {
   ChartBar, 
   Search, 
   Home,
-  Building2,
   Scale,
   Shield,
   FileText,
   Handshake,
-  Graph,
+  BarChart,
   Heart,
   Lock,
   Wallet,
@@ -28,60 +27,37 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Comprehensive mapping of specialties to icons
 const serviceIconMap: Record<string, LucideIcon> = {
-  // Tax & Accounting Core Services
   "tax": DollarSign,
   "accounting": Calculator,
   "bookkeeping": Calculator,
   "payroll": Users,
-  "audit": Clipboard,
-  
-  // Advisory & Consulting
   "advisory": Lightbulb,
   "consulting": Briefcase,
-  "business": Building2,
-  "strategic": Star,
-  "management": Briefcase,
-  
-  // Financial Services
   "financial": PiggyBank,
-  "wealth": Wallet,
-  "retirement": PiggyBank,
-  "planning": Graph,
-  
-  // Valuation & Analysis
+  "planning": BarChart,
   "valuation": ChartBar,
-  "analytics": Graph,
-  "analysis": Graph,
-  
-  // Specialized Services
   "forensic": Search,
   "estate": Home,
   "litigation": Scale,
   "compliance": Shield,
-  
-  // Documentation & Reporting
   "statements": FileText,
   "reporting": FileText,
   "reviews": FileText,
-  "compilations": FileText,
-  
-  // Risk & Controls
   "risk": Shield,
   "controls": Lock,
-  
-  // Transaction Services
   "mergers": Handshake,
   "acquisitions": Handshake,
   "diligence": Search,
-  
-  // Healthcare & Non-profit
   "non-profit": Heart,
   "healthcare": Heart,
-  
-  // Default
-  "default": Building2
+  "wealth": Wallet,
+  "retirement": PiggyBank,
+  "strategic": Star,
+  "management": Briefcase,
+  "audit": Clipboard,
+  "analytics": ChartBar,
+  "analysis": ChartBar
 };
 
 interface ServiceIconsProps {
@@ -97,8 +73,8 @@ export function ServiceIcons({ specialities }: ServiceIconsProps) {
     <div className="flex flex-wrap gap-2 mt-2">
       {services.map((service, index) => {
         // Find the first matching icon by checking if the service includes any of our keywords
-        const iconKey = Object.keys(serviceIconMap).find(key => service.includes(key)) || 'default';
-        const Icon = serviceIconMap[iconKey];
+        const iconKey = Object.keys(serviceIconMap).find(key => service.includes(key));
+        const Icon = iconKey ? serviceIconMap[iconKey] : Star; // Using Star as default icon instead of Building2
 
         return (
           <TooltipProvider key={index}>
