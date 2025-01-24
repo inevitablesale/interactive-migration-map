@@ -55,19 +55,12 @@ serve(async (req) => {
     // If no profile exists, create one
     if (!userProfile) {
       console.log('No profile found, creating one')
-      const { data: userData, error: userDataError } = await supabase.auth.admin.getUserById(userId)
-      
-      if (userDataError || !userData.user) {
-        console.error('Error getting user data:', userDataError)
-        throw new Error('Could not get user data')
-      }
-
       const { error: createError } = await supabase
         .from('buyer_profiles')
         .insert({
           user_id: userId,
-          buyer_name: userData.user.email?.split('@')[0] || 'Anonymous',
-          contact_email: userData.user.email || '',
+          buyer_name: 'Anonymous',
+          contact_email: 'pending@inevitable.sale',
           target_geography: [],
           subscription_tier: 'free'
         })
