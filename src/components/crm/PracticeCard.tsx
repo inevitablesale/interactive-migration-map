@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Users, DollarSign, Star } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PracticeCardProps {
   practice: {
@@ -73,15 +79,27 @@ export function PracticeCard({ practice }: PracticeCardProps) {
               {city}{state ? `, ${state}` : ''}
             </div>
             {serviceScore > 0 && (
-              <div className="flex items-center gap-1 mt-2">
-                {Array.from({ length: serviceScore }).map((_, index) => (
-                  <Star
-                    key={index}
-                    className="h-4 w-4 text-yellow-400 fill-yellow-400 animate-fade-in"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  />
-                ))}
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 mt-2 cursor-help">
+                      {Array.from({ length: serviceScore }).map((_, index) => (
+                        <Star
+                          key={index}
+                          className="h-4 w-4 text-yellow-400 fill-yellow-400 animate-fade-in"
+                          style={{ animationDelay: `${index * 100}ms` }}
+                        />
+                      ))}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Service Density Rating: {serviceScore}/5</p>
+                    <p className="text-xs text-muted-foreground">
+                      Based on {practice.specialities?.split(',').length} specialized services
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
           
