@@ -48,7 +48,10 @@ export default function TrackedPractices() {
         practice_buyer_pool: [],
         notes: [],
         specialities: practice.specialities,
-        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
+        COUNTYFP: practice.COUNTYFP,
+        STATEFP: practice.STATEFP,
+        COUNTYNAME: practice.COUNTYNAME
       }));
     }
   });
@@ -268,7 +271,10 @@ export default function TrackedPractices() {
                         key={practice.id}
                         practice={{
                           ...practice,
-                          avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee
+                          avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee,
+                          COUNTYFP: practice.COUNTYFP,
+                          STATEFP: practice.STATEFP,
+                          COUNTYNAME: practice.COUNTYNAME
                         }}
                         onWithdraw={() => handleWithdraw(practice.id)}
                         onExpressInterest={() => handleExpressInterest(practice.id)}

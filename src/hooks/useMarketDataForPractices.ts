@@ -4,50 +4,29 @@ import { supabase } from "@/integrations/supabase/client";
 interface Practice {
   id: string;
   region: string;
+  COUNTYFP?: string;
+  STATEFP?: string;
+  COUNTYNAME?: string;
 }
 
 export const useMarketDataForPractices = (practices: Practice[] | undefined) => {
-  // Parse location to get county and state
-  const getLocationParts = (location: string) => {
-    const parts = location.split(",").map(part => part.trim());
-    let county = parts[0];
-    let state = parts[1];
-
-    // Add "County" suffix if not present and not empty
-    if (county && !county.toLowerCase().includes("county")) {
-      county = `${county} County`;
-    }
-
-    return { county, state };
-  };
-
   const marketQueries = useQueries({
     queries: (practices || []).map(practice => {
-      const { county, state } = getLocationParts(practice.region);
-      
       return {
-        queryKey: ['marketReport', county, state, practice.id],
+        queryKey: ['marketReport', practice.COUNTYFP, practice.STATEFP, practice.id],
         queryFn: async () => {
-          if (!county || !state) {
+          if (!practice.COUNTYFP || !practice.STATEFP || !practice.COUNTYNAME) {
+            console.log('Missing FIPS codes or county name:', { practice });
             return { avgSalaryPerEmployee: 86259 }; // Fallback value
           }
 
-          // First get the state FIPS code
-          const { data: stateFips, error: stateFipsError } = await supabase
-            .from('state_fips_codes')
-            .select('STATEFP')
-            .eq('state', state)
-            .maybeSingle();
-
-          if (stateFipsError) throw stateFipsError;
-          if (!stateFips) return { avgSalaryPerEmployee: 86259 };
-
-          // Then get the county data using the FIPS code
+          // Get the county data using FIPS codes
           const { data: countyData, error: countyError } = await supabase
             .from('county_data')
             .select('PAYANN, EMP')
-            .eq('STATEFP', stateFips.STATEFP)
-            .eq('COUNTYNAME', county)
+            .eq('STATEFP', practice.STATEFP)
+            .eq('COUNTYFP', practice.COUNTYFP)
+            .eq('COUNTYNAME', practice.COUNTYNAME)
             .maybeSingle();
 
           if (countyError) throw countyError;
@@ -58,8 +37,9 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
             : 86259; // Fallback to national average
             
           console.log('Market data query for:', {
-            county,
-            state,
+            COUNTYFP: practice.COUNTYFP,
+            STATEFP: practice.STATEFP,
+            COUNTYNAME: practice.COUNTYNAME,
             countyData,
             avgSalaryPerEmployee
           });
