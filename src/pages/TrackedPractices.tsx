@@ -4,19 +4,21 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Bird, Users, Clock, Play } from "lucide-react";
+import { LayoutGrid, List, Bird, Users, Clock, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
-import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAlertOpen, setIsAlertOpen] = useState(true);
+  const [hasBeenViewed, setHasBeenViewed] = useState(false);
   const { toast } = useToast();
   
   const ITEMS_PER_PAGE = 6;
@@ -56,7 +58,6 @@ export default function TrackedPractices() {
     }
   });
 
-  // Filter practices based on search and filters
   const filteredPractices = practices?.filter(practice => {
     const searchMatches = !searchQuery || 
       practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -182,21 +183,77 @@ export default function TrackedPractices() {
     return range;
   };
 
+  const toggleAlert = () => {
+    setIsAlertOpen(!isAlertOpen);
+    if (!hasBeenViewed) {
+      setHasBeenViewed(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-            <span className="text-xl font-bold text-yellow-400">Canary</span>
+        <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+              <span className="text-xl font-bold text-yellow-400">Canary</span>
+            </div>
+            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+              Sign In
+            </Link>
           </div>
-          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-            Sign In
-          </Link>
+          
+          {/* Featured Opportunity Alert */}
+          <div className="w-full">
+            <button
+              onClick={toggleAlert}
+              className={cn(
+                "w-full flex items-center justify-between p-2 rounded-t-lg bg-white text-black",
+                !hasBeenViewed && "animate-pulse"
+              )}
+            >
+              <span className="font-semibold">Today's Featured Opportunity</span>
+              {isAlertOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            
+            {isAlertOpen && (
+              <div className="bg-white rounded-b-lg p-4 space-y-4 shadow-lg">
+                <div className="relative">
+                  <div className="absolute -right-3 top-0 rotate-45 bg-yellow-300 px-8 py-1 text-black text-sm font-semibold">
+                    COMING SOON
+                  </div>
+                  <h3 className="text-xl font-semibold mt-6">Accounting | Virginia</h3>
+                  <p className="text-gray-600">346 employees | 100% General</p>
+                  
+                  <div className="flex justify-between items-center py-4">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-gray-500" />
+                      <span>0 interested buyers</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-gray-500" />
+                      <span>12 hours remaining</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-gray-200 text-gray-600 hover:bg-gray-300" disabled>
+                      I'm Interested
+                    </Button>
+                    <Button variant="outline" className="flex-1 flex items-center justify-center gap-2">
+                      <Play className="w-4 h-4" />
+                      Watch the live replay
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto p-4 sm:p-6 pt-[120px] space-y-6">
+      <main className="container mx-auto p-4 sm:p-6 pt-[220px] space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
@@ -220,40 +277,6 @@ export default function TrackedPractices() {
         </div>
 
         <DashboardSummary />
-
-        {/* New Featured Opportunity Section */}
-        <Card className="relative overflow-hidden bg-white p-8">
-          {/* Coming Soon Banner */}
-          <div className="absolute -right-16 top-8 rotate-45 bg-yellow-300 px-16 py-2 text-black font-semibold z-10">
-            COMING SOON
-          </div>
-          
-          <div className="space-y-4">
-            <h2 className="text-3xl font-bold">Today's Featured Opportunity</h2>
-            <h3 className="text-2xl font-semibold">Accounting | Virginia</h3>
-            <p className="text-gray-600 text-lg">346 employees | 100% General</p>
-            
-            <div className="flex justify-between items-center py-4">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-gray-500" />
-                <span>0 interested buyers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-gray-500" />
-                <span>12 hours remaining</span>
-              </div>
-            </div>
-
-            <Button className="w-full bg-gray-200 text-gray-600 hover:bg-gray-300" disabled>
-              I'm Interested
-            </Button>
-
-            <Button variant="outline" className="w-full mt-2 flex items-center justify-center gap-2">
-              <Play className="w-4 h-4" />
-              Watch the live replay
-            </Button>
-          </div>
-        </Card>
         
         <div className="grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
