@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Linkedin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Bird } from "lucide-react";
 
 export default function Auth() {
@@ -13,12 +13,22 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const isSignUp = searchParams.get("signup") === "true";
 
-  // Check if user is already logged in
+  // Check if user is already logged in and has signed documents
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/tracked-practices");
+        // Check if documents are signed
+        const { data: documents } = await supabase
+          .from('user_documents')
+          .select('*')
+          .single();
+
+        if (documents?.nda_signed && documents?.success_fee_signed) {
+          navigate("/tracked-practices");
+        } else {
+          navigate("/sign-documents");
+        }
       }
     };
     checkSession();
@@ -29,7 +39,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/tracked-practices`,
+          redirectTo: `${window.location.origin}/sign-documents`,
         },
       });
 
