@@ -77,7 +77,6 @@ export default function DocSign() {
         description: `You have successfully signed the ${documentType === 'nda' ? 'NDA' : 'Success Fee Agreement'}.`,
       });
 
-      // If both documents are signed, redirect to tracked practices
       if (documentType === 'success_fee' || (documentType === 'nda' && documents.success_fee_signed)) {
         navigate('/tracked-practices');
       }
@@ -95,7 +94,7 @@ export default function DocSign() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-white/95 backdrop-blur-sm">
+      <Card className="w-full max-w-4xl bg-white/95 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Document Signing</CardTitle>
           <CardDescription className="text-center">
@@ -104,8 +103,9 @@ export default function DocSign() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
+            {/* NDA Section */}
             <div className="p-4 border rounded-lg bg-white">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <File className="h-6 w-6 text-blue-600" />
                   <div>
@@ -122,10 +122,22 @@ export default function DocSign() {
                   <span>{documents.nda_signed ? 'Signed' : 'Sign NDA'}</span>
                 </Button>
               </div>
+              {!documents.nda_signed && (
+                <div className="prose prose-sm max-w-none">
+                  <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-700 leading-relaxed">
+                    <p className="mb-2">This Non-Disclosure Agreement ("Agreement") is entered into between Canary ("Company") and you ("Recipient").</p>
+                    <p className="mb-2">1. Confidential Information: Recipient agrees to maintain the confidentiality of all information related to practices, valuations, and market data shared through the platform.</p>
+                    <p className="mb-2">2. Use Restriction: Recipient will use the Confidential Information solely for the purpose of evaluating potential practice acquisitions through the platform.</p>
+                    <p className="mb-2">3. Term: This Agreement shall remain in effect indefinitely from the date of signing.</p>
+                    <p>4. By signing, you acknowledge that you have read, understand, and agree to be bound by these terms.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Success Fee Agreement Section */}
             <div className="p-4 border rounded-lg bg-white">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <File className="h-6 w-6 text-blue-600" />
                   <div>
@@ -142,6 +154,17 @@ export default function DocSign() {
                   <span>{documents.success_fee_signed ? 'Signed' : 'Sign Agreement'}</span>
                 </Button>
               </div>
+              {!documents.success_fee_signed && documents.nda_signed && (
+                <div className="prose prose-sm max-w-none">
+                  <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-700 leading-relaxed">
+                    <p className="mb-2">This Success Fee Agreement ("Agreement") outlines the terms of service between Canary ("Company") and you ("Client").</p>
+                    <p className="mb-2">1. Success Fee: Client agrees to pay a success fee of 1% of the total transaction value for any practice acquisition facilitated through the platform.</p>
+                    <p className="mb-2">2. Payment Terms: The success fee is due upon successful closing of any practice acquisition.</p>
+                    <p className="mb-2">3. Services: Company will provide access to practice listings, market data, and facilitation services through the platform.</p>
+                    <p>4. By signing, you acknowledge that you have read, understand, and agree to these payment terms and conditions.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
