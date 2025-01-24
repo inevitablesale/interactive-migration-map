@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
 import { cn } from "@/lib/utils";
+import { CountdownBanner } from "@/components/CountdownBanner";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -206,174 +207,121 @@ export default function TrackedPractices() {
         </div>
       </header>
 
-      {/* Floating Featured Opportunity Widget */}
-      <div className={cn(
-        "fixed bottom-8 right-8 z-50 w-96 transform transition-transform duration-300",
-        isAlertOpen ? "translate-y-0" : "translate-y-[calc(100%-3rem)]"
-      )}>
-        <div className="relative">
-          {/* Chain decorations */}
-          <div className="absolute -top-4 left-0 w-full flex justify-between px-4 pointer-events-none">
-            <div className="w-1 h-16 bg-gradient-to-b from-gray-600 to-gray-800 rounded transform -rotate-12" />
-            <div className="w-1 h-16 bg-gradient-to-b from-gray-600 to-gray-800 rounded transform rotate-12" />
+      <main className="container mx-auto px-4 sm:px-6 pt-24 pb-16">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="bg-yellow-400 text-black hover:bg-yellow-500"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="bg-yellow-400 text-black hover:bg-yellow-500"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+
+          <DashboardSummary />
           
-          {/* Widget Header with Timer */}
-          <button
-            onClick={toggleAlert}
-            className="w-full flex items-center justify-between p-3 rounded-t-lg bg-gray-800 border-t border-x border-gray-700"
-          >
-            <div className="flex items-center gap-2">
-              <LightbulbIcon className={cn(
-                "w-5 h-5 text-yellow-400",
-                !hasBeenViewed && "animate-pulse"
-              )} />
-              <span className="font-semibold text-white">Featured Opportunity</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="text-red-500 font-mono bg-gray-900 px-2 py-1 rounded">
-                12:00
-              </div>
-              {isAlertOpen ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
-            </div>
-          </button>
-          
-          {/* Widget Content */}
-          {isAlertOpen && (
-            <div className="bg-gray-800 rounded-b-lg p-4 space-y-4 border-b border-x border-gray-700 shadow-2xl">
-              <div className="relative">
-                <div className="absolute -right-3 top-0 rotate-45 bg-yellow-300 px-8 py-1 text-black text-sm font-semibold">
-                  COMING SOON
-                </div>
-                <h3 className="text-xl font-semibold mt-6 text-white">Accounting | Virginia</h3>
-                <p className="text-gray-400">346 employees | 100% General</p>
-                
-                <div className="flex justify-between items-center py-4">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Users className="w-5 h-5" />
-                    <span>0 interested buyers</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Clock className="w-5 h-5" />
-                    <span>12 hours remaining</span>
-                  </div>
+          <div className="w-full">
+            <SearchFilters 
+              onSearch={handleSearch}
+              onFilter={handleFilter}
+            />
+            
+            {isLoading ? (
+              <div className="text-white">Loading practices...</div>
+            ) : (
+              <>
+                <div className={cn(
+                  "mt-6 grid gap-6",
+                  viewMode === 'grid' 
+                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                    : 'grid-cols-1'
+                )}>
+                  {paginatedPractices?.map((practice, index) => {
+                    const marketData = marketQueries[index]?.data;
+                    return (
+                      <PracticeCard
+                        key={practice.id}
+                        practice={{
+                          ...practice,
+                          avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee,
+                          COUNTYFP: practice.COUNTYFP,
+                          STATEFP: practice.STATEFP,
+                          COUNTYNAME: practice.COUNTYNAME
+                        }}
+                        onWithdraw={() => handleWithdraw(practice.id)}
+                        onExpressInterest={() => handleExpressInterest(practice.id)}
+                      />
+                    );
+                  })}
                 </div>
 
-                <div className="flex gap-2">
-                  <Button className="flex-1 bg-gray-700 text-gray-300 hover:bg-gray-600" disabled>
-                    I'm Interested
-                  </Button>
-                  <Button variant="outline" className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700">
-                    <Play className="w-4 h-4" />
-                    Watch the live replay
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <main className="container mx-auto p-4 sm:p-6 pt-24">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+                {totalPages > 1 && (
+                  <Pagination className="mt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          className={cn(
+                            "text-white hover:text-yellow-400",
+                            currentPage === 1 && "pointer-events-none opacity-50"
+                          )}
+                        />
+                      </PaginationItem>
+                      
+                      {getPaginationRange().map((page, index) => (
+                        page === 'ellipsis' ? (
+                          <PaginationItem key={`ellipsis-${index}`}>
+                            <PaginationEllipsis className="text-white" />
+                          </PaginationItem>
+                        ) : (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className={cn(
+                                currentPage === page 
+                                  ? "bg-yellow-400 text-black" 
+                                  : "text-white hover:text-yellow-400"
+                              )}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      ))}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          className={cn(
+                            "text-white hover:text-yellow-400",
+                            currentPage === totalPages && "pointer-events-none opacity-50"
+                          )}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </>
+            )}
           </div>
-        </div>
-
-        <DashboardSummary />
-        
-        <div className="w-full">
-          <SearchFilters 
-            onSearch={handleSearch}
-            onFilter={handleFilter}
-          />
-          
-          {isLoading ? (
-            <div className="text-white">Loading practices...</div>
-          ) : (
-            <>
-              <div className={`mt-6 grid gap-4 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-                  : 'grid-cols-1'
-              }`}>
-                {paginatedPractices?.map((practice, index) => {
-                  const marketData = marketQueries[index]?.data;
-                  return (
-                    <PracticeCard
-                      key={practice.id}
-                      practice={{
-                        ...practice,
-                        avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee,
-                        COUNTYFP: practice.COUNTYFP,
-                        STATEFP: practice.STATEFP,
-                        COUNTYNAME: practice.COUNTYNAME
-                      }}
-                      onWithdraw={() => handleWithdraw(practice.id)}
-                      onExpressInterest={() => handleExpressInterest(practice.id)}
-                    />
-                  );
-                })}
-              </div>
-
-              {totalPages > 1 && (
-                <Pagination className="mt-6">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
-                      />
-                    </PaginationItem>
-                    
-                    {getPaginationRange().map((page, index) => (
-                      page === 'ellipsis' ? (
-                        <PaginationItem key={`ellipsis-${index}`}>
-                          <PaginationEllipsis className="text-white" />
-                        </PaginationItem>
-                      ) : (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          )}
         </div>
       </main>
+
+      <CountdownBanner />
     </div>
   );
 }
