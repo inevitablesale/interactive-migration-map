@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
+import { estimateAnnualRevenue } from "@/utils/valuationUtils";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -40,7 +41,7 @@ export default function TrackedPractices() {
         industry: practice["Primary Subtitle"] || "",
         region: practice["State Name"] || "",
         employee_count: practice.employeeCount || 0,
-        annual_revenue: practice.annual_revenue || 0,
+        annual_revenue: estimateAnnualRevenue(practice.employeeCount || 0),
         service_mix: { "General": 100 },
         status: "not_contacted",
         last_updated: new Date().toISOString(),

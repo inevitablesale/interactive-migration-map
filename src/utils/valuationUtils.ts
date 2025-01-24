@@ -78,3 +78,10 @@ export const getValuationMultiple = (firmSize: string, revenue: number) => {
   // Cap at the maximum industry multiple
   return Math.min(1.50, baseMultiple);
 };
+
+// New function to estimate revenue based on employee count
+export const estimateAnnualRevenue = (employeeCount: number) => {
+  // Average revenue per employee for professional services firms
+  const revenuePerEmployee = 150000; // $150k per employee
+  return employeeCount * revenuePerEmployee;
+};
