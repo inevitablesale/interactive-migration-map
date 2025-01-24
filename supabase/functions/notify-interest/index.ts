@@ -1,191 +1,94 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from 'https://esm.sh/@resend/node'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders
-    })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not configured');
-    }
-
-    // Create Supabase client
-    const supabase = createClient(
-      SUPABASE_URL!,
-      SUPABASE_ANON_KEY!
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
     const { companyId, userId, message } = await req.json()
     console.log('Received notification request:', { companyId, userId, message })
 
-    // Get company details
-    const { data: company, error: companyError } = await supabase
-      .from('canary_firms_data')
-      .select('*')
-      .eq('Company ID', companyId)
-      .maybeSingle()
-
-    if (companyError || !company) {
-      console.error('Error fetching company:', companyError)
-      throw new Error('Company not found')
-    }
-
-    // Get user details - get most recent profile
-    const { data: userProfile, error: userError } = await supabase
+    // Get the user's profile
+    const { data: profile, error: profileError } = await supabaseClient
       .from('buyer_profiles')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .maybeSingle()
+      .single()
 
-    // If no profile exists, get basic user info from auth.users
-    if (!userProfile) {
-      console.log('No buyer profile found, fetching user data from auth')
-      const { data: { user }, error: authError } = await supabase.auth.admin.getUserById(userId)
-      
-      if (authError || !user) {
-        console.error('Error fetching user:', authError)
-        throw new Error('User not found')
-      }
-
-      // Send email with basic user info
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
-          from: 'Canary <notifications@inevitable.sale>',
-          to: ['chris@inevitable.sale'],
-          subject: `New Interest: ${company["Company Name"]}`,
-          html: `
-            <h2>New Interest Notification</h2>
-            <p>A user has expressed interest in ${company["Company Name"]}.</p>
-            
-            <h3>User Details:</h3>
-            <ul>
-              <li>Email: ${user.email}</li>
-              <li>Note: User has not completed their buyer profile yet</li>
-            </ul>
-
-            <h3>Company Details:</h3>
-            <ul>
-              <li>Location: ${company.Location}</li>
-              <li>Employee Count: ${company.employeeCount}</li>
-              <li>Specialties: ${company.specialities || 'Not specified'}</li>
-            </ul>
-
-            ${message ? `<h3>Message from User:</h3><p>${message}</p>` : ''}
-            
-            <p>Please follow up with the user within 4 hours.</p>
-          `,
-        }),
-      })
-
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.text()
-        console.error('Error sending email:', errorData)
-        throw new Error('Failed to send notification email')
-      }
-
-      const emailResult = await emailResponse.json()
-      console.log('Email sent successfully:', emailResult)
-
-      return new Response(
-        JSON.stringify({ success: true }),
-        { 
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+    if (profileError) {
+      console.error('Error fetching profile:', profileError)
+      throw new Error('Error fetching user profile')
     }
 
-    // If we have a profile, send the full notification
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'Canary <notifications@inevitable.sale>',
-        to: ['chris@inevitable.sale'],
-        subject: `New Interest: ${company["Company Name"]}`,
-        html: `
-          <h2>New Interest Notification</h2>
-          <p>A user has expressed interest in ${company["Company Name"]}.</p>
-          
-          <h3>User Details:</h3>
-          <ul>
-            <li>Name: ${userProfile.buyer_name}</li>
-            <li>Email: ${userProfile.contact_email}</li>
-            <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
-          </ul>
+    // Get the practice details
+    const { data: practice, error: practiceError } = await supabaseClient
+      .from('canary_firms_data')
+      .select('*')
+      .eq('Company ID', companyId)
+      .single()
 
-          <h3>Company Details:</h3>
-          <ul>
-            <li>Location: ${company.Location}</li>
-            <li>Employee Count: ${company.employeeCount}</li>
-            <li>Specialties: ${company.specialities || 'Not specified'}</li>
-          </ul>
+    if (practiceError) {
+      console.error('Error fetching practice:', practiceError)
+      throw new Error('Error fetching practice details')
+    }
 
-          ${message ? `<h3>Message from User:</h3><p>${message}</p>` : ''}
-          
-          <p>Please follow up with the user within 4 hours.</p>
-        `,
-      }),
+    // Send email notification
+    const emailHtml = `
+      <h2>New Interest Expression</h2>
+      <p><strong>Buyer:</strong> ${profile.buyer_name}</p>
+      <p><strong>Contact Email:</strong> ${profile.contact_email}</p>
+      <p><strong>Practice:</strong> ${practice['Company Name']}</p>
+      <p><strong>Location:</strong> ${practice.Location}</p>
+      ${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
+      <p><strong>Subscription Tier:</strong> ${profile.subscription_tier}</p>
+    `
+
+    const { data: emailResponse, error: emailError } = await resend.emails.send({
+      from: 'Canary <notifications@inevitable.sale>',
+      to: ['chris@inevitable.sale'],
+      subject: `New Interest: ${practice['Company Name']}`,
+      html: emailHtml,
     })
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.text()
-      console.error('Error sending email:', errorData)
+    if (emailError) {
+      console.error('Error sending email:', emailError)
       throw new Error('Failed to send notification email')
     }
 
-    const emailResult = await emailResponse.json()
-    console.log('Email sent successfully:', emailResult)
+    console.log('Successfully sent notification email:', emailResponse)
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ message: 'Notification sent successfully' }),
       { 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
     )
 
   } catch (error) {
     console.error('Error in notify-interest function:', error)
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        success: false 
-      }),
+      JSON.stringify({ error: error.message }),
       { 
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
+      },
     )
   }
 })
