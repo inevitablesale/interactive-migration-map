@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronDown, ChevronUp, Bird } from "lucide-react";
+import { ArrowLeft, Users, Building, TrendingUp, Bird } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
@@ -184,10 +184,13 @@ export default function PracticeDetails() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
         <div className="container mx-auto p-6 space-y-6 pt-24">
-          <Skeleton className="h-12 w-[300px] bg-white/10" />
-          <Skeleton className="h-20 w-full bg-white/10" />
-          <div className="grid gap-6 md:grid-cols-2">
-            <Skeleton className="h-[400px] bg-white/10" />
+          <div className="flex items-center gap-4 animate-pulse">
+            <Skeleton className="h-12 w-12 rounded-full bg-white/10" />
+            <Skeleton className="h-8 w-[200px] bg-white/10" />
+          </div>
+          <Skeleton className="h-[200px] w-full bg-white/10" />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Skeleton className="h-[400px] lg:col-span-2 bg-white/10" />
             <Skeleton className="h-[400px] bg-white/10" />
           </div>
         </div>
@@ -206,35 +209,15 @@ export default function PracticeDetails() {
 
   const { practice, countyData, generatedText } = practiceData;
 
-  const handleInterested = async () => {
-    const { error } = await supabase
-      .from('canary_firm_interests')
-      .insert([
-        { company_id: practice["Company ID"] }
-      ]);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to express interest. Please try again.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Successfully expressed interest in the practice.",
-      });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-white/10">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
+              size="sm"
               className="text-white hover:text-white/80 hover:bg-white/10"
               onClick={() => navigate(-1)}
             >
@@ -254,69 +237,85 @@ export default function PracticeDetails() {
             Sign In
           </Link>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="container mx-auto p-6 space-y-8 pt-24">
-        {/* Header Section */}
-        <div className="rounded-lg p-6 bg-black/40 backdrop-blur-md border border-white/10 animate-fade-in">
-          <PracticeHeader practice={practice} generatedText={generatedText} />
-        </div>
+      <main className="container mx-auto px-4 pt-24 pb-12">
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Header Section */}
+            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in">
+              <PracticeHeader practice={practice} generatedText={generatedText} />
+            </div>
 
-        {/* Key Metrics Section */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <KeyMetricsBar practice={practice} countyData={countyData} />
-        </div>
-        
-        {/* Badges and Callouts */}
-        {generatedText && (
-          <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <BadgesAndCallouts generatedText={generatedText} />
-          </div>
-        )}
+            {/* Key Metrics */}
+            <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <KeyMetricsBar practice={practice} countyData={countyData} />
+            </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          {/* Left Column - Business Overview */}
-          <div className="lg:col-span-2 space-y-6">
-            <BusinessOverview practice={practice} />
-            
-            {/* Market Data Section - Collapsible */}
-            <Collapsible
-              open={isMarketDataOpen}
-              onOpenChange={setIsMarketDataOpen}
-              className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 transition-all duration-200"
-            >
-              <div className="flex items-center justify-between">
+            {/* Business Overview */}
+            <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <BusinessOverview practice={practice} />
+            </div>
+
+            {/* Market Metrics */}
+            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                  Geographic & Demographic Data
-                  <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/60">
-                    {isMarketDataOpen ? 'Click to collapse' : 'Click to expand'}
-                  </span>
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                  Market Analysis
                 </h2>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="hover:bg-white/10">
-                    {isMarketDataOpen ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
               </div>
-              
-              <CollapsibleContent className="mt-4 space-y-4">
-                {countyData && <MarketMetricsGrid marketData={countyData} />}
-              </CollapsibleContent>
-            </Collapsible>
+              {countyData && <MarketMetricsGrid marketData={countyData} />}
+            </div>
           </div>
 
-          {/* Right Column - Practice Info */}
-          <div className="lg:sticky lg:top-24 h-fit">
-            <PracticeInfo practice={practice} onInterested={handleInterested} />
+          {/* Right Column - Sticky Sidebar */}
+          <div className="lg:sticky lg:top-24 space-y-6 h-fit">
+            {/* Practice Info Card */}
+            <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              <PracticeInfo practice={practice} onInterested={handleInterested} />
+            </div>
+
+            {/* Additional Metrics Card */}
+            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-white/60">
+                  <Users className="w-4 h-4" />
+                  <span>Employee Distribution</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-white/60">Current</p>
+                    <p className="text-lg font-semibold text-white">{practice.employeeCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white/60">Range</p>
+                    <p className="text-lg font-semibold text-white">
+                      {practice.employeeCountRangeLow} - {practice.employeeCountRangeHigh}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Info */}
+            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.7s' }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-white/60">
+                  <Building className="w-4 h-4" />
+                  <span>Location Details</span>
+                </div>
+                <div>
+                  <p className="text-sm text-white/60">Address</p>
+                  <p className="text-lg font-semibold text-white">{practice.Location}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
