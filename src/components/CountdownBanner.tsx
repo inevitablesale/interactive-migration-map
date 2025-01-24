@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const CountdownBanner = () => {
+export const CountdownBanner = () => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -51,5 +51,3 @@ const CountdownBanner = () => {
     </div>
   );
 };
-
-export default CountdownBanner;
