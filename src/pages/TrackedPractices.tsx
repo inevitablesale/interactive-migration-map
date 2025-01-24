@@ -4,12 +4,13 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Bird } from "lucide-react";
+import { LayoutGrid, List, Bird, Users, Clock, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
+import { Card } from "@/components/ui/card";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -219,9 +220,43 @@ export default function TrackedPractices() {
         </div>
 
         <DashboardSummary />
+
+        {/* New Featured Opportunity Section */}
+        <Card className="relative overflow-hidden bg-white p-8">
+          {/* Coming Soon Banner */}
+          <div className="absolute -right-16 top-8 rotate-45 bg-yellow-300 px-16 py-2 text-black font-semibold z-10">
+            COMING SOON
+          </div>
+          
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold">Today's Featured Opportunity</h2>
+            <h3 className="text-2xl font-semibold">Accounting | Virginia</h3>
+            <p className="text-gray-600 text-lg">346 employees | 100% General</p>
+            
+            <div className="flex justify-between items-center py-4">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-gray-500" />
+                <span>0 interested buyers</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-gray-500" />
+                <span>12 hours remaining</span>
+              </div>
+            </div>
+
+            <Button className="w-full bg-gray-200 text-gray-600 hover:bg-gray-300" disabled>
+              I'm Interested
+            </Button>
+
+            <Button variant="outline" className="w-full mt-2 flex items-center justify-center gap-2">
+              <Play className="w-4 h-4" />
+              Watch the live replay
+            </Button>
+          </div>
+        </Card>
         
-        <div>
-          <div>
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
             <SearchFilters 
               onSearch={handleSearch}
               onFilter={handleFilter}
