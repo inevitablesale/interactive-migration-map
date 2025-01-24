@@ -4,7 +4,7 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Bird, Users, Clock, Play, ChevronDown, ChevronUp, LightbulbIcon } from "lucide-react";
+import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -368,8 +368,6 @@ export default function TrackedPractices() {
           </div>
         </div>
       </main>
-
-      <CountdownBanner />
     </div>
   );
 }
