@@ -136,24 +136,49 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!adminRes.ok || !userRes.ok) {
-      console.error('Error response from Resend:', await adminRes.text());
-      const error = await adminRes.text();
-      throw new Error(`Failed to send email: ${error}`);
+      console.error('Error response from Resend:', {
+        adminStatus: adminRes.status,
+        userStatus: userRes.status
+      });
+      const adminError = await adminRes.text();
+      const userError = await userRes.text();
+      console.error('Admin email error:', adminError);
+      console.error('User email error:', userError);
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to send notification emails',
+          details: { adminError, userError }
+        }), 
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
     }
 
     const data = await adminRes.json();
     console.log('Emails sent successfully:', data);
     
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    return new Response(
+      JSON.stringify({ success: true, message: 'Notifications sent successfully' }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
   } catch (error: any) {
     console.error('Error in notify-interest function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: error.toString()
+      }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    );
   }
 }
 
