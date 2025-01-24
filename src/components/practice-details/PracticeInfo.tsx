@@ -26,11 +26,22 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
 
   const handleInterestConfirmed = async () => {
     try {
-      // First check if user has a profile
+      // Get current user
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user?.id) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not get user information. Please try logging in again.",
+        });
+        return;
+      }
+
+      // Check if user has a profile
       const { data: profile, error: profileError } = await supabase
         .from('buyer_profiles')
         .select('*')
-        .limit(1)
+        .eq('user_id', userData.user.id)
         .maybeSingle();
 
       if (profileError) {
@@ -45,20 +56,11 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
 
       // If no profile exists, create a basic one
       if (!profile) {
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData?.user?.email) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not get user information. Please try logging in again.",
-          });
-          return;
-        }
-
         const { error: createError } = await supabase
           .from('buyer_profiles')
           .insert({
-            buyer_name: userData.user.email.split('@')[0],
+            user_id: userData.user.id,
+            buyer_name: userData.user.email?.split('@')[0],
             contact_email: userData.user.email,
             target_geography: [],
             subscription_tier: 'free'
