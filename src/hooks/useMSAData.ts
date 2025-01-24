@@ -1,5 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { MSAData } from "@/types/map";
+
+interface MSACrosswalk {
+  MSA: string;
+  msa_name: string;
+  STATEFP: string;
+}
 
 export const useMSAData = (stateFp: string) => {
   return useQuery({
@@ -13,7 +20,7 @@ export const useMSAData = (stateFp: string) => {
       if (msaError) throw msaError;
 
       const msaData = await Promise.all(
-        msaList.map(async (msa) => {
+        (msaList as MSACrosswalk[]).map(async (msa) => {
           const { data: metrics, error: metricsError } = await supabase
             .from('region_data')
             .select('*')
@@ -25,7 +32,7 @@ export const useMSAData = (stateFp: string) => {
           return {
             ...msa,
             ...metrics,
-          };
+          } as MSAData;
         })
       );
 
