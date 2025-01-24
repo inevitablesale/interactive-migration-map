@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const ADMIN_EMAIL = 'chris@inevitable.sale'
@@ -66,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
       ${message ? `<h3>Message:</h3><p>${message}</p>` : ''}
     `
 
-    // Send email using Resend
+    // Send email using Resend with verified domain
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -74,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Canary <notifications@canary.accountants>',
+        from: 'Canary Notifications <notifications@canary.accountants>',
         to: [ADMIN_EMAIL],
         subject: `New Interest: ${practice['Company Name']}`,
         html: emailHtml,
@@ -92,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in notify-interest function:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
