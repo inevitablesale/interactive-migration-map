@@ -5,7 +5,7 @@ import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Bird, ChartBar, LineChart } from "lucide-react";
+import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -56,7 +56,6 @@ function TrackedPractices() {
     }
   });
 
-  // Filter practices based on search and filters
   const filteredPractices = practices?.filter(practice => {
     const searchMatches = !searchQuery || 
       practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,7 +74,6 @@ function TrackedPractices() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Only fetch market data for visible practices
   const marketQueries = useMarketDataForPractices(paginatedPractices);
 
   const handleWithdraw = async (practiceId: string) => {
@@ -149,7 +147,6 @@ function TrackedPractices() {
     setCurrentPage(1);
   };
 
-  // Helper function to generate pagination numbers
   const getPaginationRange = () => {
     const range: (number | 'ellipsis')[] = [];
     const maxVisiblePages = 5;
@@ -220,21 +217,6 @@ function TrackedPractices() {
             >
               <List className="h-4 w-4" />
             </Button>
-          </div>
-
-          <div className="flex gap-2">
-            <Link to="/analysis">
-              <Button variant="outline" size="sm" className="border-blue-400 text-blue-400 hover:bg-blue-400/20">
-                <ChartBar className="h-4 w-4 mr-2" />
-                Trending Insights
-              </Button>
-            </Link>
-            <Link to="/analysis#market-analyst">
-              <Button variant="outline" size="sm" className="border-purple-400 text-purple-400 hover:bg-purple-400/20">
-                <LineChart className="h-4 w-4 mr-2" />
-                Market Analyst
-              </Button>
-            </Link>
           </div>
         </div>
 
