@@ -298,19 +298,12 @@ export default function PracticeDetails() {
               <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                 <div className="flex-1">
                   <PracticeHeader practice={practice} generatedText={generatedText} />
+                  <p className="text-white mt-2">Atlanta's Premier Multi-Industry Advisory Firm</p>
                   {generatedText?.teaser && (
                     <p className="mt-4 text-white/80">{generatedText.teaser}</p>
                   )}
                 </div>
                 <div className="w-full md:w-auto">
-                  <Button 
-                    onClick={handleInterested}
-                    className="w-full md:w-auto bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-6 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
-                    size="lg"
-                  >
-                    <Heart className="mr-2 h-5 w-5" />
-                    I'm Interested
-                  </Button>
                 </div>
               </div>
               
@@ -400,7 +393,7 @@ export default function PracticeDetails() {
           <div className="lg:sticky lg:top-24 space-y-6 h-fit">
             {/* Practice Info Card */}
             <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <PracticeInfo practice={practice} onInterested={handleInterested} />
+              <PracticeInfo practice={practice} />
             </div>
 
             {/* Location Info */}
