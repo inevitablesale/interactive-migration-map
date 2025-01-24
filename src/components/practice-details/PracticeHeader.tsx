@@ -5,6 +5,7 @@ interface PracticeHeaderProps {
   generatedText: {
     title: string | null;
     generated_summary: string | null;
+    teaser: string | null;
   } | null;
 }
 
@@ -14,7 +15,9 @@ export function PracticeHeader({ practice, generatedText }: PracticeHeaderProps)
       <h1 className="text-3xl font-bold text-white">
         {generatedText?.title || practice["Company Name"]}
       </h1>
-      <p className="text-white/60">{practice["Primary Subtitle"]}</p>
+      <p className="text-white/60">
+        {generatedText?.teaser || practice["Primary Subtitle"]}
+      </p>
     </div>
   );
 }
