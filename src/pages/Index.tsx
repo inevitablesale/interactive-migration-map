@@ -13,9 +13,48 @@ import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
 import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
 import { CatalystSection } from "@/components/CatalystSection";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [session, setSession] = useState(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* Countdown Banner */}
@@ -33,9 +72,23 @@ const Index = () => {
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
-          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-            Sign In
-          </Link>
+          {session ? (
+            <div className="flex items-center gap-4">
+              <Link to="/tracked-practices" className="text-white hover:text-yellow-400 transition-colors">
+                Dashboard
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-white hover:text-yellow-400 transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
 
