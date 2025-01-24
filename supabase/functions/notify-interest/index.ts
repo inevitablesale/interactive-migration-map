@@ -57,31 +57,17 @@ serve(async (req) => {
 
     console.log('User profile query result:', { data: userProfile, error: userError })
 
-    // If no profile exists, create one
-    if (!userProfile) {
-      console.log('No profile found, creating one')
-      const { error: createError } = await supabase
-        .from('buyer_profiles')
-        .insert({
-          user_id: userId,
-          buyer_name: 'Anonymous',
-          contact_email: 'pending@inevitable.sale',
-          target_geography: [],
-          subscription_tier: 'free'
-        })
-
-      if (createError) {
-        console.error('Error creating profile:', createError)
-        throw new Error('Could not create user profile')
-      }
+    if (userError) {
+      console.error('Error fetching user profile:', userError)
+      throw new Error('Could not fetch user profile')
     }
 
     // Send notification email
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
         from: 'Canary <notifications@inevitable.sale>',
@@ -99,6 +85,8 @@ serve(async (req) => {
     })
 
     if (!emailResponse.ok) {
+      const errorText = await emailResponse.text()
+      console.error('Failed to send notification email:', errorText)
       throw new Error('Failed to send notification email')
     }
 
@@ -110,13 +98,13 @@ serve(async (req) => {
       },
     )
 
-  } catch (error) {
-    console.error('Error:', error.message)
+  } catch (error: any) {
+    console.error('Error in notify-interest function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       },
     )
   }
