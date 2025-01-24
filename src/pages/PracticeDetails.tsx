@@ -247,6 +247,8 @@ export default function PracticeDetails() {
           </div>
 
           <KeyMetricsBar practice={practice} countyData={countyData} />
+          
+          <BadgesAndCallouts companyId={practice["Company ID"]} />
 
           {/* Market Data Section - Collapsible */}
           <Collapsible
