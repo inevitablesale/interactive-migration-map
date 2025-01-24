@@ -68,17 +68,50 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       .filter(Boolean); // Remove any null values
   };
 
+  // Parse badges (simple comma-separated list)
+  const parseBadges = (badgesText: string | null) => {
+    if (!badgesText) return [];
+    return badgesText.split(',').map(badge => badge.trim()).filter(Boolean);
+  };
+
   const callouts = parseCallouts(generatedText.callouts);
+  const badges = parseBadges(generatedText.badges);
 
   return (
     <div className="space-y-6">
       {/* Raw Data Display */}
       <Card className="p-4 bg-black/40 border-white/10">
-        <h3 className="text-lg font-semibold text-white mb-4">Raw Callouts Data:</h3>
-        <pre className="text-white/70 whitespace-pre-wrap text-sm">
-          {generatedText.callouts || 'No callouts data'}
-        </pre>
+        <h3 className="text-lg font-semibold text-white mb-4">Raw Data:</h3>
+        <div className="space-y-2">
+          <div>
+            <h4 className="text-sm font-medium text-white/70">Badges:</h4>
+            <pre className="text-white/70 whitespace-pre-wrap text-sm">
+              {generatedText.badges || 'No badges data'}
+            </pre>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-white/70">Callouts:</h4>
+            <pre className="text-white/70 whitespace-pre-wrap text-sm">
+              {generatedText.callouts || 'No callouts data'}
+            </pre>
+          </div>
+        </div>
       </Card>
+
+      {/* Badges Display */}
+      {badges.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {badges.map((badge, index) => (
+            <Badge 
+              key={index}
+              variant="secondary" 
+              className="bg-white/10 text-white hover:bg-white/20"
+            >
+              {badge}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       {/* Parsed Callouts Display */}
       {callouts.length > 0 && (
