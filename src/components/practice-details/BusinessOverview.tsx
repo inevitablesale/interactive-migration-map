@@ -66,13 +66,7 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
             </div>
           </div>
 
-          {/* Teaser Section */}
-          {generatedText?.teaser && (
-            <div>
-              <h3 className="text-white/60 mb-2">Key Highlights</h3>
-              <p className="text-white">{generatedText.teaser}</p>
-            </div>
-          )}
+          {/* Teaser Section removed as requested */}
 
           {/* Badges and Callouts sections removed as requested */}
         </div>
