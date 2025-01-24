@@ -1,5 +1,5 @@
 import { useQueries } from "@tanstack/react-query";
-import { useMarketReportData } from "./useMarketReportData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Practice {
   id: string;
@@ -31,15 +31,39 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
           if (!county || !state) {
             return { avgSalaryPerEmployee: 86259 }; // Fallback value
           }
-          
-          const marketReport = await useMarketReportData(county, state);
-          const countyData = marketReport.data?.countyData;
+
+          // First get the state FIPS code
+          const { data: stateFips, error: stateFipsError } = await supabase
+            .from('state_fips_codes')
+            .select('STATEFP')
+            .eq('state', state)
+            .maybeSingle();
+
+          if (stateFipsError) throw stateFipsError;
+          if (!stateFips) return { avgSalaryPerEmployee: 86259 };
+
+          // Then get the county data using the FIPS code
+          const { data: countyData, error: countyError } = await supabase
+            .from('county_data')
+            .select('PAYANN, EMP')
+            .eq('STATEFP', stateFips.STATEFP)
+            .eq('COUNTYNAME', county)
+            .maybeSingle();
+
+          if (countyError) throw countyError;
           
           // Calculate average salary from county data if available
-          const avgSalaryPerEmployee = countyData?.payann && countyData?.emp 
-            ? (countyData.payann * 1000) / countyData.emp 
+          const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP 
+            ? (countyData.PAYANN * 1000) / countyData.EMP 
             : 86259; // Fallback to national average
             
+          console.log('Market data query for:', {
+            county,
+            state,
+            countyData,
+            avgSalaryPerEmployee
+          });
+
           return { avgSalaryPerEmployee };
         },
         enabled: !!practice.region,
