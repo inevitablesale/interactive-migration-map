@@ -9,7 +9,9 @@ interface BadgesAndCalloutsProps {
 }
 
 export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
-  const { data: generatedText, error } = useQuery({
+  console.log('BadgesAndCallouts rendered with companyId:', companyId);
+  
+  const { data: generatedText, error, isLoading } = useQuery({
     queryKey: ['firm-generated-text', companyId],
     queryFn: async () => {
       console.log('Starting fetch for company ID:', companyId);
@@ -29,6 +31,11 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       return data;
     }
   });
+
+  if (isLoading) {
+    console.log('Loading data...');
+    return <div className="text-white/60 text-center py-4">Loading badges and callouts...</div>;
+  }
 
   if (error) {
     console.error('Query error:', error);
@@ -66,6 +73,9 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
 
   const badges = parseBadges(generatedText.badges);
   const callouts = parseCallouts(generatedText.callouts);
+
+  console.log('Parsed badges:', badges);
+  console.log('Parsed callouts:', callouts);
 
   return (
     <div className="space-y-6">
