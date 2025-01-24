@@ -52,12 +52,72 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .maybeSingle()
 
-    if (userError || !userProfile) {
-      console.error('Error fetching user profile:', userError)
-      throw new Error('User profile not found')
+    // If no profile exists, get basic user info from auth.users
+    if (!userProfile) {
+      console.log('No buyer profile found, fetching user data from auth')
+      const { data: { user }, error: authError } = await supabase.auth.admin.getUserById(userId)
+      
+      if (authError || !user) {
+        console.error('Error fetching user:', authError)
+        throw new Error('User not found')
+      }
+
+      // Send email with basic user info
+      const emailResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: 'Canary <notifications@inevitable.sale>',
+          to: ['chris@inevitable.sale'],
+          subject: `New Interest: ${company["Company Name"]}`,
+          html: `
+            <h2>New Interest Notification</h2>
+            <p>A user has expressed interest in ${company["Company Name"]}.</p>
+            
+            <h3>User Details:</h3>
+            <ul>
+              <li>Email: ${user.email}</li>
+              <li>Note: User has not completed their buyer profile yet</li>
+            </ul>
+
+            <h3>Company Details:</h3>
+            <ul>
+              <li>Location: ${company.Location}</li>
+              <li>Employee Count: ${company.employeeCount}</li>
+              <li>Specialties: ${company.specialities || 'Not specified'}</li>
+            </ul>
+
+            ${message ? `<h3>Message from User:</h3><p>${message}</p>` : ''}
+            
+            <p>Please follow up with the user within 4 hours.</p>
+          `,
+        }),
+      })
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.text()
+        console.error('Error sending email:', errorData)
+        throw new Error('Failed to send notification email')
+      }
+
+      const emailResult = await emailResponse.json()
+      console.log('Email sent successfully:', emailResult)
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { 
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
     }
 
-    // Send email using Resend
+    // If we have a profile, send the full notification
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
