@@ -61,40 +61,7 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
             </div>
           )}
 
-          {/* Badges Section */}
-          {parsedBadges.length > 0 && (
-            <div>
-              <h3 className="text-white/60 mb-2">Recognition & Achievements</h3>
-              <div className="flex flex-wrap gap-2">
-                {parsedBadges.map((badge, index) => (
-                  <Badge 
-                    key={index}
-                    variant="secondary" 
-                    className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                  >
-                    {badge}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Callouts Section */}
-          {parsedCallouts.length > 0 && (
-            <div>
-              <h3 className="text-white/60 mb-2">Notable Features</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {parsedCallouts.map((callout, index) => (
-                  <div 
-                    key={index}
-                    className="bg-white/5 rounded-lg p-3 text-white"
-                  >
-                    {callout}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Badges and Callouts sections removed as requested */}
         </div>
       </div>
     </div>
