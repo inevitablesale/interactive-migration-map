@@ -7,9 +7,10 @@ interface BadgesAndCalloutsProps {
     badges: string | null;
     callouts: string | null;
   };
+  specialties?: string | null;
 }
 
-export function BadgesAndCallouts({ generatedText }: BadgesAndCalloutsProps) {
+export function BadgesAndCallouts({ generatedText, specialties }: BadgesAndCalloutsProps) {
   console.log('BadgesAndCallouts rendered with data:', generatedText);
   
   // Parse badges (handles both newlines and commas)
@@ -36,11 +37,19 @@ export function BadgesAndCallouts({ generatedText }: BadgesAndCalloutsProps) {
       .filter(({ title, description }) => title && description); // Only return complete entries
   };
 
+  // Parse specialties (comma-separated)
+  const parseSpecialties = (specialtiesText: string | null) => {
+    if (!specialtiesText) return [];
+    return specialtiesText.split(',').map(s => s.trim()).filter(Boolean);
+  };
+
   const badges = parseBadges(generatedText.badges);
   const callouts = parseCallouts(generatedText.callouts);
+  const specialtiesList = parseSpecialties(specialties);
 
   console.log('Parsed badges:', badges);
   console.log('Parsed callouts:', callouts);
+  console.log('Parsed specialties:', specialtiesList);
 
   return (
     <div className="space-y-6">
@@ -56,6 +65,24 @@ export function BadgesAndCallouts({ generatedText }: BadgesAndCalloutsProps) {
               {badge}
             </Badge>
           ))}
+        </div>
+      )}
+
+      {/* Specialties Display */}
+      {specialtiesList.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold text-white mb-3">Specialties</h3>
+          <div className="flex flex-wrap gap-2">
+            {specialtiesList.map((specialty, index) => (
+              <Badge 
+                key={`specialty-${index}`}
+                variant="secondary" 
+                className="bg-white/10 text-white hover:bg-white/20"
+              >
+                {specialty}
+              </Badge>
+            ))}
+          </div>
         </div>
       )}
 

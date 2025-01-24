@@ -112,7 +112,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         iconColor="bg-orange-400/10 text-orange-400"
         title="Est. Valuation"
         value={formatCurrency(estimatedValuation)}
-        subtitle={`Based on Revenue × ${valuationMultiple.toFixed(2)} (${getFirmSizeDisplay(firmSize)} firm)`}
+        subtitle={`Based on Revenue × ${valuationMultiple.toFixed(2)}`}
         tooltip="Based on industry multiples"
       />
     </div>
