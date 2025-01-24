@@ -35,36 +35,60 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return null;
   }
 
+  console.log('Raw badges text:', generatedText.badges);
+  console.log('Raw callouts text:', generatedText.callouts);
+
   // Parse markdown-formatted badges
   const badges = generatedText.badges
     ? generatedText.badges
         .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.startsWith('*'))
-        .map(line => line.replace(/^\*\s*\*\*/, '').replace(/\*\*$/, '').trim())
+        .map(line => {
+          console.log('Processing badge line:', line);
+          return line.trim();
+        })
+        .filter(line => {
+          const isValid = line.startsWith('*');
+          console.log('Badge line valid?', { line, isValid });
+          return isValid;
+        })
+        .map(line => {
+          const cleaned = line.replace(/^\*\s*\*\*/, '').replace(/\*\*$/, '').trim();
+          console.log('Cleaned badge:', { original: line, cleaned });
+          return cleaned;
+        })
         .filter(badge => badge.length > 0)
     : [];
 
-  console.log('Parsed badges:', badges);
+  console.log('Final parsed badges:', badges);
 
   // Parse markdown-formatted callouts
   const callouts = generatedText.callouts
     ? generatedText.callouts
         .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.startsWith('*'))
+        .map(line => {
+          console.log('Processing callout line:', line);
+          return line.trim();
+        })
+        .filter(line => {
+          const isValid = line.startsWith('*');
+          console.log('Callout line valid?', { line, isValid });
+          return isValid;
+        })
         .map(line => {
           const content = line.replace(/^\*\s*\*\*/, '').replace(/\*\*/, ':').trim();
+          console.log('Cleaned callout line:', { original: line, cleaned: content });
           const [title, ...descParts] = content.split(':');
-          return {
+          const result = {
             title: title.trim(),
             description: descParts.join(':').trim()
           };
+          console.log('Parsed callout:', result);
+          return result;
         })
         .filter(callout => callout.title.length > 0)
     : [];
 
-  console.log('Parsed callouts:', callouts);
+  console.log('Final parsed callouts:', callouts);
 
   return (
     <div className="space-y-6">
