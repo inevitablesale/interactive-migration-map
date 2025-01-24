@@ -44,7 +44,7 @@ export default function DocSign() {
     }
   };
 
-  const handleSignDocument = async (documentType: 'nda' | 'success_fee') => {
+  const handleSignDocument = async (documentType: 'success_fee') => {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -72,12 +72,10 @@ export default function DocSign() {
 
       toast({
         title: "Document Signed",
-        description: `You have successfully signed the ${documentType === 'nda' ? 'NDA' : 'Success Fee Agreement'}.`,
+        description: "You have successfully signed the Success Fee Agreement.",
       });
 
-      if (documentType === 'success_fee' || (documentType === 'nda' && documents.success_fee_signed)) {
-        navigate('/tracked-practices');
-      }
+      navigate('/tracked-practices');
     } catch (error) {
       console.error('Error signing document:', error);
       toast({
@@ -89,25 +87,6 @@ export default function DocSign() {
       setLoading(false);
     }
   };
-
-  const ndaText = `NON-DISCLOSURE AGREEMENT
-
-This Non-Disclosure Agreement (the "Agreement") is entered into between Inevitable and the undersigned party.
-
-1. Confidential Information
-   The parties agree that any information shared regarding business practices, client data, market analysis, and proprietary methods shall be considered confidential.
-
-2. Use of Confidential Information
-   The receiving party agrees to use the Confidential Information solely for the purpose of evaluating and engaging in business opportunities through the platform.
-
-3. Term
-   This Agreement shall remain in effect indefinitely from the date of signing.
-
-4. Return of Materials
-   Upon request, all confidential materials shall be returned or destroyed.
-
-5. Governing Law
-   This Agreement shall be governed by applicable state and federal laws.`;
 
   const successFeeText = `SUCCESS FEE AGREEMENT
 
@@ -139,38 +118,11 @@ This Success Fee Agreement (the "Agreement") outlines the terms and conditions f
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Document Signing</CardTitle>
           <CardDescription className="text-center">
-            Please review and sign the following documents to continue
+            Please review and sign the Success Fee Agreement to continue
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="p-6 border rounded-lg bg-white">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <File className="h-6 w-6 text-blue-600" />
-                  <div>
-                    <h3 className="font-semibold">Non-Disclosure Agreement</h3>
-                    <p className="text-sm text-gray-500">Protect confidential information</p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => handleSignDocument('nda')}
-                  disabled={documents.nda_signed || loading}
-                  className="flex items-center space-x-2"
-                >
-                  <Signature className="h-4 w-4" />
-                  <span>{documents.nda_signed ? 'Signed' : 'Sign NDA'}</span>
-                </Button>
-              </div>
-              {!documents.nda_signed && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">
-                    {ndaText}
-                  </pre>
-                </div>
-              )}
-            </div>
-
             <div className="p-6 border rounded-lg bg-white">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -182,14 +134,14 @@ This Success Fee Agreement (the "Agreement") outlines the terms and conditions f
                 </div>
                 <Button
                   onClick={() => handleSignDocument('success_fee')}
-                  disabled={!documents.nda_signed || documents.success_fee_signed || loading}
+                  disabled={documents.success_fee_signed || loading}
                   className="flex items-center space-x-2"
                 >
                   <Signature className="h-4 w-4" />
                   <span>{documents.success_fee_signed ? 'Signed' : 'Sign Agreement'}</span>
                 </Button>
               </div>
-              {documents.nda_signed && !documents.success_fee_signed && (
+              {!documents.success_fee_signed && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-md">
                   <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">
                     {successFeeText}
@@ -200,7 +152,7 @@ This Success Fee Agreement (the "Agreement") outlines the terms and conditions f
           </div>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-gray-500">
-          Please sign the NDA first, followed by the Success Fee Agreement
+          Please review the agreement carefully before signing
         </CardFooter>
       </Card>
     </div>
