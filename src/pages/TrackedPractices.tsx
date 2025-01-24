@@ -35,24 +35,20 @@ export default function TrackedPractices() {
 
       if (error) throw error;
 
-      return practicesData.map(practice => {
-        // Use the same data from the canary_firms_data table
-        // No revenue estimation - we'll use the valuation utils in PracticeCard
-        return {
-          id: practice["Company ID"].toString(),
-          industry: practice["Primary Subtitle"] || "",
-          region: practice["State Name"] || "",
-          employee_count: practice.employeeCount || 0,
-          annual_revenue: practice.annual_revenue || 0, // Pass through actual revenue if it exists
-          service_mix: { "General": 100 },
-          status: "not_contacted",
-          last_updated: new Date().toISOString(),
-          practice_buyer_pool: [],
-          notes: [],
-          specialities: practice.specialities,
-          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
-        };
-      });
+      return practicesData.map(practice => ({
+        id: practice["Company ID"].toString(),
+        industry: practice["Primary Subtitle"] || "",
+        region: practice["State Name"] || "",
+        employee_count: practice.employeeCount || 0,
+        annual_revenue: practice.annual_revenue || 0,
+        service_mix: { "General": 100 },
+        status: "not_contacted",
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        notes: [],
+        specialities: practice.specialities,
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+      }));
     }
   });
 
