@@ -75,6 +75,15 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
 
   return (
     <div className="space-y-6">
+      {/* Raw Data Display */}
+      <Card className="p-4 bg-black/40 border-white/10">
+        <h3 className="text-lg font-semibold text-white mb-4">Raw Callouts Data:</h3>
+        <pre className="text-white/70 whitespace-pre-wrap text-sm">
+          {generatedText.callouts || 'No callouts data'}
+        </pre>
+      </Card>
+
+      {/* Parsed Callouts Display */}
       {callouts.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {callouts.map((callout, index) => (
