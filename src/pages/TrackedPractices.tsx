@@ -183,11 +183,11 @@ export default function TrackedPractices() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
-      <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
+    <div className="min-h-screen bg-black">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-black border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+            <Bird className="w-8 h-8 text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
           <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
@@ -196,15 +196,19 @@ export default function TrackedPractices() {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 sm:p-6 pt-36 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
+      <main className="container mx-auto px-4 pt-24">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <h1 className="text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('grid')}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
+              className={`${
+                viewMode === 'grid' 
+                  ? 'bg-yellow-400 text-black hover:bg-yellow-500' 
+                  : 'border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black'
+              }`}
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
@@ -212,7 +216,11 @@ export default function TrackedPractices() {
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('list')}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
+              className={`${
+                viewMode === 'list' 
+                  ? 'bg-yellow-400 text-black hover:bg-yellow-500' 
+                  : 'border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black'
+              }`}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -304,3 +312,5 @@ export default function TrackedPractices() {
     </div>
   );
 }
+
+export default TrackedPractices;
