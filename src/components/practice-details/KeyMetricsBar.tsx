@@ -81,15 +81,6 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const firmSize = getFirmSizeCategory(practice.employeeCount || 0);
   const sdeParams = getSDEParameters(firmSize);
 
-  // Calculate SDE components based on firm size
-  const ownerCompensation = estimatedRevenue * sdeParams.ownerCompRatio;
-  const operatingExpenses = estimatedRevenue * sdeParams.operatingExpenseRatio;
-  const sde = estimatedRevenue * sdeParams.sdeMargin;
-
-  // Calculate EBITDA (typically 70-75% of SDE for accounting firms)
-  const ebitdaRatio = 0.70;
-  const ebitda = sde * ebitdaRatio;
-
   // Calculate valuation using revenue multiple based on firm size
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
   const estimatedValuation = estimatedRevenue * valuationMultiple;
@@ -155,7 +146,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   );
 
   return (
-    <div className="grid grid-cols-5 gap-6 p-8 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
+    <div className="grid grid-cols-3 gap-6 p-8 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
       <MetricCard
         icon={DollarSign}
         iconColor="bg-emerald-400/10 text-emerald-400"
@@ -163,22 +154,6 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         value={formatCurrency(estimatedRevenue)}
         subtitle="Based on payroll data"
         tooltip="Estimated based on industry standards"
-      />
-      
-      <MetricCard
-        icon={Building2}
-        iconColor="bg-blue-400/10 text-blue-400"
-        title="Est. SDE"
-        value={formatCurrency(sde)}
-        tooltip={`Seller's Discretionary Earnings\nBased on ${firmSize} firm benchmarks`}
-      />
-      
-      <MetricCard
-        icon={Users}
-        iconColor="bg-purple-400/10 text-purple-400"
-        title="Est. EBITDA"
-        value={formatCurrency(ebitda)}
-        tooltip="70% of SDE for accounting firms"
       />
       
       <MetricCard
