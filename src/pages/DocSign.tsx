@@ -176,7 +176,7 @@ By clicking 'Accept,' the Client acknowledges and agrees to the terms outlined i
           </div>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-gray-500">
-          Please review the agreement carefully before signing
+          Please review the agreement carefully before accepting
         </CardFooter>
       </Card>
     </div>
