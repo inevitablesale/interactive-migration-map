@@ -21,7 +21,18 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
     
   const annualPayroll = practice.employeeCount ? practice.employeeCount * avgSalaryPerEmployee : 0;
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
-  const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
+  const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
+
+  console.log('KeyMetricsBar calculation:', {
+    employeeCount: practice.employeeCount,
+    avgSalaryPerEmployee,
+    annualPayroll,
+    estimatedRevenue,
+    countyData: {
+      payann: countyData?.payann,
+      emp: countyData?.emp
+    }
+  });
 
   const firmSize = getFirmSizeCategory(practice.employeeCount || 0);
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
