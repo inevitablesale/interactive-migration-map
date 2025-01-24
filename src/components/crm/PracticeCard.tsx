@@ -26,8 +26,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     [practice.region, ""];
 
   // Calculate gross revenue using payroll data
-  const defaultAvgSalary = 86259; // National average if county data not available
-  const avgSalary = practice.avgSalaryPerEmployee || defaultAvgSalary;
+  const avgSalary = practice.avgSalaryPerEmployee || 42752; // Use county average as fallback
   const totalPayroll = avgSalary * practice.employee_count;
   const estimatedGrossRevenue = totalPayroll * (1/0.35); // 35% payroll to revenue ratio
 
