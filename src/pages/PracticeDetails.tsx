@@ -284,7 +284,7 @@ export default function PracticeDetails() {
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
-      navigate("/auth");
+      navigate("/"); // Changed from "/auth" to "/"
     } catch (error) {
       toast({
         variant: "destructive",
