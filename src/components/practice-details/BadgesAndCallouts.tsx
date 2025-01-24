@@ -23,7 +23,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       const { data, error } = await supabase
         .from('firm_generated_text')
         .select('badges, callouts')
-        .eq('company_id', companyId)
+        .eq('company_id', companyId.toString())
         .maybeSingle();
 
       if (error) throw error;
