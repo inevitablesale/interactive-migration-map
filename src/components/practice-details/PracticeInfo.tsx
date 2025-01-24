@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PracticeInfoProps {
   practice: TopFirm;
@@ -20,12 +22,72 @@ interface PracticeInfoProps {
 export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [message, setMessage] = useState("");
+  const { toast } = useToast();
 
-  const handleInterestConfirmed = () => {
-    console.log('Interest confirmed in PracticeInfo component');
-    console.log('Message:', message);
-    setShowDialog(false);
-    onInterested?.(message);
+  const handleInterestConfirmed = async () => {
+    try {
+      // First check if user has a profile
+      const { data: profile, error: profileError } = await supabase
+        .from('buyer_profiles')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error checking profile:', profileError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "There was an error checking your profile. Please try again.",
+        });
+        return;
+      }
+
+      // If no profile exists, create a basic one
+      if (!profile) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData?.user?.email) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not get user information. Please try logging in again.",
+          });
+          return;
+        }
+
+        const { error: createError } = await supabase
+          .from('buyer_profiles')
+          .insert({
+            buyer_name: userData.user.email.split('@')[0],
+            contact_email: userData.user.email,
+            target_geography: [],
+            subscription_tier: 'free'
+          });
+
+        if (createError) {
+          console.error('Error creating profile:', createError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "There was an error creating your profile. Please try again.",
+          });
+          return;
+        }
+      }
+
+      // Now proceed with expressing interest
+      console.log('Interest confirmed in PracticeInfo component');
+      console.log('Message:', message);
+      setShowDialog(false);
+      onInterested?.(message);
+    } catch (error) {
+      console.error('Error in handleInterestConfirmed:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
   };
 
   // Create an anonymized name
