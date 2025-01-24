@@ -1,84 +1,82 @@
 import { Badge } from "@/components/ui/badge";
-import { BadgeCheck, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { CheckCircle, BadgeCheck } from "lucide-react";
 
 interface BadgesAndCalloutsProps {
   generatedText: {
-    badges?: string;
-    callouts?: string;
-  } | null;
-  specialties?: string;
+    badges: string | null;
+    callouts: string | null;
+  };
+  specialties?: string | null;
 }
 
-export const BadgesAndCallouts = ({ generatedText, specialties }: BadgesAndCalloutsProps) => {
-  // Parse badges from generated text or specialties
-  const badges = (() => {
-    if (!generatedText?.badges) {
-      return specialties ? [specialties] : [];
-    }
-    try {
-      return JSON.parse(generatedText.badges) as string[];
-    } catch {
-      // If parsing fails, treat it as a single badge string
-      return [generatedText.badges];
-    }
-  })();
+export function BadgesAndCallouts({ generatedText, specialties }: BadgesAndCalloutsProps) {
+  console.log('BadgesAndCallouts rendered with data:', generatedText);
+  
+  // Parse badges (handles both newlines and commas)
+  const parseBadges = (badgesText: string | null) => {
+    if (!badgesText) return [];
+    return badgesText
+      .split(/[\n,]/) // Split on newlines or commas
+      .map(badge => badge.trim())
+      .filter(Boolean); // Remove empty strings
+  };
 
-  // Parse callouts from generated text
-  const callouts = (() => {
-    if (!generatedText?.callouts) return [];
-    try {
-      return JSON.parse(generatedText.callouts) as string[];
-    } catch {
-      // If parsing fails, treat it as a single callout string
-      return [generatedText.callouts];
-    }
-  })();
+  // Parse callouts (title: description format)
+  const parseCallouts = (calloutsText: string | null) => {
+    if (!calloutsText) return [];
+    
+    return calloutsText
+      .split('.,')  // Split on period + comma
+      .map(entry => {
+        const [title, description] = entry.split(':').map(part => part.trim());
+        // Remove trailing period if it exists
+        const cleanDescription = description?.replace(/\.$/, '');
+        return { title, description: cleanDescription };
+      })
+      .filter(({ title, description }) => title && description); // Only return complete entries
+  };
 
-  if (!badges.length && !callouts.length) {
-    return null;
-  }
+  const badges = parseBadges(generatedText.badges);
+  const callouts = parseCallouts(generatedText.callouts);
+
+  console.log('Parsed badges:', badges);
+  console.log('Parsed callouts:', callouts);
 
   return (
     <div className="space-y-6">
-      {/* Badges Section */}
+      {/* Badges Display */}
       {badges.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Key Highlights</h3>
-          <div className="flex flex-wrap gap-3">
-            {badges.map((badge, index) => (
-              <Badge 
-                key={`badge-${index}`}
-                variant="secondary" 
-                className="px-4 py-2 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 border border-emerald-200/20 backdrop-blur-sm text-black hover:from-emerald-400/30 hover:to-teal-400/30 transition-all duration-300 flex items-center gap-2"
-              >
-                <BadgeCheck className="w-4 h-4 text-emerald-700" />
-                {badge}
-              </Badge>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-3">
+          {badges.map((badge, index) => (
+            <Badge 
+              key={`badge-${index}`}
+              variant="secondary" 
+              className="px-4 py-2 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 border border-indigo-200/20 backdrop-blur-sm text-white hover:from-indigo-400/30 hover:to-blue-400/30 transition-all duration-300 flex items-center gap-2"
+            >
+              <BadgeCheck className="w-4 h-4 text-indigo-300" />
+              {badge}
+            </Badge>
+          ))}
         </div>
       )}
 
-      {/* Callouts Section */}
+      {/* Callouts Display */}
       {callouts.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Additional Information</h3>
-          <div className="grid gap-4">
-            {callouts.map((callout, index) => (
-              <Card 
-                key={`callout-${index}`}
-                className="p-4 bg-black/40 border-white/10 backdrop-blur-sm"
-              >
-                <div className="flex items-start gap-3">
-                  <ArrowRight className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <p className="text-white/80">{callout}</p>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {callouts.map((callout, index) => (
+            <Card key={`callout-${index}`} className="p-4 bg-black/40 border-white/10">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white">{callout.title}</h4>
+                  <p className="text-sm text-white/70 mt-1">{callout.description}</p>
                 </div>
-              </Card>
-            ))}
-          </div>
+              </div>
+            </Card>
+          ))}
         </div>
       )}
     </div>
   );
-};
+}
