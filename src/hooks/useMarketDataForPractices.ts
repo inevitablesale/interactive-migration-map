@@ -20,12 +20,12 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
             return { avgSalaryPerEmployee: 86259 }; // Fallback value
           }
 
-          // Query using numbers directly since COUNTYFP and STATEFP are numbers in the database
+          // Cast numbers to strings for the query since they are stored as text
           const { data: countyData, error: countyError } = await supabase
             .from('county_data')
             .select('PAYANN, EMP')
-            .eq('STATEFP', practice.STATEFP)  // Remove toString()
-            .eq('COUNTYFP', practice.COUNTYFP) // Remove toString()
+            .eq('STATEFP', practice.STATEFP.toString())
+            .eq('COUNTYFP', practice.COUNTYFP.toString())
             .eq('COUNTYNAME', practice.COUNTYNAME)
             .maybeSingle();
 
