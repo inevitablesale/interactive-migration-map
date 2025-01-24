@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Play } from "lucide-react";
+import { Calendar, Users, Play } from "lucide-react";
 
 interface PracticeOfDayProps {
   practice?: {
@@ -21,6 +21,7 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
           <CardTitle>Practice of the Day</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4 py-8">
+          <Calendar className="h-8 w-8 text-muted-foreground" />
           <p className="text-muted-foreground">Next reveal in 12 hours</p>
         </CardContent>
       </Card>
@@ -28,9 +29,9 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
   }
 
   return (
-    <Card className="bg-gradient-to-br from-primary/10 to-transparent relative overflow-hidden">
+    <Card className="bg-white relative overflow-hidden">
       {/* Coming Soon Banner */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-yellow-400/90 text-black font-bold py-2 px-20 text-lg shadow-lg z-10">
+      <div className="absolute -right-12 top-6 rotate-45 bg-yellow-400 text-black font-semibold py-1 px-12 text-sm shadow-md z-10">
         COMING SOON
       </div>
       
@@ -55,7 +56,7 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
             <span className="text-sm">{practice.buyer_count} interested buyers</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm">12 hours remaining</span>
           </div>
         </div>
