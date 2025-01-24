@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface Practice {
   id: string;
   region: string;
-  COUNTYFP?: number;  // Changed from string to number
-  STATEFP?: number;   // Changed from string to number
+  COUNTYFP?: number;  
+  STATEFP?: number;   
   COUNTYNAME?: string;
 }
 
@@ -20,12 +20,12 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
             return { avgSalaryPerEmployee: 86259 }; // Fallback value
           }
 
-          // Get the county data using FIPS codes
+          // Query using numbers directly since COUNTYFP and STATEFP are numbers in the database
           const { data: countyData, error: countyError } = await supabase
             .from('county_data')
             .select('PAYANN, EMP')
-            .eq('STATEFP', practice.STATEFP.toString())  // Convert to string for query
-            .eq('COUNTYFP', practice.COUNTYFP.toString()) // Convert to string for query
+            .eq('STATEFP', practice.STATEFP)  // Remove toString()
+            .eq('COUNTYFP', practice.COUNTYFP) // Remove toString()
             .eq('COUNTYNAME', practice.COUNTYNAME)
             .maybeSingle();
 
