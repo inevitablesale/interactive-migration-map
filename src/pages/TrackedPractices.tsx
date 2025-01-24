@@ -311,5 +311,3 @@ export default function TrackedPractices() {
     </div>
   );
 }
-
-export default TrackedPractices;
