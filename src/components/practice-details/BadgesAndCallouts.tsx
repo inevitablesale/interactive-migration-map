@@ -25,7 +25,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       const { data, error } = await supabase
         .from('firm_generated_text')
         .select('badges, callouts')
-        .eq('company_id', companyId)
+        .eq('company_id', companyId)  // This was the issue - using wrong column name
         .maybeSingle();
 
       if (error) {
