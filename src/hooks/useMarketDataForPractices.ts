@@ -20,9 +20,9 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
             return { avgSalaryPerEmployee: 86259 }; // Fallback value
           }
 
-          // Cast numbers to strings for the query since they are stored as text
-          const statefp = practice.STATEFP.toString();
-          const countyfp = practice.COUNTYFP.toString();
+          // Cast numbers to strings for the query and pad COUNTYFP with leading zeros
+          const statefp = practice.STATEFP.toString().padStart(2, '0');
+          const countyfp = practice.COUNTYFP.toString().padStart(3, '0');
           
           console.log('Querying county_rankings with:', {
             STATEFP: statefp,
