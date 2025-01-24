@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Map from "@/components/Map";
 import { Hero } from "@/components/Hero";
 import { Bird } from "lucide-react";
@@ -16,38 +14,8 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { ValueProposition } from "@/components/ValueProposition";
 import { CatalystSection } from "@/components/CatalystSection";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkDocuments = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        try {
-          const { data: userDocs, error } = await supabase
-            .from('user_documents')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-
-          if (error) throw error;
-
-          if (!userDocs || !userDocs.success_fee_signed) {
-            console.log("Redirecting to doc-sign - documents not signed");
-            navigate("/doc-sign");
-          }
-        } catch (error) {
-          console.error('Error checking document status:', error);
-          navigate("/doc-sign");
-        }
-      }
-    };
-
-    checkDocuments();
-  }, [navigate]);
-
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* Countdown Banner */}
