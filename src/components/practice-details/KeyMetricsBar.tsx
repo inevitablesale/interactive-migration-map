@@ -110,13 +110,15 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   };
 
   return (
-    <div className="grid grid-cols-5 gap-4 p-6 bg-black/40 backdrop-blur-md border-white/10 rounded-lg">
-      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+    <div className="grid grid-cols-5 gap-6 p-8 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
+      <div className="group relative flex flex-col justify-between p-6 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-emerald-400" />
-            <div className="flex items-center gap-1">
-              <p className="text-sm font-medium text-white/60">Est. Gross Revenue</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-400/10">
+              <DollarSign className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-white/80">Est. Gross Revenue</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -130,18 +132,20 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </div>
           </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-4">
           <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(estimatedRevenue)}</p>
-          <p className="text-xs text-white/40 mt-1">Based on payroll data</p>
+          <p className="text-xs text-white/50 mt-2 font-medium">Based on payroll data</p>
         </div>
       </div>
 
-      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+      <div className="group relative flex flex-col justify-between p-6 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-blue-400" />
-            <div className="flex items-center gap-1">
-              <p className="text-sm font-medium text-white/60">Est. SDE</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-400/10">
+              <Building2 className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-white/80">Est. SDE</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -156,17 +160,19 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </div>
           </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-4">
           <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(sde)}</p>
         </div>
       </div>
 
-      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+      <div className="group relative flex flex-col justify-between p-6 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-400" />
-            <div className="flex items-center gap-1">
-              <p className="text-sm font-medium text-white/60">Est. EBITDA</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-purple-400/10">
+              <Users className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-white/80">Est. EBITDA</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -180,17 +186,19 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </div>
           </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-4">
           <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(ebitda)}</p>
         </div>
       </div>
 
-      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+      <div className="group relative flex flex-col justify-between p-6 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-yellow-400" />
-            <div className="flex items-center gap-1">
-              <p className="text-sm font-medium text-white/60">Growth Rates</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-yellow-400/10">
+              <TrendingUp className="w-5 h-5 text-yellow-400" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-white/80">Growth Rates</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -205,22 +213,24 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </div>
           </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-4">
           <p className="text-2xl font-bold text-white tracking-tight">
             {formatGrowthRate(countyData?.population_growth_rate)}
           </p>
-          <p className="text-xs text-white/40 mt-1">
+          <p className="text-xs text-white/50 mt-2 font-medium">
             Avg: {formatGrowthRate(countyData?.avg_growth_rate)}
           </p>
         </div>
       </div>
 
-      <div className="group relative flex flex-col justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-200">
+      <div className="group relative flex flex-col justify-between p-6 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LineChart className="w-5 h-5 text-orange-400" />
-            <div className="flex items-center gap-1">
-              <p className="text-sm font-medium text-white/60">Est. Valuation</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-orange-400/10">
+              <LineChart className="w-5 h-5 text-orange-400" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-white/80">Est. Valuation</p>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -234,11 +244,11 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
             </div>
           </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-4">
           <p className="text-2xl font-bold text-white tracking-tight">
             {formatCurrency(estimatedValuation)}
           </p>
-          <p className="text-xs text-white/40 mt-1">
+          <p className="text-xs text-white/50 mt-2 font-medium">
             Based on Revenue × {valuationMultiple.toFixed(2)}
           </p>
         </div>
