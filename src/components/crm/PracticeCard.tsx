@@ -95,3 +95,4 @@ export function PracticeCard({ practice }: PracticeCardProps) {
       </div>
     </div>
   );
+}
