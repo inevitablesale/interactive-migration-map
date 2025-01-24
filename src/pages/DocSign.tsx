@@ -22,23 +22,21 @@ export default function DocSign() {
   const checkDocumentStatus = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth');
-        return;
-      }
+      
+      if (session) {
+        const { data, error } = await supabase
+          .from('user_documents')
+          .select('nda_signed, success_fee_signed')
+          .eq('user_id', session.user.id)
+          .single();
 
-      const { data, error } = await supabase
-        .from('user_documents')
-        .select('nda_signed, success_fee_signed')
-        .eq('user_id', session.user.id)
-        .single();
+        if (error) throw error;
 
-      if (error) throw error;
-
-      if (data) {
-        setDocuments(data);
-        if (data.success_fee_signed) {
-          navigate('/tracked-practices');
+        if (data) {
+          setDocuments(data);
+          if (data.success_fee_signed) {
+            navigate('/tracked-practices');
+          }
         }
       }
     } catch (error) {
