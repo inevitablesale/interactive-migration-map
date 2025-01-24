@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, CheckCircle } from "lucide-react";
+import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, CheckCircle, BriefcaseBusiness } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
@@ -394,6 +394,23 @@ export default function PracticeDetails() {
             {/* Practice Info Card */}
             <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
               <PracticeInfo practice={practice} onInterested={handleInterested} />
+            </div>
+
+            {/* Advertiser Space Card */}
+            <div className="bg-[#1A1F2C] backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.7s' }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-white/60">
+                  <BriefcaseBusiness className="w-4 h-4" />
+                  <span>Advertiser Space</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">New Philadelphia's Premier Business Advisors</h3>
+                  <p className="text-sm text-white/60 mt-2">Premium advertising space available. Contact us to showcase your business here.</p>
+                </div>
+                <Button variant="secondary" className="w-full">
+                  Learn More
+                </Button>
+              </div>
             </div>
           </div>
         </div>
