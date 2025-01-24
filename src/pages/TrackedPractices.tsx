@@ -77,7 +77,6 @@ export default function TrackedPractices() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Only fetch market data for visible practices
   const marketQueries = useMarketDataForPractices(paginatedPractices);
 
   const handleWithdraw = async (practiceId: string) => {
@@ -151,7 +150,6 @@ export default function TrackedPractices() {
     setCurrentPage(1);
   };
 
-  // Helper function to generate pagination numbers
   const getPaginationRange = () => {
     const range: (number | 'ellipsis')[] = [];
     const maxVisiblePages = 5;
@@ -207,7 +205,7 @@ export default function TrackedPractices() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 pt-24 pb-16">
+      <main className="container mx-auto px-4 sm:px-6 pt-32 pb-16">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
