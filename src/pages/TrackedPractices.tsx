@@ -42,7 +42,7 @@ export default function TrackedPractices() {
           return {
             id: practice["Company ID"].toString(),
             industry: practice["Primary Subtitle"] || "",
-            region: practice["State Name"] || "",
+            region: practice.Location || practice["State Name"] || "",
             employee_count: practice.employeeCount || 0,
             annual_revenue: 0,
             service_mix: { "General": 100 },
@@ -61,7 +61,7 @@ export default function TrackedPractices() {
         return {
           id: practice["Company ID"].toString(),
           industry: practice["Primary Subtitle"] || "",
-          region: practice["State Name"] || "",
+          region: practice.Location || practice["State Name"] || "",
           employee_count: practice.employeeCount || 0,
           annual_revenue: 0,
           service_mix: { "General": 100 },
