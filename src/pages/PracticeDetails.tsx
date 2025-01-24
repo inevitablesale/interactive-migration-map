@@ -27,7 +27,7 @@ export default function PracticeDetails() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isMarketDataOpen, setIsMarketDataOpen] = useState(false);
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     // Get initial session
@@ -148,9 +148,9 @@ export default function PracticeDetails() {
         employed_population: countyData?.employed_population,
         private_sector_accountants: countyData?.private_sector_accountants,
         public_sector_accountants: countyData?.public_sector_accountants,
-        firms_per_10k_population: countyData?.firms_per_10k,
+        firms_per_10k: countyData?.firms_per_10k,
         population_growth_rate: countyData?.population_growth_rate,
-        market_saturation_index: countyData?.market_saturation,
+        market_saturation: countyData?.market_saturation,
         total_education_population: countyData?.education_population,
         bachelors_holders: countyData?.bachelors_holders,
         masters_holders: countyData?.masters_holders,
@@ -200,6 +200,7 @@ export default function PracticeDetails() {
           description: "Please sign in to express interest",
           variant: "destructive",
         });
+        navigate("/auth");
         return;
       }
 
