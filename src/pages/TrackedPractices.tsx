@@ -11,6 +11,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
+interface CountyData {
+  PAYANN: number;
+  EMP: number;
+}
+
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +49,7 @@ export default function TrackedPractices() {
             .select('PAYANN, EMP')
             .eq('COUNTYFP', practice.COUNTYFP?.toString())
             .eq('STATEFP', practice.STATEFP?.toString())
-            .single();
+            .maybeSingle() as { data: CountyData | null };
 
           // Calculate avgSalaryPerEmployee from county data
           const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
