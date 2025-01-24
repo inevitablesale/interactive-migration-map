@@ -401,11 +401,11 @@ export default function PracticeDetails() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-white/60">
                   <BriefcaseBusiness className="w-4 h-4" />
-                  <span>Advertiser Space</span>
+                  <span>Professional Services</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">New Philadelphia's Premier Business Advisors</h3>
-                  <p className="text-sm text-white/60 mt-2">Premium advertising space available. Contact us to showcase your business here.</p>
+                  <h3 className="text-lg font-semibold text-white">Connect with M&A Professionals</h3>
+                  <p className="text-sm text-white/60 mt-2">Premium space for lenders, attorneys, and M&A advisors to showcase their expertise in practice transitions.</p>
                 </div>
                 <Button variant="secondary" className="w-full">
                   Learn More
