@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Users, DollarSign } from "lucide-react";
+import { getFirmSizeCategory, getValuationMultiple } from "@/utils/valuationUtils";
 
 interface PracticeCardProps {
   practice: {
@@ -24,8 +25,9 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
 
-  // Calculate estimated valuation (using a multiplier based on revenue)
-  const valuationMultiplier = 1.50;
+  // Calculate estimated valuation using the same logic as PracticeDetails
+  const firmSize = getFirmSizeCategory(practice.employee_count);
+  const valuationMultiplier = getValuationMultiple(firmSize, practice.annual_revenue);
   const estimatedValuation = practice.annual_revenue * valuationMultiplier;
 
   // Format currency
