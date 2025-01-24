@@ -290,49 +290,36 @@ export default function PracticeDetails() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Header Section with Prominent CTA */}
-            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in">
-              <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-                <div className="flex-1">
-                  <PracticeHeader 
-                    practice={practice} 
-                    generatedText={generatedText}
-                  />
-                  {generatedText?.teaser && (
-                    <p className="mt-4 text-white/80">{generatedText.teaser}</p>
-                  )}
-                </div>
-                <div className="w-full md:w-auto">
-                </div>
-              </div>
-            </div>
+        {/* Hero Section */}
+        <div className="mb-8 bg-gradient-to-br from-black/60 to-gray-900/60 rounded-xl border border-white/10 p-8">
+          <PracticeHeader practice={practice} generatedText={generatedText} />
+          <div className="mt-6">
+            <KeyMetricsBar practice={practice} countyData={countyData} />
+          </div>
+        </div>
 
-            {/* Key Metrics */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <KeyMetricsBar practice={practice} countyData={countyData} />
-            </div>
-
-            {/* Callouts Section */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="grid gap-8 lg:grid-cols-12">
+          {/* Main Content Column */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Badges and Callouts */}
+            <section className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-6">
+              <h2 className="text-xl font-semibold text-white mb-6">Key Highlights</h2>
               <BadgesAndCallouts 
                 generatedText={generatedText} 
                 specialties={practice.specialities}
               />
-            </div>
+            </section>
 
             {/* Business Overview */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <section className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
               <BusinessOverview practice={practice} />
-            </div>
+            </section>
 
-            {/* Collapsible Market Analysis */}
+            {/* Market Analysis */}
             <Collapsible
               open={isMarketDataOpen}
               onOpenChange={setIsMarketDataOpen}
-              className="bg-black/40 backdrop-blur-md rounded-lg border border-white/10 animate-fade-in"
+              className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10"
             >
               <CollapsibleTrigger asChild>
                 <Button
@@ -356,28 +343,30 @@ export default function PracticeDetails() {
             </Collapsible>
           </div>
 
-          {/* Right Column - Sticky Sidebar */}
-          <div className="lg:sticky lg:top-24 space-y-6 h-fit">
+          {/* Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
             {/* Practice Info Card */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <div className="sticky top-24">
               <PracticeInfo practice={practice} onInterested={handleInterested} />
-            </div>
 
-            {/* Advertiser Space Card */}
-            <div className="bg-[#1A1F2C] backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-white/60">
-                  <Briefcase className="w-4 h-4" />
-                  <span>Premium Advertising Space</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Grow Your Professional Network</h3>
-                  <p className="text-sm text-white/60 mt-2">Reach practice buyers and sellers looking for M&A advisors, attorneys, and lenders. Showcase your expertise to decision-makers actively exploring practice transitions.</p>
-                </div>
-                <Button variant="secondary" className="w-full">
-                  Learn More
-                </Button>
-              </div>
+              {/* Premium Advertisement */}
+              <Card className="mt-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-white/10">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center gap-2 text-white/60">
+                    <Briefcase className="w-4 h-4" />
+                    <span>Premium Features</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Unlock Full Access</h3>
+                    <p className="text-sm text-white/60 mt-2">
+                      Get detailed analytics, market insights, and connect directly with practice owners.
+                    </p>
+                  </div>
+                  <Button variant="secondary" className="w-full bg-white/10 text-white hover:bg-white/20">
+                    Upgrade Now
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
