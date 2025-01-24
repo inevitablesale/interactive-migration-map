@@ -35,84 +35,20 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return <div className="text-white/60 text-center py-4">No data available for this company.</div>;
   }
 
-  // Parse badges (format: "* **Badge Name**")
-  const badges = generatedText.badges
-    ? generatedText.badges
-        .split('\n')
-        .map(line => {
-          const match = line.match(/^\*\s*\*\*(.*?)\*\*$/);
-          return match ? match[1].trim() : null;
-        })
-        .filter((badge): badge is string => badge !== null)
-    : [];
+  console.log('Raw badges text:', generatedText.badges);
+  console.log('Raw callouts text:', generatedText.callouts);
 
-  // Parse callouts (format: "* **Title:** Description")
-  const callouts = generatedText.callouts
-    ? generatedText.callouts
-        .split('\n')
-        .map(line => {
-          // First, extract the entire content between * and the end
-          const contentMatch = line.match(/^\*\s*\*\*(.*?)\*\*:(.*)$/);
-          if (!contentMatch) return null;
-          
-          return {
-            title: contentMatch[1].trim(),
-            description: contentMatch[2].trim()
-          };
-        })
-        .filter((callout): callout is { title: string; description: string } => callout !== null)
-    : [];
-
-  console.log('Parsed badges:', badges);
-  console.log('Parsed callouts:', callouts);
-
-  if (!badges.length && !callouts.length) {
-    return <div className="text-white/60 text-center py-4">No badges or callouts available.</div>;
-  }
-
+  // Return the raw data for now to debug
   return (
     <div className="space-y-6">
-      {badges.length > 0 && (
-        <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-          <div className="flex items-center gap-2 mb-4">
-            <Award className="w-5 h-5 text-yellow-400" />
-            <h3 className="text-lg font-semibold text-white">Recognition & Achievements</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {badges.map((badge, index) => (
-              <Badge 
-                key={`${companyId}-badge-${index}`}
-                className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                variant="secondary"
-              >
-                {badge}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {callouts.length > 0 && (
-        <Card className="p-6 bg-black/40 backdrop-blur-md border-white/10">
-          <div className="flex items-center gap-2 mb-4">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-semibold text-white">Notable Features</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {callouts.map((callout, index) => (
-              <div 
-                key={`${companyId}-callout-${index}`}
-                className="bg-white/5 rounded-lg p-4"
-              >
-                <h4 className="font-semibold text-blue-400 mb-2">{callout.title}</h4>
-                {callout.description && (
-                  <p className="text-white/80 text-sm">{callout.description}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+      <pre className="text-white whitespace-pre-wrap">
+        <h3>Badges Raw Data:</h3>
+        {JSON.stringify(generatedText.badges, null, 2)}
+      </pre>
+      <pre className="text-white whitespace-pre-wrap">
+        <h3>Callouts Raw Data:</h3>
+        {JSON.stringify(generatedText.callouts, null, 2)}
+      </pre>
     </div>
   );
 }
