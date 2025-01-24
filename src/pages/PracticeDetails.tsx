@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown } from "lucide-react";
+import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
@@ -367,7 +367,7 @@ export default function PracticeDetails() {
             <div className="bg-[#1A1F2C] backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.7s' }}>
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-white/60">
-                  <BriefcaseBusiness className="w-4 h-4" />
+                  <Briefcase className="w-4 h-4" />
                   <span>Premium Advertising Space</span>
                 </div>
                 <div>
