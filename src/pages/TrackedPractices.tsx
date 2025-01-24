@@ -56,8 +56,42 @@ export default function TrackedPractices() {
     }
   });
 
-  // Fetch market data for all practices
-  const marketQueries = useMarketDataForPractices(practices);
+  // Filter practices based on search and filters
+  const filteredPractices = practices?.filter(practice => {
+    const searchMatches = !searchQuery || 
+      practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      practice.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const industryMatches = !filters.industry || practice.industry === filters.industry;
+    const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
+                           (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
+    const stateMatches = !filters.state || practice.region.includes(filters.state);
+    
+    // Get market data for this practice
+    const marketData = marketQueries[practices.indexOf(practice)]?.data;
+    const avgSalaryPerEmployee = marketData?.avgSalaryPerEmployee || 86259;
+    
+    // Calculate estimated revenue
+    const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
+    const payrollToRevenueRatio = 0.35;
+    const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
+    
+    const revenueMatches = (!filters.minRevenue || estimatedRevenue >= parseInt(filters.minRevenue)) &&
+                          (!filters.maxRevenue || estimatedRevenue <= parseInt(filters.maxRevenue));
+    const valuationMatches = (!filters.minValuation || (estimatedRevenue * 2.5) >= parseInt(filters.minValuation)) &&
+                            (!filters.maxValuation || (estimatedRevenue * 2.5) <= parseInt(filters.maxValuation));
+
+    return searchMatches && industryMatches && employeeMatches && stateMatches && 
+           revenueMatches && valuationMatches;
+  });
+
+  const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Only fetch market data for visible practices
+  const marketQueries = useMarketDataForPractices(paginatedPractices);
 
   const handleWithdraw = async (practiceId: string) => {
     const { error } = await supabase
@@ -130,85 +164,6 @@ export default function TrackedPractices() {
     setCurrentPage(1);
   };
 
-  const filteredPractices = practices?.filter(practice => {
-    const searchMatches = !searchQuery || 
-      practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      practice.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const industryMatches = !filters.industry || practice.industry === filters.industry;
-    const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
-                           (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
-    const stateMatches = !filters.state || practice.region.includes(filters.state);
-    
-    // Get market data for this practice
-    const marketData = marketQueries[practices.indexOf(practice)]?.data;
-    const avgSalaryPerEmployee = marketData?.avgSalaryPerEmployee || 86259;
-    
-    // Calculate estimated revenue
-    const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
-    const payrollToRevenueRatio = 0.35;
-    const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
-    
-    const revenueMatches = (!filters.minRevenue || estimatedRevenue >= parseInt(filters.minRevenue)) &&
-                          (!filters.maxRevenue || estimatedRevenue <= parseInt(filters.maxRevenue));
-    const valuationMatches = (!filters.minValuation || (estimatedRevenue * 2.5) >= parseInt(filters.minValuation)) &&
-                            (!filters.maxValuation || (estimatedRevenue * 2.5) <= parseInt(filters.maxValuation));
-
-    return searchMatches && industryMatches && employeeMatches && stateMatches && 
-           revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
-
-  const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  const getPaginationNumbers = () => {
-    const pageNumbers: (number | 'ellipsis')[] = [];
-    const currentGroup = Math.floor((currentPage - 1) / 10);
-    const startPage = currentGroup * 10 + 1;
-    const endPage = Math.min(startPage + 9, totalPages);
-
-    if (startPage > 1) {
-      pageNumbers.push(1);
-      if (startPage > 2) pageNumbers.push('ellipsis');
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) pageNumbers.push('ellipsis');
-      pageNumbers.push(totalPages);
-    }
-
-    return pageNumbers;
-  };
-
-  const { data: practiceOfDay } = useQuery({
-    queryKey: ['practice-of-day'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('canary_firms_data')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
-
-      if (error) return null;
-      if (!data) return null;
-      
-      return {
-        id: data["Company ID"].toString(),
-        industry: data["Primary Subtitle"] || "",
-        region: data["State Name"] || "",
-        employee_count: data.employeeCount || 0,
-        service_mix: { "General": 100 },
-        buyer_count: 0,
-      };
-    }
-  });
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
@@ -265,7 +220,7 @@ export default function TrackedPractices() {
                     : 'grid-cols-1'
                 }`}>
                   {paginatedPractices?.map((practice, index) => {
-                    const marketData = marketQueries[practices.indexOf(practice)]?.data;
+                    const marketData = marketQueries[index]?.data;
                     return (
                       <PracticeCard
                         key={practice.id}
