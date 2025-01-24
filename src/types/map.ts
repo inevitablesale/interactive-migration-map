@@ -1,6 +1,7 @@
 export interface MSAData {
-  msa: string;
+  MSA: string;
   msa_name: string;
+  STATEFP: string;
   EMP?: number;
   PAYANN?: number;
   ESTAB?: number;

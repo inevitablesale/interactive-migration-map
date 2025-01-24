@@ -9,9 +9,6 @@ interface MSACrosswalk {
   STATEFP: string;
 }
 
-// Simplified type for metrics to avoid deep nesting
-type MSAMetrics = Omit<MSAData, 'MSA' | 'msa_name'>;
-
 export const useMSAData = (stateFp: string) => {
   return useQuery({
     queryKey: ['msaData', stateFp],
