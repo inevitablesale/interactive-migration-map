@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, BadgeCheck } from "lucide-react";
 
 interface BadgesAndCalloutsProps {
   generatedText: {
@@ -47,13 +47,14 @@ export function BadgesAndCallouts({ generatedText, specialties }: BadgesAndCallo
     <div className="space-y-6">
       {/* Badges Display */}
       {badges.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {badges.map((badge, index) => (
             <Badge 
               key={`badge-${index}`}
               variant="secondary" 
-              className="bg-white/10 text-white hover:bg-white/20"
+              className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/20 backdrop-blur-sm text-white hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 flex items-center gap-2"
             >
+              <BadgeCheck className="w-4 h-4 text-blue-400" />
               {badge}
             </Badge>
           ))}

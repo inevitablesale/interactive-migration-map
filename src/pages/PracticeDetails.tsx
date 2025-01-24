@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, CheckCircle, BriefcaseBusiness } from "lucide-react";
+import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
@@ -315,7 +315,7 @@ export default function PracticeDetails() {
               <KeyMetricsBar practice={practice} countyData={countyData} />
             </div>
 
-            {/* Callouts Section - Moved here */}
+            {/* Callouts Section */}
             <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <BadgesAndCallouts 
                 generatedText={generatedText} 
@@ -354,32 +354,6 @@ export default function PracticeDetails() {
                 {countyData && <MarketMetricsGrid marketData={countyData} />}
               </CollapsibleContent>
             </Collapsible>
-
-            {/* Callouts Section */}
-            {generatedText?.callouts && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                {generatedText.callouts.split('.,').map((callout, index) => {
-                  const [title, description] = callout.split(':').map(part => part.trim());
-                  if (!title || !description) return null;
-                  
-                  return (
-                    <Card key={index} className="bg-black/40 backdrop-blur-md border-white/10">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
-                          <div>
-                            <h4 className="font-semibold text-white">{title}</h4>
-                            <p className="text-sm text-white/70 mt-1">
-                              {description.replace(/\.$/, '')}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
           </div>
 
           {/* Right Column - Sticky Sidebar */}
