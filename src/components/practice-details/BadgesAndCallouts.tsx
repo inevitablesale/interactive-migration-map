@@ -26,7 +26,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       // Now fetch the generated text
       const { data, error } = await supabase
         .from('firm_generated_text')
-        .select('*')  // Select all columns to see what we get
+        .select('*')
         .eq('company_id', companyId)
         .maybeSingle();
 
@@ -50,12 +50,46 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return <div className="text-white/60 text-center py-4">No badges or callouts available for this company.</div>;
   }
 
+  // Parse callouts from markdown format
+  const parseCallouts = (calloutsText: string | null) => {
+    if (!calloutsText) return [];
+    
+    // Split by newline and filter out empty lines
+    return calloutsText.split('\n')
+      .filter(line => line.trim().startsWith('*'))
+      .map(line => {
+        // Extract the title and description
+        const match = line.match(/\*\*([^:]+):\*\*\s*(.*)/);
+        if (match) {
+          return {
+            title: match[1].trim(),
+            description: match[2].trim()
+          };
+        }
+        return null;
+      })
+      .filter(Boolean); // Remove any null values
+  };
+
+  const callouts = parseCallouts(generatedText.callouts);
+
   return (
     <div className="space-y-6">
-      <pre className="text-white whitespace-pre-wrap">
-        <h3>Complete Generated Text Data:</h3>
-        {JSON.stringify(generatedText, null, 2)}
-      </pre>
+      {callouts.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {callouts.map((callout, index) => (
+            <Card key={index} className="p-4 bg-black/40 border-white/10">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white">{callout.title}</h4>
+                  <p className="text-sm text-white/70 mt-1">{callout.description}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
