@@ -69,9 +69,9 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             <h3 className="text-lg font-semibold text-white">Recognition & Achievements</h3>
           </div>
           <div className="flex flex-wrap gap-2">
-            {parsedBadges.map((badge, index) => (
+            {parsedBadges.map((badge) => (
               <Badge 
-                key={index}
+                key={`badge-${companyId}-${badge}`}
                 variant="secondary" 
                 className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
               >
@@ -89,13 +89,13 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             <h3 className="text-lg font-semibold text-white">Notable Features</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {parsedCallouts.map((callout, index) => {
+            {parsedCallouts.map((callout) => {
               const [title, ...descParts] = callout.split(':');
               const description = descParts.join(':').trim();
               
               return (
                 <div 
-                  key={index}
+                  key={`callout-${companyId}-${title}`}
                   className="bg-white/5 rounded-lg p-4"
                 >
                   <h4 className="font-semibold text-blue-400 mb-2">{title}</h4>
