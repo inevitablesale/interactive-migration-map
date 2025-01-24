@@ -206,48 +206,64 @@ export default function TrackedPractices() {
         </div>
       </header>
 
-      {/* Featured Opportunity Alert - Now floating */}
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4">
-        <div className="w-full">
+      {/* Floating Featured Opportunity Widget */}
+      <div className={cn(
+        "fixed bottom-8 right-8 z-50 w-96 transform transition-transform duration-300",
+        isAlertOpen ? "translate-y-0" : "translate-y-[calc(100%-3rem)]"
+      )}>
+        <div className="relative">
+          {/* Chain decorations */}
+          <div className="absolute -top-4 left-0 w-full flex justify-between px-4 pointer-events-none">
+            <div className="w-1 h-16 bg-gradient-to-b from-gray-600 to-gray-800 rounded transform -rotate-12" />
+            <div className="w-1 h-16 bg-gradient-to-b from-gray-600 to-gray-800 rounded transform rotate-12" />
+          </div>
+          
+          {/* Widget Header with Timer */}
           <button
             onClick={toggleAlert}
-            className="w-full flex items-center justify-between p-2 rounded-lg bg-white text-black shadow-lg"
+            className="w-full flex items-center justify-between p-3 rounded-t-lg bg-gray-800 border-t border-x border-gray-700"
           >
             <div className="flex items-center gap-2">
               <LightbulbIcon className={cn(
                 "w-5 h-5 text-yellow-400",
                 !hasBeenViewed && "animate-pulse"
               )} />
-              <span className="font-semibold">Today's Featured Opportunity</span>
+              <span className="font-semibold text-white">Featured Opportunity</span>
             </div>
-            {isAlertOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <div className="flex items-center gap-2">
+              <div className="text-red-500 font-mono bg-gray-900 px-2 py-1 rounded">
+                12:00
+              </div>
+              {isAlertOpen ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
+            </div>
           </button>
           
+          {/* Widget Content */}
           {isAlertOpen && (
-            <div className="bg-white rounded-b-lg p-4 space-y-4 shadow-lg">
+            <div className="bg-gray-800 rounded-b-lg p-4 space-y-4 border-b border-x border-gray-700 shadow-2xl">
               <div className="relative">
                 <div className="absolute -right-3 top-0 rotate-45 bg-yellow-300 px-8 py-1 text-black text-sm font-semibold">
                   COMING SOON
                 </div>
-                <h3 className="text-xl font-semibold mt-6">Accounting | Virginia</h3>
-                <p className="text-gray-600">346 employees | 100% General</p>
+                <h3 className="text-xl font-semibold mt-6 text-white">Accounting | Virginia</h3>
+                <p className="text-gray-400">346 employees | 100% General</p>
                 
                 <div className="flex justify-between items-center py-4">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-500" />
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Users className="w-5 h-5" />
                     <span>0 interested buyers</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-gray-500" />
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Clock className="w-5 h-5" />
                     <span>12 hours remaining</span>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gray-200 text-gray-600 hover:bg-gray-300" disabled>
+                  <Button className="flex-1 bg-gray-700 text-gray-300 hover:bg-gray-600" disabled>
                     I'm Interested
                   </Button>
-                  <Button variant="outline" className="flex-1 flex items-center justify-center gap-2">
+                  <Button variant="outline" className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700">
                     <Play className="w-4 h-4" />
                     Watch the live replay
                   </Button>
@@ -258,8 +274,8 @@ export default function TrackedPractices() {
         </div>
       </div>
 
-      <main className="container mx-auto p-4 sm:p-6 pt-[220px]">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
+      <main className="container mx-auto p-4 sm:p-6 pt-24">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
             <Button
