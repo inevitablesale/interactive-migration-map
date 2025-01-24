@@ -19,11 +19,11 @@ export default function Auth() {
       if (session) {
         const { data: documents } = await supabase
           .from('user_documents')
-          .select('nda_signed, success_fee_signed')
+          .select('success_fee_signed')
           .eq('user_id', session.user.id)
           .maybeSingle();
 
-        if (!documents || !documents.nda_signed || !documents.success_fee_signed) {
+        if (!documents || !documents.success_fee_signed) {
           navigate("/document-signing");
         } else {
           navigate("/tracked-practices");
