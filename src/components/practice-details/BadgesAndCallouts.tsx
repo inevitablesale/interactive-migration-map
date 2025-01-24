@@ -35,22 +35,27 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return null;
   }
 
-  // Parse badges - handle both comma-separated and newline formats
+  // Parse markdown-formatted badges
   const badges = generatedText.badges
     ? generatedText.badges
-        .split(/[,\n]/)
-        .map(badge => badge.trim())
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('*'))
+        .map(line => line.replace(/^\*\s*\*\*/, '').replace(/\*\*$/, '').trim())
         .filter(badge => badge.length > 0)
     : [];
 
   console.log('Parsed badges:', badges);
 
-  // Parse callouts - handle both comma-separated and newline formats
+  // Parse markdown-formatted callouts
   const callouts = generatedText.callouts
     ? generatedText.callouts
-        .split(/[,\n]/)
-        .map(callout => {
-          const [title, ...descParts] = callout.trim().split(':');
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('*'))
+        .map(line => {
+          const content = line.replace(/^\*\s*\*\*/, '').replace(/\*\*/, ':').trim();
+          const [title, ...descParts] = content.split(':');
           return {
             title: title.trim(),
             description: descParts.join(':').trim()
