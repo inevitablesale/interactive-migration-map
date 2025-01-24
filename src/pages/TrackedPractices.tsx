@@ -11,11 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 
-interface CountyData {
-  PAYANN: number;
-  EMP: number;
-}
-
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,66 +20,35 @@ export default function TrackedPractices() {
   
   const ITEMS_PER_PAGE = 6;
 
-  // Fetch practices with county data
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
-      // First, fetch the firms data
-      const { data: practicesData, error: practicesError } = await supabase
+      const { data: practicesData, error } = await supabase
         .from('canary_firms_data')
         .select(`
           *,
           firm_generated_text!inner (
             title
           )
-        `);
+        `)
+        .order('followerCount', { ascending: false });
 
-      if (practicesError) throw practicesError;
+      if (error) throw error;
 
-      // Then, for each practice, fetch the corresponding county data
-      const practicesWithCountyData = await Promise.all(
-        practicesData.map(async (practice) => {
-          // Get county data, handling the case of multiple or no results
-          const { data: countyDataArray } = await supabase
-            .from('county_data')
-            .select('PAYANN, EMP')
-            .eq('COUNTYFP', practice.COUNTYFP?.toString())
-            .eq('STATEFP', practice.STATEFP?.toString());
-
-          // Use the first result if available, otherwise use default values
-          const countyData = countyDataArray && countyDataArray.length > 0 ? countyDataArray[0] : null;
-
-          // Calculate avgSalaryPerEmployee from county data or use fallback
-          const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
-            (countyData.PAYANN * 1000) / countyData.EMP : 
-            86259; // Fallback to industry average if no county data
-
-          console.log('County data calculation:', {
-            countyFP: practice.COUNTYFP,
-            stateFP: practice.STATEFP,
-            countyData,
-            avgSalaryPerEmployee
-          });
-
-          return {
-            id: practice["Company ID"].toString(),
-            industry: practice["Primary Subtitle"] || "",
-            region: practice["State Name"] || "",
-            employee_count: practice.employeeCount || 0,
-            annual_revenue: 0,
-            service_mix: { "General": 100 },
-            status: "not_contacted",
-            last_updated: new Date().toISOString(),
-            practice_buyer_pool: [],
-            notes: [],
-            specialities: practice.specialities,
-            generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
-            avgSalaryPerEmployee
-          };
-        })
-      );
-
-      return practicesWithCountyData;
+      return practicesData.map(practice => ({
+        id: practice["Company ID"].toString(),
+        industry: practice["Primary Subtitle"] || "",
+        region: practice["State Name"] || "",
+        employee_count: practice.employeeCount || 0,
+        annual_revenue: 0,
+        service_mix: { "General": 100 },
+        status: "not_contacted",
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        notes: [],
+        specialities: practice.specialities,
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+      }));
     }
   });
 
@@ -177,7 +141,7 @@ export default function TrackedPractices() {
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -231,6 +195,7 @@ export default function TrackedPractices() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
+      {/* Fixed Header with Logo */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -243,6 +208,7 @@ export default function TrackedPractices() {
         </div>
       </header>
 
+      {/* Main Content with increased top padding */}
       <main className="container mx-auto p-4 sm:p-6 pt-[120px] space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
