@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
 
@@ -17,45 +17,9 @@ function TrackedPractices() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [user, setUser] = useState(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   const ITEMS_PER_PAGE = 6;
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-
-    checkUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account.",
-      });
-      navigate('/auth');
-    } catch (error) {
-      toast({
-        title: "Error signing out",
-        description: "There was a problem signing out. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
@@ -219,22 +183,13 @@ function TrackedPractices() {
     <div className="min-h-screen bg-black">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Bird className="w-8 h-8 text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
+          </div>
+          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+            Sign In
           </Link>
-          {user ? (
-            <button
-              onClick={handleSignOut}
-              className="text-white hover:text-yellow-400 transition-colors"
-            >
-              Sign Out
-            </button>
-          ) : (
-            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-              Sign In
-            </Link>
-          )}
         </div>
       </header>
 
