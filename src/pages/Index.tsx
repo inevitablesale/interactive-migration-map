@@ -6,7 +6,7 @@ import { SolutionsSection } from "@/components/SolutionsSection";
 import { Card } from "@/components/ui/card";
 import { PricingSection } from "@/components/PricingSection";
 import { BetaAccessSection } from "@/components/BetaAccessSection";
-import CountdownBanner from "@/components/CountdownBanner";
+import { CountdownBanner } from "@/components/CountdownBanner";
 import { DailyRevealsSection } from "@/components/DailyRevealsSection";
 import { DatabaseSection } from "@/components/DatabaseSection";
 import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
