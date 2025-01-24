@@ -309,22 +309,10 @@ export default function PracticeDetails() {
                 </div>
               </div>
               
-              {/* Badges Section */}
-              {generatedText?.badges && (
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {generatedText.badges.split(/[\n,]/).map((badge, index) => (
-                    badge.trim() && (
-                      <Badge 
-                        key={index}
-                        variant="secondary" 
-                        className="bg-white/10 text-white hover:bg-white/20"
-                      >
-                        {badge.trim()}
-                      </Badge>
-                    )
-                  ))}
-                </div>
-              )}
+              <BadgesAndCallouts 
+                generatedText={generatedText} 
+                specialties={practice.specialities}
+              />
             </div>
 
             {/* Key Metrics */}
