@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Linkedin, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -17,19 +17,29 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Check if user has documents in user_documents table
-        const { data: userDocs } = await supabase
-          .from('user_documents')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
+        try {
+          // Check if user has documents in user_documents table
+          const { data: userDocs, error } = await supabase
+            .from('user_documents')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
 
-        if (!userDocs || !userDocs.success_fee_signed) {
-          // New user or hasn't signed documents - redirect to doc signing
+          if (error) throw error;
+
+          // If no documents found or success fee not signed, redirect to doc signing
+          if (!userDocs || !userDocs.success_fee_signed) {
+            console.log("Redirecting to doc-sign - documents not signed");
+            navigate("/doc-sign");
+          } else {
+            // Existing user with signed documents - redirect to tracked practices
+            console.log("Redirecting to tracked practices - documents already signed");
+            navigate("/tracked-practices");
+          }
+        } catch (error) {
+          console.error('Error checking document status:', error);
+          // If there's an error checking documents, default to doc-sign
           navigate("/doc-sign");
-        } else {
-          // Existing user with signed documents - redirect to tracked practices
-          navigate("/tracked-practices");
         }
       }
     };
@@ -41,7 +51,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/tracked-practices`,
+          redirectTo: `${window.location.origin}/auth`,
         },
       });
 
