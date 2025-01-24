@@ -27,14 +27,15 @@ export const useMSAData = (stateFp: string) => {
           const { data: metrics, error: metricsError } = await supabase
             .from('region_data')
             .select('EMP, PAYANN, ESTAB, B01001_001E, B19013_001E, B23025_004E')
-            .eq('MSA', msa.MSA)
+            .eq('msa', msa.MSA)
             .single();
 
           if (metricsError) throw metricsError;
 
-          // Combine the MSA info with its metrics
           return {
-            ...msa,
+            MSA: msa.MSA,
+            msa_name: msa.msa_name,
+            STATEFP: msa.STATEFP,
             ...metrics,
           } as MSAData;
         })
