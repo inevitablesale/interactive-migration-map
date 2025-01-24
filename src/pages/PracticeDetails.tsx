@@ -172,8 +172,13 @@ export default function PracticeDetails() {
 
   const handleInterested = async (message?: string) => {
     try {
+      console.log('handleInterested called with message:', message);
+      
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user);
+      
       if (!user) {
+        console.log('No user found, showing auth required toast');
         toast({
           title: "Authentication Required",
           description: "Please sign in to express interest",
@@ -184,18 +189,25 @@ export default function PracticeDetails() {
 
       const companyId = Number(practiceId);
       if (!companyId || isNaN(companyId)) {
+        console.error('Invalid practice ID:', practiceId);
         throw new Error('Invalid practice ID');
       }
+      console.log('Company ID:', companyId);
 
       // Check if user has already expressed interest
-      const { data: existingInterest } = await supabase
+      const { data: existingInterest, error: checkError } = await supabase
         .from('canary_firm_interests')
         .select('id')
         .eq('company_id', companyId)
         .eq('user_id', user.id)
         .maybeSingle();
 
+      if (checkError) {
+        console.error('Error checking existing interest:', checkError);
+      }
+
       if (existingInterest) {
+        console.log('User already expressed interest');
         toast({
           title: "Already Interested",
           description: "You have already expressed interest in this practice",
@@ -203,6 +215,7 @@ export default function PracticeDetails() {
         return;
       }
 
+      console.log('Adding interest record to database');
       // Add interest record
       const { error: interestError } = await supabase
         .from('canary_firm_interests')
@@ -213,8 +226,12 @@ export default function PracticeDetails() {
           is_anonymous: false
         }]);
 
-      if (interestError) throw interestError;
+      if (interestError) {
+        console.error('Error inserting interest:', interestError);
+        throw interestError;
+      }
 
+      console.log('Calling notify-interest edge function');
       // Call the notify-interest edge function with the message
       const { error: notifyError } = await supabase.functions.invoke('notify-interest', {
         body: { 
@@ -229,6 +246,7 @@ export default function PracticeDetails() {
         // Don't throw here - we still want to show success since the interest was recorded
       }
 
+      console.log('Interest registered successfully');
       toast({
         title: "Interest Registered",
         description: "We'll notify you of any updates about this practice",

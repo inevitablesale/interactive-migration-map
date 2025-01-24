@@ -22,6 +22,8 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
   const [message, setMessage] = useState("");
 
   const handleInterestConfirmed = () => {
+    console.log('Interest confirmed in PracticeInfo component');
+    console.log('Message:', message);
     setShowDialog(false);
     onInterested?.(message);
   };
@@ -35,7 +37,10 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-white">Practice Information</CardTitle>
           <Button 
-            onClick={() => setShowDialog(true)}
+            onClick={() => {
+              console.log('Opening interest dialog');
+              setShowDialog(true);
+            }}
             className="bg-yellow-400 text-black hover:bg-yellow-500"
             size="sm"
           >
