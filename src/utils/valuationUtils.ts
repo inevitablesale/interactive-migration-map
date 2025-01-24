@@ -79,10 +79,9 @@ export const getValuationMultiple = (firmSize: string, revenue: number) => {
   return Math.min(1.50, baseMultiple);
 };
 
-// Updated function to estimate revenue based on average salary per employee
-export const estimateAnnualRevenue = (employeeCount: number, avgSalaryPerEmployee: number = 86259) => {
-  // Industry standard: payroll is typically 35% of revenue
-  const payrollToRevenueRatio = 0.35;
-  const annualPayroll = employeeCount * avgSalaryPerEmployee;
-  return annualPayroll / payrollToRevenueRatio;
+// New function to estimate revenue based on employee count
+export const estimateAnnualRevenue = (employeeCount: number) => {
+  // Average revenue per employee for professional services firms
+  const revenuePerEmployee = 150000; // $150k per employee
+  return employeeCount * revenuePerEmployee;
 };

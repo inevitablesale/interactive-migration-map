@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Users, DollarSign } from "lucide-react";
-import { getFirmSizeCategory, getValuationMultiple, estimateAnnualRevenue } from "@/utils/valuationUtils";
+import { getFirmSizeCategory, getValuationMultiple } from "@/utils/valuationUtils";
 
 interface PracticeCardProps {
   practice: {
