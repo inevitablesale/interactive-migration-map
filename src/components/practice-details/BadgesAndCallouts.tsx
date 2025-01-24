@@ -74,7 +74,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
         <div className="flex flex-wrap gap-2">
           {badges.map((badge, index) => (
             <Badge 
-              key={index}
+              key={`badge-${index}`}
               variant="secondary" 
               className="bg-white/10 text-white hover:bg-white/20"
             >
@@ -88,7 +88,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       {callouts.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {callouts.map((callout, index) => (
-            <Card key={index} className="p-4 bg-black/40 border-white/10">
+            <Card key={`callout-${index}`} className="p-4 bg-black/40 border-white/10">
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
                 <div>
