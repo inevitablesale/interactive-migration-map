@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
+import { useMarketReportData } from "@/hooks/useMarketReportData";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -35,20 +36,46 @@ export default function TrackedPractices() {
 
       if (error) throw error;
 
-      return practicesData.map(practice => ({
-        id: practice["Company ID"].toString(),
-        industry: practice["Primary Subtitle"] || "",
-        region: practice["State Name"] || "",
-        employee_count: practice.employeeCount || 0,
-        annual_revenue: 0,
-        service_mix: { "General": 100 },
-        status: "not_contacted",
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        notes: [],
-        specialities: practice.specialities,
-        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+      // For each practice, get the market report data to get the avgSalaryPerEmployee
+      const practicesWithSalary = await Promise.all(practicesData.map(async (practice) => {
+        if (!practice.COUNTYNAME || !practice["State Name"]) {
+          return {
+            id: practice["Company ID"].toString(),
+            industry: practice["Primary Subtitle"] || "",
+            region: practice["State Name"] || "",
+            employee_count: practice.employeeCount || 0,
+            annual_revenue: 0,
+            service_mix: { "General": 100 },
+            status: "not_contacted",
+            last_updated: new Date().toISOString(),
+            practice_buyer_pool: [],
+            notes: [],
+            specialities: practice.specialities,
+            generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
+            avgSalaryPerEmployee: 86259 // Fallback to county average
+          };
+        }
+
+        const { data: marketData } = await useMarketReportData(practice.COUNTYNAME, practice["State Name"]).refetch();
+        
+        return {
+          id: practice["Company ID"].toString(),
+          industry: practice["Primary Subtitle"] || "",
+          region: practice["State Name"] || "",
+          employee_count: practice.employeeCount || 0,
+          annual_revenue: 0,
+          service_mix: { "General": 100 },
+          status: "not_contacted",
+          last_updated: new Date().toISOString(),
+          practice_buyer_pool: [],
+          notes: [],
+          specialities: practice.specialities,
+          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
+          avgSalaryPerEmployee: marketData?.countyData?.avgSalaryPerEmployee || 86259 // Use county data or fallback
+        };
       }));
+
+      return practicesWithSalary;
     }
   });
 
@@ -133,15 +160,21 @@ export default function TrackedPractices() {
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
     const stateMatches = !filters.state || practice.region === filters.state;
-    const revenueMatches = (!filters.minRevenue || practice.annual_revenue >= parseInt(filters.minRevenue)) &&
-                          (!filters.maxRevenue || practice.annual_revenue <= parseInt(filters.maxRevenue));
-    const estimatedValuation = practice.annual_revenue * 2.5;
-    const valuationMatches = (!filters.minValuation || estimatedValuation >= parseInt(filters.minValuation)) &&
-                            (!filters.maxValuation || estimatedValuation <= parseInt(filters.maxValuation));
+    
+    // Calculate estimated revenue using the same logic as KeyMetricsBar
+    const avgSalaryPerEmployee = practice.avgSalaryPerEmployee || 86259;
+    const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
+    const payrollToRevenueRatio = 0.35;
+    const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
+    
+    const revenueMatches = (!filters.minRevenue || estimatedRevenue >= parseInt(filters.minRevenue)) &&
+                          (!filters.maxRevenue || estimatedRevenue <= parseInt(filters.maxRevenue));
+    const valuationMatches = (!filters.minValuation || (estimatedRevenue * 2.5) >= parseInt(filters.minValuation)) &&
+                            (!filters.maxValuation || (estimatedRevenue * 2.5) <= parseInt(filters.maxValuation));
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
