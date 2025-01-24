@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
+import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,49 +11,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
-import { cn } from "@/lib/utils";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [hasBeenViewed, setHasBeenViewed] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
   const { toast } = useToast();
   
   const ITEMS_PER_PAGE = 6;
-
-  // Set target date to 30 days from now
-  useEffect(() => {
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 30);
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = targetDate.getTime() - now;
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      setTimeLeft({ days, hours, minutes, seconds });
-
-      if (distance < 0) {
-        clearInterval(timer);
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
@@ -89,6 +56,7 @@ export default function TrackedPractices() {
     }
   });
 
+  // Filter practices based on search and filters
   const filteredPractices = practices?.filter(practice => {
     const searchMatches = !searchQuery || 
       practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -107,6 +75,7 @@ export default function TrackedPractices() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
+  // Only fetch market data for visible practices
   const marketQueries = useMarketDataForPractices(paginatedPractices);
 
   const handleWithdraw = async (practiceId: string) => {
@@ -180,6 +149,7 @@ export default function TrackedPractices() {
     setCurrentPage(1);
   };
 
+  // Helper function to generate pagination numbers
   const getPaginationRange = () => {
     const range: (number | 'ellipsis')[] = [];
     const maxVisiblePages = 5;
@@ -212,76 +182,47 @@ export default function TrackedPractices() {
     return range;
   };
 
-  const toggleAlert = () => {
-    setIsAlertOpen(!isAlertOpen);
-    if (!hasBeenViewed) {
-      setHasBeenViewed(true);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-              <span className="text-xl font-bold text-yellow-400">Canary</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.days}</div>
-                  <div className="text-xs text-gray-400">Days</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.hours}</div>
-                  <div className="text-xs text-gray-400">Hours</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.minutes}</div>
-                  <div className="text-xs text-gray-400">Minutes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.seconds}</div>
-                  <div className="text-xs text-gray-400">Seconds</div>
-                </div>
-              </div>
-              <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-                Sign In
-              </Link>
-            </div>
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+            <span className="text-xl font-bold text-yellow-400">Canary</span>
           </div>
+          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+            Sign In
+          </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 pt-32 pb-16">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="bg-yellow-400 text-black hover:bg-yellow-500"
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="bg-yellow-400 text-black hover:bg-yellow-500"
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
+      <main className="container mx-auto p-4 sm:p-6 pt-[120px] space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="bg-yellow-400 text-black hover:bg-yellow-500"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="bg-yellow-400 text-black hover:bg-yellow-500"
+            >
+              <List className="h-4 w-4" />
+            </Button>
           </div>
+        </div>
 
-          <DashboardSummary />
-          
-          <div className="w-full">
+        <DashboardSummary />
+        
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
             <SearchFilters 
               onSearch={handleSearch}
               onFilter={handleFilter}
@@ -291,12 +232,11 @@ export default function TrackedPractices() {
               <div className="text-white">Loading practices...</div>
             ) : (
               <>
-                <div className={cn(
-                  "mt-6 grid gap-6",
+                <div className={`mt-6 grid gap-4 ${
                   viewMode === 'grid' 
-                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                    ? 'grid-cols-1 sm:grid-cols-2' 
                     : 'grid-cols-1'
-                )}>
+                }`}>
                   {paginatedPractices?.map((practice, index) => {
                     const marketData = marketQueries[index]?.data;
                     return (
@@ -317,15 +257,12 @@ export default function TrackedPractices() {
                 </div>
 
                 {totalPages > 1 && (
-                  <Pagination className="mt-8">
+                  <Pagination className="mt-6">
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious 
                           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                          className={cn(
-                            "text-white hover:text-yellow-400",
-                            currentPage === 1 && "pointer-events-none opacity-50"
-                          )}
+                          className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
                         />
                       </PaginationItem>
                       
@@ -339,11 +276,7 @@ export default function TrackedPractices() {
                             <PaginationLink
                               onClick={() => setCurrentPage(page)}
                               isActive={currentPage === page}
-                              className={cn(
-                                currentPage === page 
-                                  ? "bg-yellow-400 text-black" 
-                                  : "text-white hover:text-yellow-400"
-                              )}
+                              className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
                             >
                               {page}
                             </PaginationLink>
@@ -354,10 +287,7 @@ export default function TrackedPractices() {
                       <PaginationItem>
                         <PaginationNext 
                           onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                          className={cn(
-                            "text-white hover:text-yellow-400",
-                            currentPage === totalPages && "pointer-events-none opacity-50"
-                          )}
+                          className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -365,6 +295,9 @@ export default function TrackedPractices() {
                 )}
               </>
             )}
+          </div>
+          <div className="mt-6 md:mt-0">
+            <PracticeOfDay />
           </div>
         </div>
       </main>

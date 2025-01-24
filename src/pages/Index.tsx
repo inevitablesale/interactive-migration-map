@@ -6,6 +6,7 @@ import { SolutionsSection } from "@/components/SolutionsSection";
 import { Card } from "@/components/ui/card";
 import { PricingSection } from "@/components/PricingSection";
 import { BetaAccessSection } from "@/components/BetaAccessSection";
+import CountdownBanner from "@/components/CountdownBanner";
 import { DailyRevealsSection } from "@/components/DailyRevealsSection";
 import { DatabaseSection } from "@/components/DatabaseSection";
 import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
@@ -17,6 +18,9 @@ import { Link } from "react-router-dom";
 const Index = () => {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
+      {/* Countdown Banner */}
+      <CountdownBanner />
+
       {/* Fixed Map Background */}
       <div className="fixed inset-0 z-0">
         <Map />

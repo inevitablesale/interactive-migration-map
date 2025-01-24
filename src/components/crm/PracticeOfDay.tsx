@@ -31,19 +31,19 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
   return (
     <Card className="bg-white relative overflow-hidden">
       {/* Coming Soon Banner */}
-      <div className="absolute -right-20 top-12 rotate-45 bg-yellow-400 text-black font-semibold py-1 px-16 text-base shadow-md z-10">
+      <div className="absolute -right-12 top-6 rotate-45 bg-yellow-400 text-black font-semibold py-1 px-12 text-sm shadow-md z-10">
         COMING SOON
       </div>
       
       <CardHeader>
         <CardTitle>Today's Featured Opportunity</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <div className="space-y-2">
-          <h3 className="text-2xl font-semibold">
+          <h3 className="text-xl font-semibold">
             {practice.industry} | {practice.region}
           </h3>
-          <p className="text-base text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {practice.employee_count} employees | {Object.entries(practice.service_mix)
               .map(([key, value]) => `${value}% ${key}`)
               .join(", ")}
@@ -52,22 +52,22 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-muted-foreground" />
-            <span className="text-base">{practice.buyer_count} interested buyers</span>
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{practice.buyer_count} interested buyers</span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-muted-foreground" />
-            <span className="text-base">12 hours remaining</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">12 hours remaining</span>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <Button className="w-full h-12 text-base" onClick={onInterested} disabled>
+        <div className="space-y-2">
+          <Button className="w-full" onClick={onInterested} disabled>
             I'm Interested
           </Button>
-          <Button variant="outline" className="w-full h-12 text-base" asChild disabled>
+          <Button variant="outline" className="w-full" asChild disabled>
             <a href="#replay">
-              <Play className="h-5 w-5 mr-2" />
+              <Play className="h-4 w-4 mr-2" />
               Watch the live replay
             </a>
           </Button>
