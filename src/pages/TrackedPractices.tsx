@@ -31,18 +31,21 @@ export default function TrackedPractices() {
           firm_generated_text!inner (
             title
           ),
-          county_data!inner (
+          county_data (
             PAYANN,
             EMP
           )
-        `);
+        `)
+        .eq('county_data.COUNTYFP', 'canary_firms_data.COUNTYFP')
+        .eq('county_data.STATEFP', 'canary_firms_data.STATEFP');
 
       if (error) throw error;
 
       return practicesData.map(practice => {
         // Calculate avgSalaryPerEmployee from county data
-        const avgSalaryPerEmployee = practice.county_data?.PAYANN && practice.county_data?.EMP ? 
-          (practice.county_data.PAYANN * 1000) / practice.county_data.EMP : 
+        const countyData = practice.county_data?.[0];
+        const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
+          (countyData.PAYANN * 1000) / countyData.EMP : 
           86259; // Fallback to industry average if no county data
 
         return {
@@ -207,7 +210,6 @@ export default function TrackedPractices() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
-      {/* Fixed Header with Logo */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
