@@ -24,7 +24,7 @@ interface PracticeCardProps {
   onExpressInterest: () => void;
 }
 
-export function PracticeCard({ practice }: PracticeCardProps) {
+export function PracticeCard({ practice, onWithdraw, onExpressInterest }: PracticeCardProps) {
   // Parse location to get city and state
   const [city, state] = practice.region.includes(",") ? 
     practice.region.split(",").map(part => part.trim()) : 

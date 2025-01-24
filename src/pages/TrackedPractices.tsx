@@ -63,6 +63,11 @@ function TrackedPractices() {
           *,
           firm_generated_text!inner (
             title
+          ),
+          canary_firm_interests!left (
+            id,
+            status,
+            is_anonymous
           )
         `)
         .order('employeeCount', { ascending: false });
@@ -76,9 +81,9 @@ function TrackedPractices() {
         employee_count: practice.employeeCount || 0,
         annual_revenue: 0,
         service_mix: { "General": 100 },
-        status: "not_contacted",
+        status: practice.canary_firm_interests?.[0]?.status || "not_contacted",
         last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
+        practice_buyer_pool: practice.canary_firm_interests || [],
         notes: [],
         specialities: practice.specialities,
         generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
@@ -89,31 +94,14 @@ function TrackedPractices() {
     }
   });
 
-  const filteredPractices = practices?.filter(practice => {
-    const searchMatches = !searchQuery || 
-      practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      practice.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const industryMatches = !filters.industry || practice.industry === filters.industry;
-    const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
-                           (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
-    const stateMatches = !filters.state || practice.region.includes(filters.state);
-
-    return searchMatches && industryMatches && employeeMatches && stateMatches;
-  });
-
-  const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  const marketQueries = useMarketDataForPractices(paginatedPractices);
-
   const handleWithdraw = async (practiceId: string) => {
     const { error } = await supabase
-      .from('practice_buyer_pool')
+      .from('canary_firm_interests')
       .delete()
-      .match({ practice_id: practiceId, user_id: (await supabase.auth.getUser()).data.user?.id });
+      .match({ 
+        company_id: parseInt(practiceId), 
+        user_id: (await supabase.auth.getUser()).data.user?.id 
+      });
 
     if (error) {
       toast({
@@ -142,9 +130,14 @@ function TrackedPractices() {
     }
 
     const { error } = await supabase
-      .from('practice_buyer_pool')
+      .from('canary_firm_interests')
       .insert([
-        { practice_id: practiceId, user_id: user.id }
+        { 
+          company_id: parseInt(practiceId), 
+          user_id: user.id,
+          status: 'interested',
+          is_anonymous: false
+        }
       ]);
 
     if (error) {
@@ -169,6 +162,26 @@ function TrackedPractices() {
       refetchPractices();
     }
   };
+
+  const filteredPractices = practices?.filter(practice => {
+    const searchMatches = !searchQuery || 
+      practice.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      practice.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (practice.specialities && practice.specialities.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const industryMatches = !filters.industry || practice.industry === filters.industry;
+    const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
+                           (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
+    const stateMatches = !filters.state || practice.region.includes(filters.state);
+
+    return searchMatches && industryMatches && employeeMatches && stateMatches;
+  });
+
+  const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedPractices = filteredPractices?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const marketQueries = useMarketDataForPractices(paginatedPractices);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
