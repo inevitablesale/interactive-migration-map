@@ -52,9 +52,9 @@ export function BadgesAndCallouts({ generatedText, specialties }: BadgesAndCallo
             <Badge 
               key={`badge-${index}`}
               variant="secondary" 
-              className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/20 backdrop-blur-sm text-white hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 flex items-center gap-2"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 border border-indigo-200/20 backdrop-blur-sm text-white hover:from-indigo-400/30 hover:to-blue-400/30 transition-all duration-300 flex items-center gap-2"
             >
-              <BadgeCheck className="w-4 h-4 text-blue-400" />
+              <BadgeCheck className="w-4 h-4 text-indigo-300" />
               {badge}
             </Badge>
           ))}
