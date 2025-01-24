@@ -61,13 +61,14 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             {parsedBadges.map((badge, index) => {
               const cleanBadge = badge.replace(/\*\*/g, '');
               return (
-                <Badge 
-                  key={`badge-${index}`}
-                  variant="secondary" 
-                  className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                >
-                  {cleanBadge}
-                </Badge>
+                <div key={`badge-${index}`}>
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                  >
+                    {cleanBadge}
+                  </Badge>
+                </div>
               );
             })}
           </div>
