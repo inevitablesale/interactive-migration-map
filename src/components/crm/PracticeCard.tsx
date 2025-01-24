@@ -25,20 +25,16 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
 
-  console.log('Practice data:', {
-    id: practice.id,
-    annual_revenue: practice.annual_revenue,
-    employee_count: practice.employee_count
-  });
-
   // Calculate estimated valuation using the same logic as PracticeDetails
   const firmSize = getFirmSizeCategory(practice.employee_count);
   const valuationMultiplier = getValuationMultiple(firmSize, practice.annual_revenue);
   const estimatedValuation = practice.annual_revenue * valuationMultiplier;
 
-  console.log('Valuation calculation:', {
+  console.log('Practice valuation calculation:', {
+    id: practice.id,
     firmSize,
     valuationMultiplier,
+    annual_revenue: practice.annual_revenue,
     estimatedValuation
   });
 
@@ -99,4 +95,3 @@ export function PracticeCard({ practice }: PracticeCardProps) {
       </div>
     </div>
   );
-}

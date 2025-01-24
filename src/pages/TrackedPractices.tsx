@@ -36,16 +36,14 @@ export default function TrackedPractices() {
       if (error) throw error;
 
       return practicesData.map(practice => {
-        // Estimate annual revenue based on employee count
-        // Using a simple estimation of $150,000 revenue per employee
-        const estimatedRevenue = (practice.employeeCount || 0) * 150000;
-
+        // Use the same data from the canary_firms_data table
+        // No revenue estimation - we'll use the valuation utils in PracticeCard
         return {
           id: practice["Company ID"].toString(),
           industry: practice["Primary Subtitle"] || "",
           region: practice["State Name"] || "",
           employee_count: practice.employeeCount || 0,
-          annual_revenue: estimatedRevenue,
+          annual_revenue: practice.annual_revenue || 0, // Pass through actual revenue if it exists
           service_mix: { "General": 100 },
           status: "not_contacted",
           last_updated: new Date().toISOString(),
