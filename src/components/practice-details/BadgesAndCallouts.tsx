@@ -39,10 +39,8 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
   const badges = generatedText.badges
     ? generatedText.badges
         .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.startsWith('*'))
         .map(line => {
-          const match = line.match(/\*\*([^*]+)\*\*/);
+          const match = line.match(/^\*\s*\*\*(.*?)\*\*$/);
           return match ? match[1].trim() : null;
         })
         .filter((badge): badge is string => badge !== null)
@@ -52,18 +50,14 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
   const callouts = generatedText.callouts
     ? generatedText.callouts
         .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.startsWith('*'))
         .map(line => {
-          const titleMatch = line.match(/\*\*([^*]+)\*\*/);
-          if (!titleMatch) return null;
-          
-          const title = titleMatch[1].trim();
-          const description = line.split(':**')[1]?.trim() || '';
+          // First, extract the entire content between * and the end
+          const contentMatch = line.match(/^\*\s*\*\*(.*?)\*\*:(.*)$/);
+          if (!contentMatch) return null;
           
           return {
-            title,
-            description
+            title: contentMatch[1].trim(),
+            description: contentMatch[2].trim()
           };
         })
         .filter((callout): callout is { title: string; description: string } => callout !== null)
@@ -87,7 +81,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           <div className="flex flex-wrap gap-2">
             {badges.map((badge, index) => (
               <Badge 
-                key={index}
+                key={`${companyId}-badge-${index}`}
                 className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 variant="secondary"
               >
@@ -107,7 +101,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {callouts.map((callout, index) => (
               <div 
-                key={index}
+                key={`${companyId}-callout-${index}`}
                 className="bg-white/5 rounded-lg p-4"
               >
                 <h4 className="font-semibold text-blue-400 mb-2">{callout.title}</h4>
