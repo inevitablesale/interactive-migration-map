@@ -27,6 +27,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set');
+      return new Response(
+        JSON.stringify({ error: 'Email service configuration is missing' }), 
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
+        }
+      );
+    }
+
     console.log('Notify interest function called');
     const { companyId, message, userId } = await req.json() as NotifyRequest;
     console.log('Request data:', { companyId, message, userId });
@@ -138,8 +149,11 @@ const handler = async (req: Request): Promise<Response> => {
     if (!adminRes.ok || !userRes.ok) {
       console.error('Error response from Resend:', {
         adminStatus: adminRes.status,
-        userStatus: userRes.status
+        userStatus: userRes.status,
+        adminStatusText: adminRes.statusText,
+        userStatusText: userRes.statusText
       });
+
       const adminError = await adminRes.text();
       const userError = await userRes.text();
       console.error('Admin email error:', adminError);
@@ -148,7 +162,12 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to send notification emails',
-          details: { adminError, userError }
+          details: { 
+            adminError, 
+            userError,
+            adminStatus: adminRes.status,
+            userStatus: userRes.status 
+          }
         }), 
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -172,7 +191,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: error.toString()
+        details: error.toString(),
+        stack: error.stack
       }), 
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
