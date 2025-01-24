@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Building, Users } from "lucide-react";
+import { Building, Users, DollarSign } from "lucide-react";
 
 interface PracticeCardProps {
   practice: {
@@ -23,6 +23,21 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   const [city, state] = practice.region.includes(",") ? 
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
+
+  // Calculate estimated valuation (using a multiplier of 1.50)
+  const valuationMultiplier = 1.50;
+  const estimatedValuation = practice.annual_revenue * valuationMultiplier;
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(2)}M`;
+    }
+    if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(0)}K`;
+    }
+    return `$${amount.toFixed(0)}`;
+  };
 
   return (
     <div className="min-h-[200px] sm:min-h-[250px] w-full bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
@@ -49,13 +64,22 @@ export function PracticeCard({ practice }: PracticeCardProps) {
           </div>
         </div>
 
-        <div className="mt-auto">
+        <div className="mt-auto grid grid-cols-2 gap-4">
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <Users className="h-4 w-4 mr-2" />
               Employees
             </div>
             <p className="text-base sm:text-lg font-semibold text-white truncate">{practice.employee_count}</p>
+          </div>
+
+          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
+            <div className="flex items-center text-sm text-white/60 mb-2">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Est. Valuation
+            </div>
+            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedValuation)}</p>
+            <p className="text-xs text-white/40 mt-1">Based on Revenue × {valuationMultiplier.toFixed(2)}</p>
           </div>
         </div>
       </div>
