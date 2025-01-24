@@ -29,10 +29,15 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { companyId, message, userId } = await req.json() as NotifyRequest
 
-    // Get practice details
+    // Get practice details and generated text
     const { data: practice, error: practiceError } = await supabase
       .from('canary_firms_data')
-      .select('*')
+      .select(`
+        *,
+        firm_generated_text (
+          title
+        )
+      `)
       .eq('Company ID', companyId)
       .single()
 
@@ -50,13 +55,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (profileError) throw profileError
 
+    const practiceTitle = practice.firm_generated_text?.title || practice['Company Name']
+
     // Prepare email content for admin
     const adminEmailHtml = `
       <h2>New Interest Expression</h2>
       <p>A user has expressed interest in a practice:</p>
       <h3>Practice Details:</h3>
       <ul>
-        <li>Name: ${practice['Company Name']}</li>
+        <li>Name: ${practiceTitle}</li>
         <li>Location: ${practice.Location}</li>
         <li>Employee Count: ${practice.employeeCount || 'Not specified'}</li>
       </ul>
@@ -66,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
         <li>Email: ${user.email}</li>
         <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
       </ul>
-      ${message ? `<h3>Message:</h3><p>${message}</p>` : ''}
+      ${message ? `<h3>Message from Buyer:</h3><p>${message}</p>` : ''}
     `
 
     // Prepare email content for user
@@ -75,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Hello ${userProfile.buyer_name},</p>
       <p>We've received your interest in the following practice:</p>
       <ul>
-        <li>Practice: ${practice['Company Name']}</li>
+        <li>Practice: ${practiceTitle}</li>
         <li>Location: ${practice.Location}</li>
       </ul>
       <p>Our team will review your interest and contact the practice owner on your behalf. We'll keep you updated on any developments.</p>
@@ -92,7 +99,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: 'Canary Notifications <notifications@canary.accountants>',
         to: [ADMIN_EMAIL],
-        subject: `New Interest: ${practice['Company Name']}`,
+        subject: `New Interest: ${practiceTitle}`,
         html: adminEmailHtml,
       }),
     })
