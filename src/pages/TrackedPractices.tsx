@@ -193,7 +193,7 @@ export default function TrackedPractices() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
@@ -203,60 +203,62 @@ export default function TrackedPractices() {
               Sign In
             </Link>
           </div>
-          
-          {/* Featured Opportunity Alert */}
-          <div className="w-full">
-            <button
-              onClick={toggleAlert}
-              className="w-full flex items-center justify-between p-2 rounded-lg bg-white text-black"
-            >
-              <div className="flex items-center gap-2">
-                <LightbulbIcon className={cn(
-                  "w-5 h-5 text-yellow-400",
-                  !hasBeenViewed && "animate-pulse"
-                )} />
-                <span className="font-semibold">Today's Featured Opportunity</span>
-              </div>
-              {isAlertOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-            
-            {isAlertOpen && (
-              <div className="bg-white rounded-b-lg p-4 space-y-4 shadow-lg">
-                <div className="relative">
-                  <div className="absolute -right-3 top-0 rotate-45 bg-yellow-300 px-8 py-1 text-black text-sm font-semibold">
-                    COMING SOON
-                  </div>
-                  <h3 className="text-xl font-semibold mt-6">Accounting | Virginia</h3>
-                  <p className="text-gray-600">346 employees | 100% General</p>
-                  
-                  <div className="flex justify-between items-center py-4">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-gray-500" />
-                      <span>0 interested buyers</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-gray-500" />
-                      <span>12 hours remaining</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button className="flex-1 bg-gray-200 text-gray-600 hover:bg-gray-300" disabled>
-                      I'm Interested
-                    </Button>
-                    <Button variant="outline" className="flex-1 flex items-center justify-center gap-2">
-                      <Play className="w-4 h-4" />
-                      Watch the live replay
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </header>
 
-      <main className="container mx-auto p-4 sm:p-6 pt-[220px] space-y-6">
+      {/* Featured Opportunity Alert - Now floating */}
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4">
+        <div className="w-full">
+          <button
+            onClick={toggleAlert}
+            className="w-full flex items-center justify-between p-2 rounded-lg bg-white text-black shadow-lg"
+          >
+            <div className="flex items-center gap-2">
+              <LightbulbIcon className={cn(
+                "w-5 h-5 text-yellow-400",
+                !hasBeenViewed && "animate-pulse"
+              )} />
+              <span className="font-semibold">Today's Featured Opportunity</span>
+            </div>
+            {isAlertOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          {isAlertOpen && (
+            <div className="bg-white rounded-b-lg p-4 space-y-4 shadow-lg">
+              <div className="relative">
+                <div className="absolute -right-3 top-0 rotate-45 bg-yellow-300 px-8 py-1 text-black text-sm font-semibold">
+                  COMING SOON
+                </div>
+                <h3 className="text-xl font-semibold mt-6">Accounting | Virginia</h3>
+                <p className="text-gray-600">346 employees | 100% General</p>
+                
+                <div className="flex justify-between items-center py-4">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-gray-500" />
+                    <span>0 interested buyers</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-gray-500" />
+                    <span>12 hours remaining</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button className="flex-1 bg-gray-200 text-gray-600 hover:bg-gray-300" disabled>
+                    I'm Interested
+                  </Button>
+                  <Button variant="outline" className="flex-1 flex items-center justify-center gap-2">
+                    <Play className="w-4 h-4" />
+                    Watch the live replay
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <main className="container mx-auto p-4 sm:p-6 pt-[220px]">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
           <div className="flex gap-2">
@@ -281,81 +283,79 @@ export default function TrackedPractices() {
 
         <DashboardSummary />
         
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <SearchFilters 
-              onSearch={handleSearch}
-              onFilter={handleFilter}
-            />
-            
-            {isLoading ? (
-              <div className="text-white">Loading practices...</div>
-            ) : (
-              <>
-                <div className={`mt-6 grid gap-4 ${
-                  viewMode === 'grid' 
-                    ? 'grid-cols-1 sm:grid-cols-2' 
-                    : 'grid-cols-1'
-                }`}>
-                  {paginatedPractices?.map((practice, index) => {
-                    const marketData = marketQueries[index]?.data;
-                    return (
-                      <PracticeCard
-                        key={practice.id}
-                        practice={{
-                          ...practice,
-                          avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee,
-                          COUNTYFP: practice.COUNTYFP,
-                          STATEFP: practice.STATEFP,
-                          COUNTYNAME: practice.COUNTYNAME
-                        }}
-                        onWithdraw={() => handleWithdraw(practice.id)}
-                        onExpressInterest={() => handleExpressInterest(practice.id)}
-                      />
-                    );
-                  })}
-                </div>
+        <div className="w-full">
+          <SearchFilters 
+            onSearch={handleSearch}
+            onFilter={handleFilter}
+          />
+          
+          {isLoading ? (
+            <div className="text-white">Loading practices...</div>
+          ) : (
+            <>
+              <div className={`mt-6 grid gap-4 ${
+                viewMode === 'grid' 
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                  : 'grid-cols-1'
+              }`}>
+                {paginatedPractices?.map((practice, index) => {
+                  const marketData = marketQueries[index]?.data;
+                  return (
+                    <PracticeCard
+                      key={practice.id}
+                      practice={{
+                        ...practice,
+                        avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee,
+                        COUNTYFP: practice.COUNTYFP,
+                        STATEFP: practice.STATEFP,
+                        COUNTYNAME: practice.COUNTYNAME
+                      }}
+                      onWithdraw={() => handleWithdraw(practice.id)}
+                      onExpressInterest={() => handleExpressInterest(practice.id)}
+                    />
+                  );
+                })}
+              </div>
 
-                {totalPages > 1 && (
-                  <Pagination className="mt-6">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                          className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
-                        />
-                      </PaginationItem>
-                      
-                      {getPaginationRange().map((page, index) => (
-                        page === 'ellipsis' ? (
-                          <PaginationItem key={`ellipsis-${index}`}>
-                            <PaginationEllipsis className="text-white" />
-                          </PaginationItem>
-                        ) : (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                              className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        )
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                          className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </>
-            )}
-          </div>
+              {totalPages > 1 && (
+                <Pagination className="mt-6">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
+                      />
+                    </PaginationItem>
+                    
+                    {getPaginationRange().map((page, index) => (
+                      page === 'ellipsis' ? (
+                        <PaginationItem key={`ellipsis-${index}`}>
+                          <PaginationEllipsis className="text-white" />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className={`${currentPage === page ? 'bg-yellow-400 text-black' : 'text-white hover:text-yellow-400'}`}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} text-white hover:text-yellow-400`}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>
