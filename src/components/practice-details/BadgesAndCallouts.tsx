@@ -12,11 +12,21 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
   const { data: generatedText, error } = useQuery({
     queryKey: ['firm-generated-text', companyId],
     queryFn: async () => {
-      console.log('Fetching data for company:', companyId);
+      console.log('Starting fetch for company ID:', companyId);
       
+      // First, let's check if the company exists
+      const { data: companyCheck } = await supabase
+        .from('canary_firms_data')
+        .select('Company ID')
+        .eq('Company ID', companyId)
+        .single();
+      
+      console.log('Company check result:', companyCheck);
+
+      // Now fetch the generated text
       const { data, error } = await supabase
         .from('firm_generated_text')
-        .select('badges, callouts')
+        .select('*')  // Select all columns to see what we get
         .eq('company_id', companyId)
         .maybeSingle();
 
@@ -25,29 +35,26 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
         throw error;
       }
 
-      console.log('Raw data from Supabase:', data);
+      console.log('Complete data from firm_generated_text:', data);
       return data;
     }
   });
 
-  if (!generatedText) {
-    console.log('No generated text found');
-    return <div className="text-white/60 text-center py-4">No data available for this company.</div>;
+  if (error) {
+    console.error('Query error:', error);
+    return <div className="text-white/60 text-center py-4">Error loading badges and callouts.</div>;
   }
 
-  console.log('Raw badges text:', generatedText.badges);
-  console.log('Raw callouts text:', generatedText.callouts);
+  if (!generatedText) {
+    console.log('No generated text found for company ID:', companyId);
+    return <div className="text-white/60 text-center py-4">No badges or callouts available for this company.</div>;
+  }
 
-  // Return the raw data for now to debug
   return (
     <div className="space-y-6">
       <pre className="text-white whitespace-pre-wrap">
-        <h3>Badges Raw Data:</h3>
-        {JSON.stringify(generatedText.badges, null, 2)}
-      </pre>
-      <pre className="text-white whitespace-pre-wrap">
-        <h3>Callouts Raw Data:</h3>
-        {JSON.stringify(generatedText.callouts, null, 2)}
+        <h3>Complete Generated Text Data:</h3>
+        {JSON.stringify(generatedText, null, 2)}
       </pre>
     </div>
   );
