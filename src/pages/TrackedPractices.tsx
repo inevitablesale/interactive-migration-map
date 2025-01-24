@@ -183,10 +183,10 @@ function TrackedPractices() {
     <div className="min-h-screen bg-black">
       <header className="fixed top-0 left-0 right-0 z-40 bg-black border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Bird className="w-8 h-8 text-yellow-400" />
             <span className="text-xl font-bold text-yellow-400">Canary</span>
-          </div>
+          </Link>
           <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
             Sign In
           </Link>
