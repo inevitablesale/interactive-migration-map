@@ -249,6 +249,7 @@ export default function PracticeDetails() {
 
           <KeyMetricsBar practice={practice} countyData={countyData} />
           
+          {/* Add BadgesAndCallouts component here */}
           <BadgesAndCallouts companyId={practice["Company ID"]} />
 
           {/* Market Data Section - Collapsible */}
