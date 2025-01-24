@@ -7,21 +7,41 @@ export function DashboardSummary() {
   const { data: summary } = useQuery({
     queryKey: ['dashboard-summary'],
     queryFn: async () => {
-      const { data: practices } = await supabase
-        .from('tracked_practices')
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return { total: 0, pending: 0, avgPoolSize: 0 };
+
+      const { data: interests } = await supabase
+        .from('canary_firm_interests')
         .select(`
           *,
-          practice_buyer_pool (*)
-        `);
+          canary_firms_data!inner (*)
+        `)
+        .eq('user_id', user.id);
 
-      if (!practices) return { total: 0, pending: 0, avgPoolSize: 0 };
+      if (!interests) return { total: 0, pending: 0, avgPoolSize: 0 };
 
-      const total = practices.length;
-      const pending = practices.filter(p => p.status === 'pending_response').length;
-      const avgPoolSize = practices.reduce((acc, p) => 
-        acc + (p.practice_buyer_pool?.length || 0), 0) / (total || 1);
+      const total = interests.length;
+      const pending = interests.filter(i => i.status === 'interested').length;
+      
+      // Calculate average number of interested buyers per practice
+      const practiceInterests = new Map();
+      interests.forEach(interest => {
+        const companyId = interest.company_id;
+        if (!practiceInterests.has(companyId)) {
+          practiceInterests.set(companyId, 0);
+        }
+        practiceInterests.set(companyId, practiceInterests.get(companyId) + 1);
+      });
+      
+      const avgPoolSize = practiceInterests.size > 0 ? 
+        Array.from(practiceInterests.values()).reduce((a, b) => a + b, 0) / practiceInterests.size : 0;
 
-      return { total, pending, avgPoolSize: Math.round(avgPoolSize) };
+      return { 
+        total, 
+        pending, 
+        avgPoolSize: Math.round(avgPoolSize) 
+      };
     }
   });
 
