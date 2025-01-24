@@ -10,7 +10,7 @@ const CountdownBanner = () => {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const targetDate = new Date("2025-02-15T00:00:00");
+      const targetDate = new Date("2024-05-29T00:00:00");
       const now = new Date();
       const difference = targetDate.getTime() - now.getTime();
 
@@ -35,11 +35,19 @@ const CountdownBanner = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-primary text-primary-foreground py-2 px-4 z-50 text-center text-sm md:text-base">
-      <span className="font-medium">
-        New firms added in: {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m{" "}
-        {timeLeft.seconds}s
-      </span>
+    <div className="fixed bottom-8 right-8 z-50 w-96 transform transition-transform duration-300">
+      <div className="relative">
+        {/* Chain decorations */}
+        <div className="absolute -top-4 left-0 w-full flex justify-between px-4 pointer-events-none">
+          <div className="w-1 h-16 bg-gradient-to-b from-gray-600 to-gray-800 rounded transform -rotate-12" />
+          <div className="w-1 h-16 bg-gradient-to-b from-gray-600 to-gray-800 rounded transform rotate-12" />
+        </div>
+        
+        {/* Timer Display */}
+        <div className="text-red-500 font-mono bg-gray-900 px-2 py-1 rounded">
+          {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+        </div>
+      </div>
     </div>
   );
 };
