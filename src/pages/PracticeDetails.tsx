@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, Briefcase, Mail, Megaphone, ChartBar } from "lucide-react";
+import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, Briefcase, Mail, Megaphone, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
