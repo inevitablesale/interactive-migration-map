@@ -12,16 +12,28 @@ interface BadgesAndCalloutsProps {
 
 export const BadgesAndCallouts = ({ generatedText, specialties }: BadgesAndCalloutsProps) => {
   // Parse badges from generated text or specialties
-  const badges = generatedText?.badges
-    ? JSON.parse(generatedText.badges) as string[]
-    : specialties
-    ? [specialties]
-    : [];
+  const badges = (() => {
+    if (!generatedText?.badges) {
+      return specialties ? [specialties] : [];
+    }
+    try {
+      return JSON.parse(generatedText.badges) as string[];
+    } catch {
+      // If parsing fails, treat it as a single badge string
+      return [generatedText.badges];
+    }
+  })();
 
   // Parse callouts from generated text
-  const callouts = generatedText?.callouts
-    ? JSON.parse(generatedText.callouts) as string[]
-    : [];
+  const callouts = (() => {
+    if (!generatedText?.callouts) return [];
+    try {
+      return JSON.parse(generatedText.callouts) as string[];
+    } catch {
+      // If parsing fails, treat it as a single callout string
+      return [generatedText.callouts];
+    }
+  })();
 
   if (!badges.length && !callouts.length) {
     return null;
