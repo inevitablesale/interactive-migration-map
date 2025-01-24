@@ -27,7 +27,8 @@ export default function PracticeDetails() {
   const navigate = useNavigate();
   const [isMarketDataOpen, setIsMarketDataOpen] = useState(false);
 
-  const { data, isLoading, error } = useQuery({
+  // Fetch practice details and generated text in parallel
+  const { data: practiceData, isLoading: isPracticeLoading, error: practiceError } = useQuery({
     queryKey: ['practice-details', practiceId],
     queryFn: async () => {
       if (!practiceId) throw new Error('Practice ID is required');
@@ -39,21 +40,31 @@ export default function PracticeDetails() {
 
       console.log('Fetching practice with Company ID:', companyId);
       
-      const { data: practice, error: practiceError } = await supabase
-        .from('canary_firms_data')
-        .select('*')
-        .eq('Company ID', companyId)
-        .maybeSingle();
+      const [practiceResult, generatedTextResult] = await Promise.all([
+        supabase
+          .from('canary_firms_data')
+          .select('*')
+          .eq('Company ID', companyId)
+          .maybeSingle(),
+        supabase
+          .from('firm_generated_text')
+          .select('*')
+          .eq('company_id', companyId)
+          .maybeSingle()
+      ]);
 
-      if (practiceError) {
-        console.error('Error fetching practice:', practiceError);
-        throw practiceError;
+      if (practiceResult.error) {
+        console.error('Error fetching practice:', practiceResult.error);
+        throw practiceResult.error;
       }
       
-      if (!practice) {
+      if (!practiceResult.data) {
         console.log('No practice found for ID:', companyId);
         throw new Error('Practice not found');
       }
+
+      const practice = practiceResult.data;
+      const generatedText = generatedTextResult.data;
 
       const transformedPractice: TopFirm = {
         "Company Name": practice["Company Name"],
@@ -92,7 +103,7 @@ export default function PracticeDetails() {
 
       if (!countyFp || !stateFp) {
         console.log('Missing FIPS codes:', { countyFp, stateFp });
-        return { practice: transformedPractice, countyData: null };
+        return { practice: transformedPractice, countyData: null, generatedText };
       }
 
       console.log('Fetching county data with FIPS:', { countyFp, stateFp });
@@ -133,7 +144,6 @@ export default function PracticeDetails() {
         avgSalaryPerEmployee: countyData?.total_payroll && countyData?.total_employees ? 
           countyData.total_payroll / countyData.total_employees : undefined,
         vacancy_rate: countyData?.vacancy_rate,
-        // State-level rankings
         vacancy_rank: countyData?.vacancy_rank,
         income_rank: countyData?.income_rank,
         population_rank: countyData?.population_rank,
@@ -142,7 +152,6 @@ export default function PracticeDetails() {
         firm_density_rank: countyData?.firm_density_rank,
         density_rank: countyData?.firm_density_rank,
         state_rank: countyData?.growth_rank,
-        // National-level rankings
         national_income_rank: countyData?.national_income_rank,
         national_population_rank: countyData?.national_population_rank,
         national_rent_rank: countyData?.national_rent_rank,
@@ -150,29 +159,28 @@ export default function PracticeDetails() {
         national_growth_rank: countyData?.national_growth_rank,
         national_vacancy_rank: countyData?.national_vacancy_rank,
         national_market_saturation_rank: countyData?.national_market_saturation_rank,
-        // Averages
         avg_firms_per_10k: countyData?.avg_firms_per_10k,
         avg_growth_rate: countyData?.avg_growth_rate,
         avg_market_saturation: countyData?.avg_market_saturation
       };
 
-      return { practice: transformedPractice, countyData: transformedCountyData };
+      return { practice: transformedPractice, countyData: transformedCountyData, generatedText };
     },
     retry: false
   });
 
   useEffect(() => {
-    if (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error loading practice details';
+    if (practiceError) {
+      const errorMessage = practiceError instanceof Error ? practiceError.message : 'Error loading practice details';
       toast({
         title: "Error loading practice details",
         description: errorMessage,
         variant: "destructive",
       });
     }
-  }, [error, toast]);
+  }, [practiceError, toast]);
 
-  if (isLoading) {
+  if (isPracticeLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white pt-24">
         <Skeleton className="h-12 w-[300px] bg-white/10" />
@@ -185,14 +193,14 @@ export default function PracticeDetails() {
     );
   }
 
-  if (!data?.practice) return (
+  if (!practiceData?.practice) return (
     <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white pt-24">
       <h1 className="text-2xl font-bold">Practice not found</h1>
       <p className="text-white/60">The practice you're looking for could not be found.</p>
     </div>
   );
 
-  const { practice, countyData } = data;
+  const { practice, countyData, generatedText } = practiceData;
 
   const handleInterested = async () => {
     const { error } = await supabase
@@ -244,13 +252,13 @@ export default function PracticeDetails() {
         <div className="space-y-6">
           {/* Primary Content */}
           <div className="rounded-lg p-6">
-            <PracticeHeader practice={practice} />
+            <PracticeHeader practice={practice} generatedText={generatedText} />
           </div>
 
           <KeyMetricsBar practice={practice} countyData={countyData} />
           
-          {/* Moved BadgesAndCallouts here */}
-          <BadgesAndCallouts companyId={practice["Company ID"]} />
+          {/* Pass generatedText directly */}
+          {generatedText && <BadgesAndCallouts generatedText={generatedText} />}
 
           {/* Market Data Section - Collapsible */}
           <Collapsible

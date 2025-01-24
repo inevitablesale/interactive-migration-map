@@ -1,52 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface BadgesAndCalloutsProps {
-  companyId: number;
+  generatedText: {
+    badges: string | null;
+    callouts: string | null;
+  };
 }
 
-export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
-  console.log('BadgesAndCallouts rendered with companyId:', companyId);
+export function BadgesAndCallouts({ generatedText }: BadgesAndCalloutsProps) {
+  console.log('BadgesAndCallouts rendered with data:', generatedText);
   
-  const { data: generatedText, error, isLoading } = useQuery({
-    queryKey: ['firm-generated-text', companyId],
-    queryFn: async () => {
-      console.log('Starting fetch for company ID:', companyId);
-      
-      const { data, error } = await supabase
-        .from('firm_generated_text')
-        .select('*')
-        .eq('company_id', companyId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      console.log('Complete data from firm_generated_text:', data);
-      return data;
-    }
-  });
-
-  if (isLoading) {
-    console.log('Loading data...');
-    return <div className="text-white/60 text-center py-4">Loading badges and callouts...</div>;
-  }
-
-  if (error) {
-    console.error('Query error:', error);
-    return <div className="text-white/60 text-center py-4">Error loading badges and callouts.</div>;
-  }
-
-  if (!generatedText) {
-    console.log('No generated text found for company ID:', companyId);
-    return <div className="text-white/60 text-center py-4">No badges or callouts available for this company.</div>;
-  }
-
   // Parse badges (handles both newlines and commas)
   const parseBadges = (badgesText: string | null) => {
     if (!badgesText) return [];
