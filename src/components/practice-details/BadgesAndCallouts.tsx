@@ -32,13 +32,13 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
 
   if (!generatedText) {
     console.log('No generated text found');
-    return null;
+    return <div className="text-white/60 text-center py-4">No data available for this company.</div>;
   }
 
   console.log('Raw badges text:', generatedText.badges);
   console.log('Raw callouts text:', generatedText.callouts);
 
-  // Parse markdown-formatted badges
+  // Parse markdown-formatted badges with improved error handling
   const badges = generatedText.badges
     ? generatedText.badges
         .split('\n')
@@ -52,7 +52,8 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           return isValid;
         })
         .map(line => {
-          const cleaned = line.replace(/^\*\s*\*\*/, '').replace(/\*\*$/, '').trim();
+          // Remove markdown formatting (* and **)
+          const cleaned = line.replace(/^\*\s*/, '').replace(/\*\*/g, '').trim();
           console.log('Cleaned badge:', { original: line, cleaned });
           return cleaned;
         })
@@ -61,7 +62,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
 
   console.log('Final parsed badges:', badges);
 
-  // Parse markdown-formatted callouts
+  // Parse markdown-formatted callouts with improved error handling
   const callouts = generatedText.callouts
     ? generatedText.callouts
         .split('\n')
@@ -75,8 +76,10 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           return isValid;
         })
         .map(line => {
-          const content = line.replace(/^\*\s*\*\*/, '').replace(/\*\*/, ':').trim();
+          // Remove markdown formatting and split into title/description
+          const content = line.replace(/^\*\s*/, '').replace(/\*\*/g, '').trim();
           console.log('Cleaned callout line:', { original: line, cleaned: content });
+          
           const [title, ...descParts] = content.split(':');
           const result = {
             title: title.trim(),
@@ -90,6 +93,10 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
 
   console.log('Final parsed callouts:', callouts);
 
+  if (!badges.length && !callouts.length) {
+    return <div className="text-white/60 text-center py-4">No badges or callouts available.</div>;
+  }
+
   return (
     <div className="space-y-6">
       {badges.length > 0 && (
@@ -101,7 +108,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           <div className="flex flex-wrap gap-2">
             {badges.map((badge, index) => (
               <Badge 
-                key={index}
+                key={`badge-${index}`}
                 className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 variant="secondary"
               >
@@ -121,7 +128,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {callouts.map((callout, index) => (
               <div 
-                key={index}
+                key={`callout-${index}`}
                 className="bg-white/5 rounded-lg p-4"
               >
                 <h4 className="font-semibold text-blue-400 mb-2">{callout.title}</h4>
