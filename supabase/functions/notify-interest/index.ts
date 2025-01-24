@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Canary <notifications@inevitable.sale>',
+        from: 'Canary <notifications@canary.accountants>',
         to: [ADMIN_EMAIL],
         subject: `New Interest: ${practice['Company Name']}`,
         html: emailHtml,
