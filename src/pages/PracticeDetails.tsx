@@ -393,21 +393,7 @@ export default function PracticeDetails() {
           <div className="lg:sticky lg:top-24 space-y-6 h-fit">
             {/* Practice Info Card */}
             <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <PracticeInfo practice={practice} />
-            </div>
-
-            {/* Location Info */}
-            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-white/60">
-                  <Building className="w-4 h-4" />
-                  <span>Location Details</span>
-                </div>
-                <div>
-                  <p className="text-sm text-white/60">Address</p>
-                  <p className="text-lg font-semibold text-white">{practice.Location}</p>
-                </div>
-              </div>
+              <PracticeInfo practice={practice} onInterested={handleInterested} />
             </div>
           </div>
         </div>
