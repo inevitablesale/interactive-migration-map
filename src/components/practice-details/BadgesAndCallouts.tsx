@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { CheckCircle, BadgeCheck } from "lucide-react";
+import { CheckCircle, Award, Star, Trophy, Target, Sparkles } from "lucide-react";
 
 interface BadgesAndCalloutsProps {
   generatedText: {
@@ -43,21 +43,27 @@ export function BadgesAndCallouts({ generatedText, specialties }: BadgesAndCallo
   console.log('Parsed badges:', badges);
   console.log('Parsed callouts:', callouts);
 
+  // Array of badge icons to rotate through
+  const badgeIcons = [Award, Star, Trophy, Target, Sparkles];
+
   return (
     <div className="space-y-6">
       {/* Badges Display */}
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-3">
-          {badges.map((badge, index) => (
-            <Badge 
-              key={`badge-${index}`}
-              variant="secondary" 
-              className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 text-gray-900 hover:from-gray-200 hover:to-gray-300 transition-all duration-300 flex items-center gap-2"
-            >
-              <BadgeCheck className="w-4 h-4 text-[#8B5CF6] hover:text-[#D946EF] transition-colors duration-300" />
-              {badge}
-            </Badge>
-          ))}
+          {badges.map((badge, index) => {
+            const BadgeIcon = badgeIcons[index % badgeIcons.length];
+            return (
+              <Badge 
+                key={`badge-${index}`}
+                variant="secondary" 
+                className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 text-gray-900 hover:from-gray-200 hover:to-gray-300 transition-all duration-300 flex items-center gap-2"
+              >
+                <BadgeIcon className="w-4 h-4 text-[#8B5CF6] hover:text-[#D946EF] transition-colors duration-300" />
+                {badge}
+              </Badge>
+            );
+          })}
         </div>
       )}
 
