@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PracticeHeader } from "@/components/practice-details/PracticeHeader";
 import { KeyMetricsBar } from "@/components/practice-details/KeyMetricsBar";
 import { BusinessOverview } from "@/components/practice-details/BusinessOverview";
@@ -18,7 +18,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useState } from "react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +27,23 @@ export default function PracticeDetails() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isMarketDataOpen, setIsMarketDataOpen] = useState(false);
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { data: practiceData, isLoading: isPracticeLoading, error: practiceError } = useQuery({
     queryKey: ['practice-details', practiceId],
@@ -261,6 +277,23 @@ export default function PracticeDetails() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+      });
+    }
+  };
+
   if (isPracticeLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
@@ -311,12 +344,22 @@ export default function PracticeDetails() {
               <span className="text-xl font-bold text-yellow-400">Canary</span>
             </div>
           </div>
-          <Link 
-            to="/auth" 
-            className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
-          >
-            Sign In
-          </Link>
+          {session ? (
+            <Button 
+              onClick={handleSignOut}
+              variant="ghost"
+              className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
+            >
+              Sign Out
+            </Button>
+          ) : (
+            <Link 
+              to="/auth" 
+              className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </header>
 
