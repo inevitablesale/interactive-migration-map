@@ -308,11 +308,6 @@ export default function PracticeDetails() {
                 <div className="w-full md:w-auto">
                 </div>
               </div>
-              
-              <BadgesAndCallouts 
-                generatedText={generatedText} 
-                specialties={practice.specialities}
-              />
             </div>
 
             {/* Key Metrics */}
@@ -320,8 +315,16 @@ export default function PracticeDetails() {
               <KeyMetricsBar practice={practice} countyData={countyData} />
             </div>
 
-            {/* Business Overview */}
+            {/* Callouts Section - Moved here */}
             <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <BadgesAndCallouts 
+                generatedText={generatedText} 
+                specialties={practice.specialities}
+              />
+            </div>
+
+            {/* Business Overview */}
+            <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <BusinessOverview practice={practice} />
             </div>
 
