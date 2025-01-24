@@ -24,7 +24,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
 
-  // Calculate estimated valuation (using a multiplier of 1.50)
+  // Calculate estimated valuation (using a multiplier based on revenue)
   const valuationMultiplier = 1.50;
   const estimatedValuation = practice.annual_revenue * valuationMultiplier;
 
