@@ -16,18 +16,23 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
         .eq('company_id', practice["Company ID"])
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching generated text:', error);
+        throw error;
+      }
       return data;
     }
   });
 
+  console.log('Generated Text:', generatedText); // Debug log
+
   return (
     <div className="space-y-6">
       <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Business Overview</h2>
+        <h2 className="text-xl font-semibold text-white mb-4">Business Overview</h2>
         <div className="prose prose-invert max-w-none">
           <p className="text-white/80 leading-relaxed">
-            {generatedText?.generated_summary || practice.Summary}
+            {generatedText?.generated_summary || practice.Summary || 'No summary available'}
           </p>
         </div>
       </div>
