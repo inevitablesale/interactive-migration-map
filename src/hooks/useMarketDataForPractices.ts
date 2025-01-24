@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface Practice {
   id: string;
   region: string;
-  COUNTYFP?: string;
-  STATEFP?: string;
+  COUNTYFP?: number;  // Changed from string to number
+  STATEFP?: number;   // Changed from string to number
   COUNTYNAME?: string;
 }
 
@@ -24,8 +24,8 @@ export const useMarketDataForPractices = (practices: Practice[] | undefined) => 
           const { data: countyData, error: countyError } = await supabase
             .from('county_data')
             .select('PAYANN, EMP')
-            .eq('STATEFP', practice.STATEFP)
-            .eq('COUNTYFP', practice.COUNTYFP)
+            .eq('STATEFP', practice.STATEFP.toString())  // Convert to string for query
+            .eq('COUNTYFP', practice.COUNTYFP.toString()) // Convert to string for query
             .eq('COUNTYNAME', practice.COUNTYNAME)
             .maybeSingle();
 

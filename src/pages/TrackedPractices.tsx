@@ -49,9 +49,9 @@ export default function TrackedPractices() {
         notes: [],
         specialities: practice.specialities,
         generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
-        COUNTYFP: practice.COUNTYFP,
-        STATEFP: practice.STATEFP,
-        COUNTYNAME: practice.COUNTYNAME
+        COUNTYFP: practice.COUNTYFP || undefined,
+        STATEFP: practice.STATEFP || undefined,
+        COUNTYNAME: practice.COUNTYNAME || undefined
       }));
     }
   });
