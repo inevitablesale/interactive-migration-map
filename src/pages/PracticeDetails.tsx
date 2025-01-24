@@ -182,21 +182,25 @@ export default function PracticeDetails() {
 
   if (isPracticeLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6 bg-black/95 min-h-screen text-white pt-24">
-        <Skeleton className="h-12 w-[300px] bg-white/10" />
-        <Skeleton className="h-20 w-full bg-white/10" />
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-[400px] bg-white/10" />
-          <Skeleton className="h-[400px] bg-white/10" />
+      <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+        <div className="container mx-auto p-6 space-y-6 pt-24">
+          <Skeleton className="h-12 w-[300px] bg-white/10" />
+          <Skeleton className="h-20 w-full bg-white/10" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-[400px] bg-white/10" />
+            <Skeleton className="h-[400px] bg-white/10" />
+          </div>
         </div>
       </div>
     );
   }
 
   if (!practiceData?.practice) return (
-    <div className="container mx-auto p-6 bg-black/95 min-h-screen text-white pt-24">
-      <h1 className="text-2xl font-bold">Practice not found</h1>
-      <p className="text-white/60">The practice you're looking for could not be found.</p>
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+      <div className="container mx-auto p-6 pt-24">
+        <h1 className="text-2xl font-bold">Practice not found</h1>
+        <p className="text-white/60">The practice you're looking for could not be found.</p>
+      </div>
     </div>
   );
 
@@ -226,71 +230,90 @@ export default function PracticeDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-            <span className="text-xl font-bold text-yellow-400">Canary</span>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              className="text-white hover:text-white/80 hover:bg-white/10"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <div className="h-6 w-px bg-white/20" />
+            <div className="flex items-center gap-2">
+              <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+              <span className="text-xl font-bold text-yellow-400">Canary</span>
+            </div>
           </div>
-          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+          <Link 
+            to="/auth" 
+            className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
+          >
             Sign In
           </Link>
         </div>
       </div>
 
-      {/* Main Content - Added pt-24 to prevent header overlap */}
+      {/* Main Content */}
       <div className="container mx-auto p-6 space-y-8 pt-24">
-        <Button
-          variant="ghost"
-          className="text-white hover:text-white/80 hover:bg-white/10"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Listings
-        </Button>
+        {/* Header Section */}
+        <div className="rounded-lg p-6 bg-black/40 backdrop-blur-md border border-white/10 animate-fade-in">
+          <PracticeHeader practice={practice} generatedText={generatedText} />
+        </div>
 
-        <div className="space-y-6">
-          {/* Primary Content */}
-          <div className="rounded-lg p-6">
-            <PracticeHeader practice={practice} generatedText={generatedText} />
+        {/* Key Metrics Section */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <KeyMetricsBar practice={practice} countyData={countyData} />
+        </div>
+        
+        {/* Badges and Callouts */}
+        {generatedText && (
+          <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <BadgesAndCallouts generatedText={generatedText} />
+          </div>
+        )}
+
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          {/* Left Column - Business Overview */}
+          <div className="lg:col-span-2 space-y-6">
+            <BusinessOverview practice={practice} />
+            
+            {/* Market Data Section - Collapsible */}
+            <Collapsible
+              open={isMarketDataOpen}
+              onOpenChange={setIsMarketDataOpen}
+              className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 transition-all duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  Geographic & Demographic Data
+                  <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/60">
+                    {isMarketDataOpen ? 'Click to collapse' : 'Click to expand'}
+                  </span>
+                </h2>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="hover:bg-white/10">
+                    {isMarketDataOpen ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+              
+              <CollapsibleContent className="mt-4 space-y-4">
+                {countyData && <MarketMetricsGrid marketData={countyData} />}
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
-          <KeyMetricsBar practice={practice} countyData={countyData} />
-          
-          {/* Pass generatedText directly */}
-          {generatedText && <BadgesAndCallouts generatedText={generatedText} />}
-
-          {/* Market Data Section - Collapsible */}
-          <Collapsible
-            open={isMarketDataOpen}
-            onOpenChange={setIsMarketDataOpen}
-            className="bg-black/40 backdrop-blur-md rounded-lg p-6"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Geographic & Demographic Data</h2>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="hover:bg-white/10">
-                  {isMarketDataOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent className="mt-4">
-              {countyData && <MarketMetricsGrid marketData={countyData} />}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <BusinessOverview practice={practice} />
-            </div>
-            <div>
-              <PracticeInfo practice={practice} onInterested={handleInterested} />
-            </div>
+          {/* Right Column - Practice Info */}
+          <div className="lg:sticky lg:top-24 h-fit">
+            <PracticeInfo practice={practice} onInterested={handleInterested} />
           </div>
         </div>
       </div>
