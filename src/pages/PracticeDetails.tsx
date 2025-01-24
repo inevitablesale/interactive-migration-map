@@ -9,6 +9,7 @@ import { KeyMetricsBar } from "@/components/practice-details/KeyMetricsBar";
 import { BusinessOverview } from "@/components/practice-details/BusinessOverview";
 import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
+import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronDown, ChevronUp, Bird } from "lucide-react";
 import { Link } from "react-router-dom";
