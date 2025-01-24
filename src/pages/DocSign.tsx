@@ -162,7 +162,7 @@ By clicking 'Accept,' the Client acknowledges and agrees to the terms outlined i
                   className="flex items-center space-x-2"
                 >
                   <Signature className="h-4 w-4" />
-                  <span>{documents.success_fee_signed ? 'Signed' : 'Sign Agreement'}</span>
+                  <span>{documents.success_fee_signed ? 'Signed' : 'Accept'}</span>
                 </Button>
               </div>
               {!documents.success_fee_signed && (
