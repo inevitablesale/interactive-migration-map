@@ -46,7 +46,12 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
 
   if (!practice) {
     return (
-      <Card className="bg-black border-white/10">
+      <Card className="bg-black border-white/10 relative overflow-hidden">
+        {/* Coming Soon Banner */}
+        <div className="absolute -right-8 top-12 rotate-45 bg-gray-500/80 text-white px-8 py-1 text-sm font-semibold shadow-lg z-10">
+          Coming Soon
+        </div>
+        
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-bold text-white">Practice of the Day</CardTitle>
@@ -83,11 +88,12 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
             </div>
 
             <Button 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full bg-gray-600 hover:bg-gray-700 text-gray-300 cursor-not-allowed opacity-50"
+              disabled
               onClick={handleLinkedInSignup}
             >
               <Linkedin className="w-4 h-4 mr-2" />
-              Sign Up with LinkedIn
+              RSVP with LinkedIn
             </Button>
 
             <p className="text-xs text-center text-gray-400">
