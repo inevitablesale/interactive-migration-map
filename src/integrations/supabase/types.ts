@@ -1109,6 +1109,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_documents: {
+        Row: {
+          created_at: string | null
+          id: string
+          nda_signed: boolean | null
+          nda_signed_at: string | null
+          success_fee_signed: boolean | null
+          success_fee_signed_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nda_signed?: boolean | null
+          nda_signed_at?: string | null
+          success_fee_signed?: boolean | null
+          success_fee_signed_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nda_signed?: boolean | null
+          nda_signed_at?: string | null
+          success_fee_signed?: boolean | null
+          success_fee_signed_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       county_rankings: {
