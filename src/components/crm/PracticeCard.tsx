@@ -31,7 +31,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
   const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
 
-  // Format currency
+  // Format currency exactly like KeyMetricsBar
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
       return `$${(amount / 1000000).toFixed(2)}M`;
@@ -46,7 +46,8 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     employeeCount: practice.employee_count,
     avgSalaryPerEmployee,
     annualPayroll,
-    estimatedRevenue
+    estimatedRevenue,
+    formattedRevenue: formatCurrency(estimatedRevenue)
   });
 
   return (
