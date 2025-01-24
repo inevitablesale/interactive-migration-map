@@ -8,8 +8,6 @@ import MarketReport from "@/pages/MarketReport";
 import StateMarketReport from "@/pages/StateMarketReport";
 import ThankYou from "@/pages/ThankYou";
 import Auth from "@/pages/Auth";
-import TrendingInsights from "@/pages/TrendingInsights";
-import MarketAnalyst from "@/pages/MarketAnalyst";
 
 export default function App() {
   return (
@@ -20,8 +18,6 @@ export default function App() {
         <Route path="/tracked-practices" element={<TrackedPractices />} />
         <Route path="/practice/:practiceId" element={<PracticeDetails />} />
         <Route path="/analysis" element={<Analysis />} />
-        <Route path="/trending-insights" element={<TrendingInsights />} />
-        <Route path="/market-analyst" element={<MarketAnalyst />} />
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/market-report/:county/:state" element={<MarketReport />} />
         <Route path="/state-market-report/:state" element={<StateMarketReport />} />
