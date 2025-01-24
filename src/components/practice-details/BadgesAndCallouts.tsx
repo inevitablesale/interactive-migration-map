@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 
 interface BadgesAndCalloutsProps {
   generatedText: {
-    badges?: string[];
+    badges?: string;
     callouts?: string;
   } | null;
   specialties?: string;
@@ -13,14 +13,14 @@ interface BadgesAndCalloutsProps {
 export const BadgesAndCallouts = ({ generatedText, specialties }: BadgesAndCalloutsProps) => {
   // Parse badges from generated text or specialties
   const badges = generatedText?.badges
-    ? JSON.parse(generatedText.badges)
+    ? JSON.parse(generatedText.badges) as string[]
     : specialties
     ? [specialties]
     : [];
 
   // Parse callouts from generated text
   const callouts = generatedText?.callouts
-    ? JSON.parse(generatedText.callouts)
+    ? JSON.parse(generatedText.callouts) as string[]
     : [];
 
   if (!badges.length && !callouts.length) {
