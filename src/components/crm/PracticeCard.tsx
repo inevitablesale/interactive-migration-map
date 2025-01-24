@@ -13,6 +13,7 @@ interface PracticeCardProps {
     status: string;
     last_updated: string;
     generated_title?: string;
+    avgSalaryPerEmployee?: number;
   };
   onWithdraw: () => void;
   onExpressInterest: () => void;
@@ -24,9 +25,15 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
 
+  // Calculate revenue using the same logic as PracticeDetails
+  const defaultAvgSalary = 86259; // National average if county data not available
+  const avgSalary = practice.avgSalaryPerEmployee || defaultAvgSalary;
+  const totalPayroll = avgSalary * practice.employee_count;
+  const estimatedRevenue = totalPayroll / 0.35; // 35% payroll to revenue ratio
+
   // Calculate estimated valuation (using a multiplier of 1.50)
   const valuationMultiplier = 1.50;
-  const estimatedValuation = practice.annual_revenue * valuationMultiplier;
+  const estimatedValuation = estimatedRevenue * valuationMultiplier;
 
   // Format currency
   const formatCurrency = (amount: number) => {
