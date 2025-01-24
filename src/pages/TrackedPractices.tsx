@@ -35,20 +35,26 @@ export default function TrackedPractices() {
 
       if (error) throw error;
 
-      return practicesData.map(practice => ({
-        id: practice["Company ID"].toString(),
-        industry: practice["Primary Subtitle"] || "",
-        region: practice["State Name"] || "",
-        employee_count: practice.employeeCount || 0,
-        annual_revenue: 0,
-        service_mix: { "General": 100 },
-        status: "not_contacted",
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        notes: [],
-        specialities: practice.specialities,
-        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
-      }));
+      return practicesData.map(practice => {
+        // Estimate annual revenue based on employee count
+        // Using a simple estimation of $150,000 revenue per employee
+        const estimatedRevenue = (practice.employeeCount || 0) * 150000;
+
+        return {
+          id: practice["Company ID"].toString(),
+          industry: practice["Primary Subtitle"] || "",
+          region: practice["State Name"] || "",
+          employee_count: practice.employeeCount || 0,
+          annual_revenue: estimatedRevenue,
+          service_mix: { "General": 100 },
+          status: "not_contacted",
+          last_updated: new Date().toISOString(),
+          practice_buyer_pool: [],
+          notes: [],
+          specialities: practice.specialities,
+          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+        };
+      });
     }
   });
 
@@ -141,7 +147,7 @@ export default function TrackedPractices() {
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
