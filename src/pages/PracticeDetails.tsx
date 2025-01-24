@@ -284,7 +284,7 @@ export default function PracticeDetails() {
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
-      navigate("/"); // Changed from "/auth" to "/"
+      navigate("/");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -339,7 +339,10 @@ export default function PracticeDetails() {
               Back
             </Button>
             <div className="h-6 w-px bg-white/20" />
-            <div className="flex items-center gap-2">
+            <div 
+              className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate("/")}
+            >
               <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
               <span className="text-xl font-bold text-yellow-400">Canary</span>
             </div>
