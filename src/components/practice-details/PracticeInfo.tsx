@@ -42,36 +42,37 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
         .from('buyer_profiles')
         .select('*')
         .eq('user_id', userData.user.id)
-        .maybeSingle();
+        .single();
 
       if (profileError) {
         console.error('Error checking profile:', profileError);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "There was an error checking your profile. Please try again.",
-        });
-        return;
-      }
+        
+        // If the error is that no rows were found, create a profile
+        if (profileError.code === 'PGRST116') {
+          const { error: createError } = await supabase
+            .from('buyer_profiles')
+            .insert({
+              user_id: userData.user.id,
+              buyer_name: userData.user.email?.split('@')[0] || 'Anonymous',
+              contact_email: userData.user.email || '',
+              target_geography: [],
+              subscription_tier: 'free'
+            });
 
-      // If no profile exists, create a basic one
-      if (!profile) {
-        const { error: createError } = await supabase
-          .from('buyer_profiles')
-          .insert({
-            user_id: userData.user.id,
-            buyer_name: userData.user.email?.split('@')[0],
-            contact_email: userData.user.email,
-            target_geography: [],
-            subscription_tier: 'free'
-          });
-
-        if (createError) {
-          console.error('Error creating profile:', createError);
+          if (createError) {
+            console.error('Error creating profile:', createError);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "There was an error creating your profile. Please try again.",
+            });
+            return;
+          }
+        } else {
           toast({
             variant: "destructive",
             title: "Error",
-            description: "There was an error creating your profile. Please try again.",
+            description: "There was an error checking your profile. Please try again.",
           });
           return;
         }
