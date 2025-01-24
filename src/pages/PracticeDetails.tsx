@@ -349,20 +349,23 @@ export default function PracticeDetails() {
             <div className="sticky top-24">
               <PracticeInfo practice={practice} onInterested={handleInterested} />
 
-              {/* Premium Advertisement */}
-              <Card className="mt-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-white/10">
+              {/* Premium Advertisement - Updated styling */}
+              <Card className="mt-6 overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] border-white/10">
                 <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center gap-2 text-white/60">
-                    <Briefcase className="w-4 h-4" />
-                    <span>Premium Features</span>
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-[#9b87f5]" />
+                    <span className="text-[#E5DEFF]">Premium Features</span>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white">Unlock Full Access</h3>
-                    <p className="text-sm text-white/60 mt-2">
+                    <p className="text-sm text-gray-400 mt-2">
                       Get detailed analytics, market insights, and connect directly with practice owners.
                     </p>
                   </div>
-                  <Button variant="secondary" className="w-full bg-white/10 text-white hover:bg-white/20">
+                  <Button 
+                    variant="secondary" 
+                    className="w-full bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] text-white hover:from-[#8B76E4] hover:to-[#6E59A5] border-none"
+                  >
                     Upgrade Now
                   </Button>
                 </CardContent>
