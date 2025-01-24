@@ -169,6 +169,65 @@ export default function PracticeDetails() {
     retry: false
   });
 
+  const handleInterested = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to express interest",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const companyId = Number(practiceId);
+      if (!companyId || isNaN(companyId)) {
+        throw new Error('Invalid practice ID');
+      }
+
+      // Check if user has already expressed interest
+      const { data: existingInterest } = await supabase
+        .from('canary_firm_interests')
+        .select('id')
+        .eq('company_id', companyId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingInterest) {
+        toast({
+          title: "Already Interested",
+          description: "You have already expressed interest in this practice",
+        });
+        return;
+      }
+
+      // Add interest record
+      const { error: interestError } = await supabase
+        .from('canary_firm_interests')
+        .insert([{
+          company_id: companyId,
+          user_id: user.id,
+          status: 'interested',
+          is_anonymous: false
+        }]);
+
+      if (interestError) throw interestError;
+
+      toast({
+        title: "Interest Registered",
+        description: "We'll notify you of any updates about this practice",
+      });
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to register interest. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (practiceError) {
       const errorMessage = practiceError instanceof Error ? practiceError.message : 'Error loading practice details';
