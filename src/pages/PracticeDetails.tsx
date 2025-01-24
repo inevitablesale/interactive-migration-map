@@ -170,7 +170,7 @@ export default function PracticeDetails() {
     retry: false
   });
 
-  const handleInterested = async () => {
+  const handleInterested = async (message?: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -214,6 +214,20 @@ export default function PracticeDetails() {
         }]);
 
       if (interestError) throw interestError;
+
+      // Call the notify-interest edge function with the message
+      const { error: notifyError } = await supabase.functions.invoke('notify-interest', {
+        body: { 
+          companyId: companyId, 
+          userId: user.id,
+          message: message 
+        }
+      });
+
+      if (notifyError) {
+        console.error('Error notifying admin:', notifyError);
+        // Don't throw here - we still want to show success since the interest was recorded
+      }
 
       toast({
         title: "Interest Registered",

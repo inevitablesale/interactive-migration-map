@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface PracticeInfoProps {
   practice: TopFirm;
-  onInterested?: () => void;
+  onInterested?: (message?: string) => void;
 }
 
 export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
@@ -23,7 +23,7 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
 
   const handleInterestConfirmed = () => {
     setShowDialog(false);
-    onInterested?.();
+    onInterested?.(message);
   };
 
   // Create an anonymized name

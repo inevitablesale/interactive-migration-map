@@ -27,7 +27,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { companyId, message, userId } = await req.json() as NotifyRequest
+    console.log('Notify interest function called');
+    const { companyId, message, userId } = await req.json() as NotifyRequest;
+    console.log('Request data:', { companyId, message, userId });
 
     // Get practice details and generated text
     const { data: practice, error: practiceError } = await supabase
@@ -39,23 +41,35 @@ const handler = async (req: Request): Promise<Response> => {
         )
       `)
       .eq('Company ID', companyId)
-      .single()
+      .single();
 
-    if (practiceError) throw practiceError
+    if (practiceError) {
+      console.error('Error fetching practice:', practiceError);
+      throw practiceError;
+    }
+    console.log('Practice data:', practice);
 
     // Get user profile and auth data
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId)
-    if (userError) throw userError
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      throw userError;
+    }
+    console.log('User data:', user);
 
     const { data: userProfile, error: profileError } = await supabase
       .from('buyer_profiles')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .single();
 
-    if (profileError) throw profileError
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      throw profileError;
+    }
+    console.log('User profile:', userProfile);
 
-    const practiceTitle = practice.firm_generated_text?.title || practice['Company Name']
+    const practiceTitle = practice.firm_generated_text?.[0]?.title || practice['Company Name'];
 
     // Prepare email content for admin
     const adminEmailHtml = `
@@ -74,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
         <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
       </ul>
       ${message ? `<h3>Message from Buyer:</h3><p>${message}</p>` : ''}
-    `
+    `;
 
     // Prepare email content for user
     const userEmailHtml = `
@@ -87,8 +101,9 @@ const handler = async (req: Request): Promise<Response> => {
       </ul>
       <p>Our team will review your interest and contact the practice owner on your behalf. We'll keep you updated on any developments.</p>
       <p>Best regards,<br>The Canary Team</p>
-    `
+    `;
 
+    console.log('Sending admin email...');
     // Send email to admin
     const adminRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -102,8 +117,9 @@ const handler = async (req: Request): Promise<Response> => {
         subject: `New Interest: ${practiceTitle}`,
         html: adminEmailHtml,
       }),
-    })
+    });
 
+    console.log('Sending user email...');
     // Send confirmation email to user
     const userRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -117,21 +133,23 @@ const handler = async (req: Request): Promise<Response> => {
         subject: 'Interest Confirmation - Canary',
         html: userEmailHtml,
       }),
-    })
+    });
 
     if (!adminRes.ok || !userRes.ok) {
+      console.error('Error response from Resend:', await adminRes.text());
       const error = await adminRes.text();
       throw new Error(`Failed to send email: ${error}`);
     }
 
     const data = await adminRes.json();
+    console.log('Emails sent successfully:', data);
     
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error: any) {
-    console.error('Error in notify-interest function:', error)
+    console.error('Error in notify-interest function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
