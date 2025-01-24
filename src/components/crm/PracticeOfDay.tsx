@@ -28,10 +28,12 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
   }
 
   return (
-    <Card className="bg-gradient-to-br from-primary/10 to-transparent relative overflow-hidden">
-      {/* Coming Soon Banner - Improved styling */}
-      <div className="absolute top-6 -right-12 bg-yellow-400 text-black font-bold py-1 px-12 text-sm shadow-lg transform rotate-45 z-10">
-        COMING SOON
+    <Card className="bg-white relative overflow-hidden">
+      {/* Coming Soon Banner - Styled to match the image */}
+      <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-8 right-[-68px] bg-[#FFD700] text-black font-semibold py-1.5 px-16 text-sm transform rotate-45 shadow-md z-10">
+          COMING SOON
+        </div>
       </div>
       
       <CardHeader>
