@@ -35,63 +35,37 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return <div className="text-white/60 text-center py-4">No data available for this company.</div>;
   }
 
-  console.log('Raw badges text:', generatedText.badges);
-  console.log('Raw callouts text:', generatedText.callouts);
-
-  // Parse markdown-formatted badges with improved error handling
+  // Parse badges (format: "* **Badge Name**")
   const badges = generatedText.badges
     ? generatedText.badges
         .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('*'))
         .map(line => {
-          console.log('Processing badge line:', line);
-          return line.trim();
+          // Extract text between ** **
+          const match = line.match(/\*\*(.*?)\*\*/);
+          return match ? match[1].trim() : null;
         })
-        .filter(line => {
-          const isValid = line.startsWith('*');
-          console.log('Badge line valid?', { line, isValid });
-          return isValid;
-        })
-        .map(line => {
-          // Remove markdown formatting (* and **)
-          const cleaned = line.replace(/^\*\s*/, '').replace(/\*\*/g, '').trim();
-          console.log('Cleaned badge:', { original: line, cleaned });
-          return cleaned;
-        })
-        .filter(badge => badge.length > 0)
+        .filter(Boolean)
     : [];
 
-  console.log('Final parsed badges:', badges);
-
-  // Parse markdown-formatted callouts with improved error handling
+  // Parse callouts (format: "* **Title:** Description")
   const callouts = generatedText.callouts
     ? generatedText.callouts
         .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('*'))
         .map(line => {
-          console.log('Processing callout line:', line);
-          return line.trim();
-        })
-        .filter(line => {
-          const isValid = line.startsWith('*');
-          console.log('Callout line valid?', { line, isValid });
-          return isValid;
-        })
-        .map(line => {
-          // Remove markdown formatting and split into title/description
-          const content = line.replace(/^\*\s*/, '').replace(/\*\*/g, '').trim();
-          console.log('Cleaned callout line:', { original: line, cleaned: content });
-          
-          const [title, ...descParts] = content.split(':');
-          const result = {
-            title: title.trim(),
-            description: descParts.join(':').trim()
+          // Extract title and description
+          const match = line.match(/\*\*(.*?)\*\*:\s*(.*)/);
+          if (!match) return null;
+          return {
+            title: match[1].trim(),
+            description: match[2]?.trim() || ''
           };
-          console.log('Parsed callout:', result);
-          return result;
         })
-        .filter(callout => callout.title.length > 0)
+        .filter(Boolean)
     : [];
-
-  console.log('Final parsed callouts:', callouts);
 
   if (!badges.length && !callouts.length) {
     return <div className="text-white/60 text-center py-4">No badges or callouts available.</div>;
