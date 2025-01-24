@@ -18,6 +18,7 @@ import {
   Lock,
   Wallet,
   Star,
+  ChevronDown,
   LucideIcon,
 } from "lucide-react";
 import {
@@ -26,6 +27,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const serviceIconMap: Record<string, LucideIcon> = {
   "tax": DollarSign,
@@ -65,32 +73,49 @@ interface ServiceIconsProps {
 }
 
 export function ServiceIcons({ specialities }: ServiceIconsProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!specialities) return null;
 
   const services = specialities.split(',').map(s => s.trim().toLowerCase());
   
   return (
-    <div className="flex flex-wrap gap-2 mt-2">
-      {services.map((service, index) => {
-        // Find the first matching icon by checking if the service includes any of our keywords
-        const iconKey = Object.keys(serviceIconMap).find(key => service.includes(key));
-        const Icon = iconKey ? serviceIconMap[iconKey] : Star; // Using Star as default icon instead of Building2
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-2">
+      <CollapsibleTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="p-2 h-8 text-sm text-white/60 hover:text-white/80 transition-colors"
+        >
+          View Services
+          <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${
+            isOpen ? "transform rotate-180" : ""
+          }`}/>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2">
+        <div className="flex flex-wrap gap-2">
+          {services.map((service, index) => {
+            const iconKey = Object.keys(serviceIconMap).find(key => service.includes(key));
+            const Icon = iconKey ? serviceIconMap[iconKey] : Star;
 
-        return (
-          <TooltipProvider key={index}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="p-1.5 bg-black/20 rounded-md cursor-help hover:bg-black/30 transition-colors">
-                  <Icon className="h-4 w-4 text-white/60" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="capitalize">{service}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        );
-      })}
-    </div>
+            return (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="p-1.5 bg-black/20 rounded-md cursor-help hover:bg-black/30 transition-colors">
+                      <Icon className="h-4 w-4 text-white/60" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="capitalize">{service}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          })}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
