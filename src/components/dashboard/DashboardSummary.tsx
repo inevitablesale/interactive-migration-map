@@ -11,7 +11,8 @@ export function DashboardSummary() {
       
       if (!user) return { total: 0, pending: 0, avgPoolSize: 0 };
 
-      const { data: interests } = await supabase
+      // First get the user's interests
+      const { data: userInterests } = await supabase
         .from('canary_firm_interests')
         .select(`
           *,
@@ -19,20 +20,31 @@ export function DashboardSummary() {
         `)
         .eq('user_id', user.id);
 
-      if (!interests) return { total: 0, pending: 0, avgPoolSize: 0 };
+      if (!userInterests) return { total: 0, pending: 0, avgPoolSize: 0 };
 
-      const total = interests.length;
-      const pending = interests.filter(i => i.status === 'interested').length;
+      // Get the company IDs this user is interested in
+      const companyIds = userInterests.map(interest => interest.company_id);
+
+      // Get all interests for these companies to calculate pool size
+      const { data: allInterests } = await supabase
+        .from('canary_firm_interests')
+        .select('*')
+        .in('company_id', companyIds);
+
+      const total = userInterests.length;
+      const pending = userInterests.filter(i => i.status === 'interested').length;
       
-      // Calculate average number of interested buyers per practice
+      // Calculate average number of interested buyers for the practices this user is interested in
       const practiceInterests = new Map();
-      interests.forEach(interest => {
-        const companyId = interest.company_id;
-        if (!practiceInterests.has(companyId)) {
-          practiceInterests.set(companyId, 0);
-        }
-        practiceInterests.set(companyId, practiceInterests.get(companyId) + 1);
-      });
+      if (allInterests) {
+        allInterests.forEach(interest => {
+          const companyId = interest.company_id;
+          if (!practiceInterests.has(companyId)) {
+            practiceInterests.set(companyId, 0);
+          }
+          practiceInterests.set(companyId, practiceInterests.get(companyId) + 1);
+        });
+      }
       
       const avgPoolSize = practiceInterests.size > 0 ? 
         Array.from(practiceInterests.values()).reduce((a, b) => a + b, 0) / practiceInterests.size : 0;
