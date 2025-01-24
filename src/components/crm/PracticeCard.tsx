@@ -42,6 +42,13 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     return `$${amount.toFixed(0)}`;
   };
 
+  console.log('PracticeCard calculation:', {
+    avgSalary,
+    employeeCount: practice.employee_count,
+    totalPayroll,
+    estimatedGrossRevenue
+  });
+
   return (
     <div className="min-h-[200px] sm:min-h-[250px] w-full bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
       <div className="p-4 sm:p-6 h-full flex flex-col">
