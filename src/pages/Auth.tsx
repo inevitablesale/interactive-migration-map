@@ -13,12 +13,28 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const isSignUp = searchParams.get("signup") === "true";
 
-  // Check if user is already logged in
+  // Check if user is already logged in and has signed documents
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/tracked-practices");
+        // Check if documents are signed
+        const { data, error } = await supabase
+          .from('user_documents')
+          .select('nda_signed, success_fee_signed')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error checking document status:', error);
+          return;
+        }
+
+        if (data && data.nda_signed && data.success_fee_signed) {
+          navigate("/tracked-practices");
+        } else {
+          navigate("/document-signing");
+        }
       }
     };
     checkSession();
@@ -29,7 +45,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/tracked-practices`,
+          redirectTo: `${window.location.origin}/document-signing`,
         },
       });
 
