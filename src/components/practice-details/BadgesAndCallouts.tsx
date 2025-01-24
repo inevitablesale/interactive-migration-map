@@ -50,28 +50,27 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return <div className="text-white/60 text-center py-4">No badges or callouts available for this company.</div>;
   }
 
-  // Parse callouts from new format (title: description, title: description)
+  // Parse callouts (title: description format, separated by commas)
   const parseCallouts = (calloutsText: string | null) => {
     if (!calloutsText) return [];
     
-    // Split by comma and filter empty entries
     return calloutsText.split(',')
       .map(entry => entry.trim())
       .filter(entry => entry.includes(':'))
       .map(entry => {
         const [title, description] = entry.split(':').map(part => part.trim());
-        return {
-          title,
-          description
-        };
+        return { title, description };
       })
-      .filter(Boolean); // Remove any null values
+      .filter(Boolean);
   };
 
-  // Parse badges (simple comma-separated list)
+  // Parse badges (handles both newlines and commas)
   const parseBadges = (badgesText: string | null) => {
     if (!badgesText) return [];
-    return badgesText.split(',').map(badge => badge.trim()).filter(Boolean);
+    return badgesText
+      .split(/[\n,]/) // Split on newlines or commas
+      .map(badge => badge.trim())
+      .filter(Boolean); // Remove empty strings
   };
 
   const callouts = parseCallouts(generatedText.callouts);
