@@ -20,6 +20,7 @@ export default function TrackedPractices() {
   
   const ITEMS_PER_PAGE = 6;
 
+  // Fetch practices with county data
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
@@ -29,26 +30,37 @@ export default function TrackedPractices() {
           *,
           firm_generated_text!inner (
             title
+          ),
+          county_data!inner (
+            PAYANN,
+            EMP
           )
-        `)
-        .order('followerCount', { ascending: false });
+        `);
 
       if (error) throw error;
 
-      return practicesData.map(practice => ({
-        id: practice["Company ID"].toString(),
-        industry: practice["Primary Subtitle"] || "",
-        region: practice["State Name"] || "",
-        employee_count: practice.employeeCount || 0,
-        annual_revenue: 0,
-        service_mix: { "General": 100 },
-        status: "not_contacted",
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        notes: [],
-        specialities: practice.specialities,
-        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
-      }));
+      return practicesData.map(practice => {
+        // Calculate avgSalaryPerEmployee from county data
+        const avgSalaryPerEmployee = practice.county_data?.PAYANN && practice.county_data?.EMP ? 
+          (practice.county_data.PAYANN * 1000) / practice.county_data.EMP : 
+          86259; // Fallback to industry average if no county data
+
+        return {
+          id: practice["Company ID"].toString(),
+          industry: practice["Primary Subtitle"] || "",
+          region: practice["State Name"] || "",
+          employee_count: practice.employeeCount || 0,
+          annual_revenue: 0,
+          service_mix: { "General": 100 },
+          status: "not_contacted",
+          last_updated: new Date().toISOString(),
+          practice_buyer_pool: [],
+          notes: [],
+          specialities: practice.specialities,
+          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
+          avgSalaryPerEmployee
+        };
+      });
     }
   });
 
@@ -141,7 +153,7 @@ export default function TrackedPractices() {
 
     return searchMatches && industryMatches && employeeMatches && stateMatches && 
            revenueMatches && valuationMatches;
-  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));  // Sort by employee count
+  })?.sort((a, b) => (b.employee_count || 0) - (a.employee_count || 0));
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -208,7 +220,6 @@ export default function TrackedPractices() {
         </div>
       </header>
 
-      {/* Main Content with increased top padding */}
       <main className="container mx-auto p-4 sm:p-6 pt-[120px] space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
