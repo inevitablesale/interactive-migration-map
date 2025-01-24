@@ -65,10 +65,6 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
               {secondParagraph && <p className="text-white">{secondParagraph}</p>}
             </div>
           </div>
-
-          {/* Teaser Section removed as requested */}
-
-          {/* Badges and Callouts sections removed as requested */}
         </div>
       </div>
     </div>
