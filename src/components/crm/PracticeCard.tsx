@@ -29,7 +29,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     [practice.region, ""];
 
   // Calculate gross revenue using exact same logic as KeyMetricsBar
-  const avgSalaryPerEmployee = practice.avgSalaryPerEmployee || 86259; // Use county average as fallback
+  const avgSalaryPerEmployee = practice.avgSalaryPerEmployee ? practice.avgSalaryPerEmployee * 1000 : 86259 * 1000; // Use county average as fallback and multiply by 1000 since payroll is in thousands
   const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
   const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
   const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
