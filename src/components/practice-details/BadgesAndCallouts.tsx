@@ -25,7 +25,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       const { data, error } = await supabase
         .from('firm_generated_text')
         .select('badges, callouts')
-        .eq('company_id', companyId)  // This was the issue - using wrong column name
+        .eq('Company ID', companyId)  // Fixed: Using correct column name
         .maybeSingle();
 
       if (error) {
@@ -62,7 +62,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
               const cleanBadge = badge.replace(/\*\*/g, '');
               return (
                 <Badge 
-                  key={index}
+                  key={`badge-${index}`}
                   variant="secondary" 
                   className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 >
@@ -88,7 +88,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
               
               return (
                 <div 
-                  key={index}
+                  key={`callout-${index}`}
                   className="bg-white/5 rounded-lg p-4"
                 >
                   <h4 className="font-semibold text-blue-400 mb-2">{cleanTitle}</h4>
