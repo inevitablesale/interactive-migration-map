@@ -1,77 +1,82 @@
-import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { CheckCircle, BadgeCheck } from "lucide-react";
 
 interface BadgesAndCalloutsProps {
-  generatedText?: {
-    badges?: string;
-    callouts?: string;
+  generatedText: {
+    badges: string | null;
+    callouts: string | null;
   };
-  specialties?: string;
+  specialties?: string | null;
 }
 
-export const BadgesAndCallouts = ({ generatedText, specialties }: BadgesAndCalloutsProps) => {
-  // Safely parse JSON with error handling
-  const parseBadgesAndCallouts = (jsonString?: string) => {
-    if (!jsonString) return [];
-    try {
-      return JSON.parse(jsonString);
-    } catch (error) {
-      console.error('Error parsing JSON:', error);
-      return [];
-    }
+export function BadgesAndCallouts({ generatedText, specialties }: BadgesAndCalloutsProps) {
+  console.log('BadgesAndCallouts rendered with data:', generatedText);
+  
+  // Parse badges (handles both newlines and commas)
+  const parseBadges = (badgesText: string | null) => {
+    if (!badgesText) return [];
+    return badgesText
+      .split(/[\n,]/) // Split on newlines or commas
+      .map(badge => badge.trim())
+      .filter(Boolean); // Remove empty strings
   };
 
-  const badges = parseBadgesAndCallouts(generatedText?.badges);
-  const callouts = parseBadgesAndCallouts(generatedText?.callouts);
+  // Parse callouts (title: description format)
+  const parseCallouts = (calloutsText: string | null) => {
+    if (!calloutsText) return [];
+    
+    return calloutsText
+      .split('.,')  // Split on period + comma
+      .map(entry => {
+        const [title, description] = entry.split(':').map(part => part.trim());
+        // Remove trailing period if it exists
+        const cleanDescription = description?.replace(/\.$/, '');
+        return { title, description: cleanDescription };
+      })
+      .filter(({ title, description }) => title && description); // Only return complete entries
+  };
+
+  const badges = parseBadges(generatedText.badges);
+  const callouts = parseCallouts(generatedText.callouts);
+
+  console.log('Parsed badges:', badges);
+  console.log('Parsed callouts:', callouts);
 
   return (
     <div className="space-y-6">
-      {/* Badges */}
-      <div className="flex flex-wrap gap-3">
-        {badges.map((badge: string, index: number) => (
-          <Badge
-            key={index}
-            className="bg-gray-800/60 text-white hover:bg-gray-700/60 px-4 py-1.5 text-sm font-medium"
-          >
-            <Check className="w-4 h-4 mr-1.5 text-yellow-400" />
-            {badge}
-          </Badge>
-        ))}
-      </div>
+      {/* Badges Display */}
+      {badges.length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          {badges.map((badge, index) => (
+            <Badge 
+              key={`badge-${index}`}
+              variant="secondary" 
+              className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/20 backdrop-blur-sm text-white hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 flex items-center gap-2"
+            >
+              <BadgeCheck className="w-4 h-4 text-blue-400" />
+              {badge}
+            </Badge>
+          ))}
+        </div>
+      )}
 
-      {/* Callouts */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {callouts.map((callout: any, index: number) => (
-          <div
-            key={index}
-            className="bg-gray-800/40 backdrop-blur-sm rounded-lg p-4 border border-white/5"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Check className="w-5 h-5 text-yellow-400" />
-              <h4 className="font-semibold text-white">{callout.title}</h4>
-            </div>
-            <p className="text-sm text-white/70">{callout.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Specialties */}
-      {specialties && (
-        <div className="mt-6">
-          <h4 className="text-sm font-medium text-white/60 mb-3">Specialties</h4>
-          <div className="flex flex-wrap gap-2">
-            {specialties.split(',').map((specialty, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="bg-gray-800/60 text-white hover:bg-gray-700/60"
-              >
-                {specialty.trim()}
-              </Badge>
-            ))}
-          </div>
+      {/* Callouts Display */}
+      {callouts.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {callouts.map((callout, index) => (
+            <Card key={`callout-${index}`} className="p-4 bg-black/40 border-white/10">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white">{callout.title}</h4>
+                  <p className="text-sm text-white/70 mt-1">{callout.description}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
       )}
     </div>
   );
-};
+}
