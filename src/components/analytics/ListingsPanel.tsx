@@ -55,9 +55,13 @@ export const ListingsPanel = () => {
         .from('buyer_profiles')
         .select('subscription_tier')
         .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
       return data;
     }
   });

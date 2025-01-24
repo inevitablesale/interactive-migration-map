@@ -19,6 +19,10 @@ serve(async (req) => {
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+
     // Create Supabase client
     const supabase = createClient(
       SUPABASE_URL!,
@@ -33,28 +37,24 @@ serve(async (req) => {
       .from('canary_firms_data')
       .select('*')
       .eq('Company ID', companyId)
-      .single()
+      .maybeSingle()
 
-    if (companyError) {
+    if (companyError || !company) {
       console.error('Error fetching company:', companyError)
       throw new Error('Company not found')
     }
 
-    // Get user details
+    // Get user details - get most recent profile
     const { data: userProfile, error: userError } = await supabase
       .from('buyer_profiles')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .order('created_at', { ascending: false })
+      .maybeSingle()
 
-    if (userError) {
+    if (userError || !userProfile) {
       console.error('Error fetching user profile:', userError)
       throw new Error('User profile not found')
-    }
-
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY not configured')
-      throw new Error('Email service not configured')
     }
 
     // Send email using Resend
