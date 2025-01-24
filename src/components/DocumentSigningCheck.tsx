@@ -10,16 +10,22 @@ export function DocumentSigningCheck({ children }: { children: React.ReactNode }
     const checkDocuments = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        console.log("Checking documents for user:", user?.id);
         
         if (user) {
-          const { data: documents } = await supabase
+          const { data: documents, error } = await supabase
             .from('user_documents')
             .select('nda_signed, success_fee_signed')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
-          if (!documents?.nda_signed || !documents?.success_fee_signed) {
+          console.log("Documents check result:", documents, error);
+
+          if (!documents || !documents.nda_signed || !documents.success_fee_signed) {
+            console.log("Documents need to be signed");
             setShowDialog(true);
+          } else {
+            console.log("Documents already signed");
           }
         }
         setCheckComplete(true);
