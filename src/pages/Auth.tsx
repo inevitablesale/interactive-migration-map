@@ -18,7 +18,20 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/tracked-practices");
+        // Check if user has documents in user_documents table
+        const { data: userDocs } = await supabase
+          .from('user_documents')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (!userDocs || !userDocs.success_fee_signed) {
+          // New user or hasn't signed documents - redirect to doc signing
+          navigate("/doc-sign");
+        } else {
+          // Existing user with signed documents - redirect to tracked practices
+          navigate("/tracked-practices");
+        }
       }
     };
     checkSession();
