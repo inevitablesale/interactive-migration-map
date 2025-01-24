@@ -1,13 +1,8 @@
-import { ChartBar, Users, TrendingUp, Lock } from "lucide-react";
+import { ChartBar, Users, TrendingUp } from "lucide-react";
 import { KeyInsightsPanel } from "@/components/analytics/KeyInsightsPanel";
-import { AIDealSourcer } from "@/components/analytics/AIDealSourcer";
 import { ComparisonTool } from "@/components/ComparisonTool";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useState } from "react";
-import { BuyerProfileForm } from "@/components/analytics/BuyerProfileForm";
 
 async function fetchStats() {
   // Get total regions analyzed from county_rankings view
@@ -33,7 +28,6 @@ async function fetchStats() {
 }
 
 export default function Analysis() {
-  const [showProfileForm, setShowProfileForm] = useState(false);
   const { data: stats } = useQuery({
     queryKey: ['analysisStats'],
     queryFn: fetchStats
@@ -91,16 +85,11 @@ export default function Analysis() {
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
         <div className="grid grid-cols-1 gap-6">
           <KeyInsightsPanel />
-          <div className="relative">
-            <AIDealSourcer />
-            <Lock className="absolute top-6 right-6 h-4 w-4 text-yellow-400" />
-          </div>
         </div>
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-md rounded-lg border border-white/10 shadow-xl">
           <div className="p-6">
-            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold text-white mb-6">
               Accounting Firm Market Analyst
-              <Lock className="h-4 w-4 text-yellow-400" />
             </h2>
             <ComparisonTool embedded={true} />
           </div>
