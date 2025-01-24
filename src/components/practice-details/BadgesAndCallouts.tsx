@@ -9,21 +9,32 @@ interface BadgesAndCalloutsProps {
 }
 
 const parseMarkdownList = (text: string | null): string[] => {
-  if (!text) return [];
+  console.log('Parsing markdown text:', text);
+  
+  if (!text) {
+    console.log('Text is null, returning empty array');
+    return [];
+  }
   
   // Split by commas if it's a comma-separated string
   if (text.includes(',')) {
-    return text.split(',')
+    console.log('Detected comma-separated format');
+    const items = text.split(',')
       .map(item => item.trim())
       .filter(item => item.length > 0)
       .map(item => item.replace(/\*\*/g, ''));
+    console.log('Parsed comma-separated items:', items);
+    return items;
   }
   
   // Otherwise try to parse as markdown list
-  return text
+  console.log('Attempting to parse as markdown list');
+  const items = text
     .split('\n')
     .filter(line => line.trim().length > 0)
     .map(line => line.replace(/^\*\s*/, '').replace(/\*\*/g, '').trim());
+  console.log('Parsed markdown list items:', items);
+  return items;
 };
 
 export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
@@ -43,16 +54,17 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
         throw error;
       }
       
-      console.log('Generated text data:', data);
+      console.log('Raw generated text data:', data);
       return data;
     }
   });
 
+  console.log('Generated text from query:', generatedText);
   const parsedBadges = parseMarkdownList(generatedText?.badges);
   const parsedCallouts = parseMarkdownList(generatedText?.callouts);
 
-  console.log('Parsed badges:', parsedBadges);
-  console.log('Parsed callouts:', parsedCallouts);
+  console.log('Final parsed badges:', parsedBadges);
+  console.log('Final parsed callouts:', parsedCallouts);
 
   // Only return null if there's no data at all
   if (!generatedText) {
@@ -92,6 +104,8 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             {parsedCallouts.map((callout, index) => {
               const [title, ...descParts] = callout.split(':');
               const description = descParts.join(':').trim();
+              
+              console.log('Parsing callout:', { callout, title, description });
               
               return (
                 <div 
