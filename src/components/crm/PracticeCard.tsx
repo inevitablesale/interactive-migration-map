@@ -25,10 +25,11 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
 
-  // Calculate gross revenue using payroll data
-  const avgSalary = practice.avgSalaryPerEmployee || 42752; // Use county average as fallback
-  const totalPayroll = avgSalary * practice.employee_count;
-  const estimatedGrossRevenue = totalPayroll * (1/0.35); // 35% payroll to revenue ratio
+  // Calculate gross revenue using exact same logic as KeyMetricsBar
+  const avgSalaryPerEmployee = practice.avgSalaryPerEmployee || 86259; // Use county average as fallback
+  const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
+  const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
+  const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -42,10 +43,10 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   };
 
   console.log('PracticeCard calculation:', {
-    avgSalary,
     employeeCount: practice.employee_count,
-    totalPayroll,
-    estimatedGrossRevenue
+    avgSalaryPerEmployee,
+    annualPayroll,
+    estimatedRevenue
   });
 
   return (
@@ -87,7 +88,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
               <DollarSign className="h-4 w-4 mr-2" />
               Est. Gross Revenue
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedGrossRevenue)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedRevenue)}</p>
             <p className="text-xs text-white/40 mt-1">Based on payroll data</p>
           </div>
         </div>
