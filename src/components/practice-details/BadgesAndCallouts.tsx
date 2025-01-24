@@ -50,20 +50,6 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     return <div className="text-white/60 text-center py-4">No badges or callouts available for this company.</div>;
   }
 
-  // Parse callouts (title: description format, separated by commas)
-  const parseCallouts = (calloutsText: string | null) => {
-    if (!calloutsText) return [];
-    
-    return calloutsText.split(',')
-      .map(entry => entry.trim())
-      .filter(entry => entry.includes(':'))
-      .map(entry => {
-        const [title, description] = entry.split(':').map(part => part.trim());
-        return { title, description };
-      })
-      .filter(Boolean);
-  };
-
   // Parse badges (handles both newlines and commas)
   const parseBadges = (badgesText: string | null) => {
     if (!badgesText) return [];
@@ -73,30 +59,26 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       .filter(Boolean); // Remove empty strings
   };
 
-  const callouts = parseCallouts(generatedText.callouts);
+  // Parse callouts (title: description format)
+  const parseCallouts = (calloutsText: string | null) => {
+    if (!calloutsText) return [];
+    
+    return calloutsText
+      .split('.,')  // Split on period + comma
+      .map(entry => {
+        const [title, description] = entry.split(':').map(part => part.trim());
+        // Remove trailing period if it exists
+        const cleanDescription = description?.replace(/\.$/, '');
+        return { title, description: cleanDescription };
+      })
+      .filter(({ title, description }) => title && description); // Only return complete entries
+  };
+
   const badges = parseBadges(generatedText.badges);
+  const callouts = parseCallouts(generatedText.callouts);
 
   return (
     <div className="space-y-6">
-      {/* Raw Data Display */}
-      <Card className="p-4 bg-black/40 border-white/10">
-        <h3 className="text-lg font-semibold text-white mb-4">Raw Data:</h3>
-        <div className="space-y-2">
-          <div>
-            <h4 className="text-sm font-medium text-white/70">Badges:</h4>
-            <pre className="text-white/70 whitespace-pre-wrap text-sm">
-              {generatedText.badges || 'No badges data'}
-            </pre>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-white/70">Callouts:</h4>
-            <pre className="text-white/70 whitespace-pre-wrap text-sm">
-              {generatedText.callouts || 'No callouts data'}
-            </pre>
-          </div>
-        </div>
-      </Card>
-
       {/* Badges Display */}
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -112,7 +94,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
         </div>
       )}
 
-      {/* Parsed Callouts Display */}
+      {/* Callouts Display */}
       {callouts.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {callouts.map((callout, index) => (
