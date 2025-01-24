@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Building, Users, DollarSign } from "lucide-react";
+import { Building, Users, DollarSign, Star } from "lucide-react";
 
 interface PracticeCardProps {
   practice: {
@@ -17,6 +17,7 @@ interface PracticeCardProps {
     COUNTYFP?: number;
     STATEFP?: number;
     COUNTYNAME?: string;
+    specialities?: string;
   };
   onWithdraw: () => void;
   onExpressInterest: () => void;
@@ -44,13 +45,18 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     return `$${amount.toFixed(0)}`;
   };
 
-  console.log('PracticeCard calculation:', {
-    employeeCount: practice.employee_count,
-    avgSalaryPerEmployee,
-    annualPayroll,
-    estimatedRevenue,
-    formattedRevenue: formatCurrency(estimatedRevenue)
-  });
+  // Calculate service density score (1-5 stars)
+  const getServiceDensityScore = (specialities: string | undefined): number => {
+    if (!specialities) return 0;
+    const services = specialities.split(',').map(s => s.trim());
+    if (services.length >= 8) return 5;
+    if (services.length >= 6) return 4;
+    if (services.length >= 4) return 3;
+    if (services.length >= 2) return 2;
+    return 1;
+  };
+
+  const serviceScore = getServiceDensityScore(practice.specialities);
 
   return (
     <div className="group relative min-h-[200px] sm:min-h-[250px] w-full bg-gradient-to-br from-[#1A1F2C] to-[#221F26] backdrop-blur-md rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[#9b87f5]/10 hover:border-[#9b87f5]/20">
@@ -66,6 +72,17 @@ export function PracticeCard({ practice }: PracticeCardProps) {
               <Building className="h-4 w-4 mr-2 text-[#0EA5E9]" />
               {city}{state ? `, ${state}` : ''}
             </div>
+            {serviceScore > 0 && (
+              <div className="flex items-center gap-1 mt-2">
+                {Array.from({ length: serviceScore }).map((_, index) => (
+                  <Star
+                    key={index}
+                    className="h-4 w-4 text-yellow-400 fill-yellow-400 animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
