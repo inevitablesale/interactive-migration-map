@@ -56,8 +56,7 @@ serve(async (req) => {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
+      .maybeSingle()
 
     console.log('User profile query result:', { data: userProfile, error: userError })
 
