@@ -24,46 +24,52 @@ export default function TrackedPractices() {
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
     queryFn: async () => {
-      const { data: practicesData, error } = await supabase
+      // First, fetch the firms data
+      const { data: practicesData, error: practicesError } = await supabase
         .from('canary_firms_data')
         .select(`
           *,
           firm_generated_text!inner (
             title
-          ),
-          county_data (
-            PAYANN,
-            EMP
           )
-        `)
-        .eq('county_data.COUNTYFP', 'canary_firms_data.COUNTYFP')
-        .eq('county_data.STATEFP', 'canary_firms_data.STATEFP');
+        `);
 
-      if (error) throw error;
+      if (practicesError) throw practicesError;
 
-      return practicesData.map(practice => {
-        // Calculate avgSalaryPerEmployee from county data
-        const countyData = practice.county_data?.[0];
-        const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
-          (countyData.PAYANN * 1000) / countyData.EMP : 
-          86259; // Fallback to industry average if no county data
+      // Then, for each practice, fetch the corresponding county data
+      const practicesWithCountyData = await Promise.all(
+        practicesData.map(async (practice) => {
+          const { data: countyData } = await supabase
+            .from('county_data')
+            .select('PAYANN, EMP')
+            .eq('COUNTYFP', practice.COUNTYFP?.toString())
+            .eq('STATEFP', practice.STATEFP?.toString())
+            .single();
 
-        return {
-          id: practice["Company ID"].toString(),
-          industry: practice["Primary Subtitle"] || "",
-          region: practice["State Name"] || "",
-          employee_count: practice.employeeCount || 0,
-          annual_revenue: 0,
-          service_mix: { "General": 100 },
-          status: "not_contacted",
-          last_updated: new Date().toISOString(),
-          practice_buyer_pool: [],
-          notes: [],
-          specialities: practice.specialities,
-          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
-          avgSalaryPerEmployee
-        };
-      });
+          // Calculate avgSalaryPerEmployee from county data
+          const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
+            (countyData.PAYANN * 1000) / countyData.EMP : 
+            86259; // Fallback to industry average if no county data
+
+          return {
+            id: practice["Company ID"].toString(),
+            industry: practice["Primary Subtitle"] || "",
+            region: practice["State Name"] || "",
+            employee_count: practice.employeeCount || 0,
+            annual_revenue: 0,
+            service_mix: { "General": 100 },
+            status: "not_contacted",
+            last_updated: new Date().toISOString(),
+            practice_buyer_pool: [],
+            notes: [],
+            specialities: practice.specialities,
+            generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
+            avgSalaryPerEmployee
+          };
+        })
+      );
+
+      return practicesWithCountyData;
     }
   });
 
