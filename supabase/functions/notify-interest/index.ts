@@ -1,205 +1,131 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const ADMIN_EMAIL = 'chris@inevitable.sale'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface NotifyRequest {
-  companyId: number;
-  message?: string;
-  userId: string;
-}
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-)
-
-const handler = async (req: Request): Promise<Response> => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      headers: corsHeaders
+    })
   }
 
   try {
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set');
-      return new Response(
-        JSON.stringify({ error: 'Email service configuration is missing' }), 
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500 
-        }
-      );
-    }
+    // Create Supabase client
+    const supabase = createClient(
+      SUPABASE_URL!,
+      SUPABASE_ANON_KEY!
+    )
 
-    console.log('Notify interest function called');
-    const { companyId, message, userId } = await req.json() as NotifyRequest;
-    console.log('Request data:', { companyId, message, userId });
+    const { companyId, userId, message } = await req.json()
+    console.log('Received notification request:', { companyId, userId, message })
 
-    // Get practice details and generated text
-    const { data: practice, error: practiceError } = await supabase
+    // Get company details
+    const { data: company, error: companyError } = await supabase
       .from('canary_firms_data')
-      .select(`
-        *,
-        firm_generated_text (
-          title
-        )
-      `)
+      .select('*')
       .eq('Company ID', companyId)
-      .single();
+      .single()
 
-    if (practiceError) {
-      console.error('Error fetching practice:', practiceError);
-      throw practiceError;
+    if (companyError) {
+      console.error('Error fetching company:', companyError)
+      throw new Error('Company not found')
     }
-    console.log('Practice data:', practice);
 
-    // Get user profile and auth data
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
-    if (userError) {
-      console.error('Error fetching user:', userError);
-      throw userError;
-    }
-    console.log('User data:', user);
-
-    const { data: userProfile, error: profileError } = await supabase
+    // Get user details
+    const { data: userProfile, error: userError } = await supabase
       .from('buyer_profiles')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .single()
 
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-      throw profileError;
+    if (userError) {
+      console.error('Error fetching user profile:', userError)
+      throw new Error('User profile not found')
     }
-    console.log('User profile:', userProfile);
 
-    const practiceTitle = practice.firm_generated_text?.[0]?.title || practice['Company Name'];
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY not configured')
+      throw new Error('Email service not configured')
+    }
 
-    // Prepare email content for admin
-    const adminEmailHtml = `
-      <h2>New Interest Expression</h2>
-      <p>A user has expressed interest in a practice:</p>
-      <h3>Practice Details:</h3>
-      <ul>
-        <li>Name: ${practiceTitle}</li>
-        <li>Location: ${practice.Location}</li>
-        <li>Employee Count: ${practice.employeeCount || 'Not specified'}</li>
-      </ul>
-      <h3>User Details:</h3>
-      <ul>
-        <li>Name: ${userProfile.buyer_name}</li>
-        <li>Email: ${user.email}</li>
-        <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
-      </ul>
-      ${message ? `<h3>Message from Buyer:</h3><p>${message}</p>` : ''}
-    `;
-
-    // Prepare email content for user
-    const userEmailHtml = `
-      <h2>Interest Confirmation</h2>
-      <p>Hello ${userProfile.buyer_name},</p>
-      <p>We've received your interest in the following practice:</p>
-      <ul>
-        <li>Practice: ${practiceTitle}</li>
-        <li>Location: ${practice.Location}</li>
-      </ul>
-      <p>Our team will review your interest and contact the practice owner on your behalf. We'll keep you updated on any developments.</p>
-      <p>Best regards,<br>The Canary Team</p>
-    `;
-
-    console.log('Sending admin email...');
-    // Send email to admin
-    const adminRes = await fetch('https://api.resend.com/emails', {
+    // Send email using Resend
+    const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Canary Notifications <notifications@canary.accountants>',
-        to: [ADMIN_EMAIL],
-        subject: `New Interest: ${practiceTitle}`,
-        html: adminEmailHtml,
+        from: 'Canary <notifications@inevitable.sale>',
+        to: ['chris@inevitable.sale'],
+        subject: `New Interest: ${company["Company Name"]}`,
+        html: `
+          <h2>New Interest Notification</h2>
+          <p>A user has expressed interest in ${company["Company Name"]}.</p>
+          
+          <h3>User Details:</h3>
+          <ul>
+            <li>Name: ${userProfile.buyer_name}</li>
+            <li>Email: ${userProfile.contact_email}</li>
+            <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
+          </ul>
+
+          <h3>Company Details:</h3>
+          <ul>
+            <li>Location: ${company.Location}</li>
+            <li>Employee Count: ${company.employeeCount}</li>
+            <li>Specialties: ${company.specialities || 'Not specified'}</li>
+          </ul>
+
+          ${message ? `<h3>Message from User:</h3><p>${message}</p>` : ''}
+          
+          <p>Please follow up with the user within 4 hours.</p>
+        `,
       }),
-    });
+    })
 
-    console.log('Sending user email...');
-    // Send confirmation email to user
-    const userRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'Canary <team@canary.accountants>',
-        to: [user.email],
-        subject: 'Interest Confirmation - Canary',
-        html: userEmailHtml,
-      }),
-    });
-
-    if (!adminRes.ok || !userRes.ok) {
-      console.error('Error response from Resend:', {
-        adminStatus: adminRes.status,
-        userStatus: userRes.status,
-        adminStatusText: adminRes.statusText,
-        userStatusText: userRes.statusText
-      });
-
-      const adminError = await adminRes.text();
-      const userError = await userRes.text();
-      console.error('Admin email error:', adminError);
-      console.error('User email error:', userError);
-      
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to send notification emails',
-          details: { 
-            adminError, 
-            userError,
-            adminStatus: adminRes.status,
-            userStatus: userRes.status 
-          }
-        }), 
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500 
-        }
-      );
+    if (!emailResponse.ok) {
+      const errorData = await emailResponse.text()
+      console.error('Error sending email:', errorData)
+      throw new Error('Failed to send notification email')
     }
 
-    const data = await adminRes.json();
-    console.log('Emails sent successfully:', data);
-    
+    const emailResult = await emailResponse.json()
+    console.log('Email sent successfully:', emailResult)
+
     return new Response(
-      JSON.stringify({ success: true, message: 'Notifications sent successfully' }), 
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+      JSON.stringify({ success: true }),
+      { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    );
-  } catch (error: any) {
-    console.error('Error in notify-interest function:', error);
+    )
+
+  } catch (error) {
+    console.error('Error in notify-interest function:', error)
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: error.toString(),
-        stack: error.stack
-      }), 
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        error: error.message || 'Internal server error',
+        success: false 
+      }),
+      { 
         status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    );
+    )
   }
-}
-
-serve(handler)
+})
