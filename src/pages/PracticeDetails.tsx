@@ -27,7 +27,6 @@ export default function PracticeDetails() {
   const navigate = useNavigate();
   const [isMarketDataOpen, setIsMarketDataOpen] = useState(false);
 
-  // Fetch practice details and generated text in parallel
   const { data: practiceData, isLoading: isPracticeLoading, error: practiceError } = useQuery({
     queryKey: ['practice-details', practiceId],
     queryFn: async () => {
@@ -228,17 +227,6 @@ export default function PracticeDetails() {
     }
   };
 
-  useEffect(() => {
-    if (practiceError) {
-      const errorMessage = practiceError instanceof Error ? practiceError.message : 'Error loading practice details';
-      toast({
-        title: "Error loading practice details",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  }, [practiceError, toast]);
-
   if (isPracticeLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
@@ -303,9 +291,43 @@ export default function PracticeDetails() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Header Section */}
+            {/* Header Section with Prominent CTA */}
             <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in">
-              <PracticeHeader practice={practice} generatedText={generatedText} />
+              <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                <div className="flex-1">
+                  <PracticeHeader practice={practice} generatedText={generatedText} />
+                  {generatedText?.teaser && (
+                    <p className="mt-4 text-white/80">{generatedText.teaser}</p>
+                  )}
+                </div>
+                <div className="w-full md:w-auto">
+                  <Button 
+                    onClick={handleInterested}
+                    className="w-full md:w-auto bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-6 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
+                    size="lg"
+                  >
+                    <Heart className="mr-2 h-5 w-5" />
+                    I'm Interested
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Badges Section */}
+              {generatedText?.badges && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {generatedText.badges.split(/[\n,]/).map((badge, index) => (
+                    badge.trim() && (
+                      <Badge 
+                        key={index}
+                        variant="secondary" 
+                        className="bg-white/10 text-white hover:bg-white/20"
+                      >
+                        {badge.trim()}
+                      </Badge>
+                    )
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Key Metrics */}
@@ -318,16 +340,58 @@ export default function PracticeDetails() {
               <BusinessOverview practice={practice} />
             </div>
 
-            {/* Market Metrics */}
-            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-400" />
-                  Market Analysis
-                </h2>
+            {/* Collapsible Market Analysis */}
+            <Collapsible
+              open={isMarketDataOpen}
+              onOpenChange={setIsMarketDataOpen}
+              className="bg-black/40 backdrop-blur-md rounded-lg border border-white/10 animate-fade-in"
+            >
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full p-6 flex items-center justify-between text-white hover:bg-white/5"
+                >
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-blue-400" />
+                    <h2 className="text-xl font-semibold">Market Analysis</h2>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      isMarketDataOpen ? "transform rotate-180" : ""
+                    }`}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="p-6 pt-0">
+                {countyData && <MarketMetricsGrid marketData={countyData} />}
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Callouts Section */}
+            {generatedText?.callouts && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                {generatedText.callouts.split('.,').map((callout, index) => {
+                  const [title, description] = callout.split(':').map(part => part.trim());
+                  if (!title || !description) return null;
+                  
+                  return (
+                    <Card key={index} className="bg-black/40 backdrop-blur-md border-white/10">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
+                          <div>
+                            <h4 className="font-semibold text-white">{title}</h4>
+                            <p className="text-sm text-white/70 mt-1">
+                              {description.replace(/\.$/, '')}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
-              {countyData && <MarketMetricsGrid marketData={countyData} />}
-            </div>
+            )}
           </div>
 
           {/* Right Column - Sticky Sidebar */}
@@ -335,28 +399,6 @@ export default function PracticeDetails() {
             {/* Practice Info Card */}
             <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
               <PracticeInfo practice={practice} onInterested={handleInterested} />
-            </div>
-
-            {/* Additional Metrics Card */}
-            <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-white/60">
-                  <Users className="w-4 h-4" />
-                  <span>Employee Distribution</span>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-white/60">Current</p>
-                    <p className="text-lg font-semibold text-white">{practice.employeeCount}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-white/60">Range</p>
-                    <p className="text-lg font-semibold text-white">
-                      {practice.employeeCountRangeLow} - {practice.employeeCountRangeHigh}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Location Info */}
