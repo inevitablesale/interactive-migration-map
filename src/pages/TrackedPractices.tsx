@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
@@ -11,7 +11,6 @@ import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
 import { cn } from "@/lib/utils";
-import { CountdownBanner } from "@/components/CountdownBanner";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -20,9 +19,40 @@ export default function TrackedPractices() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
   const { toast } = useToast();
   
   const ITEMS_PER_PAGE = 6;
+
+  // Set target date to 30 days from now
+  useEffect(() => {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + 30);
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeLeft({ days, hours, minutes, seconds });
+
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: practices, isLoading, refetch: refetchPractices } = useQuery({
     queryKey: ['practices'],
@@ -198,9 +228,29 @@ export default function TrackedPractices() {
               <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
               <span className="text-xl font-bold text-yellow-400">Canary</span>
             </div>
-            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-              Sign In
-            </Link>
+            <div className="flex items-center gap-4">
+              <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.days}</div>
+                  <div className="text-xs text-gray-400">Days</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.hours}</div>
+                  <div className="text-xs text-gray-400">Hours</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.minutes}</div>
+                  <div className="text-xs text-gray-400">Minutes</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{timeLeft.seconds}</div>
+                  <div className="text-xs text-gray-400">Seconds</div>
+                </div>
+              </div>
+              <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+                Sign In
+              </Link>
+            </div>
           </div>
         </div>
       </header>
