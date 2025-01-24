@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PracticeInfoProps {
   practice: TopFirm;
@@ -18,11 +19,15 @@ interface PracticeInfoProps {
 
 export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
   const [showDialog, setShowDialog] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleInterestConfirmed = () => {
     setShowDialog(false);
     onInterested?.();
   };
+
+  // Create an anonymized name
+  const anonymizedName = `${practice.Location} Practice (${practice.employeeCount || 'Small'} employees)`;
 
   return (
     <>
@@ -63,14 +68,30 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Express Interest</DialogTitle>
             <DialogDescription className="text-gray-400 pt-2">
-              You're about to express interest in {practice["Company Name"]}. This will:
+              You're about to express interest in {anonymizedName}. This will:
               <ul className="list-disc list-inside mt-4 space-y-2">
                 <li>Add this practice to your tracked practices</li>
                 <li>Notify you of any updates about this practice</li>
-                <li>Allow you to receive market insights about this region</li>
+                <li>Our team will make contact with the owner on your behalf</li>
               </ul>
             </DialogDescription>
           </DialogHeader>
+          
+          <div className="mt-6 space-y-4">
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-200 mb-2">
+                Message to Owner (Optional)
+              </label>
+              <Textarea
+                id="message"
+                placeholder="Share any specific questions or information you'd like us to relay to the owner..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="bg-black/50 border-white/10 text-white placeholder:text-gray-500 min-h-[100px]"
+              />
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3 mt-6">
             <Button
               variant="outline"
