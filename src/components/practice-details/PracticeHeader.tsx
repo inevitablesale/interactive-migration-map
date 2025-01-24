@@ -22,16 +22,11 @@ export function PracticeHeader({ practice }: PracticeHeaderProps) {
   });
 
   return (
-    <div className="space-y-4">
+    <div>
       <h1 className="text-3xl font-bold text-gradient">
         {generatedText?.title || practice["Company Name"]}
       </h1>
       <p className="text-white/60">{practice["Primary Subtitle"]}</p>
-      {generatedText?.generated_summary && (
-        <p className="text-white/80 mt-4 text-lg">
-          {generatedText.generated_summary}
-        </p>
-      )}
     </div>
   );
 }
