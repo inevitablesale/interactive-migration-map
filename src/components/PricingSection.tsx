@@ -1,7 +1,6 @@
 import { ArrowRight, Check, Linkedin } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -110,43 +109,7 @@ export const PricingSection = () => {
               </li>
             </ul>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full mb-6 border-yellow-600 text-yellow-600 hover:bg-yellow-600/10">
-                  View Success Fee Terms
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] bg-black border border-white/10">
-                <DialogHeader>
-                  <DialogTitle className="text-xl font-bold text-white">Success Fee Terms</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 text-gray-300">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-white">What is the Success Fee?</h4>
-                    <p>Our success fee is 2.5% of the final purchase price, charged only when a deal successfully closes.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-white">When is it Applied?</h4>
-                    <ul className="list-disc pl-4 space-y-2">
-                      <li>Only charged upon successful completion of the acquisition</li>
-                      <li>Fee is calculated based on the final agreed purchase price</li>
-                      <li>Due at closing as part of the final transaction</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-white">What's Included?</h4>
-                    <ul className="list-disc pl-4 space-y-2">
-                      <li>Professional seller engagement and communication</li>
-                      <li>Deal coordination and facilitation</li>
-                      <li>NDA management and document handling</li>
-                      <li>Access to our full platform and support team</li>
-                    </ul>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            <div className="mt-6 text-center">
+            <div className="mt-12 text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Discover Your Next Acquisition?</h3>
               <p className="text-gray-600 mb-6">Don't wait for opportunities to go public. With Canary, you gain access to off-market firms and actionable insights to help you close deals faster.</p>
               <div className="space-y-4">
