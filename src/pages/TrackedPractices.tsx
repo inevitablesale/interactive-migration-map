@@ -4,7 +4,7 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Bird, Users, Clock, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { LayoutGrid, List, Bird, Users, Clock, Play, ChevronDown, ChevronUp, LightbulbIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -17,7 +17,7 @@ export default function TrackedPractices() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [isAlertOpen, setIsAlertOpen] = useState(true);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
   const { toast } = useToast();
   
@@ -208,12 +208,15 @@ export default function TrackedPractices() {
           <div className="w-full">
             <button
               onClick={toggleAlert}
-              className={cn(
-                "w-full flex items-center justify-between p-2 rounded-t-lg bg-white text-black",
-                !hasBeenViewed && "animate-pulse"
-              )}
+              className="w-full flex items-center justify-between p-2 rounded-lg bg-white text-black"
             >
-              <span className="font-semibold">Today's Featured Opportunity</span>
+              <div className="flex items-center gap-2">
+                <LightbulbIcon className={cn(
+                  "w-5 h-5 text-yellow-400",
+                  !hasBeenViewed && "animate-pulse"
+                )} />
+                <span className="font-semibold">Today's Featured Opportunity</span>
+              </div>
               {isAlertOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
             
