@@ -196,7 +196,7 @@ function TrackedPractices() {
       <main className="container mx-auto p-4 sm:p-6 pt-28 space-y-8">
         <div className="space-y-2.5">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Find Your Next Practice</h1>
-          <p className="text-lg text-gray-400">Discover and track professional service firms that match your acquisition criteria.</p>
+          <p className="text-lg text-gray-400 pt-2.5">Discover and track professional service firms that match your acquisition criteria.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
