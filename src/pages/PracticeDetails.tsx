@@ -355,28 +355,34 @@ export default function PracticeDetails() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-yellow-400">
                       <Megaphone className="w-5 h-5" />
-                      <span className="font-semibold">Advertise Here</span>
+                      <span className="font-semibold">Advertise with Us</span>
                     </div>
                     <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
-                      Premium Spot
+                      Premium Placement
                     </Badge>
                   </div>
 
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-white">
-                      Reach Active Buyers & Sellers
+                      Maximum Exposure
                     </h3>
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-2">
-                        <ChartBar className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
-                        <span className="text-sm text-gray-300">
-                          2,300+ monthly unique visitors actively looking for practices
-                        </span>
-                      </div>
+                    <div className="space-y-3">
                       <div className="flex items-start gap-2">
                         <Users className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
                         <span className="text-sm text-gray-300">
-                          Direct access to qualified buyers and sellers in the accounting industry
+                          Engage Active Buyers & Sellers
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Target className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                        <span className="text-sm text-gray-300">
+                          Reach a targeted audience actively seeking accounting practices
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Briefcase className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                        <span className="text-sm text-gray-300">
+                          Direct Access: Connect with qualified buyers and sellers in the accounting industry
                         </span>
                       </div>
                     </div>
@@ -388,10 +394,10 @@ export default function PracticeDetails() {
                       onClick={() => window.location.href = 'mailto:advertising@inevitable.sale'}
                     >
                       <Mail className="w-4 h-4 mr-2" />
-                      Contact for Advertising
+                      Contact Us Today to Secure Your Spot!
                     </Button>
                     <p className="text-xs text-gray-400 text-center mt-3">
-                      Limited spots available
+                      Limited Opportunities Available
                     </p>
                   </div>
                 </CardContent>
