@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, Briefcase } from "lucide-react";
+import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, Briefcase, Mail, Megaphone, ChartBar } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
@@ -349,22 +349,51 @@ export default function PracticeDetails() {
             <div className="sticky top-24">
               <PracticeInfo practice={practice} onInterested={handleInterested} />
 
-              {/* Premium Advertisement */}
-              <Card className="mt-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-white/10">
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center gap-2 text-white/60">
-                    <Briefcase className="w-4 h-4" />
-                    <span>Premium Features</span>
+              {/* Advertising Space Card */}
+              <Card className="mt-6 bg-gradient-to-br from-gray-900/80 to-black/80 border-yellow-500/20">
+                <CardContent className="p-6 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-yellow-400">
+                      <Megaphone className="w-5 h-5" />
+                      <span className="font-semibold">Advertise Here</span>
+                    </div>
+                    <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
+                      Premium Spot
+                    </Badge>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Unlock Full Access</h3>
-                    <p className="text-sm text-white/60 mt-2">
-                      Get detailed analytics, market insights, and connect directly with practice owners.
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white">
+                      Reach Active Buyers & Sellers
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <ChartBar className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                        <span className="text-sm text-gray-300">
+                          2,300+ monthly unique visitors actively looking for practices
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Users className="w-4 h-4 text-yellow-400 mt-1 shrink-0" />
+                        <span className="text-sm text-gray-300">
+                          Direct access to qualified buyers and sellers in the accounting industry
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <Button 
+                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium"
+                      onClick={() => window.location.href = 'mailto:advertising@inevitable.sale'}
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      Contact for Advertising
+                    </Button>
+                    <p className="text-xs text-gray-400 text-center mt-3">
+                      Limited spots available
                     </p>
                   </div>
-                  <Button variant="secondary" className="w-full bg-white/10 text-white hover:bg-white/20">
-                    Upgrade Now
-                  </Button>
                 </CardContent>
               </Card>
             </div>
