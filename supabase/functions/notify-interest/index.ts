@@ -1,94 +1,131 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from 'https://esm.sh/@resend/node'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      headers: corsHeaders
+    })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
 
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+    // Create Supabase client
+    const supabase = createClient(
+      SUPABASE_URL!,
+      SUPABASE_ANON_KEY!
+    )
 
     const { companyId, userId, message } = await req.json()
     console.log('Received notification request:', { companyId, userId, message })
 
-    // Get the user's profile
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('buyer_profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single()
-
-    if (profileError) {
-      console.error('Error fetching profile:', profileError)
-      throw new Error('Error fetching user profile')
-    }
-
-    // Get the practice details
-    const { data: practice, error: practiceError } = await supabaseClient
+    // Get company details
+    const { data: company, error: companyError } = await supabase
       .from('canary_firms_data')
       .select('*')
       .eq('Company ID', companyId)
-      .single()
+      .maybeSingle()
 
-    if (practiceError) {
-      console.error('Error fetching practice:', practiceError)
-      throw new Error('Error fetching practice details')
+    if (companyError || !company) {
+      console.error('Error fetching company:', companyError)
+      throw new Error('Company not found')
     }
 
-    // Send email notification
-    const emailHtml = `
-      <h2>New Interest Expression</h2>
-      <p><strong>Buyer:</strong> ${profile.buyer_name}</p>
-      <p><strong>Contact Email:</strong> ${profile.contact_email}</p>
-      <p><strong>Practice:</strong> ${practice['Company Name']}</p>
-      <p><strong>Location:</strong> ${practice.Location}</p>
-      ${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
-      <p><strong>Subscription Tier:</strong> ${profile.subscription_tier}</p>
-    `
+    // Get user details - get most recent profile
+    const { data: userProfile, error: userError } = await supabase
+      .from('buyer_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .maybeSingle()
 
-    const { data: emailResponse, error: emailError } = await resend.emails.send({
-      from: 'Canary <notifications@inevitable.sale>',
-      to: ['chris@inevitable.sale'],
-      subject: `New Interest: ${practice['Company Name']}`,
-      html: emailHtml,
+    if (userError || !userProfile) {
+      console.error('Error fetching user profile:', userError)
+      throw new Error('User profile not found')
+    }
+
+    // Send email using Resend
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'Canary <notifications@inevitable.sale>',
+        to: ['chris@inevitable.sale'],
+        subject: `New Interest: ${company["Company Name"]}`,
+        html: `
+          <h2>New Interest Notification</h2>
+          <p>A user has expressed interest in ${company["Company Name"]}.</p>
+          
+          <h3>User Details:</h3>
+          <ul>
+            <li>Name: ${userProfile.buyer_name}</li>
+            <li>Email: ${userProfile.contact_email}</li>
+            <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
+          </ul>
+
+          <h3>Company Details:</h3>
+          <ul>
+            <li>Location: ${company.Location}</li>
+            <li>Employee Count: ${company.employeeCount}</li>
+            <li>Specialties: ${company.specialities || 'Not specified'}</li>
+          </ul>
+
+          ${message ? `<h3>Message from User:</h3><p>${message}</p>` : ''}
+          
+          <p>Please follow up with the user within 4 hours.</p>
+        `,
+      }),
     })
 
-    if (emailError) {
-      console.error('Error sending email:', emailError)
+    if (!emailResponse.ok) {
+      const errorData = await emailResponse.text()
+      console.error('Error sending email:', errorData)
       throw new Error('Failed to send notification email')
     }
 
-    console.log('Successfully sent notification email:', emailResponse)
+    const emailResult = await emailResponse.json()
+    console.log('Email sent successfully:', emailResult)
 
     return new Response(
-      JSON.stringify({ message: 'Notification sent successfully' }),
+      JSON.stringify({ success: true }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      },
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     )
 
   } catch (error) {
     console.error('Error in notify-interest function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Internal server error',
+        success: false 
+      }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      },
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     )
   }
 })

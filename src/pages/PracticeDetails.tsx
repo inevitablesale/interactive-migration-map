@@ -417,10 +417,7 @@ export default function PracticeDetails() {
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="p-6 pt-0">
-                {countyData && <MarketMetricsGrid marketData={{
-                  ...countyData,
-                  avg_firms_per_10k: countyData.firms_per_10k // Use the correct property name
-                }} />}
+                {countyData && <MarketMetricsGrid marketData={countyData} />}
               </CollapsibleContent>
             </Collapsible>
           </div>
