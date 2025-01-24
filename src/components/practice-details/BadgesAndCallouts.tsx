@@ -14,16 +14,6 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
     queryFn: async () => {
       console.log('Starting fetch for company ID:', companyId);
       
-      // First, let's check if the company exists
-      const { data: companyCheck } = await supabase
-        .from('canary_firms_data')
-        .select('Company ID')
-        .eq('Company ID', companyId)
-        .single();
-      
-      console.log('Company check result:', companyCheck);
-
-      // Now fetch the generated text
       const { data, error } = await supabase
         .from('firm_generated_text')
         .select('*')
