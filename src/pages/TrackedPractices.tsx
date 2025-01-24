@@ -3,7 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { PracticeCard } from "@/components/crm/PracticeCard";
 import { SearchFilters, FilterState } from "@/components/crm/SearchFilters";
-import { PracticeOfDay } from "@/components/crm/PracticeOfDay";
+</lov-replace>
+
+<lov-search>
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+</lov-search>
+<lov-replace>
+        <div>
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Bird } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -295,10 +302,6 @@ export default function TrackedPractices() {
                 )}
               </>
             )}
-          </div>
-          <div className="mt-6 md:mt-0">
-            <PracticeOfDay />
-          </div>
         </div>
       </main>
     </div>
