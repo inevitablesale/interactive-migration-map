@@ -30,30 +30,47 @@ export default function TrackedPractices() {
           *,
           firm_generated_text!inner (
             title
-          ),
-          county_data!inner (
-            PAYANN,
-            EMP
           )
-        `);
+        `)
+        .returns<any[]>();
 
       if (error) throw error;
 
-      return practicesData.map(practice => ({
-        id: practice["Company ID"].toString(),
-        industry: practice["Primary Subtitle"] || "",
-        region: practice["State Name"] || "",
-        employee_count: practice.employeeCount || 0,
-        avgSalaryPerEmployee: practice.county_data?.PAYANN && practice.county_data?.EMP ? 
-          practice.county_data.PAYANN / practice.county_data.EMP : undefined,
-        service_mix: { "General": 100 },
-        status: "not_contacted",
-        last_updated: new Date().toISOString(),
-        practice_buyer_pool: [],
-        notes: [],
-        specialities: practice.specialities,
-        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
-      }));
+      // Get county data in a separate query
+      const countyDataPromises = practicesData.map(practice => 
+        supabase
+          .from('county_data')
+          .select('PAYANN, EMP')
+          .eq('COUNTYFP', practice.COUNTYFP?.toString())
+          .eq('STATEFP', practice.STATEFP?.toString())
+          .single()
+      );
+
+      const countyDataResults = await Promise.all(countyDataPromises);
+
+      return practicesData.map((practice, index) => {
+        const countyData = countyDataResults[index].data;
+        const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
+          countyData.PAYANN / countyData.EMP : undefined;
+        
+        const annual_revenue = estimateAnnualRevenue(practice.employeeCount || 0, avgSalaryPerEmployee);
+
+        return {
+          id: practice["Company ID"].toString(),
+          industry: practice["Primary Subtitle"] || "",
+          region: practice["State Name"] || "",
+          employee_count: practice.employeeCount || 0,
+          avgSalaryPerEmployee,
+          annual_revenue,
+          service_mix: { "General": 100 },
+          status: "not_contacted",
+          last_updated: new Date().toISOString(),
+          practice_buyer_pool: [],
+          notes: [],
+          specialities: practice.specialities,
+          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
+        };
+      });
     }
   });
 
@@ -315,4 +332,3 @@ export default function TrackedPractices() {
       </main>
     </div>
   );
-}
