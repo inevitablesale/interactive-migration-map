@@ -44,17 +44,27 @@ export default function TrackedPractices() {
       // Then, for each practice, fetch the corresponding county data
       const practicesWithCountyData = await Promise.all(
         practicesData.map(async (practice) => {
-          const { data: countyData } = await supabase
+          // Get county data, handling the case of multiple or no results
+          const { data: countyDataArray } = await supabase
             .from('county_data')
             .select('PAYANN, EMP')
             .eq('COUNTYFP', practice.COUNTYFP?.toString())
-            .eq('STATEFP', practice.STATEFP?.toString())
-            .maybeSingle() as { data: CountyData | null };
+            .eq('STATEFP', practice.STATEFP?.toString());
 
-          // Calculate avgSalaryPerEmployee from county data
+          // Use the first result if available, otherwise use default values
+          const countyData = countyDataArray && countyDataArray.length > 0 ? countyDataArray[0] : null;
+
+          // Calculate avgSalaryPerEmployee from county data or use fallback
           const avgSalaryPerEmployee = countyData?.PAYANN && countyData?.EMP ? 
             (countyData.PAYANN * 1000) / countyData.EMP : 
             86259; // Fallback to industry average if no county data
+
+          console.log('County data calculation:', {
+            countyFP: practice.COUNTYFP,
+            stateFP: practice.STATEFP,
+            countyData,
+            avgSalaryPerEmployee
+          });
 
           return {
             id: practice["Company ID"].toString(),
