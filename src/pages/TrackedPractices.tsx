@@ -200,7 +200,10 @@ function TrackedPractices() {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex-1">
+            {/* Empty div to push buttons to the right */}
+          </div>
+          <div className="flex flex-wrap gap-2 ml-auto">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
