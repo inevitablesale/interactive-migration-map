@@ -31,10 +31,6 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   const totalPayroll = avgSalary * practice.employee_count;
   const estimatedRevenue = totalPayroll / 0.35; // 35% payroll to revenue ratio
 
-  // Calculate estimated valuation (using a multiplier of 1.50)
-  const valuationMultiplier = 1.50;
-  const estimatedValuation = estimatedRevenue * valuationMultiplier;
-
   // Format currency
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
@@ -83,10 +79,10 @@ export function PracticeCard({ practice }: PracticeCardProps) {
           <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
             <div className="flex items-center text-sm text-white/60 mb-2">
               <DollarSign className="h-4 w-4 mr-2" />
-              Est. Valuation
+              Est. Revenue
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedValuation)}</p>
-            <p className="text-xs text-white/40 mt-1">Based on Revenue × {valuationMultiplier.toFixed(2)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedRevenue)}</p>
+            <p className="text-xs text-white/40 mt-1">Based on {practice.employee_count} employees</p>
           </div>
         </div>
       </div>
