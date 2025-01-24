@@ -39,12 +39,18 @@ serve(async (req) => {
       .eq('Company ID', companyId)
       .maybeSingle()
 
-    if (companyError || !company) {
+    if (companyError) {
       console.error('Error fetching company:', companyError)
       throw new Error('Company not found')
     }
 
+    if (!company) {
+      console.error('No company found for ID:', companyId)
+      throw new Error('Company not found')
+    }
+
     // Get user details - get most recent profile
+    console.log('Fetching user profile for userId:', userId)
     const { data: userProfile, error: userError } = await supabase
       .from('buyer_profiles')
       .select('*')
@@ -52,8 +58,15 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .maybeSingle()
 
-    if (userError || !userProfile) {
+    console.log('User profile query result:', { data: userProfile, error: userError })
+
+    if (userError) {
       console.error('Error fetching user profile:', userError)
+      throw new Error(`Error fetching user profile: ${userError.message}`)
+    }
+
+    if (!userProfile) {
+      console.error('No user profile found for ID:', userId)
       throw new Error('User profile not found')
     }
 
