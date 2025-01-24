@@ -77,7 +77,6 @@ export default function DocSign() {
         description: `You have successfully signed the ${documentType === 'nda' ? 'NDA' : 'Success Fee Agreement'}.`,
       });
 
-      // If both documents are signed, redirect to tracked practices
       if (documentType === 'success_fee' || (documentType === 'nda' && documents.success_fee_signed)) {
         navigate('/tracked-practices');
       }
@@ -93,9 +92,52 @@ export default function DocSign() {
     }
   };
 
+  const ndaText = `NON-DISCLOSURE AGREEMENT
+
+This Non-Disclosure Agreement (the "Agreement") is entered into between Inevitable and the undersigned party.
+
+1. Confidential Information
+   The parties agree that any information shared regarding business practices, client data, market analysis, and proprietary methods shall be considered confidential.
+
+2. Use of Confidential Information
+   The receiving party agrees to use the Confidential Information solely for the purpose of evaluating and engaging in business opportunities through the platform.
+
+3. Term
+   This Agreement shall remain in effect indefinitely from the date of signing.
+
+4. Return of Materials
+   Upon request, all confidential materials shall be returned or destroyed.
+
+5. Governing Law
+   This Agreement shall be governed by applicable state and federal laws.`;
+
+  const successFeeText = `SUCCESS FEE AGREEMENT
+
+This Success Fee Agreement (the "Agreement") outlines the terms and conditions for platform usage and fee structure.
+
+1. Success Fee Structure
+   - A success fee of 1% will be charged on successful business transactions
+   - Fees are only applicable upon successful completion of a transaction
+   - Minimum fee amounts may apply based on transaction size
+
+2. Payment Terms
+   - Fees are due within 30 days of transaction completion
+   - Payment methods include wire transfer and ACH
+
+3. Service Scope
+   - Access to business listings and market data
+   - Communication tools for buyer-seller interaction
+   - Analytics and market insights
+
+4. Term and Termination
+   This agreement remains in effect until explicitly terminated by either party.
+
+5. Acceptance
+   By signing, you agree to all terms and conditions outlined above.`;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-white/95 backdrop-blur-sm">
+      <Card className="w-full max-w-4xl bg-white/95 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Document Signing</CardTitle>
           <CardDescription className="text-center">
@@ -104,8 +146,8 @@ export default function DocSign() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="p-4 border rounded-lg bg-white">
-              <div className="flex items-center justify-between">
+            <div className="p-6 border rounded-lg bg-white">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <File className="h-6 w-6 text-blue-600" />
                   <div>
@@ -122,10 +164,17 @@ export default function DocSign() {
                   <span>{documents.nda_signed ? 'Signed' : 'Sign NDA'}</span>
                 </Button>
               </div>
+              {!documents.nda_signed && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">
+                    {ndaText}
+                  </pre>
+                </div>
+              )}
             </div>
 
-            <div className="p-4 border rounded-lg bg-white">
-              <div className="flex items-center justify-between">
+            <div className="p-6 border rounded-lg bg-white">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <File className="h-6 w-6 text-blue-600" />
                   <div>
@@ -142,6 +191,13 @@ export default function DocSign() {
                   <span>{documents.success_fee_signed ? 'Signed' : 'Sign Agreement'}</span>
                 </Button>
               </div>
+              {documents.nda_signed && !documents.success_fee_signed && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">
+                    {successFeeText}
+                  </pre>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
