@@ -42,11 +42,14 @@ serve(async (req) => {
       throw new Error('Company not found')
     }
 
-    // Get user profile with detailed logging
+    // Get user profile with detailed SQL logging
     console.log('Executing buyer_profiles query:', {
-      table: 'buyer_profiles',
-      filter: { user_id: userId },
-      query: `SELECT * FROM buyer_profiles WHERE user_id = '${userId}'`
+      sql: `
+        SELECT * 
+        FROM buyer_profiles 
+        WHERE user_id = '${userId}'
+      `,
+      params: { user_id: userId }
     })
     
     const { data: userProfile, error: userError } = await supabase
