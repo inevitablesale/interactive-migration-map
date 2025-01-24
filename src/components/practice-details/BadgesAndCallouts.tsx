@@ -25,7 +25,7 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
       const { data, error } = await supabase
         .from('firm_generated_text')
         .select('badges, callouts')
-        .eq('Company ID', companyId)  // Fixed: Using correct column name
+        .eq('Company ID', companyId)
         .maybeSingle();
 
       if (error) {
@@ -61,14 +61,14 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             {parsedBadges.map((badge, index) => {
               const cleanBadge = badge.replace(/\*\*/g, '');
               return (
-                <div key={`badge-${index}`}>
+                <span key={`badge-${index}`}>
                   <Badge 
                     variant="secondary" 
                     className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                   >
                     {cleanBadge}
                   </Badge>
-                </div>
+                </span>
               );
             })}
           </div>
