@@ -2,70 +2,15 @@ import { DollarSign, TrendingUp, Users, Building2, LineChart, Info } from "lucid
 import { TopFirm } from "@/types/rankings";
 import { ComprehensiveMarketData } from "@/types/rankings";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getFirmSizeCategory, getValuationMultiple } from "@/utils/valuationUtils";
 
 interface KeyMetricsBarProps {
   practice: TopFirm;
   countyData?: ComprehensiveMarketData;
 }
 
-const getFirmSizeCategory = (employeeCount: number) => {
-  if (employeeCount <= 5) return 'small';
-  if (employeeCount <= 20) return 'medium';
-  return 'large';
-};
-
-const getSDEParameters = (firmSize: string) => {
-  switch (firmSize) {
-    case 'small':
-      return {
-        ownerCompRatio: 0.40, // 40% of revenue
-        operatingExpenseRatio: 0.25, // 25% of revenue
-        sdeMargin: 0.45 // 45% of revenue
-      };
-    case 'medium':
-      return {
-        ownerCompRatio: 0.30, // 30% of revenue
-        operatingExpenseRatio: 0.30, // 30% of revenue
-        sdeMargin: 0.40 // 40% of revenue
-      };
-    case 'large':
-      return {
-        ownerCompRatio: 0.20, // 20% of revenue
-        operatingExpenseRatio: 0.35, // 35% of revenue
-        sdeMargin: 0.35 // 35% of revenue
-      };
-    default:
-      return {
-        ownerCompRatio: 0.40,
-        operatingExpenseRatio: 0.25,
-        sdeMargin: 0.45
-      };
-  }
-};
-
-const getValuationMultiple = (firmSize: string, revenue: number) => {
-  // Base multiple starts at the lower end for very small firms
-  let baseMultiple = 0.71; // Starting at the lower end of revenue multiple range
-
-  // Size adjustments
-  switch (firmSize) {
-    case 'small':
-      baseMultiple = 0.71; // Lower end for small firms
-      break;
-    case 'medium':
-      baseMultiple = 0.85; // Middle range
-      break;
-    case 'large':
-      baseMultiple = 1.00; // Higher end for larger firms
-      break;
-  }
-
-  // Revenue scale adjustments
-  if (revenue > 5000000) baseMultiple += 0.05;
-  if (revenue > 10000000) baseMultiple += 0.04;
-
-  // Cap at the maximum industry multiple
-  return Math.min(1.09, baseMultiple);
+const getFirmSizeDisplay = (size: string) => {
+  return size.charAt(0).toUpperCase() + size.slice(1);
 };
 
 export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
@@ -79,16 +24,8 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
   const estimatedRevenue = annualPayroll / payrollToRevenueRatio;
 
   const firmSize = getFirmSizeCategory(practice.employeeCount || 0);
-  const sdeParams = getSDEParameters(firmSize);
-
-  // Calculate valuation using revenue multiple based on firm size
   const valuationMultiple = getValuationMultiple(firmSize, estimatedRevenue);
   const estimatedValuation = estimatedRevenue * valuationMultiple;
-
-  const formatGrowthRate = (rate: number | undefined) => {
-    if (!rate) return 'N/A';
-    return `${(rate / 10).toFixed(1)}%`;
-  };
 
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
@@ -98,6 +35,11 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
       return `$${(amount / 1000).toFixed(0)}K`;
     }
     return `$${amount.toFixed(0)}`;
+  };
+
+  const formatGrowthRate = (rate: number | undefined) => {
+    if (!rate) return 'N/A';
+    return `${(rate / 10).toFixed(1)}%`;
   };
 
   const MetricCard = ({ 
@@ -170,7 +112,7 @@ export function KeyMetricsBar({ practice, countyData }: KeyMetricsBarProps) {
         iconColor="bg-orange-400/10 text-orange-400"
         title="Est. Valuation"
         value={formatCurrency(estimatedValuation)}
-        subtitle={`Based on Revenue × ${valuationMultiple.toFixed(2)} (${firmSize} firm)`}
+        subtitle={`Based on Revenue × ${valuationMultiple.toFixed(2)} (${getFirmSizeDisplay(firmSize)} firm)`}
         tooltip="Based on industry multiples"
       />
     </div>
