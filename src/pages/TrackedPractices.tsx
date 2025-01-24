@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-import { useMarketReportData } from "@/hooks/useMarketReportData";
+import { useMarketDataForPractices } from "@/hooks/useMarketDataForPractices";
 
 export default function TrackedPractices() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -36,48 +36,25 @@ export default function TrackedPractices() {
 
       if (error) throw error;
 
-      // For each practice, get the market report data to get the avgSalaryPerEmployee
-      const practicesWithSalary = await Promise.all(practicesData.map(async (practice) => {
-        if (!practice.COUNTYNAME || !practice["State Name"]) {
-          return {
-            id: practice["Company ID"].toString(),
-            industry: practice["Primary Subtitle"] || "",
-            region: practice.Location || practice["State Name"] || "",
-            employee_count: practice.employeeCount || 0,
-            annual_revenue: 0,
-            service_mix: { "General": 100 },
-            status: "not_contacted",
-            last_updated: new Date().toISOString(),
-            practice_buyer_pool: [],
-            notes: [],
-            specialities: practice.specialities,
-            generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
-            avgSalaryPerEmployee: 86259 // Fallback to county average
-          };
-        }
-
-        const { data: marketData } = await useMarketReportData(practice.COUNTYNAME, practice["State Name"]).refetch();
-        
-        return {
-          id: practice["Company ID"].toString(),
-          industry: practice["Primary Subtitle"] || "",
-          region: practice.Location || practice["State Name"] || "",
-          employee_count: practice.employeeCount || 0,
-          annual_revenue: 0,
-          service_mix: { "General": 100 },
-          status: "not_contacted",
-          last_updated: new Date().toISOString(),
-          practice_buyer_pool: [],
-          notes: [],
-          specialities: practice.specialities,
-          generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || "",
-          avgSalaryPerEmployee: marketData?.countyData?.avgSalaryPerEmployee || 86259 // Use county data or fallback
-        };
+      return practicesData.map(practice => ({
+        id: practice["Company ID"].toString(),
+        industry: practice["Primary Subtitle"] || "",
+        region: practice.Location || practice["State Name"] || "",
+        employee_count: practice.employeeCount || 0,
+        annual_revenue: 0,
+        service_mix: { "General": 100 },
+        status: "not_contacted",
+        last_updated: new Date().toISOString(),
+        practice_buyer_pool: [],
+        notes: [],
+        specialities: practice.specialities,
+        generated_title: practice.firm_generated_text?.title || practice["Primary Subtitle"] || ""
       }));
-
-      return practicesWithSalary;
     }
   });
+
+  // Fetch market data for all practices
+  const marketQueries = useMarketDataForPractices(practices);
 
   const handleWithdraw = async (practiceId: string) => {
     const { error } = await supabase
@@ -159,10 +136,13 @@ export default function TrackedPractices() {
     const industryMatches = !filters.industry || practice.industry === filters.industry;
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
-    const stateMatches = !filters.state || practice.region === filters.state;
+    const stateMatches = !filters.state || practice.region.includes(filters.state);
     
-    // Calculate estimated revenue using the same logic as KeyMetricsBar
-    const avgSalaryPerEmployee = practice.avgSalaryPerEmployee || 86259;
+    // Get market data for this practice
+    const marketData = marketQueries[practices.indexOf(practice)]?.data;
+    const avgSalaryPerEmployee = marketData?.avgSalaryPerEmployee || 86259;
+    
+    // Calculate estimated revenue
     const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
     const payrollToRevenueRatio = 0.35;
     const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
@@ -228,7 +208,6 @@ export default function TrackedPractices() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
-      {/* Fixed Header with Logo */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -241,7 +220,6 @@ export default function TrackedPractices() {
         </div>
       </header>
 
-      {/* Main Content with increased top padding */}
       <main className="container mx-auto p-4 sm:p-6 pt-[120px] space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-30">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">Tracked Practices</h1>
@@ -283,14 +261,20 @@ export default function TrackedPractices() {
                     ? 'grid-cols-1 sm:grid-cols-2' 
                     : 'grid-cols-1'
                 }`}>
-                  {paginatedPractices?.map((practice) => (
-                    <PracticeCard
-                      key={practice.id}
-                      practice={practice}
-                      onWithdraw={() => handleWithdraw(practice.id)}
-                      onExpressInterest={() => handleExpressInterest(practice.id)}
-                    />
-                  ))}
+                  {paginatedPractices?.map((practice, index) => {
+                    const marketData = marketQueries[practices.indexOf(practice)]?.data;
+                    return (
+                      <PracticeCard
+                        key={practice.id}
+                        practice={{
+                          ...practice,
+                          avgSalaryPerEmployee: marketData?.avgSalaryPerEmployee
+                        }}
+                        onWithdraw={() => handleWithdraw(practice.id)}
+                        onExpressInterest={() => handleExpressInterest(practice.id)}
+                      />
+                    );
+                  })}
                 </div>
 
                 {totalPages > 1 && (
