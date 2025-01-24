@@ -142,6 +142,16 @@ export const ListingsPanel = () => {
 
       if (updateError) throw updateError;
 
+      // Call the notify-interest edge function
+      const { error: notifyError } = await supabase.functions.invoke('notify-interest', {
+        body: { companyId: companyId, userId: user.id }
+      });
+
+      if (notifyError) {
+        console.error('Error notifying admin:', notifyError);
+        // Don't throw here - we still want to show success since the interest was recorded
+      }
+
       // Refetch listings to update UI
       refetchListings();
 
