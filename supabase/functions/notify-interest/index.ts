@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from '../_shared/cors.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
@@ -28,22 +24,21 @@ serve(async (req) => {
     )
 
     const { companyId, userId, message } = await req.json()
-    console.log('Received notification request:', { companyId, userId, message })
+    console.log('Received request:', { companyId, userId, message })
+
+    if (!companyId || !userId) {
+      throw new Error('Missing required parameters')
+    }
 
     // Get company details
     const { data: company, error: companyError } = await supabase
       .from('canary_firms_data')
       .select('*')
       .eq('Company ID', companyId)
-      .maybeSingle()
+      .single()
 
-    if (companyError) {
-      console.error('Error fetching company:', companyError)
-      throw new Error('Company not found')
-    }
-
-    if (!company) {
-      console.error('No company found for ID:', companyId)
+    if (companyError || !company) {
+      console.error('Company query error:', companyError)
       throw new Error('Company not found')
     }
 
@@ -57,85 +52,74 @@ serve(async (req) => {
 
     console.log('User profile query result:', { data: userProfile, error: userError })
 
-    if (userError) {
-      console.error('Error fetching user profile:', userError)
-      throw new Error(`Error fetching user profile: ${userError.message}`)
-    }
-
+    // If no profile exists, create one
     if (!userProfile) {
-      console.error('No user profile found for ID:', userId)
-      throw new Error('User profile not found')
+      console.log('No profile found, creating one')
+      const { data: userData, error: userDataError } = await supabase.auth.admin.getUserById(userId)
+      
+      if (userDataError || !userData.user) {
+        console.error('Error getting user data:', userDataError)
+        throw new Error('Could not get user data')
+      }
+
+      const { error: createError } = await supabase
+        .from('buyer_profiles')
+        .insert({
+          user_id: userId,
+          buyer_name: userData.user.email?.split('@')[0] || 'Anonymous',
+          contact_email: userData.user.email || '',
+          target_geography: [],
+          subscription_tier: 'free'
+        })
+
+      if (createError) {
+        console.error('Error creating profile:', createError)
+        throw new Error('Could not create user profile')
+      }
     }
 
-    // Send email using Resend
+    // Send notification email
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         from: 'Canary <notifications@inevitable.sale>',
-        to: ['chris@inevitable.sale'],
-        subject: `New Interest: ${company["Company Name"]}`,
+        to: ['admin@inevitable.sale'],
+        subject: `New Interest: ${company['Company Name']}`,
         html: `
           <h2>New Interest Notification</h2>
-          <p>A user has expressed interest in ${company["Company Name"]}.</p>
-          
-          <h3>User Details:</h3>
-          <ul>
-            <li>Name: ${userProfile.buyer_name}</li>
-            <li>Email: ${userProfile.contact_email}</li>
-            <li>Phone: ${userProfile.contact_phone || 'Not provided'}</li>
-          </ul>
-
-          <h3>Company Details:</h3>
-          <ul>
-            <li>Location: ${company.Location}</li>
-            <li>Employee Count: ${company.employeeCount}</li>
-            <li>Specialties: ${company.specialities || 'Not specified'}</li>
-          </ul>
-
-          ${message ? `<h3>Message from User:</h3><p>${message}</p>` : ''}
-          
-          <p>Please follow up with the user within 4 hours.</p>
+          <p><strong>Company:</strong> ${company['Company Name']}</p>
+          <p><strong>Location:</strong> ${company.Location}</p>
+          <p><strong>User Message:</strong> ${message || 'No message provided'}</p>
+          <hr>
+          <p>Check the admin dashboard for more details.</p>
         `,
       }),
     })
 
     if (!emailResponse.ok) {
-      const errorData = await emailResponse.text()
-      console.error('Error sending email:', errorData)
       throw new Error('Failed to send notification email')
     }
 
-    const emailResult = await emailResponse.json()
-    console.log('Email sent successfully:', emailResult)
-
     return new Response(
       JSON.stringify({ success: true }),
-      { 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
     )
 
   } catch (error) {
-    console.error('Error in notify-interest function:', error)
+    console.error('Error:', error.message)
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        success: false 
-      }),
-      { 
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
+      JSON.stringify({ error: error.message }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      },
     )
   }
 })
