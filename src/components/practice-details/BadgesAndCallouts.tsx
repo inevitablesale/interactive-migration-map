@@ -10,8 +10,19 @@ interface BadgesAndCalloutsProps {
 }
 
 export const BadgesAndCallouts = ({ generatedText, specialties }: BadgesAndCalloutsProps) => {
-  const badges = generatedText?.badges ? JSON.parse(generatedText.badges) : [];
-  const callouts = generatedText?.callouts ? JSON.parse(generatedText.callouts) : [];
+  // Safely parse JSON with error handling
+  const parseBadgesAndCallouts = (jsonString?: string) => {
+    if (!jsonString) return [];
+    try {
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      return [];
+    }
+  };
+
+  const badges = parseBadgesAndCallouts(generatedText?.badges);
+  const callouts = parseBadgesAndCallouts(generatedText?.callouts);
 
   return (
     <div className="space-y-6">
