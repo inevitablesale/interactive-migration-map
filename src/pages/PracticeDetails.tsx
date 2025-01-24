@@ -231,7 +231,7 @@ export default function PracticeDetails() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto p-6 space-y-8 pt-24">
+      <div className="container mx-auto p-6 space-y-8 pt-32">
         <Button
           variant="ghost"
           className="text-white hover:text-white/80 hover:bg-white/10"

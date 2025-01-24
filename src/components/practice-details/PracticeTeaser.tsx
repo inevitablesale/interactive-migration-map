@@ -28,7 +28,7 @@ export function PracticeTeaser({ practice }: PracticeTeaserProps) {
   return (
     <div className="space-y-6 mb-6">
       {generatedText?.teaser && (
-        <div className="bg-black/40 backdrop-blur-md border-white/10 rounded-lg p-6">
+        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
           <p className="text-lg text-white leading-relaxed">{generatedText.teaser}</p>
         </div>
       )}
@@ -52,7 +52,7 @@ export function PracticeTeaser({ practice }: PracticeTeaserProps) {
           {callouts.map((callout: string, index: number) => (
             <div 
               key={index}
-              className="bg-white/5 backdrop-blur-sm rounded-lg p-4 text-white/80"
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-white/80"
             >
               {callout}
             </div>

@@ -1,5 +1,4 @@
 import { TopFirm } from "@/types/rankings";
-import { Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,18 +23,12 @@ export function BusinessOverview({ practice }: BusinessOverviewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-black/40 backdrop-blur-md border-white/10 rounded-lg p-6">
-        <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-white">Business Overview</h2>
-            <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-white/60 mb-2 flex items-center gap-2">Summary</h3>
-            <p className="text-white">{generatedText?.generated_summary || practice.Summary || 'No summary available.'}</p>
-          </div>
+      <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Business Overview</h2>
+        <div className="prose prose-invert max-w-none">
+          <p className="text-white/80 leading-relaxed">
+            {generatedText?.generated_summary || practice.Summary}
+          </p>
         </div>
       </div>
     </div>
