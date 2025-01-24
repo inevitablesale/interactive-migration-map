@@ -28,13 +28,12 @@ export function PracticeCard({ practice }: PracticeCardProps) {
     practice.region.split(",").map(part => part.trim()) : 
     [practice.region, ""];
 
-  // Calculate gross revenue using exact same logic as KeyMetricsBar
-  const avgSalaryPerEmployee = practice.avgSalaryPerEmployee ? practice.avgSalaryPerEmployee * 1000 : 86259 * 1000; // Use county average as fallback and multiply by 1000 since payroll is in thousands
+  // Calculate revenue using exact same logic as KeyMetricsBar
+  const avgSalaryPerEmployee = practice.avgSalaryPerEmployee ? practice.avgSalaryPerEmployee * 1000 : 86259 * 1000;
   const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
-  const payrollToRevenueRatio = 0.35; // Industry standard: payroll is typically 35% of revenue
+  const payrollToRevenueRatio = 0.35;
   const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
 
-  // Format currency exactly like KeyMetricsBar
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
       return `$${(amount / 1000000).toFixed(2)}M`;
@@ -54,13 +53,17 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   });
 
   return (
-    <div className="min-h-[200px] sm:min-h-[250px] w-full bg-black/40 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-white/10">
-      <div className="p-4 sm:p-6 h-full flex flex-col">
+    <div className="group relative min-h-[200px] sm:min-h-[250px] w-full bg-gradient-to-br from-[#1A1F2C] to-[#221F26] backdrop-blur-md rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[#9b87f5]/10 hover:border-[#9b87f5]/20">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#9b87f5]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+      
+      <div className="relative p-4 sm:p-6 h-full flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-6">
           <div className="w-full sm:w-auto">
-            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{practice.generated_title || practice.industry}</h3>
-            <div className="flex items-center text-sm text-white/60 bg-white/5 px-3 py-1 rounded-full w-fit">
-              <Building className="h-4 w-4 mr-2" />
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 group-hover:text-[#9b87f5] transition-colors duration-300">
+              {practice.generated_title || practice.industry}
+            </h3>
+            <div className="flex items-center text-sm text-white/60 bg-black/20 px-3 py-1 rounded-full w-fit border border-white/5">
+              <Building className="h-4 w-4 mr-2 text-[#0EA5E9]" />
               {city}{state ? `, ${state}` : ''}
             </div>
           </div>
@@ -70,7 +73,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
               <Button 
                 variant="secondary" 
                 size="sm"
-                className="bg-white/10 text-white hover:bg-white/20 w-full"
+                className="w-full bg-[#8B5CF6] hover:bg-[#9b87f5] text-white border-none transition-all duration-300"
               >
                 View Details
               </Button>
@@ -79,20 +82,20 @@ export function PracticeCard({ practice }: PracticeCardProps) {
         </div>
 
         <div className="mt-auto grid grid-cols-2 gap-4">
-          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
+          <div className="bg-black/20 rounded-lg p-3 sm:p-4 border border-white/5 hover:border-[#9b87f5]/20 transition-colors duration-300">
             <div className="flex items-center text-sm text-white/60 mb-2">
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 mr-2 text-[#33C3F0]" />
               Employees
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white truncate">{practice.employee_count}</p>
+            <p className="text-base sm:text-lg font-semibold text-white">{practice.employee_count}</p>
           </div>
 
-          <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
+          <div className="bg-black/20 rounded-lg p-3 sm:p-4 border border-white/5 hover:border-[#9b87f5]/20 transition-colors duration-300">
             <div className="flex items-center text-sm text-white/60 mb-2">
-              <DollarSign className="h-4 w-4 mr-2" />
+              <DollarSign className="h-4 w-4 mr-2 text-[#0EA5E9]" />
               Est. Gross Revenue
             </div>
-            <p className="text-base sm:text-lg font-semibold text-white truncate">{formatCurrency(estimatedRevenue)}</p>
+            <p className="text-base sm:text-lg font-semibold text-white">{formatCurrency(estimatedRevenue)}</p>
             <p className="text-xs text-white/40 mt-1">Based on payroll data</p>
           </div>
         </div>
