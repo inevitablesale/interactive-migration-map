@@ -401,10 +401,10 @@ export default function PracticeDetails() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-white/60">
                   <BriefcaseBusiness className="w-4 h-4" />
-                  <span>Advertise Here</span>
+                  <span>Premium Advertising Space</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Advertise Here</h3>
+                  <h3 className="text-lg font-semibold text-white">Grow Your Professional Network</h3>
                   <p className="text-sm text-white/60 mt-2">Reach practice buyers and sellers looking for M&A advisors, attorneys, and lenders. Showcase your expertise to decision-makers actively exploring practice transitions.</p>
                 </div>
                 <Button variant="secondary" className="w-full">
