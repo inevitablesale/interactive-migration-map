@@ -67,23 +67,8 @@ export default function TrackedPractices() {
     const employeeMatches = (!filters.minEmployees || practice.employee_count >= parseInt(filters.minEmployees)) &&
                            (!filters.maxEmployees || practice.employee_count <= parseInt(filters.maxEmployees));
     const stateMatches = !filters.state || practice.region.includes(filters.state);
-    
-    // Get market data for this practice
-    const marketData = marketQueries[practices.indexOf(practice)]?.data;
-    const avgSalaryPerEmployee = marketData?.avgSalaryPerEmployee || 86259;
-    
-    // Calculate estimated revenue
-    const annualPayroll = practice.employee_count ? practice.employee_count * avgSalaryPerEmployee : 0;
-    const payrollToRevenueRatio = 0.35;
-    const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
-    
-    const revenueMatches = (!filters.minRevenue || estimatedRevenue >= parseInt(filters.minRevenue)) &&
-                          (!filters.maxRevenue || estimatedRevenue <= parseInt(filters.maxRevenue));
-    const valuationMatches = (!filters.minValuation || (estimatedRevenue * 2.5) >= parseInt(filters.minValuation)) &&
-                            (!filters.maxValuation || (estimatedRevenue * 2.5) <= parseInt(filters.maxValuation));
 
-    return searchMatches && industryMatches && employeeMatches && stateMatches && 
-           revenueMatches && valuationMatches;
+    return searchMatches && industryMatches && employeeMatches && stateMatches;
   });
 
   const totalPages = filteredPractices ? Math.ceil(filteredPractices.length / ITEMS_PER_PAGE) : 0;
