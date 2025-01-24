@@ -13,8 +13,7 @@ const parseMarkdownList = (text: string | null): string[] => {
   return text
     .split('\n')
     .filter(line => line.trim().startsWith('*'))
-    .map(line => line.replace('* ', '').trim())
-    .map(line => line.replace(/\*\*/g, '')); // Remove all ** markdown
+    .map(line => line.replace('* ', '').trim());
 };
 
 export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
@@ -59,15 +58,19 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             <h3 className="text-lg font-semibold text-white">Recognition & Achievements</h3>
           </div>
           <div className="flex flex-wrap gap-2">
-            {parsedBadges.map((badge, index) => (
-              <Badge 
-                key={`badge-${index}`}
-                variant="secondary" 
-                className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-              >
-                {badge}
-              </Badge>
-            ))}
+            {parsedBadges.map((badge, index) => {
+              const cleanBadge = badge.replace(/\*\*/g, '');
+              return (
+                <span key={`badge-${index}`}>
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                  >
+                    {cleanBadge}
+                  </Badge>
+                </span>
+              );
+            })}
           </div>
         </Card>
       )}
@@ -82,13 +85,14 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
             {parsedCallouts.map((callout, index) => {
               const [title, ...descParts] = callout.split(':');
               const description = descParts.join(':').trim();
+              const cleanTitle = title.replace(/\*\*/g, '');
               
               return (
                 <div 
                   key={`callout-${index}`}
                   className="bg-white/5 rounded-lg p-4"
                 >
-                  <h4 className="font-semibold text-blue-400 mb-2">{title}</h4>
+                  <h4 className="font-semibold text-blue-400 mb-2">{cleanTitle}</h4>
                   <p className="text-white/80 text-sm">{description}</p>
                 </div>
               );
