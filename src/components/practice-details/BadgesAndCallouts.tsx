@@ -17,16 +17,23 @@ const parseMarkdownList = (text: string | null): string[] => {
 };
 
 export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
-  const { data: generatedText } = useQuery({
+  const { data: generatedText, error } = useQuery({
     queryKey: ['firm-generated-text', companyId],
     queryFn: async () => {
+      console.log('Fetching generated text for company:', companyId);
+      
       const { data, error } = await supabase
         .from('firm_generated_text')
         .select('badges, callouts')
         .eq('company_id', companyId)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching generated text:', error);
+        throw error;
+      }
+      
+      console.log('Generated text data:', data);
       return data;
     }
   });
@@ -34,7 +41,13 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
   const parsedBadges = parseMarkdownList(generatedText?.badges);
   const parsedCallouts = parseMarkdownList(generatedText?.callouts);
 
-  if (!parsedBadges.length && !parsedCallouts.length) return null;
+  console.log('Parsed badges:', parsedBadges);
+  console.log('Parsed callouts:', parsedCallouts);
+
+  if (!parsedBadges.length && !parsedCallouts.length) {
+    console.log('No badges or callouts found, returning null');
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -46,7 +59,6 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             {parsedBadges.map((badge, index) => {
-              // Remove markdown bold syntax
               const cleanBadge = badge.replace(/\*\*/g, '');
               return (
                 <Badge 
@@ -70,7 +82,6 @@ export function BadgesAndCallouts({ companyId }: BadgesAndCalloutsProps) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {parsedCallouts.map((callout, index) => {
-              // Split into title and description
               const [title, ...descParts] = callout.split(':');
               const description = descParts.join(':').trim();
               const cleanTitle = title.replace(/\*\*/g, '');
