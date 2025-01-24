@@ -297,7 +297,10 @@ export default function PracticeDetails() {
             <div className="bg-black/40 backdrop-blur-md rounded-lg p-6 border border-white/10 animate-fade-in">
               <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                 <div className="flex-1">
-                  <PracticeHeader practice={practice} generatedText={generatedText} />
+                  <PracticeHeader 
+                    practice={practice} 
+                    generatedText={generatedText}
+                  />
                   {generatedText?.teaser && (
                     <p className="mt-4 text-white/80">{generatedText.teaser}</p>
                   )}
