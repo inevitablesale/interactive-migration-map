@@ -1,4 +1,4 @@
-import { Clock, Users, Play, Linkedin, Bird } from "lucide-react";
+import { Clock, Users, Play, Linkedin, Bird, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";

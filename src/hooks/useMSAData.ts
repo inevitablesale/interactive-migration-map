@@ -8,6 +8,11 @@ interface MSACrosswalk {
   STATEFP: string;
 }
 
+interface MSAMetrics {
+  MSA: string;
+  metrics: Omit<MSAData, 'MSA'>;
+}
+
 export const useMSAData = (stateFp: string) => {
   return useQuery({
     queryKey: ['msaData', stateFp],
