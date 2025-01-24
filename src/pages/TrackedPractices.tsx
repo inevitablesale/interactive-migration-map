@@ -30,9 +30,12 @@ export default function TrackedPractices() {
           *,
           firm_generated_text!inner (
             title
+          ),
+          county_data!inner (
+            PAYANN,
+            EMP
           )
-        `)
-        .order('followerCount', { ascending: false });
+        `);
 
       if (error) throw error;
 
@@ -41,7 +44,8 @@ export default function TrackedPractices() {
         industry: practice["Primary Subtitle"] || "",
         region: practice["State Name"] || "",
         employee_count: practice.employeeCount || 0,
-        annual_revenue: estimateAnnualRevenue(practice.employeeCount || 0),
+        avgSalaryPerEmployee: practice.county_data?.PAYANN && practice.county_data?.EMP ? 
+          practice.county_data.PAYANN / practice.county_data.EMP : undefined,
         service_mix: { "General": 100 },
         status: "not_contacted",
         last_updated: new Date().toISOString(),

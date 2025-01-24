@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Users, DollarSign } from "lucide-react";
-import { getFirmSizeCategory, getValuationMultiple } from "@/utils/valuationUtils";
+import { getFirmSizeCategory, getValuationMultiple, estimateAnnualRevenue } from "@/utils/valuationUtils";
 
 interface PracticeCardProps {
   practice: {
@@ -9,11 +9,12 @@ interface PracticeCardProps {
     industry: string;
     region: string;
     employee_count: number;
-    annual_revenue: number;
+    annual_revenue?: number;
     service_mix: Record<string, number>;
     status: string;
     last_updated: string;
     generated_title?: string;
+    avgSalaryPerEmployee?: number;
   };
   onWithdraw: () => void;
   onExpressInterest: () => void;
@@ -27,15 +28,17 @@ export function PracticeCard({ practice }: PracticeCardProps) {
 
   // Calculate estimated valuation using the same logic as PracticeDetails
   const firmSize = getFirmSizeCategory(practice.employee_count);
-  const valuationMultiplier = getValuationMultiple(firmSize, practice.annual_revenue);
-  const estimatedValuation = practice.annual_revenue * valuationMultiplier;
+  const annual_revenue = practice.annual_revenue || estimateAnnualRevenue(practice.employee_count, practice.avgSalaryPerEmployee);
+  const valuationMultiplier = getValuationMultiple(firmSize, annual_revenue);
+  const estimatedValuation = annual_revenue * valuationMultiplier;
 
   console.log('Practice valuation calculation:', {
     id: practice.id,
     firmSize,
     valuationMultiplier,
-    annual_revenue: practice.annual_revenue,
-    estimatedValuation
+    annual_revenue,
+    estimatedValuation,
+    avgSalaryPerEmployee: practice.avgSalaryPerEmployee
   });
 
   // Format currency
