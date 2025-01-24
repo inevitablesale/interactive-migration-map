@@ -29,7 +29,7 @@ export function PracticeCard({ practice }: PracticeCardProps) {
   const defaultAvgSalary = 86259; // National average if county data not available
   const avgSalary = practice.avgSalaryPerEmployee || defaultAvgSalary;
   const totalPayroll = avgSalary * practice.employee_count;
-  const estimatedGrossRevenue = totalPayroll / 0.35; // 35% payroll to revenue ratio
+  const estimatedGrossRevenue = totalPayroll * (1/0.35); // 35% payroll to revenue ratio
 
   // Format currency
   const formatCurrency = (amount: number) => {
