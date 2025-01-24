@@ -11,7 +11,7 @@ import { PracticeInfo } from "@/components/practice-details/PracticeInfo";
 import { MarketMetricsGrid } from "@/components/practice-details/MarketMetricsGrid";
 import { BadgesAndCallouts } from "@/components/practice-details/BadgesAndCallouts";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Building, TrendingUp, Bird } from "lucide-react";
+import { Heart, ArrowLeft, Users, Building, TrendingUp, Bird, ChevronDown, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Collapsible,
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import type { TopFirm, ComprehensiveMarketData } from "@/types/rankings";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function PracticeDetails() {
   const { practiceId } = useParams();
@@ -420,3 +422,4 @@ export default function PracticeDetails() {
     </div>
   );
 }
+
