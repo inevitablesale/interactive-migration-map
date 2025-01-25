@@ -26,7 +26,7 @@ export const AIDealSourcer = () => {
   const fetchOpportunities = async () => {
     try {
       const { data: profiles, error: profilesError } = await supabase
-        .from("deal_sourcing_forms")
+        .from("buyer_profiles")
         .select("*");
 
       if (profilesError) throw profilesError;
@@ -48,8 +48,8 @@ export const AIDealSourcer = () => {
         const { data: firms } = await supabase
           .from('canary_firms_data')
           .select('*')
-          .gte('employeeCount', firstProfile.practice_size === 'small' ? 0 : 50)
-          .lte('employeeCount', firstProfile.practice_size === 'large' ? 999999 : 50);
+          .gte('employeeCount', firstProfile.employee_count_min || 0)
+          .lte('employeeCount', firstProfile.employee_count_max || 999999);
         
         setMatchingFirms(firms || []);
       }
@@ -157,10 +157,10 @@ export const AIDealSourcer = () => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h4 className="text-lg font-medium text-white">
-                      {opportunity.buyer_type}'s Profile
+                      {opportunity.buyer_name}'s Profile
                     </h4>
                     <p className="text-sm text-blue-100/60">
-                      Looking for: {opportunity.deal_preferences?.join(", ")}
+                      Looking for: {opportunity.ai_preferences?.dealTypes?.join(", ")}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -198,11 +198,11 @@ export const AIDealSourcer = () => {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div className="text-sm">
                     <p className="text-white/60">Timeline</p>
-                    <p className="text-white">{opportunity.timeline}</p>
+                    <p className="text-white">{opportunity.ai_preferences?.timeline}</p>
                   </div>
                   <div className="text-sm">
                     <p className="text-white/60">Preferred Role</p>
-                    <p className="text-white">{opportunity.remote_preference}</p>
+                    <p className="text-white">{opportunity.ai_preferences?.preferredRole}</p>
                   </div>
                 </div>
               </div>

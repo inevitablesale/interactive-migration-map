@@ -23,8 +23,8 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
       if (!user) return null;
 
       const { data, error } = await supabase
-        .from('deal_sourcing_forms')
-        .select('*')
+        .from('buyer_profiles')
+        .select('subscription_tier')
         .eq('user_id', user.id)
         .single();
 
@@ -33,7 +33,7 @@ export const GeographicLevelToggle = ({ value, onChange }: GeographicLevelToggle
     }
   });
 
-  const isFreeTier = !profile || profile.buyer_type === 'free';
+  const isFreeTier = !profile || profile.subscription_tier === 'free';
 
   const handleFilterChange = (filter: string) => {
     if (isFreeTier && filter === 'opportunities') {
