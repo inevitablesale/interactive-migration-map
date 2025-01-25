@@ -14,7 +14,7 @@ export const BuyerProfileManager = () => {
     queryKey: ["buyerProfile"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("buyer_profiles")
+        .from("deal_sourcing_forms")
         .select("*")
         .limit(1)
         .maybeSingle();
@@ -40,7 +40,7 @@ export const BuyerProfileManager = () => {
     <Card className="p-6">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-lg font-semibold">{profile.buyer_name}</h3>
+          <h3 className="text-lg font-semibold">{profile.buyer_type}</h3>
           <p className="text-gray-500">{profile.contact_email}</p>
         </div>
         <Dialog>
@@ -61,12 +61,12 @@ export const BuyerProfileManager = () => {
           <h4 className="font-medium mb-2">Acquisition Preferences</h4>
           <div className="space-y-2 text-sm">
             <p>
-              <span className="text-gray-500">Employee Range:</span>{" "}
-              {profile.employee_count_min} - {profile.employee_count_max}
+              <span className="text-gray-500">Practice Size:</span>{" "}
+              {profile.practice_size}
             </p>
             <p>
               <span className="text-gray-500">Service Lines:</span>{" "}
-              {profile.service_lines?.join(", ")}
+              {profile.services?.join(", ")}
             </p>
           </div>
         </div>
@@ -76,11 +76,11 @@ export const BuyerProfileManager = () => {
           <div className="space-y-2 text-sm">
             <p>
               <span className="text-gray-500">Purpose:</span>{" "}
-              {profile.acquisition_purpose}
+              {profile.buyer_type}
             </p>
             <p>
-              <span className="text-gray-500">Priorities:</span>{" "}
-              {profile.growth_priorities?.join(", ")}
+              <span className="text-gray-500">Timeline:</span>{" "}
+              {profile.timeline}
             </p>
           </div>
         </div>
