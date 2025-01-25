@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -23,8 +23,31 @@ interface PracticeInfoProps {
 export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [message, setMessage] = useState("");
+  const [hasExpressedInterest, setHasExpressedInterest] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkExistingInterest = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData?.user?.id) return;
+
+        const { data: existingInterest } = await supabase
+          .from('canary_firm_interests')
+          .select('id')
+          .eq('company_id', practice["Company ID"])
+          .eq('user_id', userData.user.id)
+          .maybeSingle();
+
+        setHasExpressedInterest(!!existingInterest);
+      } catch (error) {
+        console.error('Error checking existing interest:', error);
+      }
+    };
+
+    checkExistingInterest();
+  }, [practice]);
 
   const handleInterestConfirmed = async () => {
     try {
@@ -100,6 +123,7 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
       }
 
       setShowDialog(false);
+      setHasExpressedInterest(true);
       onInterested?.(message);
       
       toast({
@@ -126,14 +150,21 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
           <CardTitle className="text-white">Practice Information</CardTitle>
           <Button 
             onClick={() => {
-              console.log('Opening interest dialog');
-              setShowDialog(true);
+              if (!hasExpressedInterest) {
+                console.log('Opening interest dialog');
+                setShowDialog(true);
+              }
             }}
-            className="bg-yellow-400 text-black hover:bg-yellow-500"
+            className={`${
+              hasExpressedInterest 
+                ? 'bg-gray-600 hover:bg-gray-600 cursor-not-allowed' 
+                : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+            }`}
+            disabled={hasExpressedInterest}
             size="sm"
           >
             <Heart className="mr-2 h-4 w-4" />
-            I'm Interested
+            {hasExpressedInterest ? 'Interest Expressed' : "I'm Interested"}
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
