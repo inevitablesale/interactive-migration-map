@@ -17,8 +17,8 @@ serve(async (req) => {
       throw new Error('Missing Supabase configuration')
     }
 
-    const { companyId, userId, companyName, location, message, employeeCount, specialities } = await req.json()
-    console.log('Received request:', { companyId, userId, companyName, location, message })
+    const { companyId, userId, location, message, employeeCount, specialities } = await req.json()
+    console.log('Received request:', { companyId, userId, location, message })
 
     if (!companyId || !userId) {
       throw new Error('Missing required parameters')
@@ -36,13 +36,28 @@ serve(async (req) => {
 
     const userEmail = userData.user.email
 
+    // Get anonymized company name from firm_generated_text
+    const { data: generatedText, error: textError } = await supabase
+      .from('firm_generated_text')
+      .select('title')
+      .eq('company_id', companyId)
+      .single()
+
+    if (textError) {
+      console.error('Error getting generated text:', textError)
+      // Don't throw, we'll use fallback
+    }
+
+    // Use anonymized title or fallback to generic location-based name
+    const anonymizedName = generatedText?.title || `Practice in ${location}`
+
     // Send notification to admin
     const { error: adminEmailError } = await supabase.auth.admin.sendRawEmail({
       email: 'chris@inevitable.sale',
-      subject: `New Interest: ${companyName}`,
+      subject: `New Interest: ${anonymizedName}`,
       html: `
         <h2>New Interest Notification</h2>
-        <p><strong>Company:</strong> ${companyName}</p>
+        <p><strong>Practice:</strong> ${anonymizedName}</p>
         <p><strong>Location:</strong> ${location}</p>
         <p><strong>Employee Count:</strong> ${employeeCount || 'Not specified'}</p>
         <p><strong>Specialities:</strong> ${specialities || 'Not specified'}</p>
@@ -62,10 +77,10 @@ serve(async (req) => {
     // Send confirmation to user
     const { error: userEmailError } = await supabase.auth.admin.sendRawEmail({
       email: userEmail,
-      subject: `Interest Confirmed: ${companyName}`,
+      subject: `Interest Confirmed: ${anonymizedName}`,
       html: `
         <h2>Interest Confirmation</h2>
-        <p>Thank you for expressing interest in ${companyName}.</p>
+        <p>Thank you for expressing interest in ${anonymizedName}.</p>
         <p>Our team has been notified and will review your interest shortly. We aim to make contact within 4 hours during business hours.</p>
         <p><strong>Practice Details:</strong></p>
         <ul>
