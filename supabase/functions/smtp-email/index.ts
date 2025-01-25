@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,29 +15,20 @@ serve(async (req) => {
   try {
     const { to, subject, html, text } = await req.json()
     
-    const client = new SmtpClient();
+    const resend = new Resend(Deno.env.get('SMTP_PASSWORD'));
 
-    await client.connectTLS({
-      hostname: Deno.env.get('SMTP_HOST') || '',
-      port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
-      username: Deno.env.get('SMTP_USERNAME') || '',
-      password: Deno.env.get('SMTP_PASSWORD') || '',
-    });
-
-    await client.send({
-      from: Deno.env.get('SMTP_FROM_EMAIL') || '',
+    const data = await resend.emails.send({
+      from: Deno.env.get('SMTP_FROM_EMAIL') || 'onboarding@resend.dev',
       to: to,
       subject: subject,
-      content: text,
       html: html,
+      text: text,
     });
 
-    await client.close();
-
-    console.log('Email sent successfully to:', to);
+    console.log('Email sent successfully:', data);
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, data }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
