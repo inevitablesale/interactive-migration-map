@@ -59,7 +59,6 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
         body: { 
           companyId: practice["Company ID"],
           userId: userData.user.id,
-          companyName: practice["Company Name"] || practice.Location,
           location: practice.Location,
           message: message,
           employeeCount: practice.employeeCount,
