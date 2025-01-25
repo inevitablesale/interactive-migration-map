@@ -135,7 +135,7 @@ serve(async (req) => {
       </html>
     `
 
-    // Send admin notification email using Supabase SMTP
+    // Send admin notification email using send-email edge function
     console.log('Sending admin notification email...')
     const { error: adminEmailError } = await supabase.functions.invoke('send-email', {
       body: {
@@ -150,7 +150,7 @@ serve(async (req) => {
       throw adminEmailError
     }
 
-    // Send user confirmation email using Supabase SMTP
+    // Send user confirmation email using send-email edge function
     console.log('Sending user confirmation email...')
     const { error: userEmailError } = await supabase.functions.invoke('send-email', {
       body: {
