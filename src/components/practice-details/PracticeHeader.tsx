@@ -9,10 +9,12 @@ interface PracticeHeaderProps {
 }
 
 export function PracticeHeader({ practice, generatedText }: PracticeHeaderProps) {
+  const title = generatedText?.title?.replace(/Premier /g, '') || practice["Company Name"];
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-white">
-        {generatedText?.title || practice["Company Name"]}
+        {title}
       </h1>
       <p className="text-white/60">{practice["Primary Subtitle"]}</p>
     </div>
