@@ -56,54 +56,30 @@ export type Database = {
       }
       buyer_profiles: {
         Row: {
-          acquisition_purpose: string | null
-          ai_preferences: Json | null
           buyer_name: string
           contact_email: string
           created_at: string | null
-          deal_preferences: Json | null
-          employee_count_max: number | null
-          employee_count_min: number | null
-          growth_priorities: string[] | null
           id: string
-          preferred_insights: string[] | null
-          service_lines: string[] | null
           subscription_tier: string
           target_geography: string[]
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          acquisition_purpose?: string | null
-          ai_preferences?: Json | null
           buyer_name: string
           contact_email: string
           created_at?: string | null
-          deal_preferences?: Json | null
-          employee_count_max?: number | null
-          employee_count_min?: number | null
-          growth_priorities?: string[] | null
           id?: string
-          preferred_insights?: string[] | null
-          service_lines?: string[] | null
           subscription_tier?: string
           target_geography: string[]
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          acquisition_purpose?: string | null
-          ai_preferences?: Json | null
           buyer_name?: string
           contact_email?: string
           created_at?: string | null
-          deal_preferences?: Json | null
-          employee_count_max?: number | null
-          employee_count_min?: number | null
-          growth_priorities?: string[] | null
           id?: string
-          preferred_insights?: string[] | null
-          service_lines?: string[] | null
           subscription_tier?: string
           target_geography?: string[]
           updated_at?: string | null
