@@ -135,11 +135,14 @@ serve(async (req) => {
       </html>
     `
 
+    // Send admin notification email using Supabase SMTP
     console.log('Sending admin notification email...')
-    const { error: adminEmailError } = await supabase.auth.admin.sendRawEmail({
-      email: 'chris@inevitable.sale',
-      subject: `New Interest: ${anonymizedName}`,
-      html: adminEmailHtml
+    const { error: adminEmailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: 'chris@inevitable.sale',
+        subject: `New Interest: ${anonymizedName}`,
+        html: adminEmailHtml
+      }
     })
 
     if (adminEmailError) {
@@ -147,11 +150,14 @@ serve(async (req) => {
       throw adminEmailError
     }
 
+    // Send user confirmation email using Supabase SMTP
     console.log('Sending user confirmation email...')
-    const { error: userEmailError } = await supabase.auth.admin.sendRawEmail({
-      email: userEmail,
-      subject: `Interest Confirmed: ${anonymizedName}`,
-      html: userEmailHtml
+    const { error: userEmailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: userEmail,
+        subject: `Interest Confirmed: ${anonymizedName}`,
+        html: userEmailHtml
+      }
     })
 
     if (userEmailError) {
