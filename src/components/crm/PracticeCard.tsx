@@ -36,6 +36,9 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
   const payrollToRevenueRatio = 0.35;
   const estimatedRevenue = annualPayroll * (1/payrollToRevenueRatio);
 
+  // Filter out "Premier" from the title
+  const title = practice.generated_title?.replace(/Premier /g, '') || practice.industry;
+
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
       return `$${(amount / 1000000).toFixed(2)}M`;
@@ -56,7 +59,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-6">
           <div className="w-full sm:w-auto">
             <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 group-hover:text-[#9b87f5] transition-colors duration-300">
-              {practice.generated_title || practice.industry}
+              {title}
             </h3>
             <div className="flex items-center text-sm text-white/60 bg-black/20 px-3 py-1 rounded-full w-fit border border-white/5">
               <Building className="h-4 w-4 mr-2 text-[#0EA5E9]" />
