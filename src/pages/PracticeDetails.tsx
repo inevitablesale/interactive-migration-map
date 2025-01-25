@@ -28,6 +28,7 @@ export default function PracticeDetails() {
   const navigate = useNavigate();
   const [isMarketDataOpen, setIsMarketDataOpen] = useState(false);
   const [session, setSession] = useState(null);
+  const [hasRequestedAd, setHasRequestedAd] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -294,6 +295,50 @@ export default function PracticeDetails() {
     }
   };
 
+  const handleAdRequest = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      // Send admin notification email
+      const { error: emailError } = await supabase.functions.invoke('smtp-email', {
+        body: {
+          to: 'chris@inevitable.sale',
+          subject: 'New Advertising Interest',
+          html: `
+            <h2>New Advertising Interest</h2>
+            <p>A user has expressed interest in advertising on Canary.</p>
+            <p>User ID: ${user.id}</p>
+            <p>User Email: ${user.email}</p>
+          `,
+          text: `New Advertising Interest\n\nA user has expressed interest in advertising on Canary.\nUser ID: ${user.id}\nUser Email: ${user.email}`
+        }
+      });
+
+      if (emailError) {
+        console.error('Error sending notification:', emailError);
+        throw new Error('Failed to send notification');
+      }
+
+      setHasRequestedAd(true);
+      toast({
+        title: "Request Received",
+        description: "Our team will be in touch with you shortly to discuss advertising opportunities.",
+      });
+    } catch (error) {
+      console.error('Error handling ad request:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
+  };
+
   if (isPracticeLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
@@ -468,11 +513,16 @@ export default function PracticeDetails() {
 
                   <div className="pt-2">
                     <Button 
-                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium"
-                      onClick={() => window.location.href = 'mailto:advertising@inevitable.sale'}
+                      className={`w-full font-medium ${
+                        hasRequestedAd 
+                          ? 'bg-gray-600 hover:bg-gray-600 cursor-not-allowed text-white'
+                          : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                      }`}
+                      onClick={handleAdRequest}
+                      disabled={hasRequestedAd}
                     >
                       <Mail className="w-4 h-4 mr-2" />
-                      Contact Us Today to Secure Your Spot!
+                      {hasRequestedAd ? 'Request Sent' : 'Contact Us Today to Secure Your Spot!'}
                     </Button>
                     <p className="text-xs text-gray-400 text-center mt-3">
                       Limited Opportunities Available
