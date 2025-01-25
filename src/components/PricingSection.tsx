@@ -1,36 +1,13 @@
 import { ArrowRight, Check, Linkedin } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const PricingSection = () => {
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleLinkedInSignup = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'linkedin_oidc',
-        options: {
-          redirectTo: `${window.location.origin}/thank-you`,
-        },
-      });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
-      }
-    } catch (error) {
-      console.error('LinkedIn auth error:', error);
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "Failed to connect with LinkedIn. Please try again.",
-      });
-    }
+  const handleLinkedInSignup = () => {
+    navigate('/auth');
   };
 
   return (

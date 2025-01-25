@@ -1,8 +1,7 @@
 import { Clock, Users, Play, Linkedin, Bird, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface PracticeOfDayProps {
   practice?: {
@@ -16,32 +15,10 @@ interface PracticeOfDayProps {
 }
 
 export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleLinkedInSignup = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'linkedin_oidc',
-        options: {
-          redirectTo: `${window.location.origin}/thank-you`,
-        },
-      });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
-      }
-    } catch (error) {
-      console.error('LinkedIn auth error:', error);
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "Failed to connect with LinkedIn. Please try again.",
-      });
-    }
+  const handleLinkedInSignup = () => {
+    navigate('/auth');
   };
 
   if (!practice) {
@@ -88,8 +65,7 @@ export function PracticeOfDay({ practice, onInterested }: PracticeOfDayProps) {
             </div>
 
             <Button 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-not-allowed opacity-50"
-              disabled
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               onClick={handleLinkedInSignup}
             >
               <Linkedin className="w-4 h-4 mr-2" />

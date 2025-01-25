@@ -1,37 +1,12 @@
 import { Sparkles, ArrowRight, Linkedin } from "lucide-react";
 import { Card } from "./ui/card";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
 export const BetaAccessSection = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleLinkedInSignup = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'linkedin_oidc',
-        options: {
-          redirectTo: `${window.location.origin}/thank-you`,
-        },
-      });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
-      }
-    } catch (error) {
-      console.error('LinkedIn auth error:', error);
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "Failed to connect with LinkedIn. Please try again.",
-      });
-    }
+  const handleLinkedInSignup = () => {
+    navigate('/auth');
   };
 
   return (
