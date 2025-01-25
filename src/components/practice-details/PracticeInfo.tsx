@@ -13,6 +13,7 @@ import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface PracticeInfoProps {
   practice: TopFirm;
@@ -23,16 +24,14 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [message, setMessage] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleInterestConfirmed = async () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user?.id) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "Could not get user information. Please try logging in again.",
-        });
+        // Redirect to auth page if user is not logged in
+        navigate("/auth");
         return;
       }
 
