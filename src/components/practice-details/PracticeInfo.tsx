@@ -80,8 +80,47 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
       // Now proceed with expressing interest
       console.log('Interest confirmed in PracticeInfo component');
       console.log('Message:', message);
+
+      // Add interest record
+      const { error: interestError } = await supabase
+        .from('canary_firm_interests')
+        .insert([{
+          company_id: practice["Company ID"],
+          user_id: userData.user.id,
+          status: 'interested',
+          is_anonymous: false
+        }]);
+
+      if (interestError) {
+        console.error('Error inserting interest:', interestError);
+        throw interestError;
+      }
+
+      // Call the notify-interest edge function with practice details
+      const { error: notifyError } = await supabase.functions.invoke('notify-interest', {
+        body: { 
+          companyId: practice["Company ID"],
+          userId: userData.user.id,
+          companyName: practice["Company Name"] || practice.Location,
+          location: practice.Location,
+          message: message,
+          employeeCount: practice.employeeCount,
+          specialities: practice.specialities
+        }
+      });
+
+      if (notifyError) {
+        console.error('Error notifying admin:', notifyError);
+        // Don't throw here - we still want to show success since the interest was recorded
+      }
+
       setShowDialog(false);
       onInterested?.(message);
+      
+      toast({
+        title: "Interest Registered",
+        description: "We'll notify you of any updates about this practice",
+      });
     } catch (error) {
       console.error('Error in handleInterestConfirmed:', error);
       toast({
