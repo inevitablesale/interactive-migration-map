@@ -20,7 +20,7 @@ serve(async (req) => {
     console.log('Sending email with params:', { to, subject });
 
     const data = await resend.emails.send({
-      from: 'team@canary.accountants',
+      from: 'Canary Team <team@canary.accountants>',
       to: to,
       subject: subject,
       html: html,
