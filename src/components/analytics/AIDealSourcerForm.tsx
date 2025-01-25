@@ -1,9 +1,11 @@
-import { MultiStepForm } from "./deal-sourcer/MultiStepForm";
-
 interface AIDealSourcerFormProps {
   onSuccess?: () => void;
 }
 
 export const AIDealSourcerForm = ({ onSuccess }: AIDealSourcerFormProps) => {
-  return <MultiStepForm onSuccess={onSuccess} />;
+  return (
+    <div className="space-y-4">
+      <p className="text-white/60">This feature is currently being updated.</p>
+    </div>
+  );
 };
