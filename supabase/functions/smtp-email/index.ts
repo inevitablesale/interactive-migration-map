@@ -17,8 +17,10 @@ serve(async (req) => {
     
     const resend = new Resend(Deno.env.get('SMTP_PASSWORD'));
 
+    console.log('Sending email with params:', { to, subject });
+
     const data = await resend.emails.send({
-      from: Deno.env.get('SMTP_FROM_EMAIL') || 'onboarding@resend.dev',
+      from: 'team@canary.accountants',
       to: to,
       subject: subject,
       html: html,
