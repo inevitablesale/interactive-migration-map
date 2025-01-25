@@ -45,28 +45,7 @@ export const ListingsPanel = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  const { data: profile } = useQuery({
-    queryKey: ['buyerProfile'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from('buyer_profiles')
-        .select('subscription_tier')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return null;
-      }
-      return data;
-    }
-  });
-
-  const { data: listings, refetch: refetchListings } = useQuery<Listing[]>({
+  const { data: listings, refetch: refetchListings } = useQuery({
     queryKey: ['listings'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -95,17 +74,7 @@ export const ListingsPanel = () => {
     }
   });
 
-  const isFreeTier = !profile || profile.subscription_tier === 'free';
-
   const handleExpressInterest = async (companyId: number) => {
-    if (isFreeTier) {
-      toast({
-        title: "Premium Feature",
-        description: "Upgrade to view detailed firm information",
-      });
-      return;
-    }
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -117,6 +86,7 @@ export const ListingsPanel = () => {
         return;
       }
 
+      // Add to buyer pool
       const { error: poolError } = await supabase
         .from('canary_firm_interests')
         .insert([{
@@ -146,14 +116,25 @@ export const ListingsPanel = () => {
 
       if (updateError) throw updateError;
 
-      // Call the notify-interest edge function
+      // Get company details for notification
+      const { data: company } = await supabase
+        .from('canary_firms_data')
+        .select('*')
+        .eq('Company ID', companyId)
+        .single();
+
+      // Call the notify-interest edge function with company details
       const { error: notifyError } = await supabase.functions.invoke('notify-interest', {
-        body: { companyId: companyId, userId: user.id }
+        body: { 
+          companyId,
+          userId: user.id,
+          companyName: company['Company Name'],
+          location: company.Location
+        }
       });
 
       if (notifyError) {
         console.error('Error notifying admin:', notifyError);
-        // Don't throw here - we still want to show success since the interest was recorded
       }
 
       // Refetch listings to update UI

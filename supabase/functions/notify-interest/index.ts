@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,51 +15,11 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
-    const supabase = createClient(
-      SUPABASE_URL!,
-      SUPABASE_ANON_KEY!
-    )
-
-    const { companyId, userId, message } = await req.json()
-    console.log('Received request:', { companyId, userId, message })
+    const { companyId, userId, companyName, location, message } = await req.json()
+    console.log('Received request:', { companyId, userId, companyName, location, message })
 
     if (!companyId || !userId) {
       throw new Error('Missing required parameters')
-    }
-
-    // Get company details
-    const { data: company, error: companyError } = await supabase
-      .from('canary_firms_data')
-      .select('*')
-      .eq('Company ID', companyId)
-      .single()
-
-    if (companyError || !company) {
-      console.error('Company query error:', companyError)
-      throw new Error('Company not found')
-    }
-
-    // Get user profile with detailed SQL logging
-    console.log('Executing buyer_profiles query:', {
-      sql: `
-        SELECT * 
-        FROM buyer_profiles 
-        WHERE user_id = '${userId}'
-      `,
-      params: { user_id: userId }
-    })
-    
-    const { data: userProfile, error: userError } = await supabase
-      .from('buyer_profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    console.log('User profile query result:', { data: userProfile, error: userError })
-
-    if (userError) {
-      console.error('Error fetching user profile:', userError)
-      throw new Error('Could not fetch user profile')
     }
 
     // Send notification email
@@ -75,11 +32,11 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'Canary <notifications@inevitable.sale>',
         to: ['admin@inevitable.sale'],
-        subject: `New Interest: ${company['Company Name']}`,
+        subject: `New Interest: ${companyName}`,
         html: `
           <h2>New Interest Notification</h2>
-          <p><strong>Company:</strong> ${company['Company Name']}</p>
-          <p><strong>Location:</strong> ${company.Location}</p>
+          <p><strong>Company:</strong> ${companyName}</p>
+          <p><strong>Location:</strong> ${location}</p>
           <p><strong>User Message:</strong> ${message || 'No message provided'}</p>
           <hr>
           <p>Check the admin dashboard for more details.</p>
