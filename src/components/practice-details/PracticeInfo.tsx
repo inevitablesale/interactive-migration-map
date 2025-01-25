@@ -36,8 +36,7 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
         return;
       }
 
-      console.log('Interest confirmed in PracticeInfo component');
-      console.log('Message:', message);
+      console.log('handleInterested called with message:', message);
 
       // Add interest record
       const { error: interestError } = await supabase
@@ -54,21 +53,29 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
         throw interestError;
       }
 
-      // Call the notify-interest edge function with practice details
-      const { error: notifyError } = await supabase.functions.invoke('notify-interest', {
-        body: { 
-          companyId: practice["Company ID"],
-          userId: userData.user.id,
-          companyName: practice["Company Name"] || practice.Location,
-          location: practice.Location,
-          message: message,
-          employeeCount: practice.employeeCount,
-          specialities: practice.specialities
+      // Send admin notification email
+      const { error: adminEmailError } = await supabase.functions.invoke('smtp-email', {
+        body: {
+          to: 'chris@inevitable.sale',
+          subject: `New Interest: ${practice["Company Name"] || practice.Location}`,
+          html: `
+            <h2>New Interest Notification</h2>
+            <p>A user has expressed interest in ${practice["Company Name"] || practice.Location}</p>
+            <p>User ID: ${userData.user.id}</p>
+            <p>Message: ${message || 'No message provided'}</p>
+            <p>Practice Details:</p>
+            <ul>
+              <li>Location: ${practice.Location}</li>
+              <li>Employee Count: ${practice.employeeCount}</li>
+              <li>Specialities: ${practice.specialities || 'Not specified'}</li>
+            </ul>
+          `,
+          text: `New Interest Notification\n\nA user has expressed interest in ${practice["Company Name"] || practice.Location}\nUser ID: ${userData.user.id}\nMessage: ${message || 'No message provided'}`
         }
       });
 
-      if (notifyError) {
-        console.error('Error notifying admin:', notifyError);
+      if (adminEmailError) {
+        console.error('Error sending admin notification:', adminEmailError);
         // Don't throw here - we still want to show success since the interest was recorded
       }
 
