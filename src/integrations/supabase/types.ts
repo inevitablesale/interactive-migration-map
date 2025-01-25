@@ -54,39 +54,6 @@ export type Database = {
         }
         Relationships: []
       }
-      buyer_profiles: {
-        Row: {
-          buyer_name: string
-          contact_email: string
-          created_at: string | null
-          id: string
-          subscription_tier: string
-          target_geography: string[]
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          buyer_name: string
-          contact_email: string
-          created_at?: string | null
-          id?: string
-          subscription_tier?: string
-          target_geography: string[]
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          buyer_name?: string
-          contact_email?: string
-          created_at?: string | null
-          id?: string
-          subscription_tier?: string
-          target_geography?: string[]
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       canary_firm_interests: {
         Row: {
           company_id: number | null
