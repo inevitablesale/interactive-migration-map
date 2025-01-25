@@ -57,10 +57,10 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
       const { error: adminEmailError } = await supabase.functions.invoke('smtp-email', {
         body: {
           to: 'chris@inevitable.sale',
-          subject: `New Interest: ${practice["Company Name"] || practice.Location}`,
+          subject: `New Interest: Practice #${practice["Company ID"]}`,
           html: `
             <h2>New Interest Notification</h2>
-            <p>A user has expressed interest in ${practice["Company Name"] || practice.Location}</p>
+            <p>A user has expressed interest in practice #${practice["Company ID"]}</p>
             <p>User ID: ${userData.user.id}</p>
             <p>Message: ${message || 'No message provided'}</p>
             <p>Practice Details:</p>
@@ -70,13 +70,34 @@ export function PracticeInfo({ practice, onInterested }: PracticeInfoProps) {
               <li>Specialities: ${practice.specialities || 'Not specified'}</li>
             </ul>
           `,
-          text: `New Interest Notification\n\nA user has expressed interest in ${practice["Company Name"] || practice.Location}\nUser ID: ${userData.user.id}\nMessage: ${message || 'No message provided'}`
+          text: `New Interest Notification\n\nA user has expressed interest in practice #${practice["Company ID"]}\nUser ID: ${userData.user.id}\nMessage: ${message || 'No message provided'}`
         }
       });
 
       if (adminEmailError) {
         console.error('Error sending admin notification:', adminEmailError);
-        // Don't throw here - we still want to show success since the interest was recorded
+      }
+
+      // Send user confirmation email
+      const { error: userEmailError } = await supabase.functions.invoke('smtp-email', {
+        body: {
+          to: userData.user.email,
+          subject: "Interest Confirmation - Next Steps",
+          html: `
+            <h2>Thank you for your interest!</h2>
+            <p>We've received your interest in practice #${practice["Company ID"]}.</p>
+            <p>Our team will make contact with the practice owner within the next 72 hours and keep you updated on any developments.</p>
+            <p>If you have any questions in the meantime, please don't hesitate to reach out to us at team@canary.accountants.</p>
+            <br>
+            <p>Best regards,</p>
+            <p>The Canary Team</p>
+          `,
+          text: `Thank you for your interest!\n\nWe've received your interest in practice #${practice["Company ID"]}.\n\nOur team will make contact with the practice owner within the next 72 hours and keep you updated on any developments.\n\nIf you have any questions in the meantime, please don't hesitate to reach out to us at team@canary.accountants.\n\nBest regards,\nThe Canary Team`
+        }
+      });
+
+      if (userEmailError) {
+        console.error('Error sending user confirmation:', userEmailError);
       }
 
       setShowDialog(false);
