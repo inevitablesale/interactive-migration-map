@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, Clock, CheckCircle } from "lucide-react";
+import { Building2, Clock, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function DashboardSummary() {
