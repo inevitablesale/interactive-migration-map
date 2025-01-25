@@ -78,7 +78,7 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
                     : 'bg-[#8B5CF6] hover:bg-[#9b87f5] text-white'
                 } border-none`}
               >
-                View Details
+                {hasExpressedInterest ? 'In Progress' : 'View Details'}
               </Button>
             </Link>
           </div>
