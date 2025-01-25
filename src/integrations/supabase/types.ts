@@ -58,27 +58,15 @@ export type Database = {
         Row: {
           acquisition_purpose: string | null
           ai_preferences: Json | null
-          alert_frequency: string | null
           buyer_name: string
-          buyer_type: string | null
           contact_email: string
-          contact_phone: string | null
           created_at: string | null
           deal_preferences: Json | null
           employee_count_max: number | null
           employee_count_min: number | null
-          engagement_frequency: string | null
           growth_priorities: string[] | null
           id: string
-          last_ai_interaction: string | null
-          preferred_communication: string | null
           preferred_insights: string[] | null
-          price_max: number | null
-          price_min: number | null
-          remote_preference: string | null
-          retention_risk: string | null
-          revenue_max: number | null
-          revenue_min: number | null
           service_lines: string[] | null
           subscription_tier: string
           target_geography: string[]
@@ -88,27 +76,15 @@ export type Database = {
         Insert: {
           acquisition_purpose?: string | null
           ai_preferences?: Json | null
-          alert_frequency?: string | null
           buyer_name: string
-          buyer_type?: string | null
           contact_email: string
-          contact_phone?: string | null
           created_at?: string | null
           deal_preferences?: Json | null
           employee_count_max?: number | null
           employee_count_min?: number | null
-          engagement_frequency?: string | null
           growth_priorities?: string[] | null
           id?: string
-          last_ai_interaction?: string | null
-          preferred_communication?: string | null
           preferred_insights?: string[] | null
-          price_max?: number | null
-          price_min?: number | null
-          remote_preference?: string | null
-          retention_risk?: string | null
-          revenue_max?: number | null
-          revenue_min?: number | null
           service_lines?: string[] | null
           subscription_tier?: string
           target_geography: string[]
@@ -118,27 +94,15 @@ export type Database = {
         Update: {
           acquisition_purpose?: string | null
           ai_preferences?: Json | null
-          alert_frequency?: string | null
           buyer_name?: string
-          buyer_type?: string | null
           contact_email?: string
-          contact_phone?: string | null
           created_at?: string | null
           deal_preferences?: Json | null
           employee_count_max?: number | null
           employee_count_min?: number | null
-          engagement_frequency?: string | null
           growth_priorities?: string[] | null
           id?: string
-          last_ai_interaction?: string | null
-          preferred_communication?: string | null
           preferred_insights?: string[] | null
-          price_max?: number | null
-          price_min?: number | null
-          remote_preference?: string | null
-          retention_risk?: string | null
-          revenue_max?: number | null
-          revenue_min?: number | null
           service_lines?: string[] | null
           subscription_tier?: string
           target_geography?: string[]
