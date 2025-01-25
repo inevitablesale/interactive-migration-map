@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, Clock } from "lucide-react";
+import { Users, Building2, Clock, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function DashboardSummary() {
@@ -9,9 +9,9 @@ export function DashboardSummary() {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) return { total: 0, pending: 0, avgPoolSize: 0 };
+      if (!user) return { total: 0, pending: 0, responded: 0 };
 
-      // First get the user's interests
+      // Get the user's interests
       const { data: userInterests } = await supabase
         .from('canary_firm_interests')
         .select(`
@@ -20,40 +20,17 @@ export function DashboardSummary() {
         `)
         .eq('user_id', user.id);
 
-      if (!userInterests) return { total: 0, pending: 0, avgPoolSize: 0 };
-
-      // Get the company IDs this user is interested in
-      const companyIds = userInterests.map(interest => interest.company_id);
-
-      // Get all interests for these companies to calculate pool size
-      const { data: allInterests } = await supabase
-        .from('canary_firm_interests')
-        .select('*')
-        .in('company_id', companyIds);
+      if (!userInterests) return { total: 0, pending: 0, responded: 0 };
 
       const total = userInterests.length;
-      const pending = userInterests.filter(i => i.status === 'interested').length;
-      
-      // Calculate average number of interested buyers for the practices this user is interested in
-      const practiceInterests = new Map();
-      if (allInterests) {
-        allInterests.forEach(interest => {
-          const companyId = interest.company_id;
-          if (!practiceInterests.has(companyId)) {
-            practiceInterests.set(companyId, 0);
-          }
-          practiceInterests.set(companyId, practiceInterests.get(companyId) + 1);
-        });
-      }
-      
-      const avgPoolSize = practiceInterests.size > 0 ? 
-        Array.from(practiceInterests.values()).reduce((a, b) => a + b, 0) / practiceInterests.size : 0;
+      const pending = userInterests.filter(i => 
+        i.status === 'interested' || i.status === 'pending_outreach'
+      ).length;
+      const responded = userInterests.filter(i => 
+        i.status !== 'interested' && i.status !== 'pending_outreach'
+      ).length;
 
-      return { 
-        total, 
-        pending, 
-        avgPoolSize: Math.round(avgPoolSize) 
-      };
+      return { total, pending, responded };
     }
   });
 
@@ -81,12 +58,12 @@ export function DashboardSummary() {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg. Pool Size</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">Responded</CardTitle>
+          <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary?.avgPoolSize || 0}</div>
-          <p className="text-xs text-muted-foreground">buyers per practice</p>
+          <div className="text-2xl font-bold">{summary?.responded || 0}</div>
+          <p className="text-xs text-muted-foreground">practices responded</p>
         </CardContent>
       </Card>
     </div>
