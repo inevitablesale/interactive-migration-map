@@ -1,9 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from "npm:resend@2.0.0";
 import { corsHeaders } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 interface InterestRequest {
   companyId: number
@@ -135,34 +137,32 @@ serve(async (req) => {
       </html>
     `
 
-    // Send admin notification email using send-email edge function
+    // Send admin notification email using Resend
     console.log('Sending admin notification email...')
-    const { error: adminEmailError } = await supabase.functions.invoke('send-email', {
-      body: {
-        to: 'chris@inevitable.sale',
-        subject: `New Interest: ${anonymizedName}`,
-        html: adminEmailHtml
-      }
-    })
+    const adminEmailResponse = await resend.emails.send({
+      from: "Canary <notifications@inevitable.sale>",
+      to: "chris@inevitable.sale",
+      subject: `New Interest: ${anonymizedName}`,
+      html: adminEmailHtml
+    });
 
-    if (adminEmailError) {
-      console.error('Failed to send admin notification email:', adminEmailError)
-      throw adminEmailError
+    if (!adminEmailResponse.id) {
+      console.error('Failed to send admin notification email:', adminEmailResponse);
+      throw new Error('Failed to send admin notification email');
     }
 
-    // Send user confirmation email using send-email edge function
+    // Send user confirmation email using Resend
     console.log('Sending user confirmation email...')
-    const { error: userEmailError } = await supabase.functions.invoke('send-email', {
-      body: {
-        to: userEmail,
-        subject: `Interest Confirmed: ${anonymizedName}`,
-        html: userEmailHtml
-      }
-    })
+    const userEmailResponse = await resend.emails.send({
+      from: "Canary <notifications@inevitable.sale>",
+      to: userEmail,
+      subject: `Interest Confirmed: ${anonymizedName}`,
+      html: userEmailHtml
+    });
 
-    if (userEmailError) {
-      console.error('Failed to send user confirmation email:', userEmailError)
-      throw userEmailError
+    if (!userEmailResponse.id) {
+      console.error('Failed to send user confirmation email:', userEmailResponse);
+      throw new Error('Failed to send user confirmation email');
     }
 
     console.log('Successfully sent notification emails')
