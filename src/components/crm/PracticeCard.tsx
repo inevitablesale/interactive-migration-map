@@ -46,6 +46,8 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
     return `$${amount.toFixed(0)}`;
   };
 
+  const hasExpressedInterest = practice.status === 'interested';
+
   return (
     <div className="group relative min-h-[200px] sm:min-h-[250px] w-full bg-gradient-to-br from-[#1A1F2C] to-[#221F26] backdrop-blur-md rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[#9b87f5]/10 hover:border-[#9b87f5]/20">
       <div className="absolute inset-0 bg-gradient-to-br from-[#9b87f5]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
@@ -68,9 +70,13 @@ export function PracticeCard({ practice, onWithdraw, onExpressInterest }: Practi
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <Link to={`/practice/${practice.id}`} className="w-full sm:w-auto">
               <Button 
-                variant="secondary" 
+                variant={hasExpressedInterest ? "secondary" : "default"}
                 size="sm"
-                className="w-full bg-[#8B5CF6] hover:bg-[#9b87f5] text-white border-none transition-all duration-300"
+                className={`w-full transition-all duration-300 ${
+                  hasExpressedInterest 
+                    ? 'bg-gray-600 hover:bg-gray-700 text-gray-300' 
+                    : 'bg-[#8B5CF6] hover:bg-[#9b87f5] text-white'
+                } border-none`}
               >
                 View Details
               </Button>
