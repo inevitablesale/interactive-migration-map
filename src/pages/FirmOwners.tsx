@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ArrowRight, Info, Bird } from "lucide-react";
+import { MessageSquare, ArrowRight, Info, Bird, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -71,6 +71,15 @@ export default function FirmOwners() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 pt-24 pb-16 text-white">
+        <div className="mb-8">
+          <Link to="/">
+            <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-yellow-400">
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Home</span>
+            </Button>
+          </Link>
+        </div>
+
         <h1 className="text-4xl font-bold mb-6">Why You're Here – And How We Can Help</h1>
         
         <div className="space-y-12">

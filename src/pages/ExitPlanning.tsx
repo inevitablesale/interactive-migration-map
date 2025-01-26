@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bird } from "lucide-react";
+import { Bird, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -46,7 +46,9 @@ export default function ExitPlanning() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-            <span className="text-xl font-bold text-yellow-400">Canary</span>
+            <Link to="/" className="text-xl font-bold text-yellow-400">
+              Canary
+            </Link>
           </div>
           {session ? (
             <div className="flex items-center gap-4">
@@ -69,6 +71,15 @@ export default function ExitPlanning() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 pt-24 pb-16 text-white">
+        <div className="mb-8">
+          <Link to="/firm-owners">
+            <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-yellow-400">
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Firm Owners</span>
+            </Button>
+          </Link>
+        </div>
+
         <h1 className="text-4xl font-bold mb-4">Learn About Exit Planning</h1>
         <p className="text-2xl text-gray-300 mb-12">Unlock the Full Potential of Your Firm with Expert Guidance</p>
 
