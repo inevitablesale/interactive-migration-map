@@ -46,7 +46,9 @@ export default function FirmOwners() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-            <span className="text-xl font-bold text-yellow-400">Canary</span>
+            <Link to="/" className="text-xl font-bold text-yellow-400">
+              Canary
+            </Link>
           </div>
           {session ? (
             <div className="flex items-center gap-4">
@@ -82,7 +84,7 @@ export default function FirmOwners() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">Why We Reached Out</h2>
             <p className="text-gray-300">
-              We reached out to you because a buyer we work with expressed interest in a firm like yours. Canary specializes in connecting buyers with off-market professional service firms that align with their needs. Your firm stood out based on its size, service mix, or location.
+              We reached out to you because a buyer we work with expressed interest in your firm. Canary specializes in connecting buyers with off-market professional service firms that align with their needs. Your firm stood out based on its size, service mix, or location.
             </p>
             <p className="mt-4 text-gray-300">
               Your firm's listing on Canary is anonymized, and no identifying information is shared without your consent.
@@ -97,10 +99,12 @@ export default function FirmOwners() {
             <p className="text-gray-300 mb-6">
               We can help you understand your firm's potential, prepare for the future, and explore your options—at your own pace.
             </p>
-            <Button variant="outline" className="flex items-center gap-2 text-black">
-              <span>Learn About Exit Planning</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <Link to="/exit-planning">
+              <Button variant="outline" className="flex items-center gap-2 text-black">
+                <span>Learn About Exit Planning</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </section>
 
           <section>
@@ -110,7 +114,7 @@ export default function FirmOwners() {
             </p>
             <ul className="list-disc list-inside space-y-4 text-gray-300">
               <li>Anonymized Listings: No real names, client lists, or sensitive details are shared.</li>
-              <li>Buyer Interest: Listings are created when a buyer expresses interest in firms like yours.</li>
+              <li>Buyer Interest: Listings are created automatically when your firm is identified as a premium opportunity for buyers.</li>
               <li>Your Control: You decide what happens next—explore opportunities, plan for the future, or remove your listing entirely.</li>
             </ul>
           </section>
@@ -124,7 +128,7 @@ export default function FirmOwners() {
                   Why was my firm listed?
                 </h3>
                 <p className="text-gray-300">
-                  Your firm was included in our marketplace because a buyer expressed interest in firms with characteristics like yours. All listings are anonymized to protect your privacy.
+                  Your listing was generated automatically because your firm has been identified as a premium opportunity for buyers. All listings are anonymized to protect your privacy.
                 </p>
               </div>
               <div>
@@ -151,10 +155,12 @@ export default function FirmOwners() {
                   <span>Talk to Chris</span>
                 </Button>
               </a>
-              <Button variant="outline" className="flex items-center gap-2 text-black">
-                <ArrowRight className="w-4 h-4" />
-                <span>Learn About Exit Planning</span>
-              </Button>
+              <Link to="/exit-planning">
+                <Button variant="outline" className="flex items-center gap-2 text-black">
+                  <ArrowRight className="w-4 h-4" />
+                  <span>Learn About Exit Planning</span>
+                </Button>
+              </Link>
             </div>
           </section>
         </div>
