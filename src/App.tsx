@@ -11,10 +11,12 @@ import Auth from "@/pages/Auth";
 import DocSign from "@/pages/DocSign";
 import FirmOwners from "@/pages/FirmOwners";
 import ExitPlanning from "@/pages/ExitPlanning";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
