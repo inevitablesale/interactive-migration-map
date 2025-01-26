@@ -74,22 +74,22 @@ const Index = () => {
           </div>
           {session ? (
             <div className="flex items-center gap-4">
-              <Link to="/tracked-practices" className="text-white hover:text-yellow-400 transition-colors">
+              <Link to="/tracked-practices" className="text-white hover:text-yellow-400 transition-colors font-sans">
                 Dashboard
               </Link>
               <button
                 onClick={handleSignOut}
-                className="text-white hover:text-yellow-400 transition-colors"
+                className="text-white hover:text-yellow-400 transition-colors font-sans"
               >
                 Sign Out
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <Link to="/firm-owners" className="text-white hover:text-yellow-400 transition-colors">
+              <Link to="/firm-owners" className="text-white hover:text-yellow-400 transition-colors font-sans">
                 Firm Owners
               </Link>
-              <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+              <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors font-sans">
                 Sign In
               </Link>
             </div>
@@ -110,13 +110,13 @@ const Index = () => {
         {/* Beta Access Section */}
         <BetaAccessSection />
 
-        {/* Database Section - Moved above DailyRevealsSection */}
+        {/* Database Section */}
         <DatabaseSection />
 
         {/* Daily Reveals Section */}
         <DailyRevealsSection />
 
-        {/* Data Sources Section - Contains tracking metrics */}
+        {/* Data Sources Section */}
         <DataSourcesSection />
 
         {/* Catalyst Section */}
