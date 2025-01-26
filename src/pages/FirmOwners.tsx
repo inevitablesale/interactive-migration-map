@@ -1,11 +1,74 @@
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ArrowRight, Info } from "lucide-react";
+import { MessageSquare, ArrowRight, Info, Bird } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function FirmOwners() {
+  const [session, setSession] = useState(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-16 text-white">
+      {/* Fixed Header with Logo */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
+            <span className="text-xl font-bold text-yellow-400">Canary</span>
+          </div>
+          {session ? (
+            <div className="flex items-center gap-4">
+              <Link to="/tracked-practices" className="text-white hover:text-yellow-400 transition-colors">
+                Dashboard
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-white hover:text-yellow-400 transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
+              Sign In
+            </Link>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 pt-24 pb-16 text-white">
         <h1 className="text-4xl font-bold mb-6">Why You're Here – And How We Can Help</h1>
         
         <div className="space-y-12">

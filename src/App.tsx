@@ -10,6 +10,7 @@ import ThankYou from "@/pages/ThankYou";
 import Auth from "@/pages/Auth";
 import DocSign from "@/pages/DocSign";
 import FirmOwners from "@/pages/FirmOwners";
+import ExitPlanning from "@/pages/ExitPlanning";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/state-market-report/:state" element={<StateMarketReport />} />
         <Route path="/thank-you" element={<ThankYou />} />
         <Route path="/firm-owners" element={<FirmOwners />} />
+        <Route path="/exit-planning" element={<ExitPlanning />} />
       </Routes>
     </Router>
   );
