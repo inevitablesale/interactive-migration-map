@@ -1,0 +1,123 @@
+import { Button } from "@/components/ui/button";
+import { MessageSquare, ArrowRight, Info } from "lucide-react";
+import { Link } from "react-router-dom";
+
+export default function FirmOwners() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-white">
+        <h1 className="text-4xl font-bold mb-6">Why You're Here – And How We Can Help</h1>
+        
+        <div className="space-y-12">
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">Welcome to Canary</h2>
+            <p className="text-gray-300">
+              If you're here, it's likely because we've reached out on behalf of a buyer, you're exploring the idea of selling your firm, or you have questions about your listing on Canary. Whatever brought you here, we're here to help—with clarity, confidentiality, and your goals in mind.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">Why We Reached Out</h2>
+            <p className="text-gray-300">
+              We reached out to you because a buyer we work with expressed interest in a firm like yours. Canary specializes in connecting buyers with off-market professional service firms that align with their needs. Your firm stood out based on its size, service mix, or location.
+            </p>
+            <p className="mt-4 text-gray-300">
+              Your firm's listing on Canary is anonymized, and no identifying information is shared without your consent.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">Not Ready to Sell Yet?</h2>
+            <p className="text-gray-300 mb-4">
+              Selling your firm is a big decision, and it's okay if you're not ready yet.
+            </p>
+            <p className="text-gray-300 mb-6">
+              We can help you understand your firm's potential, prepare for the future, and explore your options—at your own pace.
+            </p>
+            <Button variant="outline" className="flex items-center gap-2">
+              <span>Learn About Exit Planning</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">Want to Update or Remove Your Listing?</h2>
+            <p className="text-gray-300 mb-6">
+              If you'd like to update or remove your firm's listing, we make it quick and easy. Simply submit your request, and we'll take care of it.
+            </p>
+            <Button variant="outline" className="flex items-center gap-2">
+              <span>Request Listing Update or Removal</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">How Canary Works for Firm Owners</h2>
+            <p className="text-gray-300 mb-6">
+              Canary is built for buyers, but we take firm owners seriously. Our goal is to protect your privacy while connecting you with qualified buyers who value what you've built.
+            </p>
+            <ul className="list-disc list-inside space-y-4 text-gray-300">
+              <li>Anonymized Listings: No real names, client lists, or sensitive details are shared.</li>
+              <li>Buyer Interest: Listings are created when a buyer expresses interest in firms like yours.</li>
+              <li>Your Control: You decide what happens next—explore opportunities, plan for the future, or remove your listing entirely.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-medium mb-2 flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  Why was my firm listed?
+                </h3>
+                <p className="text-gray-300">
+                  Your firm was included in our marketplace because a buyer expressed interest in firms with characteristics like yours. All listings are anonymized to protect your privacy.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-medium mb-2 flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  What if I'm not ready to sell?
+                </h3>
+                <p className="text-gray-300">
+                  That's completely fine. Many firm owners we contact aren't ready yet. We're here to help you explore options or plan for the future at your pace.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-medium mb-2 flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  Can I remove my firm's listing?
+                </h3>
+                <p className="text-gray-300">
+                  Yes, simply fill out the request form, and we'll take care of it promptly.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-6">Your Next Step—On Your Terms</h2>
+            <p className="text-gray-300 mb-8">
+              Whether you're ready to explore selling, thinking about the future, or simply want your listing updated, we're here to support you.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button variant="default" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                <span>Talk to Chris</span>
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2">
+                <ArrowRight className="w-4 h-4" />
+                <span>Learn About Exit Planning</span>
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2">
+                <ArrowRight className="w-4 h-4" />
+                <span>Update or Remove My Listing</span>
+              </Button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
