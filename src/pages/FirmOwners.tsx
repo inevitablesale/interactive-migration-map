@@ -34,19 +34,8 @@ export default function FirmOwners() {
             <p className="text-gray-300 mb-6">
               We can help you understand your firm's potential, prepare for the future, and explore your options—at your own pace.
             </p>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 text-black">
               <span>Learn About Exit Planning</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">Want to Update or Remove Your Listing?</h2>
-            <p className="text-gray-300 mb-6">
-              If you'd like to update or remove your firm's listing, we make it quick and easy. Simply submit your request, and we'll take care of it.
-            </p>
-            <Button variant="outline" className="flex items-center gap-2">
-              <span>Request Listing Update or Removal</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </section>
@@ -84,35 +73,24 @@ export default function FirmOwners() {
                   That's completely fine. Many firm owners we contact aren't ready yet. We're here to help you explore options or plan for the future at your pace.
                 </p>
               </div>
-              <div>
-                <h3 className="text-xl font-medium mb-2 flex items-center gap-2">
-                  <Info className="w-5 h-5" />
-                  Can I remove my firm's listing?
-                </h3>
-                <p className="text-gray-300">
-                  Yes, simply fill out the request form, and we'll take care of it promptly.
-                </p>
-              </div>
             </div>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold mb-6">Your Next Step—On Your Terms</h2>
             <p className="text-gray-300 mb-8">
-              Whether you're ready to explore selling, thinking about the future, or simply want your listing updated, we're here to support you.
+              Whether you're ready to explore selling or thinking about the future, we're here to support you.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button variant="default" className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                <span>Talk to Chris</span>
-              </Button>
-              <Button variant="outline" className="flex items-center gap-2">
+              <a href="https://calendly.com/inevitable-sale/is-selling-your-business-right-for-you" target="_blank" rel="noopener noreferrer">
+                <Button variant="default" className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Talk to Chris</span>
+                </Button>
+              </a>
+              <Button variant="outline" className="flex items-center gap-2 text-black">
                 <ArrowRight className="w-4 h-4" />
                 <span>Learn About Exit Planning</span>
-              </Button>
-              <Button variant="outline" className="flex items-center gap-2">
-                <ArrowRight className="w-4 h-4" />
-                <span>Update or Remove My Listing</span>
               </Button>
             </div>
           </section>
