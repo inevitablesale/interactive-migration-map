@@ -25,17 +25,35 @@ export default function AppSidebar() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
-          <span className="text-xl font-bold text-yellow-400">Canary</span>
+          <Link to="/" className="text-xl font-bold text-yellow-400">
+            Canary
+          </Link>
         </div>
         <div className="flex items-center gap-4">
           {!session && (
-            <Link to="/firm-owners" className="text-white hover:text-yellow-400 transition-colors">
-              Firm Owners
+            <>
+              <Link
+                to="/firm-owners"
+                className="text-white hover:text-yellow-400 transition-colors"
+              >
+                Firm Owners
+              </Link>
+              <Link
+                to="/auth"
+                className="text-white hover:text-yellow-400 transition-colors"
+              >
+                Sign In
+              </Link>
+            </>
+          )}
+          {session && (
+            <Link
+              to="/tracked-practices"
+              className="text-white hover:text-yellow-400 transition-colors"
+            >
+              Dashboard
             </Link>
           )}
-          <Link to="/auth" className="text-white hover:text-yellow-400 transition-colors">
-            {session ? "Dashboard" : "Sign In"}
-          </Link>
         </div>
       </div>
     </div>
