@@ -1162,6 +1162,12 @@ export type Database = {
           risk_score: number
         }[]
       }
+      check_if_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       get_affordable_talent_hubs: {
         Args: Record<PropertyKey, never>
         Returns: {
