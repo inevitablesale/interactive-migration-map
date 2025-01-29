@@ -22,13 +22,12 @@ interface Practice {
 }
 
 interface Interest {
+  id: string;
   practice_id: string;
   user_id: string;
   status: string;
-  created_at: string;
-  id: string;
-  is_anonymous: boolean;
   joined_at: string;
+  is_anonymous: boolean;
   notes: string | null;
   rating: number | null;
 }
