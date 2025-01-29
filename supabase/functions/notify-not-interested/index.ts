@@ -22,7 +22,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get company details
+    // Get company details and generated text
     const { data: companyData, error: companyError } = await supabase
       .from('canary_firms_data')
       .select('*')
@@ -31,9 +31,22 @@ serve(async (req) => {
 
     if (companyError) throw companyError
 
+    // Get generated text
+    const { data: generatedText, error: textError } = await supabase
+      .from('firm_generated_text')
+      .select('title')
+      .eq('company_id', company_id)
+      .single()
+
+    if (textError && textError.code !== 'PGRST116') { // Ignore "no rows returned" error
+      throw textError
+    }
+
     // Get user email
     const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(user_id)
     if (userError) throw userError
+
+    const practiceTitle = generatedText?.title?.replace(/Premier /g, '') || `Practice #${companyData['Company ID']}`
 
     const resend = new Resend(Deno.env.get('SMTP_PASSWORD'));
 
@@ -42,10 +55,10 @@ serve(async (req) => {
     const data = await resend.emails.send({
       from: 'Canary Team <team@canary.accountants>',
       to: user.email,
-      subject: `Status Update: Not Interested - ${companyData['Company Name']}`,
+      subject: `Status Update: Not Interested - ${practiceTitle}`,
       html: `
         <h2>Status Update: Not Interested</h2>
-        <p>You have marked "${companyData['Company Name']}" as "Not Interested".</p>
+        <p>You have marked "${practiceTitle}" as "Not Interested".</p>
         <p>This practice will be removed from your active tracking list.</p>
         <p>You can always express interest again if you change your mind.</p>
         <br>
