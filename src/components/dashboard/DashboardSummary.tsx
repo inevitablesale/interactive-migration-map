@@ -23,14 +23,14 @@ export function DashboardSummary() {
       if (!userInterests) return { total: 0, pending: 0, responded: 0 };
 
       const total = userInterests.length;
-      const pending = userInterests.filter(i => 
-        i.status === 'interested' || i.status === 'pending_outreach'
+      const notInterested = userInterests.filter(i => 
+        i.status === 'not_interested'
       ).length;
-      const responded = userInterests.filter(i => 
-        i.status !== 'interested' && i.status !== 'pending_outreach'
+      const connected = userInterests.filter(i => 
+        i.status === 'interested'
       ).length;
 
-      return { total, pending, responded };
+      return { total, notInterested, connected };
     }
   });
 
@@ -48,22 +48,22 @@ export function DashboardSummary() {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Awaiting Response</CardTitle>
+          <CardTitle className="text-sm font-medium">Not Interested</CardTitle>
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary?.pending || 0}</div>
-          <p className="text-xs text-muted-foreground">practices pending</p>
+          <div className="text-2xl font-bold">{summary?.notInterested || 0}</div>
+          <p className="text-xs text-muted-foreground">practices not interested</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Responded</CardTitle>
+          <CardTitle className="text-sm font-medium">Connected</CardTitle>
           <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{summary?.responded || 0}</div>
-          <p className="text-xs text-muted-foreground">practices responded</p>
+          <div className="text-2xl font-bold">{summary?.connected || 0}</div>
+          <p className="text-xs text-muted-foreground">practices connected</p>
         </CardContent>
       </Card>
     </div>
