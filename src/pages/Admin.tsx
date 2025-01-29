@@ -43,31 +43,58 @@ export default function Admin() {
   }, []);
 
   const checkAdminAccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("Current user:", user);
+      
+      if (!user) {
+        console.log("No user found, redirecting to auth");
+        navigate('/auth');
+        return;
+      }
 
-    const { data: adminData } = await supabase
-      .from('admin_users')
-      .select('is_admin')
-      .eq('user_id', user.id)
-      .single();
+      const { data: adminData, error } = await supabase
+        .from('admin_users')
+        .select('is_admin')
+        .eq('user_id', user.id)
+        .single();
 
-    if (!adminData?.is_admin) {
+      console.log("Admin check result:", { adminData, error });
+
+      if (error) {
+        console.error("Error checking admin status:", error);
+        navigate('/');
+        toast({
+          title: "Error",
+          description: "Failed to verify admin access.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!adminData?.is_admin) {
+        console.log("User is not admin, redirecting to home");
+        navigate('/');
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log("Admin access granted");
+      setIsAdmin(true);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error in admin check:", error);
       navigate('/');
       toast({
-        title: "Access Denied",
-        description: "You don't have permission to access this page.",
+        title: "Error",
+        description: "An error occurred while checking permissions.",
         variant: "destructive"
       });
-      return;
     }
-
-    setIsAdmin(true);
-    setLoading(false);
   };
 
   const fetchPractices = async () => {
@@ -126,16 +153,14 @@ export default function Admin() {
       description: "Practice status updated successfully"
     });
 
-    fetchPractices(); // Refresh the list
+    fetchPractices();
   };
 
   const handleSearch = (query: string) => {
-    // Implement practice search logic
     console.log("Searching for:", query);
   };
 
   const handleFilter = (filters: any) => {
-    // Implement practice filtering logic
     console.log("Applying filters:", filters);
   };
 
@@ -184,10 +209,10 @@ export default function Admin() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pending_response">Pending Response</SelectItem>
-                      <SelectItem value="interested">Interested</SelectItem>
-                      <SelectItem value="not_interested">Not Interested</SelectItem>
-                      <SelectItem value="under_review">Under Review</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="owner_engaged">Owner Engaged</SelectItem>
+                      <SelectItem value="negotiation">Negotiation</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="withdrawn">Withdrawn</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>
