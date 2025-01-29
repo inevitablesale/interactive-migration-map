@@ -55,12 +55,12 @@ serve(async (req) => {
     const data = await resend.emails.send({
       from: 'Canary Team <team@canary.accountants>',
       to: user.email,
-      subject: `Status Update: Not Interested - ${practiceTitle}`,
+      subject: `Update: ${practiceTitle} - Not Currently For Sale`,
       html: `
-        <h2>Status Update: Not Interested</h2>
-        <p>You have marked "${practiceTitle}" as "Not Interested".</p>
-        <p>This practice will be removed from your active tracking list.</p>
-        <p>You can always express interest again if you change your mind.</p>
+        <h2>Practice Update: Not Currently For Sale</h2>
+        <p>We wanted to let you know that "${practiceTitle}" has indicated they are not interested in selling at this time.</p>
+        <p>This practice will be removed from your active tracking list, but don't worry - there are many other opportunities available!</p>
+        <p>You can continue browsing other practices that might be a better fit for your acquisition goals.</p>
         <br>
         <p>Best regards,<br>The Canary Team</p>
       `,
