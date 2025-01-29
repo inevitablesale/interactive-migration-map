@@ -17,7 +17,7 @@ interface Practice {
   id: string;
   industry: string;
   region: string;
-  status: string;
+  status: "pending_response" | "owner_engaged" | "negotiation" | "closed" | "withdrawn";
   created_at: string;
 }
 
@@ -26,6 +26,11 @@ interface Interest {
   user_id: string;
   status: string;
   created_at: string;
+  id: string;
+  is_anonymous: boolean;
+  joined_at: string;
+  notes: string | null;
+  rating: number | null;
 }
 
 export default function Admin() {
@@ -133,7 +138,7 @@ export default function Admin() {
     setInterests(data || []);
   };
 
-  const updatePracticeStatus = async (practiceId: string, newStatus: string) => {
+  const updatePracticeStatus = async (practiceId: string, newStatus: Practice['status']) => {
     const { error } = await supabase
       .from('tracked_practices')
       .update({ status: newStatus })
@@ -202,7 +207,7 @@ export default function Admin() {
                 <TableCell>
                   <Select
                     defaultValue={practice.status}
-                    onValueChange={(value) => updatePracticeStatus(practice.id, value)}
+                    onValueChange={(value: Practice['status']) => updatePracticeStatus(practice.id, value)}
                   >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Select status" />
@@ -248,7 +253,7 @@ export default function Admin() {
                 <TableCell>{interest.practice_id}</TableCell>
                 <TableCell>{interest.user_id}</TableCell>
                 <TableCell>{interest.status}</TableCell>
-                <TableCell>{new Date(interest.created_at).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(interest.joined_at).toLocaleDateString()}</TableCell>
               </TableRow>
             ))}
           </TableBody>
