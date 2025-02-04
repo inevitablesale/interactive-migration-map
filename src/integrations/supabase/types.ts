@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          is_admin: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          is_admin?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          is_admin?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       alerts: {
         Row: {
           additional_details: string | null
@@ -1493,6 +1511,12 @@ export type Database = {
           state_rank: number
           national_rank: number
         }[]
+      }
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
       }
       refresh_state_density_metrics: {
         Args: Record<PropertyKey, never>
