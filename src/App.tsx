@@ -11,7 +11,6 @@ import Auth from "@/pages/Auth";
 import DocSign from "@/pages/DocSign";
 import FirmOwners from "@/pages/FirmOwners";
 import ExitPlanning from "@/pages/ExitPlanning";
-import Admin from "@/pages/Admin";
 import ScrollToTop from "@/components/ScrollToTop";
 
 export default function App() {
@@ -31,7 +30,6 @@ export default function App() {
         <Route path="/thank-you" element={<ThankYou />} />
         <Route path="/firm-owners" element={<FirmOwners />} />
         <Route path="/exit-planning" element={<ExitPlanning />} />
-        <Route path="/admin" element={<Admin />} />
       </Routes>
     </Router>
   );
