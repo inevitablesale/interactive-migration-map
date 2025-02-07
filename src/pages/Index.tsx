@@ -59,12 +59,12 @@ const Index = () => {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* LedgerFund Banner */}
-      <div className="bg-[#8B5CF6] text-white text-center py-2 px-4">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-accent text-accent-foreground">
         <a 
           href="https://www.ledgerfund.info/" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="hover:underline inline-block w-full"
+          className="hover:underline inline-block w-full py-2 px-4 text-center"
         >
           Own a Stake in Accounting Firms. Join the LedgerFund Pre-Sale Round Today →
         </a>
@@ -79,7 +79,7 @@ const Index = () => {
       </div>
 
       {/* Fixed Header with Logo */}
-      <div className="fixed top-[84px] left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
+      <div className="fixed top-[40px] left-0 right-0 z-50 bg-black/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bird className="w-8 h-8 animate-color-change text-yellow-400" />
@@ -111,7 +111,7 @@ const Index = () => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="relative z-10 pt-[132px]">
+      <div className="relative z-10 pt-[88px]">
         {/* Hero Section */}
         <div className="min-h-screen">
           <Hero />
