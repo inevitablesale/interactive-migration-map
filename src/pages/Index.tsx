@@ -66,7 +66,7 @@ const Index = () => {
           rel="noopener noreferrer"
           className="hover:underline inline-block w-full py-2 px-4 text-center"
         >
-          Own a Stake in Accounting Firms. Join the LedgerFund Pre-Sale Round Today →
+          Own a Stake in Accounting Firms. Join the LedgerFund DAO Pre-Sale Round →
         </a>
       </div>
 
@@ -149,3 +149,4 @@ const Index = () => {
 };
 
 export default Index;
+
