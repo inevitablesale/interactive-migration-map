@@ -7,7 +7,6 @@ import { SolutionsSection } from "@/components/SolutionsSection";
 import { Card } from "@/components/ui/card";
 import { PricingSection } from "@/components/PricingSection";
 import { BetaAccessSection } from "@/components/BetaAccessSection";
-import CountdownBanner from "@/components/CountdownBanner";
 import { DailyRevealsSection } from "@/components/DailyRevealsSection";
 import { DatabaseSection } from "@/components/DatabaseSection";
 import { WhyProfessionalServices } from "@/components/WhyProfessionalServices";
@@ -69,9 +68,6 @@ const Index = () => {
           Own a Stake in Accounting Firms. Join the LedgerFund DAO Pre-Sale Round →
         </a>
       </div>
-
-      {/* Countdown Banner */}
-      <CountdownBanner />
 
       {/* Fixed Map Background */}
       <div className="fixed inset-0 z-0">
@@ -149,4 +145,3 @@ const Index = () => {
 };
 
 export default Index;
-
